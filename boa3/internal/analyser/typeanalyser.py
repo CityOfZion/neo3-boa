@@ -299,29 +299,44 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
     def _has_return(self, node: ast.AST) -> bool:
-        if not hasattr(node, 'body'):
+        if not hasattr(node, 'body') and not hasattr(node, 'cases'):
             return False
 
-        has_else_stmt: bool = hasattr(node, 'orelse')
-        has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.body)
-        if has_body_return and not has_else_stmt:
-            # if any statement in the function body is a return, all flow has a return
-            return True
+        if isinstance(node, ast.Match):
+            body = [stmt for stmt in node.cases]
+            body_has_inner_return: bool = (
+                    len(body) > 0 and
+                    # checks if all cases have a return inside
+                    all(self._has_return(stmt) for stmt in body) and
+                    # checks if there is a default case
+                    any(hasattr(stmt.pattern, 'pattern') and stmt.pattern.pattern is None for stmt in body)
+            )
 
-        body = [stmt for stmt in node.body if hasattr(stmt, 'body')]
-        body_has_inner_return: bool = len(body) > 0 and all(self._has_return(stmt) for stmt in body)
-        if not has_body_return and not body_has_inner_return:
-            # for and while nodes must to check if there is a return inside the else statement
-            if not isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
-                return False
+            return body_has_inner_return
 
-        if has_else_stmt:
-            if any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.orelse):
+        else:
+
+            has_else_stmt: bool = hasattr(node, 'orelse')
+            has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.body)
+            if has_body_return and not has_else_stmt:
+                # if any statement in the function body is a return, all flow has a return
                 return True
-            else:
-                orelse = [stmt for stmt in node.orelse if hasattr(stmt, 'body')]
-                return len(orelse) > 0 and all(self._has_return(stmt) for stmt in orelse)
-        return body_has_inner_return
+
+            body = [stmt for stmt in node.body if hasattr(stmt, 'body') or hasattr(stmt, 'cases')]
+            body_has_inner_return: bool = len(body) > 0 and all(self._has_return(stmt) for stmt in body)
+            if not has_body_return and not body_has_inner_return:
+                # for and while nodes must to check if there is a return inside the else statement
+                if not isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
+                    return False
+
+            if has_else_stmt:
+                if any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.orelse):
+                    return True
+                else:
+                    orelse = [stmt for stmt in node.orelse if hasattr(stmt, 'body')]
+                    return len(orelse) > 0 and all(self._has_return(stmt) for stmt in orelse)
+
+            return body_has_inner_return
 
     def _check_base_init_call(self, node: ast.AST):
         if not self._current_method.is_init or not isinstance(self._current_class, ClassType):
@@ -665,6 +680,38 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.visit(stmt)
         for stmt in for_node.orelse:
             self.visit(stmt)
+
+    def visit_Match(self, match_node: ast.Match):
+        subject = self.visit(match_node.subject)
+        subject_type = self.get_type(subject)
+
+        case_symbols = []
+
+        for case in match_node.cases:
+            if (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)) or
+                    isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None
+            ):
+                self.new_local_scope()
+                if not isinstance(case.pattern, ast.MatchAs):
+                    self.visit(case.pattern.value)
+
+                for stmt in case.body:
+                    self.visit(stmt)
+                case_symbols.append(self.pop_local_scope().symbols)
+
+        last_scope = self._current_scope if len(self._scope_stack) > 0 else self._current_method
+        intersected_ids = set() if len(case_symbols) == 0 else set(case_symbols[0].keys())
+        for index in range(1, len(case_symbols)):
+            intersected_ids &= case_symbols[index].keys()
+
+        for changed_symbol in intersected_ids:
+            new_type = Type.union.build(
+                [self.get_type(case_[changed_symbol]) for case_ in case_symbols]
+            )
+            last_scope.include_symbol(changed_symbol, Variable(new_type))
+
+        for case_ in case_symbols:
+            self._include_symbols_to_scope(last_scope, case_, intersected_ids)
 
     def visit_If(self, if_node: ast.If):
         """
