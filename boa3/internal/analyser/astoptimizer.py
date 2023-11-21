@@ -302,6 +302,25 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         except BaseException:
             return None
 
+    def visit_Match(self, match_node: ast.Match) -> ast.AST:
+        self.visit(match_node.subject)
+
+        case_scopes = []
+
+        match_scope = self.current_scope
+
+        for case in match_node.cases:
+            case_scopes.append(match_scope.new_scope())
+
+            self.current_scope = case_scopes[-1]
+            for stmt in case.body:
+                self.visit(stmt)
+
+        self.current_scope = match_scope
+        self.current_scope.update_values(*case_scopes)
+
+        return match_node
+
     def visit_If(self, node: ast.If) -> ast.AST:
         self.visit(node.test)
 

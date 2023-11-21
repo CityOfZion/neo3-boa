@@ -603,7 +603,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         if isinstance(un_op.op, UnaryOperation):
             self._convert_unary_operation(un_op.operand, un_op.op)
 
-        return self.build_data(un_op)
+        return self.build_data(un_op, result_type=un_op.op.result)
 
     def visit_Compare(self, compare: ast.Compare) -> GeneratorData:
         """
@@ -670,6 +670,45 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         self.generator.convert_end_loop_else(start_addr, else_begin_address, len(while_node.orelse) > 0)
         return self.build_data(while_node, index=start_addr)
+
+    def visit_Match(self, match_node: ast.Match) -> GeneratorData:
+        case_addresses = []
+
+        for index, case in enumerate(match_node.cases):
+            # if it's the wildcard to accept all values
+            if hasattr(case.pattern, 'pattern') and case.pattern.pattern is None:
+                for stmt in case.body:
+                    self.visit_to_map(stmt, generate=True)
+                self.generator.convert_end_if(case_addresses[-1])
+            else:
+                subject = self.visit_to_map(match_node.subject, generate=True)
+                if isinstance(case.pattern, ast.MatchSingleton):
+                    self.generator.convert_literal(case.pattern.value)
+                    pattern_type = self.get_type(case.pattern.value)
+                else:
+                    pattern = self.visit_to_generate(case.pattern.value)
+                    pattern_type = pattern.type
+
+                self.generator.duplicate_stack_item(2)
+                pattern_type.generate_is_instance_type_check(self.generator)
+
+                self.generator.swap_reverse_stack_items(3)
+                self.generator.convert_operation(BinaryOp.NumEq)
+                self.generator.convert_operation(BinaryOp.And)
+
+                case_addresses.append(self.generator.convert_begin_if())
+                for stmt in case.body:
+                    self.visit_to_map(stmt, generate=True)
+
+                ends_with_if = len(case.body) > 0 and isinstance(case.body[-1], ast.If)
+
+                if index < len(match_node.cases) - 1:
+                    case_addresses[index] = self.generator.convert_begin_else(case_addresses[index], ends_with_if)
+
+        for case_addr in reversed(range(len(case_addresses))):
+            self.generator.convert_end_if(case_addresses[case_addr])
+
+        return self.build_data(match_node)
 
     def visit_For(self, for_node: ast.For) -> GeneratorData:
         """
