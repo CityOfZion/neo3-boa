@@ -19,7 +19,7 @@ class CallMethod(InteropMethod):
         args: Dict[str, Variable] = {
             'script_hash': Variable(UInt160Type.build()),
             'method': Variable(Type.str),
-            'args': Variable(Type.sequence),  # TODO: change when *args is implemented
+            'args': Variable(Type.sequence),  # TODO: change when *args is implemented #2kq1hzg
             'call_flags': Variable(call_flags)
         }
         args_default = ast.parse("{0}".format(Type.sequence.default_value)

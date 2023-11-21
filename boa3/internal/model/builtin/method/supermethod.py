@@ -9,7 +9,7 @@ class SuperMethod(IBuiltinMethod):
 
     def __init__(self, value_type: IType = None):
         if isinstance(value_type, ClassType) and len(value_type.bases) > 0:
-            # TODO: change when inheritance with multiple bases is implemented
+            # TODO: change when inheritance with multiple bases is implemented #2kq1gmc
             return_type = value_type.bases[0]
         else:
             from boa3.internal.model.type.type import Type

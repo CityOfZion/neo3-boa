@@ -25,7 +25,6 @@ class StrSplitMethod(StdLibMethod):
         neo_internal_args = {
             'str': Variable(Type.str),
             'separator': Variable(Type.str),
-            # TODO: include removeEmptyEntries
         }
 
         super().__init__(identifier, syscall, args, defaults=[separator_default, maxsplit_default],

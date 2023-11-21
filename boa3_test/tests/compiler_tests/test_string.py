@@ -892,7 +892,7 @@ class TestString(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        # TODO: upper was implemented for ASCII characters only
+        # upper was implemented for ASCII characters only
         self.assertNotEqual(string.upper(), not_as_expected.result)
 
     def test_string_lower(self):
@@ -923,7 +923,7 @@ class TestString(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        # TODO: lower was implemented for ASCII characters only
+        # lower was implemented for ASCII characters only
         self.assertNotEqual(string.lower(), not_as_expected.result)
 
     def test_string_startswith_method(self):

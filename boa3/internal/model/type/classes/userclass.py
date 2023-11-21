@@ -133,7 +133,6 @@ class UserClass(ClassArrayType):
 
     def constructor_method(self) -> Optional[Method]:
         if constants.INIT_METHOD_ID not in self._class_methods:
-            # TODO: create a generic __init__ for instantiating classes that doesn't have it declared
             from boa3.internal.model.type.classes.classinitmethoddefault import ClassInitMethod
             self._class_methods[constants.INIT_METHOD_ID] = ClassInitMethod(self)
 

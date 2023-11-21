@@ -297,7 +297,6 @@ class FileGenerator:
 
         :return: a dictionary with the manifest information
         """
-        # TODO: fill the information of the manifest
         return {
             "name": self._get_name(),
             "groups": self._get_groups(),
@@ -602,7 +601,7 @@ class FileGenerator:
             dbg_id = str(id(event))
             dbg_event = {
                 "id": dbg_id,
-                "name": ',{0}'.format(event_id),  # TODO: include module name
+                "name": ',{0}'.format(event_id),
                 "params": [
                     '{0},{1}'.format(name, var.type.abi_type) for name, var in event.args.items()
                 ]

@@ -622,7 +622,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if result is Builtin.Metadata:
                 module.body.remove(stmt)
 
-        # TODO: include the body of the builtin methods to the ast
         self.modules['main'] = mod
         module_scope = self._scope_stack.pop()
         for symbol_id, symbol in module_scope.symbols.items():
@@ -646,7 +645,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 base_type_id = base_type_id.id
 
             base_symbol = self.get_symbol(base_type_id)
-            # TODO: change when class inheritance with builtin types is implemented
+            # TODO: change when class inheritance with builtin types is implemented #2kq1ght
             if not isinstance(base_symbol, UserClass):
                 self._log_error(
                     CompilerError.NotSupportedOperation(
@@ -656,7 +655,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             bases.append(base_symbol)
 
-        # TODO: change when class inheritance with multiple bases is implemented
+        # TODO: change when class inheritance with multiple bases is implemented #2kq1gmc
         if len(bases) > 1:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -665,7 +664,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: change when base classes with keyword is implemented
+        # TODO: change when base classes with keyword is implemented #2kq1gqy
         if len(class_node.keywords) > 0:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -674,7 +673,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: change when class decorators are implemented
+        # TODO: change when class decorators are implemented #2ewf04r
         class_decorators: List[Method] = self._get_decorators(class_node)
         if not all(isinstance(decorator, IBuiltinDecorator) and decorator.is_class_decorator
                    for decorator in class_decorators):
@@ -748,7 +747,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 decorator.update_args(function.args, self._current_scope)
                 valid_decorators.append(decorator)
 
-            # TODO: remove when user-created decorators are implemented
+            # TODO: remove when user-created decorators are implemented #86a19uwzn
             elif isinstance(decorator, Method):
                 self._log_error(
                     CompilerError.NotSupportedOperation(
@@ -806,7 +805,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             fun_rtype_symbol = Type.none
 
-        # TODO: remove when dictionary unpacking operator is implemented
+        # TODO: remove when dictionary unpacking operator is implemented #2kq1hbr
         if function.args.kwarg is not None:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -815,7 +814,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: remove when keyword-only arguments are implemented
+        # TODO: remove when keyword-only arguments are implemented #2ewewtz
         if len(function.args.kwonlyargs) > 0:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -1095,7 +1094,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._check_annotation_type(ann_assign.annotation, ann_assign)
 
-        # TODO: check if the annotated type and the value type are the same
+        # TODO: check if the annotated type and the value type are the same #86a1ctmwy
         return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
 
     def assign_value(self, var_id: str, var_type: IType, source_node: ast.AST, assignment: bool = True) -> IType:
@@ -1402,7 +1401,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return self._visit_comprehension(node)
 
     def _visit_comprehension(self, node):
-        # TODO: refactor when comprehension is implemented
+        # TODO: refactor when comprehension is implemented #2ewev7w #8678dw2ak
         self._log_error(
             CompilerError.NotSupportedOperation(
                 node.lineno, node.col_offset,
@@ -1422,7 +1421,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return name.id
 
     def visit_Starred(self, node: ast.Starred):
-        # TODO: refactor when starred variables are implemented
+        # TODO: refactor when starred variables are implemented #2kq1hzg
         self._log_error(
             CompilerError.NotSupportedOperation(
                 node.lineno, node.col_offset,

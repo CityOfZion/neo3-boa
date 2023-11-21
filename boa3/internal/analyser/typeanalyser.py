@@ -378,7 +378,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(value, ast.Name):
                 symbol: ISymbol = self.get_symbol(value.id)
 
-                # TODO: change when assign functions to variable is implemented
+                # TODO: change when assign functions to variable is implemented #2ewenh8
                 if isinstance(symbol, Method):
                     self._log_error(
                         CompilerError.NotSupportedOperation(
@@ -595,7 +595,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         upper = upper if upper is not Type.none else symbol_type.valid_key
         step = step if step is not Type.none else symbol_type.valid_key
 
-        # TODO: remove when slices of other sequence types are implemented
         if (not symbol_type.is_valid_key(lower)
                 or not symbol_type.is_valid_key(upper)
                 or (step is not Type.none and not symbol_type.is_valid_key(step))
@@ -653,7 +652,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     expected_type_id=Type.sequence.identifier)
             )
 
-        # TODO: change when optimizing for loops
+        # TODO: change when optimizing for loops #864e6me36
         elif self.get_type(for_node.target) != iterator_type.item_type:
             target_id = self.visit(for_node.target)
             if isinstance(target_id, ast.Name):
@@ -1000,7 +999,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             if not Type.str.is_type_of(msg_type) and not Type.bytes.is_type_of(msg_type):
 
-                # TODO: remove this error when str constructor is implemented
+                # TODO: remove this error when str constructor is called here #86a1ctv27
                 self._log_error(
                     CompilerError.MismatchedTypes(
                         assert_.msg.lineno, assert_.msg.col_offset,
@@ -1298,10 +1297,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         attribute_type = self.get_type(attribute_symbol)
         if not isinstance(attribute_type, UserClass):
-            # TODO: change when class specific scopes are implemented in the built-ins
             return True
 
-        # TODO: remove this verification when calling an instance function from a class is implemented
+        # TODO: remove this verification when calling an instance function from a class is implemented #2ewexau
         if is_from_type_name and isinstance(callable, Method) and hasattr(attribute_symbol, 'instance_methods') \
                 and callable_id in attribute_symbol.instance_methods:
             callable_complete_id = f'{attribute_type.identifier}.{callable_id}'
@@ -1345,7 +1343,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             args = [self.get_type(param, use_metatype=True) for param in call_args]
 
             from boa3.internal.model.builtin.method import SuperMethod
-            # TODO: change when implementing super() with args
+            # TODO: change when implementing super() with args #2kq1rw4
             if (isinstance(callable_target, SuperMethod)
                     and isinstance(self._current_method, Method) and self._current_method.has_cls_or_self):
                 args.insert(0, self._current_class)
@@ -1584,7 +1582,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             logged_errors = True
 
         if node.name is not None:
-            # TODO: remove when getting the exception is implemented
+            # naming exceptions is not supported
             self._log_error(
                 CompilerError.NotSupportedOperation(line=node.lineno,
                                                     col=node.col_offset,
