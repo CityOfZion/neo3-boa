@@ -1,7 +1,14 @@
 from __future__ import annotations
 
-from typing import Dict, List, Tuple, Union
+__all__ = [
+    'StackMemento',
+    'NeoStack'
+]
 
+
+from typing import Dict, List, Tuple
+
+from boa3.internal.compiler.codegenerator.engine.istack import IStack
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.model.type.itype import IType
 from boa3.internal.neo.vm.VMCode import VMCode
@@ -87,37 +94,10 @@ class StackMemento:
             return stack.pop(index)
 
 
-class NeoStack:
+class NeoStack(IStack):
     def __init__(self):
-        self._stack: List[IType] = []
+        from boa3.internal.model.type.itype import IType
+        super().__init__(stack_type=IType)
 
-    def append(self, value: IType):
-        return self._stack.append(value)
-
-    def clear(self):
-        return self._stack.clear()
-
-    def copy(self) -> NeoStack:
-        new_stack = NeoStack()
-        new_stack._stack = self._stack.copy()
-        return new_stack
-
-    def pop(self, index: int) -> IType:
-        return self._stack.pop(index)
-
-    def __len__(self) -> int:
-        return len(self._stack)
-
-    def __getitem__(self, index_or_slice: Union[int, slice]):
-        return self._stack[index_or_slice]
-
-    def reverse(self, start: int = 0, end: int = None, *, rotate: bool = False):
-        if end is None:
-            end = len(self._stack)
-
-        if rotate:
-            reverse = self._stack[start:end]
-            reverse.append(reverse.pop(0))
-        else:
-            reverse = list(reversed(self._stack[start:end]))
-        self._stack[start:end] = reverse
+    def _default_constructor_args(self) -> tuple:
+        return tuple()
