@@ -13,6 +13,5 @@ class PrintSequenceMethod(PrintMethod):
         super().__init__(arg_value)
 
     def _generate_print_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.interop import Interop
-
-        code_generator.convert_builtin_method_call(Interop.JsonSerialize, is_internal=True)
+        from boa3.internal.model.builtin.builtin import Builtin
+        code_generator.convert_builtin_method_call(Builtin.StrSequence, is_internal=True)
