@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
+from boa3.internal.compiler.codegenerator import optimizerhelper
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
@@ -435,6 +436,13 @@ class VisitorCodeGenerator(IAstAnalyser):
             var_id = target_data.symbol_id
             var_index = target_data.index
 
+            if (
+                    isinstance(target_data.symbol, Variable) and
+                    var_id in self.symbols and
+                    not self.generator.store_constant_variable(target_data.symbol)
+            ):
+                continue
+
             # filter to find the imported variables
             if (var_id not in self.generator.symbol_table
                     and hasattr(assign, 'origin')
@@ -443,7 +451,8 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             vars_ids.append(VariableGenerationData(var_id, var_index, var_value_address))
 
-        self.store_variable(*vars_ids, value=assign.value)
+        if vars_ids:
+            self.store_variable(*vars_ids, value=assign.value)
         return self.build_data(assign)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign) -> GeneratorData:
