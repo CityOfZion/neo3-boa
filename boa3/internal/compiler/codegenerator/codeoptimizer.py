@@ -1,23 +1,13 @@
 __all__ = [
-    'OptimizationLevel',
     'CodeOptimizer'
 ]
 
-import enum
-
 from boa3.internal.compiler.codegenerator.engine.executionscript import ExecutionScript
 from boa3.internal.compiler.codegenerator.engine.neoengine import NeoEngine
+from boa3.internal.compiler.codegenerator.optimizerhelper import OptimizationLevel
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
-
-
-class OptimizationLevel(enum.IntEnum):
-    NONE = enum.auto()
-    DEBUG = enum.auto()
-    HIGH = enum.auto()
-
-    DEFAULT = HIGH
 
 
 class CodeOptimizer:
