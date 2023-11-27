@@ -1466,6 +1466,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return str.s
 
+    def visit_JoinedStr(self, joined_str: ast.JoinedStr):
+        """
+        Visitor of joined string node
+
+        :param joined_str:
+        :return: the value of the string
+
+        """
+        for node in joined_str.values:
+            self.visit(node)
+
     def visit_Bytes(self, btes: ast.Bytes) -> bytes:
         """
         Visitor of literal string node

@@ -1907,15 +1907,29 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return slice_node.lower, slice_node.upper, slice_node.step
 
-    def visit_JoinedStr(self, fstring_node: ast.JoinedStr) -> str:
+    def visit_JoinedStr(self, fstring_node: ast.JoinedStr) -> IType:
         """
         Visitor of an f-string node
 
         :param fstring_node:
         :return: the object with the index value information
         """
-        self._log_error(
-            CompilerError.NotSupportedOperation(fstring_node.lineno, fstring_node.col_offset, 'f-string')
-        )
+        for node in fstring_node.values:
+            self.visit(node)
+        return Type.str
 
-        return self.generic_visit(fstring_node)
+    def visit_FormattedValue(self, formatted_value: ast.FormattedValue) -> IType:
+        formatted_value_type = self.get_type(formatted_value.value)
+        if not (formatted_value_type is Type.str or
+                formatted_value_type is Type.int or
+                formatted_value_type is Type.bool or
+                formatted_value_type is Type.bytes or
+                Type.sequence.is_type_of(formatted_value_type) or
+                isinstance(formatted_value_type, UserClass)
+        ):
+            self._log_error(
+                CompilerError.NotSupportedOperation(line=formatted_value.lineno, col=formatted_value.col_offset,
+                                                    symbol_id=f"F-string with a {formatted_value_type.identifier} variable")
+            )
+
+        return formatted_value_type

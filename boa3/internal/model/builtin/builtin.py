@@ -75,7 +75,9 @@ class Builtin:
     Reversed = ReversedMethod()
     StrBool = StrBoolMethod()
     StrBytes = StrBytesMethod()
+    StrClass = StrClassMethod()
     StrInt = StrIntMethod()
+    StrSequence = StrSequenceMethod()
     Super = SuperMethod()
 
     # python class method
