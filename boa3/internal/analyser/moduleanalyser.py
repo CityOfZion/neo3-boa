@@ -1391,6 +1391,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         # continue to walk through the tree
         self.generic_visit(for_node)
 
+    def visit_Match(self, match_node: ast.Match):
+        for case in match_node.cases:
+            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)) or
+                    isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None and case.guard is None
+            ):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(
+                        case.pattern.lineno, case.pattern.col_offset,
+                        symbol_id='case pattern with guard'
+                    )
+                )
+        return super().generic_visit(match_node)
+
     def visit_ListComp(self, node: ast.ListComp):
         return self._visit_comprehension(node)
 
