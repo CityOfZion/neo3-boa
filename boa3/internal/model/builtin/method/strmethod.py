@@ -26,6 +26,13 @@ class StrMethod(IBuiltinMethod):
         if self._arg_value.type is Type.int:
             return '-{0}_{1}'.format(self._identifier, Type.int.identifier)
 
+        if Type.sequence.is_type_of(self._arg_value.type):
+            return '-{0}_{1}'.format(self._identifier, Type.sequence.identifier)
+
+        from boa3.internal.model.type.classes.userclass import UserClass
+        if isinstance(self._arg_value.type, UserClass):
+            return '-{0}_{1}'.format(self._identifier, self._arg_value.type.raw_identifier)
+
         return self._identifier
 
     @property

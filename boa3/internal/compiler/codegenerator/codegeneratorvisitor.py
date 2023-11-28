@@ -1222,6 +1222,48 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return self.build_data(dict_node, result_type=result_type, already_generated=True)
 
+    def visit_JoinedStr(self, fstring: ast.JoinedStr) -> GeneratorData:
+        """
+        Visitor of an f-string node
+
+        :param string: the python ast string node
+        """
+        result_type = Type.str
+        index = self.generator.bytecode_size
+        for index, value in enumerate(fstring.values):
+            self.visit_to_generate(value)
+            if index != 0:
+                self.generator.convert_operation(BinaryOp.Concat)
+                if index < len(fstring.values) - 1:
+                    self._remove_inserted_opcodes_since(self.generator.last_code_start_address)
+
+        return self.build_data(fstring, result_type=result_type, index=index, already_generated=True)
+
+    def visit_FormattedValue(self, formatted_value: ast.FormattedValue) -> GeneratorData:
+        """
+        Visitor of a formatted_value node
+
+        :param formatted_value: the python ast string node
+        """
+        generated_value = self.visit_to_generate(formatted_value.value)
+        if generated_value.type == Type.str:
+            return generated_value
+
+        else:
+            match generated_value.type:
+                case Type.bool:
+                    self.generator.convert_builtin_method_call(Builtin.StrBool)
+                case Type.int:
+                    self.generator.convert_builtin_method_call(Builtin.StrInt)
+                case Type.bytes:
+                    self.generator.convert_builtin_method_call(Builtin.StrBytes)
+                case x if Type.sequence.is_type_of(x):
+                    self.generator.convert_builtin_method_call(Builtin.StrSequence)
+                case x if isinstance(x, UserClass):
+                    self.generator.convert_builtin_method_call(Builtin.StrClass.build(x))
+
+            return self.build_data(formatted_value, result_type=Type.str, already_generated=True)
+
     def visit_Pass(self, pass_node: ast.Pass) -> GeneratorData:
         """
         Visitor of pass node
