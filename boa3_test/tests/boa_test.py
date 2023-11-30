@@ -237,7 +237,8 @@ class BoaTest(TestCase):
         return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
 
     def get_deploy_file_paths(self, *args: str, output_name: str = None,
-                              compile_if_found: bool = False, change_manifest_name: bool = False) -> Tuple[str, str]:
+                              compile_if_found: bool = False, change_manifest_name: bool = False,
+                              debug: bool = False) -> Tuple[str, str]:
         contract_path = self.get_contract_path(*args)
         if isinstance(contract_path, str):
             nef_path, manifest_path = self.get_deploy_file_paths_without_compiling(contract_path, output_name)
@@ -247,6 +248,7 @@ class BoaTest(TestCase):
                         # both .nef and .manifest.json are required to execute the smart contract
                         self.compile_and_save(contract_path, output_name=nef_path, log=True,
                                               change_manifest_name=change_manifest_name,
+                                              debug=debug,
                                               use_unique_name=False  # already using unique name
                                               )
 
@@ -254,12 +256,13 @@ class BoaTest(TestCase):
 
         return contract_path, contract_path
 
-    def compile(self, path: str, root_folder: str = None, fail_fast: bool = False) -> bytes:
+    def compile(self, path: str, root_folder: str = None, fail_fast: bool = False, **kwargs) -> bytes:
         from boa3.boa3 import Boa3
 
         with _COMPILER_LOCK:
             result = Boa3.compile(path, root_folder=root_folder, fail_fast=fail_fast,
-                                  log_level=logging.getLevelName(logging.INFO)
+                                  log_level=logging.getLevelName(logging.INFO),
+                                  optimize=kwargs['optimize'] if 'optimize' in kwargs else True
                                   )
 
         return result
@@ -293,7 +296,9 @@ class BoaTest(TestCase):
         with _COMPILER_LOCK:
             Boa3.compile_and_save(path, output_path=nef_output, root_folder=root_folder,
                                   env=env, debug=debug,
-                                  show_errors=log, log_level=logging.getLevelName(logging.INFO)
+                                  show_errors=log,
+                                  log_level=logging.getLevelName(logging.INFO),
+                                  optimize=kwargs['optimize'] if 'optimize' in kwargs else True
                                   )
 
         get_raw_nef = kwargs['get_raw_nef'] if 'get_raw_nef' in kwargs else False

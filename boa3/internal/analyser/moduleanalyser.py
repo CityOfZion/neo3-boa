@@ -175,9 +175,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             first_assign = outer_symbol is None
             if var_id in self._current_symbol_scope.symbols:
                 if hasattr(outer_symbol, 'set_is_reassigned'):
-                    # don't mark as reassigned if it is outside of a function
                     is_module_scope = isinstance(self._current_scope, Module)
                     if not is_module_scope:
+                        outer_symbol.set_is_reassigned()
+                    elif isinstance(source_node, ast.AugAssign):
+                        # augmented assignments of global variables shouldn't be evaluated in the module analyser
                         outer_symbol.set_is_reassigned()
                     self.__set_source_origin(source_node, is_module_scope)
             else:
@@ -1073,23 +1075,27 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         else:
-            var_type = self.visit_type(assign.value)
+            return self._visit_assign_value(assign)
 
-            if var_type is Type.none and isinstance(assign.value, ast.Name):
-                symbol = self.get_symbol(assign.value.id)
-                if isinstance(symbol, Event):
-                    var_type = Builtin.Event
-                    self._current_event = symbol
+    def _visit_assign_value(self, assign: ast.Assign | ast.AugAssign) -> IType:
+        targets = assign.targets if isinstance(assign, ast.Assign) else [assign.target]
+        var_type = self.visit_type(assign.value)
 
-            return_type = var_type
-            for target in assign.targets:
-                var_id = self.visit(target)
-                if not isinstance(var_id, ISymbol):
-                    return_type = self.assign_value(var_id, var_type,
-                                                    source_node=assign,
-                                                    literal_value=asthelper.literal_eval_node(assign.value))
+        if var_type is Type.none and isinstance(assign.value, ast.Name):
+            symbol = self.get_symbol(assign.value.id)
+            if isinstance(symbol, Event):
+                var_type = Builtin.Event
+                self._current_event = symbol
 
-            return return_type
+        return_type = var_type
+        for target in targets:
+            var_id = self.visit(target)
+            if not isinstance(var_id, ISymbol):
+                return_type = self.assign_value(var_id, var_type,
+                                                source_node=assign,
+                                                literal_value=asthelper.literal_eval_node(assign.value))
+
+        return return_type
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -1107,7 +1113,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._check_annotation_type(ann_assign.annotation, ann_assign)
 
         # TODO: check if the annotated type and the value type are the same #86a1ctmwy
-        return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
+        return self.assign_value(var_id, var_type,
+                                 source_node=ann_assign,
+                                 assignment=ann_assign.value is not None,
+                                 literal_value=asthelper.literal_eval_node(ann_assign.value)
+                                 )
+
+    def visit_AugAssign(self, aug_assign: ast.AugAssign):
+        return self._visit_assign_value(aug_assign)
 
     def assign_value(self,
                      var_id: str,

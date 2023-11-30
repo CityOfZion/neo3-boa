@@ -44,6 +44,10 @@ class Variable(IExpression):
         return self._var_type
 
     @property
+    def is_global(self) -> bool:
+        return hasattr(self, '_set_as_global') and self._set_as_global
+
+    @property
     def has_literal_value(self) -> bool:
         from boa3.internal.analyser.model.optimizer import Undefined
         return self._first_assign_value is not Undefined

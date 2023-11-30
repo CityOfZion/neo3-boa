@@ -361,6 +361,7 @@ class CodeGenerator:
                         if (isinstance(var, Variable)
                                 and var.is_reassigned == modified_variable
                                 and var_id not in module_global_ids
+                                and (modified_variable or self.store_constant_variable(var))
                                 and var not in result_global_vars):
                             module_global_variables.append((var_id, var))
                             module_global_ids.append(var_id)
@@ -437,9 +438,7 @@ class CodeGenerator:
     # region Optimization properties
 
     def store_constant_variable(self, var: Variable) -> bool:
-        if optimizerhelper.is_storing_static_variable(self._optimization_level, var):
-            return True
-        return False
+        return optimizerhelper.is_storing_static_variable(self._optimization_level, var)
 
     # endregion
 
@@ -1634,11 +1633,12 @@ class CodeGenerator:
             storage_key = codegenerator.get_storage_key_for_variable(var)
             self._convert_builtin_storage_get_or_put(True, storage_key)
 
+        elif var.is_global:
+            if not self.store_constant_variable(var):
+                self.convert_literal(var._first_assign_value)
+
         elif class_type:
             self.convert_load_class_variable(class_type, var_id)
-
-        elif not self.store_constant_variable(var):
-            self.convert_literal(var._first_assign_value)
 
     def convert_store_variable(self, var_id: str, value_start_address: int = None, user_class: UserClass = None):
         """
