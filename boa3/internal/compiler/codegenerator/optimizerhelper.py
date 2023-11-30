@@ -17,6 +17,9 @@ class OptimizationLevel(enum.IntEnum):
 
 
 def is_storing_static_variable(level: OptimizationLevel, var: Variable) -> bool:
+    if not hasattr(var, '_set_as_global'):
+        var._set_as_global = not var.is_reassigned and var.has_literal_value
+
     if level <= OptimizationLevel.DEBUG:
         return True
 

@@ -163,6 +163,15 @@ class VisitorCodeGenerator(IAstAnalyser):
                 return True
         return False
 
+    def is_global_variable(self, variable_id: str) -> bool:
+        if self.current_class and variable_id in self.current_class.variables:
+            return False
+        if self.current_method and (variable_id in self.current_method.args
+                                    or variable_id in self.current_method.locals):
+            return False
+
+        return variable_id in self.symbols
+
     def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
         self.generator._remove_inserted_opcodes_since(last_address, last_stack_size)
 
@@ -438,7 +447,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             if (
                     isinstance(target_data.symbol, Variable) and
-                    var_id in self.symbols and
+                    self.is_global_variable(var_id) and
                     not self.generator.store_constant_variable(target_data.symbol)
             ):
                 continue
