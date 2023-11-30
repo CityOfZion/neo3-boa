@@ -11,8 +11,8 @@ from boa3.internal.analyser.model.symbolscope import SymbolScope
 from boa3.internal.compiler import codegenerator
 from boa3.internal.compiler.codegenerator import optimizerhelper
 from boa3.internal.compiler.codegenerator.codeoptimizer import CodeOptimizer
-from boa3.internal.compiler.codegenerator.optimizerhelper import OptimizationLevel
 from boa3.internal.compiler.codegenerator.engine.stackmemento import NeoStack, StackMemento
+from boa3.internal.compiler.codegenerator.optimizerhelper import OptimizationLevel
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.compiler.compileroutput import CompilerOutput
 from boa3.internal.model.builtin.builtin import Builtin
