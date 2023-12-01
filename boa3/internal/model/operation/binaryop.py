@@ -42,6 +42,7 @@ class BinaryOp:
     # Logical operations
     And = BooleanAnd()
     Or = BooleanOr()
+    ElvisOperatorOr = ElvisOperatorOr()
     BitAnd = LogicAnd()
     BitOr = LogicOr()
     Xor = LogicXor()
