@@ -446,6 +446,15 @@ class TestImport(BoaTest):
             Opcode.CALL
             + Integer(5).to_byte_array(min_length=1, signed=True)
             + Opcode.RET
+            + Opcode.PUSH10    # module function from import
+            + Opcode.RET  # return
+            + Opcode.PUSH5    # imported function
+            + Opcode.RET  # return
+        )
+        expected_output_no_optimization = (
+            Opcode.CALL
+            + Integer(5).to_byte_array(min_length=1, signed=True)
+            + Opcode.RET
             + Opcode.LDSFLD1    # module function from import
             + Opcode.RET  # return
             + Opcode.LDSFLD2    # imported function
@@ -461,7 +470,10 @@ class TestImport(BoaTest):
         )
 
         path = self.get_contract_path('ImportUserModuleWithNotImportedVariables.py')
-        output, manifest = self.compile_and_save(path)
+        output = self.compile(path, optimize=False)
+        self.assertEqual(expected_output_no_optimization, output)
+
+        output = self.compile(path)
         self.assertEqual(expected_output, output)
 
         path, _ = self.get_deploy_file_paths(path)

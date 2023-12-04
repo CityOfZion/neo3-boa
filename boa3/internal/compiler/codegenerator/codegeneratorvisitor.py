@@ -5,6 +5,7 @@ from typing import Dict, List, Optional
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
+from boa3.internal.compiler.codegenerator import optimizerhelper
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
@@ -161,6 +162,15 @@ class VisitorCodeGenerator(IAstAnalyser):
             if isclass(symbol) and issubclass(symbol, BaseException):
                 return True
         return False
+
+    def is_global_variable(self, variable_id: str) -> bool:
+        if self.current_class and variable_id in self.current_class.variables:
+            return False
+        if self.current_method and (variable_id in self.current_method.args
+                                    or variable_id in self.current_method.locals):
+            return False
+
+        return variable_id in self.symbols
 
     def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
         self.generator._remove_inserted_opcodes_since(last_address, last_stack_size)
@@ -418,7 +428,13 @@ class VisitorCodeGenerator(IAstAnalyser):
                 and hasattr(ann_assign, 'origin')
                 and isinstance(ann_assign.origin, ast.AST)):
             var_id = self._get_unique_name(var_id, ann_assign.origin)
-        self.store_variable(VariableGenerationData(var_id, None, var_value_address), value=ann_assign.value)
+
+        if not (isinstance(var_data.symbol, Variable) and
+                self.is_global_variable(var_id) and
+                not self.generator.store_constant_variable(var_data.symbol)
+        ):
+            self.store_variable(VariableGenerationData(var_id, None, var_value_address), value=ann_assign.value)
+
         return self.build_data(ann_assign)
 
     def visit_Assign(self, assign: ast.Assign) -> GeneratorData:
@@ -435,6 +451,13 @@ class VisitorCodeGenerator(IAstAnalyser):
             var_id = target_data.symbol_id
             var_index = target_data.index
 
+            if (
+                    isinstance(target_data.symbol, Variable) and
+                    self.is_global_variable(var_id) and
+                    not self.generator.store_constant_variable(target_data.symbol)
+            ):
+                continue
+
             # filter to find the imported variables
             if (var_id not in self.generator.symbol_table
                     and hasattr(assign, 'origin')
@@ -443,7 +466,8 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             vars_ids.append(VariableGenerationData(var_id, var_index, var_value_address))
 
-        self.store_variable(*vars_ids, value=assign.value)
+        if vars_ids:
+            self.store_variable(*vars_ids, value=assign.value)
         return self.build_data(assign)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign) -> GeneratorData:

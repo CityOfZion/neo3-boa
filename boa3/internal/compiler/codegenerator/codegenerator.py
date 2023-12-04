@@ -9,7 +9,9 @@ from boa3.internal import constants
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.analyser.model.symbolscope import SymbolScope
 from boa3.internal.compiler import codegenerator
-from boa3.internal.compiler.codegenerator.codeoptimizer import OptimizationLevel, CodeOptimizer
+from boa3.internal.compiler.codegenerator import optimizerhelper
+from boa3.internal.compiler.codegenerator.codeoptimizer import CodeOptimizer
+from boa3.internal.compiler.codegenerator.optimizerhelper import OptimizationLevel
 from boa3.internal.compiler.codegenerator.engine.stackmemento import NeoStack, StackMemento
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.compiler.compileroutput import CompilerOutput
@@ -68,7 +70,7 @@ class CodeGenerator:
         analyser.update_symbol_table_with_imports()
 
         all_imports = CodeGenerator._find_all_imports(analyser)
-        generator = CodeGenerator(analyser.symbol_table)
+        generator = CodeGenerator(analyser.symbol_table, optimization_level)
 
         from boa3.internal.exception.CompilerError import CompilerError
 
@@ -168,8 +170,15 @@ class CodeGenerator:
 
         return imports
 
-    def __init__(self, symbol_table: Dict[str, ISymbol]):
+    def __init__(self,
+                 symbol_table: Dict[str, ISymbol],
+                 optimization_level: OptimizationLevel = OptimizationLevel.DEFAULT
+                 ):
+
         self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
+        self._optimization_level = (optimization_level
+                                    if isinstance(optimization_level, OptimizationLevel)
+                                    else OptimizationLevel.DEFAULT)
         self.additional_symbols: Optional[Dict[str, ISymbol]] = None
 
         self._current_method: Method = None
@@ -327,7 +336,12 @@ class CodeGenerator:
         module_global_ids = []
         result_global_vars = []
         for var_id, var in self.symbol_table.items():
-            if isinstance(var, Variable) and var.is_reassigned == modified_variable and var not in result_global_vars:
+            if (
+                isinstance(var, Variable) and
+                var.is_reassigned == modified_variable and
+                (modified_variable or self.store_constant_variable(var)) and
+                var not in result_global_vars
+            ):
                 module_global_variables.append((var_id, var))
                 module_global_ids.append(var_id)
                 result_global_vars.append(var)
@@ -347,6 +361,7 @@ class CodeGenerator:
                         if (isinstance(var, Variable)
                                 and var.is_reassigned == modified_variable
                                 and var_id not in module_global_ids
+                                and (modified_variable or self.store_constant_variable(var))
                                 and var not in result_global_vars):
                             module_global_variables.append((var_id, var))
                             module_global_ids.append(var_id)
@@ -419,6 +434,13 @@ class CodeGenerator:
     @property
     def _current_scope(self) -> SymbolScope:
         return self._scope_stack[-1] if len(self._scope_stack) > 0 else self._global_scope
+
+    # region Optimization properties
+
+    def store_constant_variable(self, var: Variable) -> bool:
+        return optimizerhelper.is_storing_static_variable(self._optimization_level, var)
+
+    # endregion
 
     def is_none_inserted(self) -> bool:
         """
@@ -1610,6 +1632,10 @@ class CodeGenerator:
             another_var_id, var = self.get_symbol(var_id)
             storage_key = codegenerator.get_storage_key_for_variable(var)
             self._convert_builtin_storage_get_or_put(True, storage_key)
+
+        elif var.is_global:
+            if not self.store_constant_variable(var):
+                self.convert_literal(var._first_assign_value)
 
         elif class_type:
             self.convert_load_class_variable(class_type, var_id)
