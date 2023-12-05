@@ -24,12 +24,13 @@ dependencies = [
 dev = [
     'autopep8>=1.4.4',
     'bump-my-version==0.10.0',
+    'coverage>=6.0.1',
+    'filelock>=3.10.7',
     'pycodestyle>=2.11.1',
     'twine>=1.10.0',
 ]
 test = [
-    'filelock>=3.10.7',
-    'coverage>=6.0.1',
+    'boa-test-constructor>=0.2.0',
 ]
 docs = [
     'myst-parser==1.0.0',
