@@ -93,6 +93,7 @@ class Builtin:
     CountSequencePrimitive = CountSequencePrimitiveMethod()
     CountStr = CountStrMethod()
     Copy = CopyListMethod()
+    ListSort = SortMethod()
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
@@ -144,6 +145,7 @@ class Builtin:
                                                 Exit,
                                                 IsInstance,
                                                 Len,
+                                                ListSort,
                                                 Max,
                                                 Min,
                                                 Print,

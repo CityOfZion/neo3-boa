@@ -1455,13 +1455,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 already_called_arg = call.keywords[index].value
             index += 1
 
-        if len_call_args > len(callable_target.args) or unexpected_kwarg is not None or already_called_arg is not None:
+        if len_call_args > len(callable_target.positional_args) or unexpected_kwarg is not None or already_called_arg is not None:
             if unexpected_kwarg is not None:
                 unexpected_arg = unexpected_kwarg
             elif already_called_arg is not None:
                 unexpected_arg = already_called_arg
             else:
-                unexpected_arg = call.args[len(callable_target.args) + ignore_first_argument]
+                unexpected_arg = call.args[len(callable_target.positional_args) + ignore_first_argument]
 
             from boa3.internal.model.builtin.method import SuperMethod
             if isinstance(callable_target, SuperMethod):

@@ -115,6 +115,10 @@ class Callable(IExpression, ABC):
         return self.args
 
     @property
+    def positional_args(self) -> Dict[str, Variable]:
+        return {key: value for key, value in self.args.items() if key not in self._kwargs}
+
+    @property
     def has_cls_or_self(self) -> bool:
         return any(decorator.has_cls_or_self for decorator in self.decorators)
 
