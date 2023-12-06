@@ -1042,3 +1042,131 @@ class TestVariable(BoaTest):
     def test_assign_function(self):
         path = self.get_contract_path('AssignFunction.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_elvis_operator_any_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorAnyParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'not empty string'))
+        expected_results.append('not empty string')
+
+        invokes.append(runner.call_contract(path, 'main', 123456))
+        expected_results.append(123456)
+
+        invokes.append(runner.call_contract(path, 'main', True))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'main', None))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', ''))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', 0))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append('some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_bytes_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorBytesParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', b'not empty string', expected_result_type=bytes))
+        expected_results.append(b'not empty string')
+
+        invokes.append(runner.call_contract(path, 'main', b'', expected_result_type=bytes))
+        expected_results.append(b'some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_str_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorStrParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'not empty string'))
+        expected_results.append('not empty string')
+
+        invokes.append(runner.call_contract(path, 'main', ''))
+        expected_results.append('some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_int_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorIntParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 100))
+        expected_results.append(100)
+
+        invokes.append(runner.call_contract(path, 'main', 0))
+        expected_results.append(123456)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_bool_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorBoolParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', True))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_optional_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorOptionalParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'unit test'))
+        expected_results.append('unit test')
+
+        invokes.append(runner.call_contract(path, 'main', ''))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', None))
+        expected_results.append('some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
