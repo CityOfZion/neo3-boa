@@ -34,19 +34,25 @@ if __name__ == '__main__':
         boa_test.USE_UNIQUE_NAME = True
 
         suite = AsyncTestSuite()
+        default_suite = unittest.TestSuite()
         discover_path = f'{env.PROJECT_ROOT_DIRECTORY}/boa3_test/'
         test_discover = unittest.loader.defaultTestLoader.discover(discover_path,
                                                                    top_level_dir=env.PROJECT_ROOT_DIRECTORY,
                                                                    )
 
         for test in list_of_tests_gen(test_discover):
-            suite.addTest(test)
+            from boa3_test.tests.boatestcase import BoaTestCase
+            if isinstance(test, BoaTestCase):
+                default_suite.addTest(test)
+            else:
+                suite.addTest(test)
 
         print(f'Found {suite.countTestCases()} tests\n')
+        default_suite.addTest(suite)
 
         test_result = unittest.TextTestRunner(verbosity=2,
                                               resultclass=CustomTestResult,
-                                              ).run(suite)
+                                              ).run(default_suite)
 
         sys.exit(not test_result.wasSuccessful())
     finally:
