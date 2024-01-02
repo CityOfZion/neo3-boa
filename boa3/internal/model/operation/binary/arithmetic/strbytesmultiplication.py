@@ -66,5 +66,4 @@ class StrBytesMultiplication(BinaryOperation):
         code_generator.remove_stack_top_item()
         code_generator.remove_stack_top_item()
 
-        if Type.str.is_type_of(self.left_type):
-            code_generator.convert_cast(self.left_type, is_internal=True)
+        code_generator.convert_cast(self.left_type, is_internal=True)
