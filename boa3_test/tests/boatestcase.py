@@ -239,6 +239,10 @@ class BoaTestCase(SmartContractTestCase):
             raise AssertionError(f'{expected_logged_exception.__name__} was logged: "{expected_logged[0].message}"')
         return output
 
+    def assertStartsWith(self, first: Any, second: Any):
+        if not (hasattr(first, 'startswith') and first.startswith(second)):
+            self.fail(f'{first} != {second}')
+
     def _assert_compiler_logs_error(self,
                                     expected_logged_exception,
                                     path
