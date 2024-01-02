@@ -27,7 +27,8 @@ class ListType(MutableSequenceType):
 
         from boa3.internal.model.builtin.builtin import Builtin
 
-        instance_methods = [Builtin.Copy
+        instance_methods = [Builtin.Copy,
+                            Builtin.ListSort
                             ]
 
         for instance_method in instance_methods:
