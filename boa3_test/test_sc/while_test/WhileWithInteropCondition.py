@@ -1,10 +1,10 @@
-from typing import cast
+from typing import cast, Any
 
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import executing_script_hash, notify
 from boa3.builtin.interop.storage import find, get, get_context, put
-from boa3.builtin.type import UInt160
+from boa3.builtin.type import UInt160, helper as type_helper
 
 FEE_RECEIVER_KEY = b'FEE_RECEIVER'
 
@@ -19,17 +19,16 @@ def test_end_while_jump() -> bool:
         token_bytes = cast(bytes, iterator.value[0])
         token_bytes = token_bytes[7:]  # cut 'feesMap' at the beginning of the bytes
         token = cast(UInt160, token_bytes)
-        fee_amount = cast(int, iterator.value[1])
+        fee_amount = type_helper.to_int(iterator.value[1])
         if fee_amount > 0:
             notify([token, executing_script_hash, fee_receiver, fee_amount])
     return True
 
 
 @public
-def deploy() -> bool:
+def _deploy(data: Any, update: bool):
     # placeholders for testing
     put(FEE_RECEIVER_KEY, UInt160())
 
     feesMap.put(GAS, 10)
     feesMap.put(NEO, 20)
-    return True
