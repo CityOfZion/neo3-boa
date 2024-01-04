@@ -335,11 +335,11 @@
 
 ### While statement
 
-- <a href="/boa3_test/test_sc/while_test/ConstantCondition.py">ConstantCondition.py</a>, 
-- <a href="/boa3_test/test_sc/while_test/MultipleRelationalCondition.py">MultipleRelationalCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileConstantCondition.py">ConstantCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileMultipleRelationalCondition.py">MultipleRelationalCondition.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/NestedWhile.py">NestedWhile.py</a>, 
-- <a href="/boa3_test/test_sc/while_test/RelationalCondition.py">RelationalCondition.py</a>, 
-- <a href="/boa3_test/test_sc/while_test/VariableCondition.py">VariableCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileRelationalCondition.py">RelationalCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileVariableCondition.py">VariableCondition.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/WhileBoa2Test.py">WhileBoa2Test.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/WhileBoa2Test1.py">WhileBoa2Test1.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/WhileBoa2Test2.py">WhileBoa2Test2.py</a>, 

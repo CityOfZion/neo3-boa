@@ -99,13 +99,15 @@ class BoaTestCase(SmartContractTestCase):
                               *,
                               output_name: str = None,
                               change_manifest_name: bool = False,
-                              signing_account: account.Account = None
+                              signing_account: account.Account = None,
+                              compile_if_found: bool = False
                               ) -> GenericContract:
 
         cls.contract_hash = await cls.compile_and_deploy(contract_path,
                                                          output_name=output_name,
                                                          change_manifest_name=change_manifest_name,
-                                                         signing_account=signing_account
+                                                         signing_account=signing_account,
+                                                         compile_if_found=compile_if_found
                                                          )
 
         return cls.contract
@@ -116,12 +118,14 @@ class BoaTestCase(SmartContractTestCase):
                                  *,
                                  output_name: str = None,
                                  change_manifest_name: bool = False,
-                                 signing_account: account.Account = None
+                                 signing_account: account.Account = None,
+                                 compile_if_found: bool = False
                                  ) -> types.UInt160:
 
         nef_abs_path, _ = cls.get_deploy_file_paths(contract_path,
                                                     output_name=output_name,
                                                     change_manifest_name=change_manifest_name,
+                                                    compile_if_found=compile_if_found
                                                     )
 
         if not signing_account:

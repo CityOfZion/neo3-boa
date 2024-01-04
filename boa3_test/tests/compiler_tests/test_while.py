@@ -1,18 +1,16 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
-from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
+from neo3.api import noderpc
+from neo3.contracts.contract import CONTRACT_HASHES
+from neo3.core import types
 
 
-class TestWhile(BoaTest):
+class TestWhile(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/while_test'
 
-    def test_while_constant_condition(self):
+    def test_while_constant_condition_compile(self):
         jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
 
@@ -35,26 +33,16 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ConstantCondition.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('WhileConstantCondition.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_while_constant_condition_run(self):
+        await self.set_up_contract('WhileConstantCondition.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(0)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_while_variable_condition(self):
+    def test_while_variable_condition_compile(self):
         jmpif_address = Integer(12).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-11).to_byte_array(min_length=1, signed=True)
 
@@ -87,55 +75,37 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('VariableCondition.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('WhileVariableCondition.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_while_variable_condition_run(self):
+        await self.set_up_contract('WhileVariableCondition.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [-2], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'Main', -2))
-        expected_results.append(0)
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(10)
-        invokes.append(runner.call_contract(path, 'Main', 8))
-        expected_results.append(16)
+        result, _ = await self.call('Main', [5], return_type=int)
+        self.assertEqual(10, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [8], return_type=int)
+        self.assertEqual(16, result)
 
     def test_while_mismatched_type_condition(self):
-        path = self.get_contract_path('MismatchedTypeCondition.py')
+        path = self.get_contract_path('WhileMismatchedTypeCondition.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_while_no_condition(self):
-        path = self.get_contract_path('NoCondition.py')
+        path = self.get_contract_path('WhileNoCondition.py')
         with self.assertRaises(SyntaxError):
-            output = self.compile(path)
+            self.compile(path)
 
-    def test_nested_while(self):
-        path, _ = self.get_deploy_file_paths('NestedWhile.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_nested_while(self):
+        await self.set_up_contract('NestedWhile.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(8, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(8)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_while_else(self):
+    def test_while_else_compile(self):
         jmpif_address = Integer(6).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-5).to_byte_array(min_length=1, signed=True)
 
@@ -162,26 +132,16 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('WhileElse.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('WhileElse.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_while_else_run(self):
+        await self.set_up_contract('WhileElse.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_while_relational_condition(self):
+    def test_while_relational_condition_compile(self):
         jmpif_address = Integer(10).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-11).to_byte_array(min_length=1, signed=True)
 
@@ -212,26 +172,16 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('RelationalCondition.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('WhileRelationalCondition.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_while_relational_condition_run(self):
+        await self.set_up_contract('WhileRelationalCondition.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(20, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(20)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_while_multiple_relational_condition(self):
+    def test_while_multiple_relational_condition_compile(self):
         jmpif_address = Integer(10).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-15).to_byte_array(min_length=1, signed=True)
 
@@ -266,162 +216,86 @@ class TestWhile(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MultipleRelationalCondition.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('WhileMultipleRelationalCondition.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_while_multiple_relational_condition_run(self):
+        await self.set_up_contract('WhileMultipleRelationalCondition.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['', 1], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'Main', '', 1))
-        expected_results.append(0)
-        invokes.append(runner.call_contract(path, 'Main', '', 10))
-        expected_results.append(0)
-        invokes.append(runner.call_contract(path, 'Main', '', 100))
-        expected_results.append(20)
+        result, _ = await self.call('Main', ['', 10], return_type=int)
+        self.assertEqual(0, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', ['', 100], return_type=int)
+        self.assertEqual(20, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_while_continue(self):
+        await self.set_up_contract('WhileContinue.py')
 
-    def test_while_continue(self):
-        path, _ = self.get_deploy_file_paths('WhileContinue.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(20, result)
 
-        invokes = []
-        expected_results = []
+    async def test_while_break(self):
+        await self.set_up_contract('WhileBreak.py')
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(20)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(6, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_while_test(self):
+        await self.set_up_contract('WhileBoa2Test.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(24, result)
 
-    def test_while_break(self):
-        path, _ = self.get_deploy_file_paths('WhileBreak.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_while_test1(self):
+        await self.set_up_contract('WhileBoa2Test1.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(6, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(6)
+    async def test_boa2_while_test2(self):
+        await self.set_up_contract('WhileBoa2Test2.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(6, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_while_interop_condition(self):
+        from dataclasses import dataclass
 
-    def test_boa2_while_test(self):
-        path, _ = self.get_deploy_file_paths('WhileBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        @dataclass
+        class TestEvent:
+            token: types.UInt160
+            executing: types.UInt160
+            fee_receiver: types.UInt160
+            fee_amount: int
 
-        invokes = []
-        expected_results = []
+            @classmethod
+            def from_notification(cls, n: noderpc.Notification):
+                stack = n.state.as_list()[0].as_list()
+                token = stack[0].as_uint160()
+                executing = stack[1].as_uint160()
+                fee_receiver = stack[2].as_uint160()
+                fee_amount = stack[3].as_int()
+                return cls(token, executing, fee_receiver, fee_amount)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(24)
+        await self.set_up_contract('WhileWithInteropCondition.py', compile_if_found=True)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_while_test1(self):
-        path, _ = self.get_deploy_file_paths('WhileBoa2Test1.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(6)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_while_test2(self):
-        path, _ = self.get_deploy_file_paths('WhileBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(6)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_while_interop_condition(self):
-        path, _ = self.get_deploy_file_paths('WhileWithInteropCondition.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'deploy'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'test_end_while_jump'))
-        expected_results.append(True)
-
-        contract = invokes[0].invoke.contract
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, notifications = await self.call('test_end_while_jump', [], return_type=bool)
+        self.assertEqual(True, result)
 
         # test notifications inserted into the code for validating if the code flow is correct
-        notifications = runner.get_events('notify', origin=contract)
-        contract_hash = contract.script_hash
         self.assertEqual(2, len(notifications))
 
-        self.assertEqual(1, len(notifications[0].arguments))
-        self.assertIsInstance(notifications[0].arguments[0], list)
-        self.assertEqual(4, len(notifications[0].arguments[0]))
-        token, executing_script_hash, fee_receiver, fee_amount = notifications[0].arguments[0]
-        if isinstance(fee_receiver, str):
-            fee_receiver = String(fee_receiver).to_bytes()
-        if isinstance(fee_amount, str):
-            fee_amount = String(fee_amount).to_bytes()
-        if isinstance(fee_amount, bytes):
-            fee_amount = Integer.from_bytes(fee_amount)
+        event = TestEvent.from_notification(notifications[0])
+        self.assertEqual(CONTRACT_HASHES.GAS_TOKEN, event.token)
+        self.assertEqual(self.contract_hash, event.executing)
+        self.assertEqual(types.UInt160.zero(), event.fee_receiver)
+        self.assertEqual(10, event.fee_amount)
 
-        self.assertEqual(constants.GAS_SCRIPT, token)
-        self.assertEqual(contract_hash, executing_script_hash)
-        self.assertEqual(bytes(20), fee_receiver)
-        self.assertEqual(10, fee_amount)
-
-        self.assertEqual(1, len(notifications[1].arguments))
-        self.assertIsInstance(notifications[1].arguments[0], list)
-        self.assertEqual(4, len(notifications[1].arguments[0]))
-        token, executing_script_hash, fee_receiver, fee_amount = notifications[1].arguments[0]
-        if isinstance(fee_receiver, str):
-            fee_receiver = String(fee_receiver).to_bytes()
-        if isinstance(fee_amount, str):
-            fee_amount = String(fee_amount).to_bytes()
-        if isinstance(fee_amount, bytes):
-            fee_amount = Integer.from_bytes(fee_amount)
-
-        self.assertEqual(constants.NEO_SCRIPT, token)
-        self.assertEqual(contract_hash, executing_script_hash)
-        self.assertEqual(bytes(20), fee_receiver)
-        self.assertEqual(20, fee_amount)
+        event = TestEvent.from_notification(notifications[1])
+        self.assertEqual(CONTRACT_HASHES.NEO_TOKEN, event.token)
+        self.assertEqual(self.contract_hash, event.executing)
+        self.assertEqual(types.UInt160.zero(), event.fee_receiver)
+        self.assertEqual(20, event.fee_amount)
