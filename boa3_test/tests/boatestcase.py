@@ -7,7 +7,7 @@ import asyncio
 import logging
 import os
 import threading
-from typing import Optional, Any
+from typing import Any
 
 from boaconstructor import SmartContractTestCase
 from neo3.api import noderpc
@@ -22,8 +22,11 @@ from boa3_test.tests.boa_test import (USE_UNIQUE_NAME,  # move theses to this mo
                                       _COMPILER_LOCK,
                                       _LOGGING_LOCK)
 
+# type annotations
 JsonToken = int | str | bool | None | list['JsonToken'] | dict[str, 'JsonToken']
 JsonObject = dict[str, JsonToken]
+ContractScript = bytes
+CompilerOutput = tuple[ContractScript, JsonObject]
 
 _CONTRACT_LOCK = threading.RLock()
 
@@ -38,7 +41,7 @@ class BoaTestCase(SmartContractTestCase):
     default_folder: str
 
     genesis: account.Account
-    _contract: Optional[GenericContract] = None
+    _contract: GenericContract | None = None
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -85,7 +88,7 @@ class BoaTestCase(SmartContractTestCase):
         super().tearDown()
 
     @property
-    def contract(self) -> Optional[GenericContract]:
+    def contract(self) -> GenericContract | None:
         if self._contract is None and self.contract_hash is not None:
             _CONTRACT_LOCK.acquire()
             print(f"'Enter test method {self._testMethodName if hasattr(self, '_testMethodName') else self.id()}'")
@@ -203,7 +206,7 @@ class BoaTestCase(SmartContractTestCase):
                       root_folder: str = None,
                       fail_fast: bool = False,
                       **kwargs
-                      ) -> tuple[bytes, JsonObject]:
+                      ) -> CompilerOutput:
 
         py_abs_path = self.get_contract_path(contract_path)
         result = self.compile(
@@ -218,11 +221,12 @@ class BoaTestCase(SmartContractTestCase):
     def assertCompilerLogs(self,
                            expected_logged_exception,
                            path
-                           ) -> bytes | str:
+                           ) -> CompilerOutput | str:
 
         output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, path)
+        manifest = {}
         if not issubclass(expected_logged_exception, CompilerError):
-            return output
+            return output, manifest
         else:
             # filter to get only the error message, without location information
             import re
@@ -231,12 +235,12 @@ class BoaTestCase(SmartContractTestCase):
             try:
                 return result.group('msg')
             except BaseException:
-                return output
+                return output, manifest
 
     def assertCompilerNotLogs(self,
                               expected_logged_exception,
                               path
-                              ) -> bytes:
+                              ) -> ContractScript:
 
         output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
         if len(expected_logged) > 0:
@@ -250,7 +254,7 @@ class BoaTestCase(SmartContractTestCase):
     def _assert_compiler_logs_error(self,
                                     expected_logged_exception,
                                     path
-                                    ) -> tuple[bytes, str]:
+                                    ) -> tuple[ContractScript, str]:
 
         output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
         if len(expected_logged) < 1:
@@ -262,7 +266,7 @@ class BoaTestCase(SmartContractTestCase):
                                path,
                                *,
                                fail_fast=False
-                               ) -> tuple[bytes, list[logging.LogRecord]]:
+                               ) -> tuple[ContractScript, list[logging.LogRecord]]:
         output = None
 
         with _LOGGING_LOCK:
@@ -417,7 +421,7 @@ class BoaTestCase(SmartContractTestCase):
         return contract_path, contract_path
 
     @staticmethod
-    def compile(path: str, root_folder: str = None, fail_fast: bool = False, **kwargs) -> bytes:
+    def compile(path: str, root_folder: str = None, fail_fast: bool = False, **kwargs) -> ContractScript:
         from boa3.boa3 import Boa3
 
         with _COMPILER_LOCK:
@@ -430,7 +434,7 @@ class BoaTestCase(SmartContractTestCase):
 
     @classmethod
     def compile_and_save(cls, path: str, root_folder: str = None, debug: bool = False, log: bool = True,
-                         output_name: str = None, env: str = None, **kwargs) -> tuple[bytes, JsonObject]:
+                         output_name: str = None, env: str = None, **kwargs) -> CompilerOutput:
 
         if output_name is not None:
             output_dir, manifest_name = os.path.split(output_name)  # get name
@@ -485,7 +489,7 @@ class BoaTestCase(SmartContractTestCase):
 
         return output, manifest
 
-    def get_debug_info(self, path: str) -> Optional[JsonObject]:
+    def get_debug_info(self, path: str) -> JsonObject | None:
         if path.endswith('.nef'):
             nef_output = path
         else:
@@ -501,7 +505,7 @@ class BoaTestCase(SmartContractTestCase):
             debug_info = json.loads(dbgnfo.read(os.path.basename(nef_output.replace('.nef', '.debug.json'))))
         return debug_info
 
-    def get_output(self, path: str, root_folder: str = None) -> tuple[bytes, JsonObject]:
+    def get_output(self, path: str, root_folder: str = None) -> CompilerOutput:
         if path.endswith('.nef'):
             nef_output = path
             manifest_output = path.replace('.nef', '.manifest.json')
@@ -530,7 +534,7 @@ class BoaTestCase(SmartContractTestCase):
 
         return output, manifest
 
-    def get_bytes_output(self, path: str) -> tuple[bytes, JsonObject]:
+    def get_serialized_output(self, path: str) -> CompilerOutput:
         nef_output, manifest_output = self.get_deploy_file_paths_without_compiling(path)
         with _COMPILER_LOCK:
             if not os.path.isfile(nef_output):
