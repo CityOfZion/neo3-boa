@@ -45,6 +45,7 @@ class StrSplitMethod(StdLibMethod):
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.model.type.type import Type
 
         code_generator.duplicate_stack_item(3)
         code_generator.swap_reverse_stack_items(2)
@@ -69,6 +70,7 @@ class StrSplitMethod(StdLibMethod):
         code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
         code_generator.swap_reverse_stack_items(2)
         code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.convert_cast(Type.str, is_internal=True)
         code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
 
         while_condition = code_generator.bytecode_size
