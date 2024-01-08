@@ -1,9 +1,14 @@
+__all__ = [
+    'StrType', 'StrBufferType'
+]
+
 from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.internal.neo.vm.type.AbiType import AbiType
+from boa3.internal.neo.vm.type.StackItem import StackItemType
 
 
 class StrType(IByteStringType):
@@ -55,3 +60,31 @@ class StrType(IByteStringType):
 
     def is_type_of(self, value: Any) -> bool:
         return self._is_type_of(value)
+
+
+class StrBufferType(StrType):
+    """
+    This class is used to represent Python str type on operations that internally use Neo Buffer type
+    """
+    def __init__(self):
+        super().__init__()
+
+    def stack_item(self) -> StackItemType:
+        return StackItemType.Buffer
+
+    @classmethod
+    def build(cls, value: Any) -> IType:
+        if cls._is_type_of(value):
+            from boa3.internal.model.type.type import Type
+            return Type.bufferStr
+
+    @classmethod
+    def build_collection(cls, value_type: IType):
+        from boa3.internal.model.type.type import Type
+        return Type.bufferStr
+
+    @classmethod
+    def _is_type_of(cls, value: Any) -> bool:
+        if isinstance(value, (str, StrBufferType)):
+            return True
+        return super()._is_type_of(value)

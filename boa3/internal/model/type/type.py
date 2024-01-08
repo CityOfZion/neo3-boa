@@ -19,7 +19,7 @@ from boa3.internal.model.type.primitive.bytearraytype import ByteArrayType
 from boa3.internal.model.type.primitive.bytestype import BytesType
 from boa3.internal.model.type.primitive.inttype import IntType
 from boa3.internal.model.type.primitive.nonetype import noneType
-from boa3.internal.model.type.primitive.strtype import StrType
+from boa3.internal.model.type.primitive.strtype import StrType, StrBufferType
 
 
 class Type:
@@ -103,6 +103,7 @@ class Type:
     int = IntType()
     bool = BoolType()
     str = StrType()
+    bufferStr = StrBufferType()
     none = noneType
     bytes = BytesType()
     bytearray = ByteArrayType()
