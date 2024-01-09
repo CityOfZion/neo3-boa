@@ -1,18 +1,15 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.contracts import FindOptions
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestLogical(BoaTest):
+class TestLogical(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/logical_test'
 
     # region BoolAnd
 
-    def test_boolean_and(self):
+    async def test_boolean_and_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -23,40 +20,33 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BoolAnd.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicBoolAnd.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boolean_and(self):
+        await self.set_up_contract('LogicBoolAnd.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, True], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True, True))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', True, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', False, True))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', False, False))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [True, False], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [False, True], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [False, False], return_type=bool)
+        self.assertEqual(False, result)
 
     def test_mismatched_type_binary_operation(self):
-        path = self.get_contract_path('MismatchedOperandAnd.py')
+        path = self.get_contract_path('LogicMismatchedOperandAnd.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
     # region BoolNot
 
-    def test_boolean_not(self):
+    async def test_boolean_not_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -66,36 +56,27 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BoolNot.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicBoolNot.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boolean_not(self):
+        await self.set_up_contract('LogicBoolNot.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', False))
-        expected_results.append(True)
+        result, _ = await self.call('Main', [False], return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mismatched_type_unary_operation(self):
-        path = self.get_contract_path('MismatchedOperandNot.py')
+    async def test_mismatched_type_unary_operation(self):
+        path = self.get_contract_path('LogicMismatchedOperandNot.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
     # region BoolOr
 
-    def test_boolean_or(self):
+    async def test_boolean_or_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -106,32 +87,25 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BoolOr.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicBoolOr.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boolean_or(self):
+        await self.set_up_contract('LogicBoolOr.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, True], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True, True))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', True, False))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', False, True))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', False, False))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [True, False], return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [False, True], return_type=bool)
+        self.assertEqual(True, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [False, False], return_type=bool)
+        self.assertEqual(False, result)
 
-    def test_sequence_boolean_or(self):
+    async def test_sequence_boolean_or_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -144,36 +118,29 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BoolOrThreeElements.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicBoolOrThreeElements.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_sequence_boolean_or(self):
+        await self.set_up_contract('LogicBoolOrThreeElements.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, False, False], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True, False, False))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', False, True, False))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', False, False, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', True, True, True))
-        expected_results.append(True)
+        result, _ = await self.call('Main', [False, True, False], return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [False, False, False], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [True, True, True], return_type=bool)
+        self.assertEqual(True, result)
 
     # endregion
 
     # region LeftShift
 
-    def test_logic_left_shift(self):
+    async def test_left_shift_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -184,54 +151,36 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicLeftShift.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicLeftShift.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_left_shift(self):
+        await self.set_up_contract('LogicLeftShift.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [int('100', 2), 2], return_type=int)
+        self.assertEqual(int('10000', 2), result)
 
-        invokes.append(runner.call_contract(path, 'Main', int('100', 2), 2))
-        expected_results.append(int('10000', 2))
-        invokes.append(runner.call_contract(path, 'Main', int('11', 2), 1))
-        expected_results.append(int('110', 2))
-        invokes.append(runner.call_contract(path, 'Main', int('101010', 2), 4))
-        expected_results.append(int('1010100000', 2))
+        result, _ = await self.call('Main', [int('11', 2), 1], return_type=int)
+        self.assertEqual(int('110', 2), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [int('101010', 2), 4], return_type=int)
+        self.assertEqual(int('1010100000', 2), result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_logic_left_shift_builtin_type(self):
+        await self.set_up_contract('LogicLeftShiftBuiltinType.py')
 
-    def test_logic_left_shift_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('LogicLeftShiftBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [FindOptions.NONE, FindOptions.DESERIALIZE_VALUES], return_type=int)
+        self.assertEqual(FindOptions.NONE << FindOptions.DESERIALIZE_VALUES, result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(FindOptions.NONE << FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mismatched_type_logic_left_shift(self):
-        path = self.get_contract_path('MismatchedOperandLogicLeftShift.py')
+    async def test_mismatched_type_logic_left_shift(self):
+        path = self.get_contract_path('LogicMismatchedOperandLogicLeftShift.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
     # region LogicAnd
 
-    def test_logic_and_with_bool_operand(self):
+    async def test_logic_and_with_bool_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -242,30 +191,23 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicAndBool.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicAndBool.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_and_with_bool_operand(self):
+        await self.set_up_contract('LogicAndBool.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, True], return_type=int)
+        self.assertEqual(True, bool(result))
 
-        invokes.append(runner.call_contract(path, 'Main', True, True))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', True, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', False, False))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [True, False], return_type=int)
+        self.assertEqual(False, bool(result))
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [False, False], return_type=int)
+        self.assertEqual(False, bool(result))
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
 
-    def test_logic_and_with_int_operand(self):
+    async def test_logic_and_with_int_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -276,54 +218,36 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicAndInt.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicAndInt.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_and_with_int_operand(self):
+        await self.set_up_contract('LogicAndInt.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [4, 6], return_type=int)
+        self.assertEqual(4 & 6, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 4, 6))
-        expected_results.append(4 & 6)
-        invokes.append(runner.call_contract(path, 'Main', 40, 6))
-        expected_results.append(40 & 6)
-        invokes.append(runner.call_contract(path, 'Main', -4, 32))
-        expected_results.append(-4 & 32)
+        result, _ = await self.call('Main', [40, 6], return_type=int)
+        self.assertEqual(40 & 6, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [-4, 32], return_type=int)
+        self.assertEqual(-4 & 32, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_logic_and_builtin_type(self):
+        await self.set_up_contract('LogicAndBuiltinType.py')
 
-    def test_logic_and_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('LogicAndBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [FindOptions.NONE, FindOptions.DESERIALIZE_VALUES], return_type=int)
+        self.assertEqual(FindOptions.NONE & FindOptions.DESERIALIZE_VALUES, result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(FindOptions.NONE & FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mismatched_type_logic_and(self):
-        path = self.get_contract_path('MismatchedOperandLogicAnd.py')
+    async def test_mismatched_type_logic_and(self):
+        path = self.get_contract_path('LogicMismatchedOperandLogicAnd.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
     # region LogicNot
 
-    def test_logic_not_with_bool_operand(self):
+    async def test_logic_not_with_bool_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -333,44 +257,25 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicNotBool.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicNotBool.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_not_with_bool_operand(self):
+        await self.set_up_contract('LogicNotBool.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True], return_type=int)
+        self.assertEqual(-2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True))
-        expected_results.append(-2)
-        invokes.append(runner.call_contract(path, 'Main', False))
-        expected_results.append(-1)
+        result, _ = await self.call('Main', [False], return_type=int)
+        self.assertEqual(-1, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_logic_not_builtin_type(self):
+        await self.set_up_contract('LogicNotBuiltinType.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY], return_type=int)
+        self.assertEqual(~FindOptions.VALUES_ONLY, result)
 
-    def test_logic_not_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('LogicNotBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY))
-        expected_results.append(~FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_logic_not_with_int_operand(self):
+    async def test_logic_not_with_int_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -380,38 +285,30 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicNotInt.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicNotInt.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_not_with_int_operand(self):
+        await self.set_up_contract('LogicNotInt.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [4], return_type=int)
+        self.assertEqual(-5, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 4))
-        expected_results.append(-5)
-        invokes.append(runner.call_contract(path, 'Main', 40))
-        expected_results.append(-41)
-        invokes.append(runner.call_contract(path, 'Main', -4))
-        expected_results.append(3)
+        result, _ = await self.call('Main', [40], return_type=int)
+        self.assertEqual(-41, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [-4], return_type=int)
+        self.assertEqual(3, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mismatched_type_logic_not(self):
-        path = self.get_contract_path('MismatchedOperandLogicNot.py')
+    async def test_mismatched_type_logic_not(self):
+        path = self.get_contract_path('LogicMismatchedOperandLogicNot.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
     # region LogicOr
 
-    def test_logic_or_with_bool_operand(self):
+    async def test_logic_or_with_bool_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -422,30 +319,23 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicOrBool.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicOrBool.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_or_with_bool_operand(self):
+        await self.set_up_contract('LogicOrBool.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, True], return_type=int)
+        self.assertEqual(True, bool(result))
 
-        invokes.append(runner.call_contract(path, 'Main', True, True))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', True, False))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', False, False))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [True, False], return_type=int)
+        self.assertEqual(True, bool(result))
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [False, False], return_type=int)
+        self.assertEqual(False, bool(result))
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
 
-    def test_logic_or_with_int_operand(self):
+    async def test_logic_or_with_int_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -456,71 +346,48 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicOrInt.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicOrInt.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_or_with_int_operand(self):
+        await self.set_up_contract('LogicOrInt.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [4, 6], return_type=int)
+        self.assertEqual(4 | 6, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 4, 6))
-        expected_results.append(4 | 6)
-        invokes.append(runner.call_contract(path, 'Main', 40, 6))
-        expected_results.append(40 | 6)
-        invokes.append(runner.call_contract(path, 'Main', -4, 32))
-        expected_results.append(-4 | 32)
+        result, _ = await self.call('Main', [40, 6], return_type=int)
+        self.assertEqual(40 | 6, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [-4, 32], return_type=int)
+        self.assertEqual(-4 | 32, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_logic_or_builtin_type(self):
+        await self.set_up_contract('LogicOrBuiltinType.py')
 
-    def test_logic_or_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('LogicOrBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [FindOptions.REMOVE_PREFIX, FindOptions.KEYS_ONLY], return_type=int)
+        self.assertEqual(int(FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY), result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [FindOptions.REMOVE_PREFIX, FindOptions.KEYS_ONLY], return_type=int)
+        self.assertEqual(FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY, result)
 
-        invokes.append(runner.call_contract(path, 'main', FindOptions.REMOVE_PREFIX, FindOptions.KEYS_ONLY,
-                                            expected_result_type=int))
-        expected_results.append(int(FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY))
+        result, _ = await self.call('main', [2, 4], return_type=int)
+        self.assertEqual(int(2 | 4), result)
 
-        invokes.append(runner.call_contract(path, 'main', FindOptions.REMOVE_PREFIX, FindOptions.KEYS_ONLY,
-                                            expected_result_type=FindOptions))
-        expected_results.append(FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY)
+        result, _ = await self.call('main', [0, 123456789], return_type=int)
+        self.assertEqual(123456789, result)
 
-        invokes.append(runner.call_contract(path, 'main', 2, 4,
-                                            expected_result_type=int))
-        expected_results.append(int(2 | 4))
+        result, _ = await self.call('main', [123456789, 0], return_type=int)
+        self.assertEqual(123456789, result)
 
-        invokes.append(runner.call_contract(path, 'main', 0, 123456789,
-                                            expected_result_type=int))
-        expected_results.append(123456789)
-
-        invokes.append(runner.call_contract(path, 'main', 123456789, 0,
-                                            expected_result_type=int))
-        expected_results.append(123456789)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mismatched_type_logic_or(self):
-        path = self.get_contract_path('MismatchedOperandLogicOr.py')
+    async def test_mismatched_type_logic_or(self):
+        path = self.get_contract_path('LogicMismatchedOperandLogicOr.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
     # region LogicXor
 
-    def test_logic_xor_with_bool_operand(self):
+    async def test_logic_xor_with_bool_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -531,30 +398,22 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicXorBool.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicXorBool.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_xor_with_bool_operand(self):
+        await self.set_up_contract('LogicXorBool.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, True], return_type=int)
+        self.assertEqual(False, bool(result))
 
-        invokes.append(runner.call_contract(path, 'Main', True, True))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', True, False))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', False, False))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [True, False], return_type=int)
+        self.assertEqual(True, bool(result))
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [False, False], return_type=int)
+        self.assertEqual(False, bool(result))
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_logic_xor_with_int_operand(self):
+    async def test_logic_xor_with_int_operand_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -565,144 +424,106 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicXorInt.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicXorInt.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_xor_with_int_operand(self):
+        await self.set_up_contract('LogicXorInt.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [4, 6], return_type=int)
+        self.assertEqual(4 ^ 6, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 4, 6))
-        expected_results.append(4 ^ 6)
-        invokes.append(runner.call_contract(path, 'Main', 40, 6))
-        expected_results.append(40 ^ 6)
-        invokes.append(runner.call_contract(path, 'Main', -4, 32))
-        expected_results.append(-4 ^ 32)
+        result, _ = await self.call('Main', [40, 6], return_type=int)
+        self.assertEqual(40 ^ 6, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [-4, 32], return_type=int)
+        self.assertEqual(-4 ^ 32, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_logic_xor_builtin_type(self):
+        await self.set_up_contract('LogicXorBuiltinType.py')
 
-    def test_logic_xor_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('LogicXorBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [FindOptions.NONE, FindOptions.DESERIALIZE_VALUES], return_type=int)
+        self.assertEqual(FindOptions.NONE ^ FindOptions.DESERIALIZE_VALUES, result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(FindOptions.NONE ^ FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mismatched_type_logic_xor(self):
-        path = self.get_contract_path('MismatchedOperandLogicXor.py')
+    async def test_mismatched_type_logic_xor(self):
+        path = self.get_contract_path('LogicMismatchedOperandLogicXor.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
 
     # region Mixed
 
-    def test_logic_augmented_assignment(self):
-        path, _ = self.get_deploy_file_paths('AugmentedAssignmentOperators.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_logic_augmented_assignment(self):
+        await self.set_up_contract('LogicAugmentedAssignmentOperators.py')
 
         a = 1
         b = 4
-        invokes.append(runner.call_contract(path, 'right_shift', a, b))
-        expected_results.append(a >> b)
+        result, _ = await self.call('right_shift', [a, b], return_type=int)
+        self.assertEqual(a >> b, result)
 
         a = 4
         b = 1
-        invokes.append(runner.call_contract(path, 'left_shift', a, b))
-        expected_results.append(a << b)
+        result, _ = await self.call('left_shift', [a, b], return_type=int)
+        self.assertEqual(a << b, result)
 
         a = 255
         b = 123
-        invokes.append(runner.call_contract(path, 'l_and', a, b))
-        expected_results.append(a & b)
+        result, _ = await self.call('l_and', [a, b], return_type=int)
+        self.assertEqual(a & b, result)
 
         a = 255
         b = 123
-        invokes.append(runner.call_contract(path, 'l_or', a, b))
-        expected_results.append(a | b)
+        result, _ = await self.call('l_or', [a, b], return_type=int)
+        self.assertEqual(a | b, result)
 
         a = 255
         b = 123
-        invokes.append(runner.call_contract(path, 'xor', a, b))
-        expected_results.append(a ^ b)
+        result, _ = await self.call('xor', [a, b], return_type=int)
+        self.assertEqual(a ^ b, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_logic_test(self):
+        await self.set_up_contract('LogicBinOpBoa2Test.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['&', 4, 4], return_type=int)
+        self.assertEqual(4, result)
 
-    def test_boa2_logic_test(self):
-        path, _ = self.get_deploy_file_paths('BinOpBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', ['|', 4, 3], return_type=int)
+        self.assertEqual(7, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['|', 4, 8], return_type=int)
+        self.assertEqual(12, result)
 
-        invokes.append(runner.call_contract(path, 'main', '&', 4, 4))
-        expected_results.append(4)
+        result, _ = await self.call('main', ['^', 4, 4], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', '|', 4, 3))
-        expected_results.append(7)
+        result, _ = await self.call('main', ['^', 4, 2], return_type=int)
+        self.assertEqual(6, result)
 
-        invokes.append(runner.call_contract(path, 'main', '|', 4, 8))
-        expected_results.append(12)
+        result, _ = await self.call('main', ['>>', 16, 2], return_type=int)
+        self.assertEqual(4, result)
 
-        invokes.append(runner.call_contract(path, 'main', '^', 4, 4))
-        expected_results.append(0)
+        result, _ = await self.call('main', ['>>', 16, 0], return_type=int)
+        self.assertEqual(16, result)
 
-        invokes.append(runner.call_contract(path, 'main', '^', 4, 2))
-        expected_results.append(6)
+        result, _ = await self.call('main', ['%', 16, 2], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', '>>', 16, 2))
-        expected_results.append(4)
+        result, _ = await self.call('main', ['%', 16, 11], return_type=int)
+        self.assertEqual(5, result)
 
-        invokes.append(runner.call_contract(path, 'main', '>>', 16, 0))
-        expected_results.append(16)
+        result, _ = await self.call('main', ['//', 16, 2], return_type=int)
+        self.assertEqual(8, result)
 
-        invokes.append(runner.call_contract(path, 'main', '%', 16, 2))
-        expected_results.append(0)
+        result, _ = await self.call('main', ['//', 16, 7], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', '%', 16, 11))
-        expected_results.append(5)
+        result, _ = await self.call('main', ['~', 16, 0], return_type=int)
+        self.assertEqual(-17, result)
 
-        invokes.append(runner.call_contract(path, 'main', '//', 16, 2))
-        expected_results.append(8)
+        result, _ = await self.call('main', ['~', -3, 0], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', '//', 16, 7))
-        expected_results.append(2)
-
-        invokes.append(runner.call_contract(path, 'main', '~', 16, 0))
-        expected_results.append(-17)
-
-        invokes.append(runner.call_contract(path, 'main', '~', -3, 0))
-        expected_results.append(2)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mixed_operations(self):
+    async def test_mixed_operations_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -716,52 +537,35 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MixedOperations.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicMixedOperations.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_mixed_operations(self):
+        await self.set_up_contract('LogicMixedOperations.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, False, False], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True, False, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', False, True, False))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', False, False, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', True, True, True))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [False, True, False], return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [False, False, False], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [True, True, True], return_type=bool)
+        self.assertEqual(False, result)
 
-    def test_logic_operation_with_return_and_stack_filled(self):
-        path, _ = self.get_deploy_file_paths('LogicOperationWithReturnAndStackFilled.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_logic_operation_with_return_and_stack_filled(self):
+        await self.set_up_contract('LogicOperationWithReturnAndStackFilled.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', return_type=bool)
+        self.assertEqual(True, result)
 
     # endregion
 
     # region RightShift
 
-    def test_logic_right_shift(self):
+    async def test_logic_right_shift_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -772,47 +576,28 @@ class TestLogical(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('LogicRightShift.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('LogicRightShift.py')
         self.assertEqual(expected_output, output)
+    async def test_logic_right_shift(self):
+        await self.set_up_contract('LogicRightShift.py')
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('Main', [int('10000', 2), 2], return_type=int)
+        self.assertEqual(int('100', 2), result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [int('110', 2), 1], return_type=int)
+        self.assertEqual(int('11', 2), result)
 
-        invokes.append(runner.call_contract(path, 'Main', int('10000', 2), 2))
-        expected_results.append(int('100', 2))
-        invokes.append(runner.call_contract(path, 'Main', int('110', 2), 1))
-        expected_results.append(int('11', 2))
-        invokes.append(runner.call_contract(path, 'Main', int('1010100000', 2), 4))
-        expected_results.append(int('101010', 2))
+        result, _ = await self.call('Main', [int('1010100000', 2), 4], return_type=int)
+        self.assertEqual(int('101010', 2), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_logic_right_shift_builtin_type(self):
+        await self.set_up_contract('LogicRightShiftBuiltinType.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.NONE, FindOptions.DESERIALIZE_VALUES], return_type=int)
+        self.assertEqual(FindOptions.NONE >> FindOptions.DESERIALIZE_VALUES, result)
 
-    def test_logic_right_shift_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('LogicRightShiftBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.NONE, FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(FindOptions.NONE >> FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mismatched_type_logic_right_shift(self):
-        path = self.get_contract_path('MismatchedOperandLogicRightShift.py')
+    async def test_mismatched_type_logic_right_shift(self):
+        path = self.get_contract_path('LogicMismatchedOperandLogicRightShift.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     # endregion
