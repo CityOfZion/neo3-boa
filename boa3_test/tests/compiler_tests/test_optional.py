@@ -15,7 +15,7 @@ class TestOptional(boatestcase.BoaTestCase):
         self.assertEqual(123, result)
 
         result, _ = await self.call('main', [3], return_type=None)
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('union_test', [1], return_type=str)
         self.assertEqual('str', result)
@@ -24,7 +24,7 @@ class TestOptional(boatestcase.BoaTestCase):
         self.assertEqual(123, result)
 
         result, _ = await self.call('union_test', [3], return_type=None)
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
     def test_optional_variable_reassign(self):
         expected_output = (
