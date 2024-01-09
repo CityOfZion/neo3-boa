@@ -1,39 +1,30 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestOptional(BoaTest):
+class TestOptional(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/optional_test'
 
-    def test_optional_return(self):
-        path, _ = self.get_deploy_file_paths('OptionalReturn.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_optional_return(self):
+        await self.set_up_contract('OptionalReturn.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [1], return_type=str)
+        self.assertEqual('str', result)
 
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append('str')
-        invokes.append(runner.call_contract(path, 'main', 2))
-        expected_results.append(123)
-        invokes.append(runner.call_contract(path, 'main', 3))
-        expected_results.append(None)
+        result, _ = await self.call('main', [2], return_type=int)
+        self.assertEqual(123, result)
 
-        invokes.append(runner.call_contract(path, 'union_test', 1))
-        expected_results.append('str')
-        invokes.append(runner.call_contract(path, 'union_test', 2))
-        expected_results.append(123)
-        invokes.append(runner.call_contract(path, 'union_test', 3))
-        expected_results.append(None)
+        result, _ = await self.call('main', [3], return_type=None)
+        self.assertEqual(None, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('union_test', [1], return_type=str)
+        self.assertEqual('str', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('union_test', [2], return_type=int)
+        self.assertEqual(123, result)
+
+        result, _ = await self.call('union_test', [3], return_type=None)
+        self.assertEqual(None, result)
 
     def test_optional_variable_reassign(self):
         expected_output = (
@@ -51,65 +42,52 @@ class TestOptional(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('OptionalVariableReassign.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('OptionalVariableReassign')
         self.assertEqual(expected_output, output)
 
-    def test_optional_variable_argument(self):
-        path, _ = self.get_deploy_file_paths('OptionalVariableArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_optional_variable_argument(self):
+        await self.set_up_contract('OptionalVariableArgument.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['unittest'], return_type=str)
+        self.assertEqual('string', result)
 
-        invokes.append(runner.call_contract(path, 'main', 'unittest'))
-        expected_results.append('string')
-        invokes.append(runner.call_contract(path, 'main', 123))
-        expected_results.append('int')
-        invokes.append(runner.call_contract(path, 'main', None))
-        expected_results.append('None')
+        result, _ = await self.call('main', [123], return_type=str)
+        self.assertEqual('int', result)
 
-        invokes.append(runner.call_contract(path, 'union_test', 'unittest'))
-        expected_results.append('string')
-        invokes.append(runner.call_contract(path, 'union_test', 123))
-        expected_results.append('int')
-        invokes.append(runner.call_contract(path, 'union_test', None))
-        expected_results.append('None')
+        result, _ = await self.call('main', [None], return_type=str)
+        self.assertEqual('None', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('union_test', ['unittest'], return_type=str)
+        self.assertEqual('string', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('union_test', [123], return_type=str)
+        self.assertEqual('int', result)
 
-    def test_optional_isinstance_validation(self):
-        path, _ = self.get_deploy_file_paths('OptionalIsInstanceValidation.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('union_test', [None], return_type=str)
+        self.assertEqual('None', result)
 
-        invokes = []
-        expected_results = []
+    async def test_optional_isinstance_validation(self):
+        await self.set_up_contract('OptionalIsInstanceValidation.py')
 
-        invokes.append(runner.call_contract(path, 'main', 'unittest'))
-        expected_results.append('unittest')
-        invokes.append(runner.call_contract(path, 'main', 123))
-        expected_results.append('int')
-        invokes.append(runner.call_contract(path, 'main', None))
-        expected_results.append('None')
+        result, _ = await self.call('main', ['unittest'], return_type=str)
+        self.assertEqual('unittest', result)
 
-        invokes.append(runner.call_contract(path, 'union_test', 'unittest'))
-        expected_results.append('unittest')
-        invokes.append(runner.call_contract(path, 'union_test', 123))
-        expected_results.append('int')
-        invokes.append(runner.call_contract(path, 'union_test', None))
-        expected_results.append('None')
+        result, _ = await self.call('main', [123], return_type=str)
+        self.assertEqual('int', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [None], return_type=str)
+        self.assertEqual('None', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('union_test', ['unittest'], return_type=str)
+        self.assertEqual('unittest', result)
 
-    def test_optional_inside_dict(self):
+        result, _ = await self.call('union_test', [123], return_type=str)
+        self.assertEqual('int', result)
+
+        result, _ = await self.call('union_test', [None], return_type=str)
+        self.assertEqual('None', result)
+
+    def test_optional_inside_dict_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -118,21 +96,11 @@ class TestOptional(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('OptionalArgumentInsideDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('OptionalArgumentInsideDict.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_optional_inside_dict(self):
+        await self.set_up_contract('OptionalArgumentInsideDict.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', {}))
-        expected_results.append({})
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [{}], return_type=dict)
+        self.assertEqual({}, result)
