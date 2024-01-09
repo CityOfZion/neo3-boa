@@ -201,14 +201,14 @@
 
 ### If, elif, else statements
 
-- <a href="/boa3_test/test_sc/if_test/ConstantCondition.py">ConstantCondition.py</a>, 
+- <a href="/boa3_test/test_sc/if_test/IfConstantCondition.py">IfConstantCondition.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/IfElif.py">IfElif.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/IfElse.py">IfElse.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/IfExpVariableCondition.py">IfExpVariableCondition.py</a>, 
-- <a href="/boa3_test/test_sc/if_test/MultipleBranches.py">MultipleBranches.py</a>, 
+- <a href="/boa3_test/test_sc/if_test/IfMultipleBranches.py">IfMultipleBranches.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/NestedIf.py">NestedIf.py</a>, 
-- <a href="/boa3_test/test_sc/if_test/RelationalCondition.py">RelationalCondition.py</a>, 
-- <a href="/boa3_test/test_sc/if_test/VariableCondition.py">VariableCondition.py</a>
+- <a href="/boa3_test/test_sc/if_test/IfRelationalCondition.py">IfRelationalCondition.py</a>, 
+- <a href="/boa3_test/test_sc/if_test/IfVariableCondition.py">IfVariableCondition.py</a>
 
 ### Import
 
