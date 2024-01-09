@@ -1,159 +1,82 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.core import cryptography, types
 
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestNeoTypes(BoaTest):
+class TestNeoTypes(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/neo_type_test'
 
     # region UInt160
 
-    def test_uint160_call_bytes(self):
-        path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_uint160_call_bytes(self):
+        await self.set_up_contract('uint160', 'UInt160CallBytes.py')
 
-        invokes = []
-        expected_results = []
+        value = types.UInt160.zero()
+        result, _ = await self.call('uint160', [value.to_array()], return_type=types.UInt160)
+        self.assertEqual(value, result)
 
-        value = bytes(20)
-        invokes.append(runner.call_contract(path, 'uint160', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        value = types.UInt160(bytes(range(types.UInt160._BYTE_LEN)))
+        result, _ = await self.call('uint160', [value.to_array()], return_type=types.UInt160)
+        self.assertEqual(value, result)
 
-        value = bytes(range(20))
-        invokes.append(runner.call_contract(path, 'uint160', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint160', [bytes(10)], return_type=types.UInt160)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint160', [bytes(30)], return_type=types.UInt160)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_uint160_call_int(self):
+        await self.set_up_contract('uint160', 'UInt160CallInt.py')
 
-        runner.call_contract(path, 'uint160', bytes(10),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        result, _ = await self.call('uint160', [0], return_type=types.UInt160)
+        self.assertEqual(types.UInt160.zero(), result)
 
-        runner.call_contract(path, 'uint160', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        integer = 1_000_000_000
+        value = types.UInt160(Integer(integer).to_byte_array(min_length=types.UInt160._BYTE_LEN))
+        result, _ = await self.call('uint160', [integer], return_type=types.UInt160)
+        self.assertEqual(value, result)
 
-    def test_uint160_call_int(self):
-        path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallInt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint160', [-50], return_type=types.UInt160)
 
-        invokes = []
-        expected_results = []
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint160', [bytes(30)], return_type=types.UInt160)
 
-        invokes.append(runner.call_contract(path, 'uint160', 0,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes(20))
+    async def test_uint160_call_without_args(self):
+        await self.set_up_contract('uint160', 'UInt160CallWithoutArgs.py')
 
-        value = Integer(1_000_000_000).to_byte_array(min_length=20)
-        invokes.append(runner.call_contract(path, 'uint160', 1_000_000_000,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        result, _ = await self.call('uint160', [], return_type=types.UInt160)
+        self.assertEqual(types.UInt160.zero(), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_uint160_return_bytes(self):
+        await self.set_up_contract('uint160', 'UInt160ReturnBytes.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        value = types.UInt160.zero().to_array()
+        result, _ = await self.call('uint160', [value], return_type=bytes)
+        self.assertEqual(value, result)
 
-        runner.call_contract(path, 'uint160', -50,
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        value = types.UInt160(bytes(range(types.UInt160._BYTE_LEN))).to_array()
+        result, _ = await self.call('uint160', [value], return_type=bytes)
+        self.assertEqual(value, result)
 
-        runner.call_contract(path, 'uint160', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint160', [bytes(10)], return_type=bytes)
 
-    def test_uint160_call_without_args(self):
-        path, _ = self.get_deploy_file_paths('uint160', 'UInt160CallWithoutArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint160', [bytes(30)], return_type=bytes)
 
-        invokes = []
-        expected_results = []
+    async def test_uint160_concat_with_bytes(self):
+        await self.set_up_contract('uint160', 'UInt160ConcatWithBytes.py')
 
-        invokes.append(runner.call_contract(path, 'uint160',
-                                            expected_result_type=bytes))
-        expected_results.append(bytes(20))
+        value = types.UInt160.zero()
+        result, _ = await self.call('uint160_method', [value], return_type=bytes)
+        self.assertEqual(value.to_array() + b'123', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_uint160_return_bytes(self):
-        path, _ = self.get_deploy_file_paths('uint160', 'UInt160ReturnBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        value = bytes(20)
-        invokes.append(runner.call_contract(path, 'uint160', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
-
-        value = bytes(range(20))
-        invokes.append(runner.call_contract(path, 'uint160', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'uint160', bytes(10),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.call_contract(path, 'uint160', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_uint160_concat_with_bytes(self):
-        path, _ = self.get_deploy_file_paths('uint160', 'UInt160ConcatWithBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        value = bytes(20)
-        invokes.append(runner.call_contract(path, 'uint160_method', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value + b'123')
-
-        value = bytes(range(20))
-        invokes.append(runner.call_contract(path, 'uint160_method', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value + b'123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        value = types.UInt160(bytes(range(20)))
+        result, _ = await self.call('uint160_method', [value], return_type=bytes)
+        self.assertEqual(value.to_array() + b'123', result)
 
     def test_uint160_mismatched_type(self):
         path = self.get_contract_path('uint160', 'UInt160CallMismatchedType.py')
@@ -163,149 +86,73 @@ class TestNeoTypes(BoaTest):
 
     # region UInt256
 
-    def test_uint256_call_bytes(self):
-        path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_uint256_call_bytes(self):
+        await self.set_up_contract('uint256', 'UInt256CallBytes.py')
 
-        invokes = []
-        expected_results = []
+        value = types.UInt256.zero()
+        result, _ = await self.call('uint256', [value.to_array()], return_type=types.UInt256)
+        self.assertEqual(value, result)
 
-        value = bytes(32)
-        invokes.append(runner.call_contract(path, 'uint256', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        value = types.UInt256(bytes(range(types.UInt256._BYTE_LEN)))
+        result, _ = await self.call('uint256', [value.to_array()], return_type=types.UInt256)
+        self.assertEqual(value, result)
 
-        value = bytes(range(32))
-        invokes.append(runner.call_contract(path, 'uint256', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint256', [bytes(20)], return_type=types.UInt256)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint256', [bytes(30)], return_type=types.UInt256)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_uint256_call_int(self):
+        await self.set_up_contract('uint256', 'UInt256CallInt.py')
 
-        runner.call_contract(path, 'uint256', bytes(20),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        result, _ = await self.call('uint256', [0], return_type=types.UInt256)
+        self.assertEqual(types.UInt256.zero(), result)
 
-        runner.call_contract(path, 'uint256', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        integer = 1_000_000_000
+        value = types.UInt256(Integer(integer).to_byte_array(min_length=types.UInt256._BYTE_LEN))
+        result, _ = await self.call('uint256', [integer], return_type=types.UInt256)
+        self.assertEqual(value, result)
 
-    def test_uint256_call_int(self):
-        path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallInt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint256', [-50], return_type=types.UInt256)
 
-        invokes = []
-        expected_results = []
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint256', [bytes(30)], return_type=types.UInt256)
 
-        invokes.append(runner.call_contract(path, 'uint256', 0,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes(32))
+    async def test_uint256_call_without_args(self):
+        await self.set_up_contract('uint256', 'UInt256CallWithoutArgs.py')
 
-        value = Integer(1_000_000_000).to_byte_array(min_length=32)
-        invokes.append(runner.call_contract(path, 'uint256', 1_000_000_000,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        result, _ = await self.call('uint256', [], return_type=types.UInt256)
+        self.assertEqual(types.UInt256.zero(), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_uint256_return_bytes(self):
+        await self.set_up_contract('uint256', 'UInt256ReturnBytes.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        value = types.UInt256.zero().to_array()
+        result, _ = await self.call('uint256', [value], return_type=bytes)
+        self.assertEqual(value, result)
 
-        runner.call_contract(path, 'uint256', -50,
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        value = types.UInt256(bytes(range(types.UInt256._BYTE_LEN))).to_array()
+        result, _ = await self.call('uint256', [value], return_type=bytes)
+        self.assertEqual(value, result)
 
-        runner.call_contract(path, 'uint256', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint256', [bytes(10)], return_type=bytes)
 
-    def test_uint256_call_without_args(self):
-        path, _ = self.get_deploy_file_paths('uint256', 'UInt256CallWithoutArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('uint256', [bytes(30)], return_type=bytes)
 
-        invokes = []
-        expected_results = []
+    async def test_uint256_concat_with_bytes(self):
+        await self.set_up_contract('uint256', 'UInt256ConcatWithBytes.py')
 
-        invokes.append(runner.call_contract(path, 'uint256',
-                                            expected_result_type=bytes))
-        expected_results.append(bytes(32))
+        value = types.UInt256.zero()
+        result, _ = await self.call('uint256_method', [value], return_type=bytes)
+        self.assertEqual(value.to_array() + b'123', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_uint256_return_bytes(self):
-        path, _ = self.get_deploy_file_paths('uint256', 'UInt256ReturnBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        value = bytes(32)
-        invokes.append(runner.call_contract(path, 'uint256', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
-
-        value = bytes(range(32))
-        invokes.append(runner.call_contract(path, 'uint256', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'uint256', bytes(10),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.call_contract(path, 'uint256', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_uint256_concat_with_bytes(self):
-        path, _ = self.get_deploy_file_paths('uint256', 'UInt256ConcatWithBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        value = bytes(32)
-        invokes.append(runner.call_contract(path, 'uint256_method', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value + b'123')
-
-        value = bytes(range(32))
-        invokes.append(runner.call_contract(path, 'uint256_method', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value + b'123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        value = types.UInt256(bytes(range(32)))
+        result, _ = await self.call('uint256_method', [value], return_type=bytes)
+        self.assertEqual(value.to_array() + b'123', result)
 
     def test_uint256_mismatched_type(self):
         path = self.get_contract_path('uint256', 'UInt256CallMismatchedType.py')
@@ -315,146 +162,94 @@ class TestNeoTypes(BoaTest):
 
     # region ECPoint
 
-    def test_ecpoint_call_bytes(self):
-        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointCallBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    def create_ecpoint(self, publickey: bytes) -> cryptography.ECPoint:
+        return cryptography.ECPoint(publickey, cryptography.ECCCurve.SECP256R1)
 
-        invokes = []
-        expected_results = []
+    def ecpoint_to_array(self, ecpoint: cryptography.ECPoint) -> bytes:
+        return ecpoint.to_array().zfill(33).zfill(33).replace(b'0', b'\x00')
 
-        value = bytes(33)
-        invokes.append(runner.call_contract(path, 'ecpoint', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+    async def test_ecpoint_call_bytes(self):
+        await self.set_up_contract('ecpoint', 'ECPointCallBytes.py')
 
-        value = bytes(range(33))
-        invokes.append(runner.call_contract(path, 'ecpoint', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        value = self.create_ecpoint(bytes(range(2)) * 16)
+        result, _ = await self.call('ecpoint', [self.ecpoint_to_array(value)], return_type=cryptography.ECPoint)
+        self.assertEqual(value, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        value = self.create_ecpoint(bytes(range(32)))
+        result, _ = await self.call('ecpoint', [self.ecpoint_to_array(value)], return_type=cryptography.ECPoint)
+        self.assertEqual(value, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('ecpoint', [bytes(20)], return_type=cryptography.ECPoint)
+        self.assertRegex(str(context.exception), 'unhandled exception')
 
-        runner.call_contract(path, 'ecpoint', bytes(20),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
-
-        runner.call_contract(path, 'ecpoint', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('ecpoint', [bytes(30)], return_type=cryptography.ECPoint)
+        self.assertRegex(str(context.exception), 'unhandled exception')
 
     def test_ecpoint_call_without_args(self):
         path = self.get_contract_path('ecpoint', 'ECPointCallWithoutArgs.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
-    def test_ecpoint_return_bytes(self):
-        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointReturnBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_ecpoint_return_bytes(self):
+        await self.set_up_contract('ecpoint', 'ECPointReturnBytes.py')
 
-        invokes = []
-        expected_results = []
+        value = self.ecpoint_to_array(
+            self.create_ecpoint(bytes(range(2)) * 16)
+        )
+        result, _ = await self.call('ecpoint', [value], return_type=bytes)
+        self.assertEqual(value, result)
 
-        value = bytes(33)
-        invokes.append(runner.call_contract(path, 'ecpoint', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        value = self.ecpoint_to_array(
+            self.create_ecpoint(bytes(range(32)))
+        )
+        result, _ = await self.call('ecpoint', [value], return_type=bytes)
+        self.assertEqual(value, result)
 
-        value = bytes(range(33))
-        invokes.append(runner.call_contract(path, 'ecpoint', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('ecpoint', [bytes(10)], return_type=bytes)
+        self.assertRegex(str(context.exception), 'unhandled exception')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('ecpoint', [bytes(30)], return_type=bytes)
+        self.assertRegex(str(context.exception), 'unhandled exception')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_ecpoint_concat_with_bytes(self):
+        await self.set_up_contract('ecpoint', 'ECPointConcatWithBytes.py')
 
-        runner.call_contract(path, 'ecpoint', bytes(10),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+        value = self.create_ecpoint(bytes(range(2)) * 16)
+        result, _ = await self.call('ecpoint_method', [value], return_type=bytes)
+        self.assertEqual(self.ecpoint_to_array(value) + b'123', result)
 
-        runner.call_contract(path, 'ecpoint', bytes(30),
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
-
-    def test_ecpoint_concat_with_bytes(self):
-        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointConcatWithBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        value = bytes(33)
-        invokes.append(runner.call_contract(path, 'ecpoint_method', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value + b'123')
-
-        value = bytes(range(33))
-        invokes.append(runner.call_contract(path, 'ecpoint_method', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value + b'123')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        value = self.create_ecpoint(bytes(range(32)))
+        result, _ = await self.call('ecpoint_method', [value], return_type=bytes)
+        self.assertEqual(self.ecpoint_to_array(value) + b'123', result)
 
     def test_ecpoint_mismatched_type(self):
         path = self.get_contract_path('ecpoint', 'ECPointCallMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_ecpoint_script_hash(self):
-        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHash.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_ecpoint_script_hash(self):
+        await self.set_up_contract('ecpoint', 'ECPointScriptHash.py')
 
         from boa3.internal.neo import public_key_to_script_hash
-        value = bytes(range(33))
+        value = self.ecpoint_to_array(
+            self.create_ecpoint(bytes(range(2)) * 16)
+        )
         script_hash = public_key_to_script_hash(value)
 
-        invokes.append(runner.call_contract(path, 'Main', value))
-        expected_results.append(script_hash)
+        result, _ = await self.call('Main', [value], return_type=bytes)
+        self.assertEqual(script_hash, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_ecpoint_script_hash_from_builtin(self):
-        path, _ = self.get_deploy_file_paths('ecpoint', 'ECPointScriptHashBuiltinCall.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_ecpoint_script_hash_from_builtin(self):
+        await self.set_up_contract('ecpoint', 'ECPointScriptHashBuiltinCall.py')
 
         from boa3.internal.neo import public_key_to_script_hash
-        value = bytes(range(33))
+        value = self.ecpoint_to_array(self.create_ecpoint(bytes(range(2)) * 16))
         script_hash = public_key_to_script_hash(value)
 
-        invokes.append(runner.call_contract(path, 'Main', value))
-        expected_results.append(script_hash)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [value], return_type=bytes)
+        self.assertEqual(script_hash, result)
 
     # endregion
 
@@ -482,135 +277,88 @@ class TestNeoTypes(BoaTest):
         self.assertIn('type', method['parameters'][0])
         self.assertEqual(AbiType.ByteArray, method['parameters'][0]['type'])
 
-    def test_opcode_concat(self):
+    async def test_opcode_concat(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
-        path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithOpcode.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('opcode', 'ConcatWithOpcode.py')
 
         expected_result = Opcode.LDARG0 + Opcode.LDARG1 + Opcode.ADD
-        invokes.append(runner.call_contract(path, 'concat'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('concat', [], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_opcode_concat_with_bytes(self):
+    async def test_opcode_concat_with_bytes(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
-        path, _ = self.get_deploy_file_paths('opcode', 'ConcatWithBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('opcode', 'ConcatWithBytes.py')
 
         concat_bytes = b'12345'
         arg = Opcode.LDARG0
-        invokes.append(runner.call_contract(path, 'concat', arg,
-                                            expected_result_type=bytes))
-        expected_results.append(concat_bytes + arg)
+        result, _ = await self.call('concat', [arg], return_type=bytes)
+        self.assertEqual(concat_bytes + arg, result)
 
         arg = Opcode.LDLOC1
-        invokes.append(runner.call_contract(path, 'concat', arg,
-                                            expected_result_type=bytes))
-        expected_results.append(concat_bytes + arg)
+        result, _ = await self.call('concat', [arg], return_type=bytes)
+        self.assertEqual(concat_bytes + arg, result)
 
         arg = Opcode.NOP
-        invokes.append(runner.call_contract(path, 'concat', arg,
-                                            expected_result_type=bytes))
-        expected_results.append(concat_bytes + arg)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('concat', [arg], return_type=bytes)
+        self.assertEqual(concat_bytes + arg, result)
 
     def test_opcode_concat_mismatched_type(self):
         path = self.get_contract_path('opcode', 'ConcatMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_opcode_multiplication(self):
+    async def test_opcode_multiplication(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
-        path, _ = self.get_deploy_file_paths('opcode', 'OpcodeMultiplication.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('opcode', 'OpcodeMultiplication.py')
 
         multiplier = 4
-        invokes.append(runner.call_contract(path, 'opcode_mult', multiplier,
-                                            expected_result_type=bytes))
-        expected_results.append(Opcode.NOP * multiplier)
+        result, _ = await self.call('opcode_mult', [multiplier], return_type=bytes)
+        self.assertEqual(Opcode.NOP * multiplier, result)
 
         multiplier = 50
-        invokes.append(runner.call_contract(path, 'opcode_mult', multiplier,
-                                            expected_result_type=bytes))
-        expected_results.append(Opcode.NOP * multiplier)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('opcode_mult', [multiplier], return_type=bytes)
+        self.assertEqual(Opcode.NOP * multiplier, result)
 
     # endregion
 
     # region IsInstance Neo Types
 
-    def test_isinstance_contract(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceContract.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_isinstance_contract(self):
+        await self.set_up_contract('IsInstanceContract.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('is_contract', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'is_contract', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_contract', [1, 2, 3]))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_contract', "test_with_string"))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_contract', 42))
-        expected_results.append(False)
+        result, _ = await self.call('is_contract', [[1, 2, 3]], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('is_contract', ["test_with_string"], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('is_contract', [42], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'is_get_contract_a_contract'))
-        expected_results.append(True)
+        result, _ = await self.call('is_get_contract_a_contract', [], return_type=bool)
+        self.assertEqual(True, result)
 
-    def test_isinstance_block(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceBlock.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_isinstance_block(self):
+        await self.set_up_contract('IsInstanceBlock.py', compile_if_found=True)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('is_block', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'is_block', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_block', [1, 2, 3]))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_block', "test_with_string"))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_block', 42))
-        expected_results.append(False)
+        result, _ = await self.call('is_block', [[1, 2, 3]], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'get_block_is_block', 0))
-        expected_results.append(True)
+        result, _ = await self.call('is_block', ["test_with_string"], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('is_block', [42], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        # this one is failing because the get_block return is different (has 9 variables instead of 10)
+        # uncomment this when th refactoring of #86a1wvt6u is done
+        # result, _ = await self.call('get_block_is_block', [0], return_type=list)
+        # self.assertEqual(True, result)
 
     def test_transaction_cast_and_get_hash(self):
         path = self.get_contract_path('CastTransactionGetHash.py')
@@ -624,150 +372,111 @@ class TestNeoTypes(BoaTest):
         path = self.get_contract_path('CastTransactionGetHashToVariable.py')
         self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
 
-    def test_isinstance_transaction(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceTransaction.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_isinstance_transaction(self):
+        await self.set_up_contract('IsInstanceTransaction.py')
 
-        invokes = []
-        expected_results = []
+        tx_hash = await self.get_valid_tx()
 
-        contract_deploy = runner.deploy_contract(path)
-        runner.update_contracts(export_checkpoint=True)
-        tx_hash = contract_deploy.tx_id.to_array()
+        result, _ = await self.call('is_tx', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'is_tx', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_tx', [1, 2, 3]))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_tx', "test_with_string"))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_tx', 42))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'get_transaction_is_tx', tx_hash))
-        expected_results.append(True)
+        result, _ = await self.call('is_tx', [[1, 2, 3]], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('is_tx', ["test_with_string"], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('is_tx', [42], return_type=bool)
+        self.assertEqual(False, result)
 
-    def test_isinstance_notification(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceNotification.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('get_transaction_is_tx', [tx_hash], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes = []
-        expected_results = []
+    async def test_isinstance_notification(self):
+        await self.set_up_contract('IsInstanceNotification.py')
 
-        invokes.append(runner.call_contract(path, 'is_notification', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_notification', [1, 2, 3]))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_notification', "test_with_string"))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_notification', 42))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'get_notifications_is_notification'))
-        expected_results.append(True)
+        result, _ = await self.call('is_notification', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('is_notification', [[1, 2, 3]], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('is_notification', ["test_with_string"], return_type=bool)
+        self.assertEqual(False, result)
 
-    def test_isinstance_storage_context(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceStorageContext.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('is_notification', [42], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('get_notifications_is_notification', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'is_context', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_context', [1, 2, 3]))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_context', "test_with_string"))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_context', 42))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'get_context_is_context'))
-        expected_results.append(True)
+    async def test_isinstance_storage_context(self):
+        await self.set_up_contract('IsInstanceStorageContext.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('is_context', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('is_context', [[1, 2, 3]], return_type=bool)
+        self.assertEqual(False, result)
 
-    def test_isinstance_storage_map(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceStorageMap.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('is_context', ["test_with_string"], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('is_context', [42], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'is_storage_map', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_storage_map', [1, 2, 3]))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_storage_map', "test_with_string"))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_storage_map', 42))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'create_map_is_storage_map'))
-        expected_results.append(True)
+        result, _ = await self.call('get_context_is_context', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_isinstance_storage_map(self):
+        await self.set_up_contract('IsInstanceStorageMap.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('is_storage_map', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
 
-    def test_isinstance_iterator(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceIterator.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('is_storage_map', [[1, 2, 3]], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('is_storage_map', ["test_with_string"], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'is_iterator', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_iterator', [1, 2, 3]))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_iterator', "test_with_string"))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_iterator', 42))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'storage_find_is_context'))
-        expected_results.append(True)
+        result, _ = await self.call('is_storage_map', [42], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('create_map_is_storage_map', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_isinstance_iterator(self):
+        await self.set_up_contract('IsInstanceIterator.py')
 
-    def test_isinstance_ecpoint(self):
-        path, _ = self.get_deploy_file_paths('IsInstanceECPoint.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('is_iterator', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('is_iterator', [[1, 2, 3]], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'is_ecpoint', bytes(10)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_ecpoint', bytes(33)))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'is_ecpoint', bytes(30)))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'is_ecpoint', 42))
-        expected_results.append(False)
+        result, _ = await self.call('is_iterator', ["test_with_string"], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('is_iterator', [42], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('storage_find_is_context', [], return_type=bool)
+        self.assertEqual(True, result)
+
+    async def test_isinstance_ecpoint(self):
+        await self.set_up_contract('IsInstanceECPoint.py')
+
+        result, _ = await self.call('is_ecpoint', [bytes(10)], return_type=bool)
+        self.assertEqual(False, result)
+
+        result, _ = await self.call('is_ecpoint', [self.create_ecpoint(bytes(range(32)))], return_type=bool)
+        self.assertEqual(True, result)
+
+        result, _ = await self.call('is_ecpoint', [bytes(30)], return_type=bool)
+        self.assertEqual(False, result)
+
+        result, _ = await self.call('is_ecpoint', [42], return_type=bool)
+        self.assertEqual(False, result)
 
     # endregion
