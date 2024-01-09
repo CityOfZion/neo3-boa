@@ -119,7 +119,7 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('logical_test', 'MultipleExpressionsInLine.py')
+        path = self.get_contract_path('logical_test', 'LogicMultipleExpressionsInLine.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
