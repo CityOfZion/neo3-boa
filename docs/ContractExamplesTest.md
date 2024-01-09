@@ -114,12 +114,12 @@
 
 ### Boolean logic operations
 
-- <a href="/boa3_test/test_sc/logical_test/BoolAnd.py">BoolAnd.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/BoolNot.py">BoolNot.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/BoolOr.py">BoolOr.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/BoolOrThreeElements.py">BoolOrThreeElements.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/MixedOperations.py">MixedOperations.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolAnd.py">LogicBoolAnd.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolNot.py">LogicBoolNot.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolOr.py">LogicBoolOr.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolOrThreeElements.py">LogicBoolOrThreeElements.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicMixedOperations.py">LogicMixedOperations.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicMultipleExpressionsInLine.py">LogicMultipleExpressionsInLine.py</a>
 
 ### Built in function
 
@@ -522,7 +522,7 @@
 - <a href="/boa3_test/test_sc/relational_test/MixedIdentity.py">MixedIdentity.py</a>
 
 #### Bitwise augmented assignment operators
-- <a href="/boa3_test/test_sc/logical_test/AugmentedAssignmentOperators.py">AugmentedAssignmentOperators.py</a>
+- <a href="/boa3_test/test_sc/logical_test/LogicAugmentedAssignmentOperators.py">LogicAugmentedAssignmentOperators.py</a>
 
 #### Built in function
 - <a href="/boa3_test/test_sc/reversed_test/ReversedBytes.py">ReversedBytes.py</a>,
