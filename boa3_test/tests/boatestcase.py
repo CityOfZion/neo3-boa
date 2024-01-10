@@ -47,6 +47,10 @@ class BoaTestCase(SmartContractTestCase):
         super().__init__(*args, **kwargs)
         self._use_custom_name = USE_UNIQUE_NAME
 
+    # TODO: Remove method after unit test refactoring is done
+    def method_name(self) -> str:
+        return self._testMethodName if hasattr(self, '_testMethodName') else self.id()
+
     @classmethod
     def setUpClass(cls):
         folders = os.path.abspath(__file__).split(os.sep)
