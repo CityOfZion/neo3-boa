@@ -195,9 +195,10 @@ class BoaTestCase(SmartContractTestCase):
         return result
 
     @classmethod
-    async def get_valid_tx(cls) -> types.UInt256:
+    async def get_valid_tx(cls) -> types.UInt256 | None:
         """
-        Must be called after set_up_contract to ensure a valid response
+        Must be called after set_up_contract to ensure a valid response.
+        If called before, it may not be able to find a valid tx.
         """
         block_ = None
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
