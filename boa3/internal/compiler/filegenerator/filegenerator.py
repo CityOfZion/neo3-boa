@@ -189,7 +189,14 @@ class FileGenerator:
             events = set()
             for imported in self._all_imports:
                 events.update([event for event in imported.all_symbols.values() if isinstance(event, Event)])
-            events.update([event for event in self._symbols.values() if isinstance(event, Event)])
+
+            for symbol in self._symbols.values():
+                if isinstance(symbol, Event):
+                    events.add(symbol)
+                elif isinstance(symbol, Package):
+                    for package_symbol in symbol.symbols.values():
+                        if isinstance(package_symbol, Event):
+                            events.add(package_symbol)
 
             self._inner_events = {event.name: event for event in events}
         return self._inner_events
