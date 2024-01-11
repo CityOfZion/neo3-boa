@@ -7,12 +7,13 @@ import asyncio
 import logging
 import os
 import threading
-from typing import Any
+from typing import Any, Optional, TypeVar, Type, Sequence
 
 from boaconstructor import SmartContractTestCase
 from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
 from neo3.core import types
+from neo3.network.payloads.verification import Signer
 from neo3.wallet import account
 
 from boa3.internal import env, constants
@@ -23,6 +24,8 @@ from boa3_test.tests.boa_test import (USE_UNIQUE_NAME,  # move theses to this mo
                                       _LOGGING_LOCK)
 
 # type annotations
+T = TypeVar("T")
+
 JsonToken = int | str | bool | None | list['JsonToken'] | dict[str, 'JsonToken']
 JsonObject = dict[str, JsonToken]
 ContractScript = bytes
@@ -140,6 +143,42 @@ class BoaTestCase(SmartContractTestCase):
 
         return await cls.deploy(nef_abs_path, signing_account)
 
+    @classmethod
+    async def call(
+            cls,
+            method: str,
+            args: Optional[list] = None,
+            *,
+            return_type: Type[T],
+            signing_accounts: Optional[Sequence[account.Account]] = None,
+            signers: Optional[Sequence[Signer]] = None,
+            target_contract: Optional[types.UInt160] = None,
+    ) -> tuple[T, list[noderpc.Notification]]:
+
+        # dict arguments are being pushed to the stack reversed
+        args = args.copy()
+        for index, arg in enumerate(args):
+            if isinstance(arg, dict):
+                args[index] = cls._handle_dict_arg(arg)
+
+        return await super().call(method,
+                                  args,
+                                  return_type=return_type,
+                                  signing_accounts=signing_accounts,
+                                  signers=signers,
+                                  target_contract=target_contract,
+                                  )
+
+    @classmethod
+    def _handle_dict_arg(cls, arg: dict) -> dict:
+        # don't change the original obj
+        aux = {}
+        for key, item in reversed(arg.items()):
+            if isinstance(item, dict):
+                item = cls._handle_dict_arg(item)
+            aux[key] = item
+        return aux
+
     def unwrap_inner_values(self, value: list | dict):
         if isinstance(value, list):
             for index, item in enumerate(value):
@@ -154,6 +193,13 @@ class BoaTestCase(SmartContractTestCase):
             for key, item in aux.items():
                 dict_key = key if not isinstance(key, noderpc.StackItem) else self._unwrap_stack_item(key)
                 dict_item = item if not isinstance(item, noderpc.StackItem) else self._unwrap_stack_item(item)
+                if isinstance(dict_item, list):
+                    if dict_item and isinstance(dict_item[0], tuple):
+                        dict_item = self._unwrap_stack_item(
+                            noderpc.MapStackItem(noderpc.StackItemType.MAP, dict_item)
+                        )
+                    else:
+                        self.unwrap_inner_values(dict_item)
 
                 value[dict_key] = dict_item
 
