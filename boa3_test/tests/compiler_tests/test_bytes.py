@@ -1,10 +1,9 @@
-from boa3_test.tests import boatestcase
-
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo3.vm import VMState
+from boa3_test.tests import boatestcase
 from boa3_test.tests.boatestcase import FaultException
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
@@ -446,42 +445,7 @@ class TestBytes(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [b'0'], return_type=int)
         self.assertEqual(48, result)
 
-    # def test_byte_array_set_value_compile(self):
-    #     expected_output = (
-    #         Opcode.INITSLOT     # function signature
-    #         + b'\x01'
-    #         + b'\x01'
-    #         + Opcode.LDARG0
-    #         + Opcode.CONVERT + StackItemType.Buffer
-    #         + Opcode.STLOC0
-    #         + Opcode.LDLOC0     # var[0] = 0x01
-    #         + Opcode.PUSH0
-    #         + Opcode.DUP
-    #         + Opcode.SIGN
-    #         + Opcode.PUSHM1
-    #         + Opcode.JMPNE
-    #         + Integer(5).to_byte_array(min_length=1, signed=True)
-    #         + Opcode.OVER
-    #         + Opcode.SIZE
-    #         + Opcode.ADD
-    #         + Opcode.PUSH1
-    #         + Opcode.SETITEM
-    #         + Opcode.LDLOC0
-    #         + Opcode.RET        # return
-    #     )
-    #
-    #     output, _ = self.assertCompile('BytearraySetValue.py')
-    #     self.assertEqual(expected_output, output)
-    #
-    # async def test_byte_array_set_value(self):
-    #     await self.set_up_contract('BytearraySetValue.py')
-    #
-    #     result, _ = await self.call('Main', [b'123'], return_type=bytes)
-    #     self.assertEqual(b'\x0123', result)
-    #
-    #     result, _ = await self.call('Main', [b'0'], return_type=bytes)
-    #     self.assertEqual(b'\x01', result)
-    def test_byte_array_set_value(self):
+    def test_byte_array_set_value_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -505,11 +469,19 @@ class TestBytes(boatestcase.BoaTestCase):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearraySetValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearraySetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
+    # async def test_byte_array_set_value(self):
+    #     await self.set_up_contract('BytearraySetValue.py')
+    #
+    #     result, _ = await self.call('Main', [b'123'], return_type=bytes)
+    #     self.assertEqual(b'\x0123', result)
+    #
+    #     result, _ = await self.call('Main', [b'0'], return_type=bytes)
+    #     self.assertEqual(b'\x01', result)
+    def test_byte_array_set_value(self):
+        path, _ = self.get_deploy_file_paths('BytearraySetValue.py')
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -528,42 +500,7 @@ class TestBytes(boatestcase.BoaTestCase):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-    # def test_byte_array_set_value_negative_index_compile(self):
-    #     expected_output = (
-    #         Opcode.INITSLOT     # function signature
-    #         + b'\x01'
-    #         + b'\x01'
-    #         + Opcode.LDARG0
-    #         + Opcode.CONVERT + StackItemType.Buffer
-    #         + Opcode.STLOC0
-    #         + Opcode.LDLOC0     # var[-1] = 0x01
-    #         + Opcode.PUSHM1
-    #         + Opcode.DUP
-    #         + Opcode.SIGN
-    #         + Opcode.PUSHM1
-    #         + Opcode.JMPNE
-    #         + Integer(5).to_byte_array(min_length=1, signed=True)
-    #         + Opcode.OVER
-    #         + Opcode.SIZE
-    #         + Opcode.ADD
-    #         + Opcode.PUSH1
-    #         + Opcode.SETITEM
-    #         + Opcode.LDLOC0
-    #         + Opcode.RET        # return
-    #     )
-    #
-    #     output, _ = self.assertCompile('BytearraySetValueNegativeIndex.py')
-    #     self.assertEqual(expected_output, output)
-    #
-    # async def test_byte_array_set_value_negative_index(self):
-    #     await self.set_up_contract('BytearraySetValueNegativeIndex.py')
-    #
-    #     result, _ = await self.call('Main', [b'123'], return_type=bytes)
-    #     self.assertEqual(b'12\x01', result)
-    #
-    #     result, _ = await self.call('Main', [b'0'], return_type=bytes)
-    #     self.assertEqual(b'\x01', result)
-    def test_byte_array_set_value_negative_index(self):
+    def test_byte_array_set_value_negative_index_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -587,11 +524,19 @@ class TestBytes(boatestcase.BoaTestCase):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearraySetValueNegativeIndex.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearraySetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
+    # async def test_byte_array_set_value_negative_index(self):
+    #     await self.set_up_contract('BytearraySetValueNegativeIndex.py')
+    #
+    #     result, _ = await self.call('Main', [b'123'], return_type=bytes)
+    #     self.assertEqual(b'12\x01', result)
+    #
+    #     result, _ = await self.call('Main', [b'0'], return_type=bytes)
+    #     self.assertEqual(b'\x01', result)
+    def test_byte_array_set_value_negative_index(self):
+        path, _ = self.get_deploy_file_paths('BytearraySetValueNegativeIndex.py')
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -614,33 +559,23 @@ class TestBytes(boatestcase.BoaTestCase):
         path = self.get_contract_path('BytearrayLiteral.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    # def test_byte_array_default_compile(self):
-    #     expected_output = (
-    #         Opcode.PUSH0      # bytearray()
-    #         + Opcode.NEWBUFFER
-    #         + Opcode.RET        # return
-    #     )
-    #
-    #     output, _ = self.assertCompile('BytearrayDefault.py')
-    #     self.assertEqual(expected_output, output)
-    #
-    # async def test_byte_array_default(self):
-    #     await self.set_up_contract('BytearrayDefault.py')
-    #
-    #     result, _ = await self.call('create_bytearray', return_type=bytes)
-    #     self.assertEqual(bytearray(), result)
-    def test_byte_array_default(self):
+    def test_byte_array_default_compile(self):
         expected_output = (
             Opcode.PUSH0      # bytearray()
             + Opcode.NEWBUFFER
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayDefault.py')
-        output, manifest = self.compile_and_save(path)
+        output, _ = self.assertCompile('BytearrayDefault.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
+    # async def test_byte_array_default(self):
+    #     await self.set_up_contract('BytearrayDefault.py')
+    #
+    #     result, _ = await self.call('create_bytearray', return_type=bytes)
+    #     self.assertEqual(bytearray(), result)
+    def test_byte_array_default(self):
+        path, _ = self.get_deploy_file_paths('BytearrayDefault.py')
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -694,19 +629,19 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearrayFromVariableBytes.py')
         self.assertEqual(expected_output, output)
 
-    # def test_byte_array_from_size_compile(self):
-    #     expected_output = (
-    #         Opcode.INITSLOT     # function signature
-    #         + b'\x00'
-    #         + b'\x01'
-    #         + Opcode.LDARG0     # bytearray(size)
-    #         + Opcode.NEWBUFFER
-    #         + Opcode.RET        # return
-    #     )
-    #
-    #     output, _ = self.assertCompile('BytearrayFromSize.py')
-    #     self.assertEqual(expected_output, output)
-    #
+    def test_byte_array_from_size_compile(self):
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x00'
+            + b'\x01'
+            + Opcode.LDARG0     # bytearray(size)
+            + Opcode.NEWBUFFER
+            + Opcode.RET        # return
+        )
+
+        output, _ = self.assertCompile('BytearrayFromSize.py')
+        self.assertEqual(expected_output, output)
+
     # async def test_byte_array_from_size(self):
     #     await self.set_up_contract('BytearrayFromSize.py')
     #
@@ -720,20 +655,7 @@ class TestBytes(boatestcase.BoaTestCase):
     #         await self.call('create_bytearray', [-10], return_type=bytes)
     #     self.assertRegex(context.exception.__str__(), f'^MaxItemSize exceed')
     def test_byte_array_from_size(self):
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x00'
-            + b'\x01'
-            + Opcode.LDARG0     # bytearray(size)
-            + Opcode.NEWBUFFER
-            + Opcode.RET        # return
-        )
-
-        path = self.get_contract_path('BytearrayFromSize.py')
-        output, manifest = self.compile_and_save(path)
-        self.assertEqual(expected_output, output)
-
-        path, _ = self.get_deploy_file_paths(path)
+        path, _ = self.get_deploy_file_paths('BytearrayFromSize.py')
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
