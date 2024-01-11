@@ -156,10 +156,11 @@ class BoaTestCase(SmartContractTestCase):
     ) -> tuple[T, list[noderpc.Notification]]:
 
         # dict arguments are being pushed to the stack reversed
-        args = args.copy()
-        for index, arg in enumerate(args):
-            if isinstance(arg, dict):
-                args[index] = cls._handle_dict_arg(arg)
+        if args is not None:
+            args = args.copy()
+            for index, arg in enumerate(args):
+                if isinstance(arg, dict):
+                    args[index] = cls._handle_dict_arg(arg)
 
         return await super().call(method,
                                   args,
