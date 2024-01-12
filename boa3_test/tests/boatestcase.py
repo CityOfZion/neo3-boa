@@ -1,6 +1,8 @@
 __all__ = [
     'BoaTestCase',
-    'FaultException'
+    'AbortException',
+    'FaultException',
+    'AssertException',
 ]
 
 import asyncio
@@ -9,7 +11,7 @@ import os
 import threading
 from typing import Any
 
-from boaconstructor import SmartContractTestCase
+from boaconstructor import SmartContractTestCase, AbortException, AssertException
 from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
 from neo3.core import types
@@ -98,14 +100,14 @@ class BoaTestCase(SmartContractTestCase):
 
     @classmethod
     async def set_up_contract(cls,
-                              contract_path: str,
-                              *,
+                              *contract_path: str,
                               output_name: str = None,
                               change_manifest_name: bool = False,
                               signing_account: account.Account = None,
                               compile_if_found: bool = False
                               ) -> GenericContract:
 
+        contract_path = cls.get_contract_path(*contract_path)
         cls.contract_hash = await cls.compile_and_deploy(contract_path,
                                                          output_name=output_name,
                                                          change_manifest_name=change_manifest_name,
@@ -192,6 +194,22 @@ class BoaTestCase(SmartContractTestCase):
             result = stack_item.value
         return result
 
+    @classmethod
+    async def get_valid_tx(cls) -> types.UInt256 | None:
+        """
+        Must be called after set_up_contract to ensure a valid response.
+        If called before, it may not be able to find a valid tx.
+        """
+        block_ = None
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
+            genesis_balances = await rpc_client.get_nep17_balances(cls.genesis.address)
+            for asset in genesis_balances.balances:
+                block_ = await rpc_client.get_block(asset.last_updated_block)
+                if block_.transactions:
+                    break
+
+        if hasattr(block_, 'transactions') and block_.transactions:
+            return block_.transactions[0].hash()
 
     @classmethod
     def _check_vmstate(cls, receipt):
