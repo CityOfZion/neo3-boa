@@ -1173,3 +1173,4 @@ class TestFileGeneration(BoaTest):
             _, manifest = self.get_output(nef_output)
 
         self.assertTrue(len(manifest['abi']['events']) > 0)
+        self.assertEqual('notify', manifest['abi']['events'][0]['name'])
