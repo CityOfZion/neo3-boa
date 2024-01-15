@@ -1,7 +1,7 @@
 from boa3.builtin.compile_time import contract, public
 
 
-@contract('0xcd8fe0d1ba2619fc05a1234edc22a6bae363f119')
+@contract('0x939e2bd39b8b5d1e7d77b64ea32c6ecbbbed578a')
 class NoReturnContract:
 
     @staticmethod
