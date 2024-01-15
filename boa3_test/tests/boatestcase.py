@@ -14,6 +14,7 @@ from typing import Any, Optional, TypeVar, Type, Sequence
 from boaconstructor import SmartContractTestCase, AbortException, AssertException
 from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
+from neo3.contracts import nef, manifest
 from neo3.core import types
 from neo3.network.payloads.verification import Signer
 from neo3.wallet import account
@@ -46,6 +47,7 @@ class BoaTestCase(SmartContractTestCase):
     default_folder: str
 
     genesis: account.Account
+    deployed_contracts: dict[str, types.UInt160]
     _contract: GenericContract | None = None
 
     def __init__(self, *args, **kwargs):
@@ -68,6 +70,7 @@ class BoaTestCase(SmartContractTestCase):
 
         constants.COMPILER_VERSION = '_unit_tests_'  # to not change test contract script hashes in different versions
         cls.contract_hash = None
+        cls.deployed_contracts = {}
 
         # Due to a lack of an asyncSetupClass we have to do it manually
         # Use this if you for example want to initialise some blockchain state
@@ -176,6 +179,43 @@ class BoaTestCase(SmartContractTestCase):
             result = tuple(result)
 
         return result, events
+
+
+    @classmethod
+    async def deploy(
+            cls, path_to_nef: str, signing_account: account.Account
+    ) -> types.UInt160:
+
+        import inspect
+        import pathlib
+
+        frame = inspect.stack()[1]
+        manifest_path = (pathlib.Path(frame.filename)
+                         .parent
+                         .joinpath(path_to_nef)
+                         .with_suffix("")
+                         .with_suffix(".manifest.json")
+                         )
+
+        try:
+            contract_hash = await super().deploy(
+                path_to_nef,
+                signing_account
+            )
+            _manifest = manifest.ContractManifest.from_file(str(manifest_path))
+            cls.deployed_contracts[_manifest.name] = contract_hash
+            return contract_hash
+
+        except ValueError as e:
+            # if the contract is already deployed, returns its script hash instead of raising an error
+            if not (e.args and isinstance(e.args[0], str) and 'contract already exists' in e.args[0]):
+                raise e
+
+            _manifest = manifest.ContractManifest.from_file(str(manifest_path))
+            if _manifest.name not in cls.deployed_contracts:
+                raise e
+
+            return cls.deployed_contracts[_manifest.name]
 
     @classmethod
     def unwrap_inner_values(cls, value: list | dict):
