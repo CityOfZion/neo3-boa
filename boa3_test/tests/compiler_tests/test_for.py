@@ -368,5 +368,4 @@ class TestFor(boatestcase.BoaTestCase):
         await self.set_up_contract('ForWithContractInterface.py')
 
         result, _ = await self.call('main', [3], return_type=list)
-        self.unwrap_inner_values(result)
         self.assertEqual([0, 0, 0], result)

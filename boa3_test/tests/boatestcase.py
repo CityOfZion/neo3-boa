@@ -157,56 +157,53 @@ class BoaTestCase(SmartContractTestCase):
             target_contract: Optional[types.UInt160] = None,
     ) -> tuple[T, list[noderpc.Notification]]:
 
-        # dict arguments are being pushed to the stack reversed
-        if args is not None:
-            args = args.copy()
-            for index, arg in enumerate(args):
-                if isinstance(arg, dict):
-                    args[index] = cls._handle_dict_arg(arg)
+        if return_type is tuple:
+            internal_return_type = list
+        else:
+            internal_return_type = return_type
 
-        return await super().call(method,
-                                  args,
-                                  return_type=return_type,
-                                  signing_accounts=signing_accounts,
-                                  signers=signers,
-                                  target_contract=target_contract,
-                                  )
+        result, events = await super().call(method,
+                                            args,
+                                            return_type=internal_return_type,
+                                            signing_accounts=signing_accounts,
+                                            signers=signers,
+                                            target_contract=target_contract,
+                                            )
+
+        if isinstance(result, list):
+            cls.unwrap_inner_values(result)
+        if return_type is tuple:
+            result = tuple(result)
+
+        return result, events
 
     @classmethod
-    def _handle_dict_arg(cls, arg: dict) -> dict:
-        # don't change the original obj
-        aux = {}
-        for key, item in reversed(arg.items()):
-            if isinstance(item, dict):
-                item = cls._handle_dict_arg(item)
-            aux[key] = item
-        return aux
-
-    def unwrap_inner_values(self, value: list | dict):
+    def unwrap_inner_values(cls, value: list | dict):
         if isinstance(value, list):
             for index, item in enumerate(value):
                 if not isinstance(item, noderpc.StackItem):
                     continue
 
-                value[index] = self._unwrap_stack_item(item)
+                value[index] = cls._unwrap_stack_item(item)
 
         elif isinstance(value, dict):
             aux = value.copy()
             value.clear()
             for key, item in aux.items():
-                dict_key = key if not isinstance(key, noderpc.StackItem) else self._unwrap_stack_item(key)
-                dict_item = item if not isinstance(item, noderpc.StackItem) else self._unwrap_stack_item(item)
+                dict_key = key if not isinstance(key, noderpc.StackItem) else cls._unwrap_stack_item(key)
+                dict_item = item if not isinstance(item, noderpc.StackItem) else cls._unwrap_stack_item(item)
                 if isinstance(dict_item, list):
                     if dict_item and isinstance(dict_item[0], tuple):
-                        dict_item = self._unwrap_stack_item(
+                        dict_item = cls._unwrap_stack_item(
                             noderpc.MapStackItem(noderpc.StackItemType.MAP, dict_item)
                         )
                     else:
-                        self.unwrap_inner_values(dict_item)
+                        cls.unwrap_inner_values(dict_item)
 
                 value[dict_key] = dict_item
 
-    def _unwrap_stack_item(self, stack_item: noderpc.StackItem) -> Any:
+    @classmethod
+    def _unwrap_stack_item(cls, stack_item: noderpc.StackItem) -> Any:
         result = None
 
         if stack_item.type is noderpc.StackItemType.BYTE_STRING:
@@ -235,11 +232,11 @@ class BoaTestCase(SmartContractTestCase):
 
         elif stack_item.type is noderpc.StackItemType.ARRAY:
             result = stack_item.as_list()
-            self.unwrap_inner_values(result)
+            cls.unwrap_inner_values(result)
 
         elif stack_item.type is noderpc.StackItemType.MAP:
             result = stack_item.as_dict()
-            self.unwrap_inner_values(result)
+            cls.unwrap_inner_values(result)
 
         if result is None:
             result = stack_item.value
