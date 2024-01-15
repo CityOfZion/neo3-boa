@@ -1174,3 +1174,14 @@ class TestFileGeneration(BoaTest):
 
         self.assertTrue(len(manifest['abi']['events']) > 0)
         self.assertEqual('notify', manifest['abi']['events'][0]['name'])
+
+    def test_manifest_optional_union_eventsd(self):
+        path = self.get_contract_path('test_sc/generation_test', 'ManifestOptionalUnionEvent.py')
+        nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
+        compiler = Compiler()
+        with LOCK:
+            compiler.compile_and_save(path, nef_output)
+            _, manifest = self.get_output(nef_output)
+
+        self.assertEqual(manifest['abi']['events'][0]['parameters'][0]['type'], 'String')
+        self.assertEqual(manifest['abi']['events'][0]['parameters'][1]['type'], 'Integer')
