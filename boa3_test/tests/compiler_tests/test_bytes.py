@@ -11,6 +11,8 @@ from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 class TestBytes(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/bytes_test'
 
+    SUBSEQUENCE_NOT_FOUND_MSG = 'subsequence of bytes not found'
+
     def test_bytes_literal_value(self):
         data = b'\x01\x02\x03'
         expected_output = (
@@ -143,6 +145,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytesFromBytearray.py')
         self.assertEqual(expected_output, output)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_assign_with_slice(self):
     #     await self.set_up_contract('AssignSlice.py')
     #
@@ -472,6 +475,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearraySetValue.py')
         self.assertEqual(expected_output, output)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_set_value(self):
     #     await self.set_up_contract('BytearraySetValue.py')
     #
@@ -527,6 +531,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearraySetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_set_value_negative_index(self):
     #     await self.set_up_contract('BytearraySetValueNegativeIndex.py')
     #
@@ -569,6 +574,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearrayDefault.py')
         self.assertEqual(expected_output, output)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_default(self):
     #     await self.set_up_contract('BytearrayDefault.py')
     #
@@ -642,6 +648,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearrayFromSize.py')
         self.assertEqual(expected_output, output)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_from_size(self):
     #     await self.set_up_contract('BytearrayFromSize.py')
     #
@@ -692,6 +699,7 @@ class TestBytes(boatestcase.BoaTestCase):
         expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({arg_type.identifier})')
         self.assertEqual(expected_error._error_message, compiler_error_message)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_string(self):
     #     await self.set_up_contract('BytearrayFromString.py')
     #
@@ -729,6 +737,7 @@ class TestBytes(boatestcase.BoaTestCase):
         path = self.get_contract_path('BytearrayFromStringWithEncoding.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_append(self):
     #     await self.set_up_contract('BytearrayAppend.py')
     #
@@ -751,6 +760,7 @@ class TestBytes(boatestcase.BoaTestCase):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_append_with_builtin(self):
     #     await self.set_up_contract('BytearrayAppendWithBuiltin.py')
     #
@@ -817,6 +827,7 @@ class TestBytes(boatestcase.BoaTestCase):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_reverse(self):
     #     await self.set_up_contract('BytearrayReverse.py')
     #
@@ -839,6 +850,7 @@ class TestBytes(boatestcase.BoaTestCase):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_extend(self):
     #     await self.set_up_contract('BytearrayExtend.py')
     #
@@ -861,6 +873,7 @@ class TestBytes(boatestcase.BoaTestCase):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_byte_array_extend_with_builtin(self):
     #     await self.set_up_contract('BytearrayExtendWithBuiltin.py')
     #
@@ -913,6 +926,7 @@ class TestBytes(boatestcase.BoaTestCase):
         result, _ = await self.call('main', return_type=bytes)
         self.assertEqual(b'\x01\x02\xaa\xfe', result)
 
+    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
     # async def test_boa2_slice_test(self):
     #     await self.set_up_contract('SliceBoa2Test.py')
     #
@@ -1251,15 +1265,15 @@ class TestBytes(boatestcase.BoaTestCase):
 
         with self.assertRaises(FaultException) as context:
             await self.call('main', ['unit test', 'i', 3, 4], return_type=int)
-        self.assertRegex(str(context.exception), f'subsequence of bytes not found')
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
         with self.assertRaises(FaultException) as context:
             await self.call('main', ['unit test', 'i', 4, -1], return_type=int)
-        self.assertRegex(str(context.exception), f'subsequence of bytes not found')
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
         with self.assertRaises(FaultException) as context:
             await self.call('main', ['unit test', 'i', 0, -99], return_type=int)
-        self.assertRegex(str(context.exception), f'subsequence of bytes not found')
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
     async def test_bytes_index_end_default(self):
         await self.set_up_contract('IndexBytesEndDefault.py')
@@ -1293,14 +1307,14 @@ class TestBytes(boatestcase.BoaTestCase):
         start = 99
         with self.assertRaises(FaultException) as context:
             await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
-        self.assertRegex(str(context.exception), f'subsequence of bytes not found')
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
         bytes_ = b'unit test'
         bytes_sequence = b's'
         start = -1
         with self.assertRaises(FaultException) as context:
             await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
-        self.assertRegex(str(context.exception), f'subsequence of bytes not found')
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
     async def test_bytes_index_defaults(self):
         await self.set_up_contract('IndexBytesDefaults.py')
