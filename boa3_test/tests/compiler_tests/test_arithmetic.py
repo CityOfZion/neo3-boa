@@ -382,25 +382,21 @@ class TestArithmetic(boatestcase.BoaTestCase):
         arg0 = [1, 'str', '123']
         arg1 = [2, True, False]
         result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
-        self.unwrap_inner_values(result)
         self.assertEqual(arg0 + arg1, result)
 
         arg0 = [1, 3]
         arg1 = [2, 5]
         result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
-        self.unwrap_inner_values(result)
         self.assertEqual(arg0 + arg1, result)
 
         arg0 = [True]
         arg1 = [False, True]
         result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
-        self.unwrap_inner_values(result)
         self.assertEqual(arg0 + arg1, result)
 
         arg0 = ['unit', ' ']
         arg1 = ['test', '.']
         result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
-        self.unwrap_inner_values(result)
         self.assertEqual(arg0 + arg1, result)
 
     # endregion
