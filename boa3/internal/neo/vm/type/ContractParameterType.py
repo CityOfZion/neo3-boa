@@ -19,7 +19,7 @@ class ContractParameterType(IntEnum):
     @classmethod
     def _get_by_name(cls, name: str) -> int:
         try:
-            value = cls.__getattr__(name)
+            value = cls.__getitem__(name)
         except BaseException:
             value = cls.Any
 
