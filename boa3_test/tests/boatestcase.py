@@ -267,10 +267,10 @@ class BoaTestCase(SmartContractTestCase):
                 except ValueError:
                     try:
                         result = stack_item.as_public_key()
-                    except ValueError:
+                    except BaseException:
                         try:
                             result = stack_item.as_str()
-                        except:
+                        except BaseException:
                             result = stack_item.as_bytes()
 
         elif stack_item.type is noderpc.StackItemType.ARRAY:
