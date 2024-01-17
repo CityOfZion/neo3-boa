@@ -319,7 +319,7 @@
 - <a href="/boa3_test/test_sc/none_test/NoneTuple.py">NoneTuple.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/BoolTuple.py">BoolTuple.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py">EmptyTupleAssignment.py</a>, 
-- <a href="/boa3_test/test_sc/tuple_test/GetValue.py">GetValue.py</a>, 
+- <a href="/boa3_test/test_sc/tuple_test/TupleGetValue.py">TupleGetValue.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/IntTuple.py">IntTuple.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/StrTuple.py">StrTuple.py</a>, 
