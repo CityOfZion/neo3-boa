@@ -106,8 +106,6 @@ jobs:
             export PATH="$PATH:$DOTNET_TOOL_PATH"
             
             coverage run boa3_test/tests/run_unit_tests.py
-            pip install coveralls
-            coveralls --service=circleci
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
