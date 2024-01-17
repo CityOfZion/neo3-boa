@@ -62,14 +62,16 @@ class StrSplitMethod(StdLibMethod):
         code_generator.duplicate_stack_top_item()
 
         #       concat values
+        concat_operation = BinaryOp.Concat.build(Type.bytearray)  # to return buffer
+
         code_generator.duplicate_stack_item(4)
         code_generator.duplicate_stack_item(2)
         code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
-        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.convert_operation(concat_operation, is_internal=True)
         code_generator.duplicate_stack_item(2)
         code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
         code_generator.swap_reverse_stack_items(2)
-        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.convert_operation(concat_operation, is_internal=True)
         code_generator.convert_cast(Type.str, is_internal=True)
         code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
 
