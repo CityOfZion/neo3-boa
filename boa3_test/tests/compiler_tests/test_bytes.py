@@ -1178,7 +1178,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(bytes_value.strip(), result)
 
     async def test_isdigit_method(self):
-        await self.set_up_contract('IsdigitMethod.py')
+        await self.set_up_contract('BytesIsdigitMethod.py')
 
         bytes_value = b'0123456789'
         result, _ = await self.call('main', [bytes_value], return_type=bool)
