@@ -1,15 +1,15 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestTuple(BoaTest):
+class TestTuple(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/tuple_test'
+
+    VALUE_OUT_OF_RANGE_ERROR = r'The value \d+ is out of range'
+    VALUE_NOT_IN_SEQUENCE_ERROR = r'\w+ not in sequence'
 
     def test_tuple_int_values(self):
         expected_output = (
@@ -25,8 +25,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('IntTuple.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('IntTuple.py')
         self.assertEqual(expected_output, output)
 
     def test_tuple_string_values(self):
@@ -53,8 +52,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('StrTuple.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrTuple.py')
         self.assertEqual(expected_output, output)
 
     def test_tuple_bool_values(self):
@@ -71,8 +69,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BoolTuple.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BoolTuple.py')
         self.assertEqual(expected_output, output)
 
     def test_tuple_variable_values(self):
@@ -95,8 +92,7 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('VariableTuple.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('VariableTuple.py')
         self.assertEqual(expected_output, output)
 
     def test_tuple_assign_empty_tuple(self):
@@ -109,11 +105,10 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('EmptyTupleAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EmptyTupleAssignment.py')
         self.assertEqual(expected_output, output)
 
-    def test_tuple_get_value(self):
+    def test_tuple_get_value_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -124,46 +119,36 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('GetValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TupleGetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_tuple_get_value_run(self):
+        await self.set_up_contract('TupleGetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [(1, 2, 3, 4)], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3, 4]))
-        expected_results.append(1)
-        invokes.append(runner.call_contract(path, 'Main', [5, 3, 2]))
-        expected_results.append(5)
+        result, _ = await self.call('Main', [(5, 3, 2)], return_type=int)
+        self.assertEqual(5, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [()], return_type=int)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', [])
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+        self.assertRegex(str(context.exception), self.VALUE_OUT_OF_RANGE_ERROR)
 
     def test_non_sequence_get_value(self):
-        path = self.get_contract_path('MismatchedTypeGetValue.py')
+        path = self.get_contract_path('TupleGetValueMismatchedType.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_tuple_set_value(self):
-        path = self.get_contract_path('SetValue.py')
+        path = self.get_contract_path('TupleSetValue.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
     def test_non_sequence_set_value(self):
-        path = self.get_contract_path('MismatchedTypeSetValue.py')
+        path = self.get_contract_path('SetValueMismatchedType.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
-    def test_tuple_get_value_typed_tuple(self):
+    def test_tuple_get_value_typed_tuple_compile(self):
         ok = String('ok').to_bytes()
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -182,30 +167,20 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('TupleGetValueTypedTuple.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TupleGetValueTypedTuple.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_tuple_get_value_typed_tuple_run(self):
+        await self.set_up_contract('TupleGetValueTypedTuple.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(1, result)
 
     def test_tuple_index_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeTupleIndex.py')
+        path = self.get_contract_path('TupleIndexMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_tuple_of_tuple(self):
+    def test_tuple_of_tuple_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -218,134 +193,62 @@ class TestTuple(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('TupleOfTuple.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TupleOfTuple.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_tuple_of_tuple_run(self):
+        await self.set_up_contract('TupleOfTuple.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [((1, 2), (3, 4))], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', ((1, 2), (3, 4))))
-        expected_results.append(1)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [()], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertRegex(str(context.exception), self.VALUE_OUT_OF_RANGE_ERROR)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [((), (1, 2), (3, 4))], return_type=int)
 
-        runner.call_contract(path, 'Main', ())
-        runner.execute()
+        self.assertRegex(str(context.exception), self.VALUE_OUT_OF_RANGE_ERROR)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+    async def test_tuple_slicing(self):
+        await self.set_up_contract('TupleSlicingLiteralValues.py')
 
-        runner.call_contract(path, 'Main', ((), (1, 2), (3, 4)))
-        runner.execute()
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((2,), result)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+    async def test_tuple_slicing_start_larger_than_ending(self):
+        await self.set_up_contract('TupleSlicingStartLargerThanEnding.py')
 
-    def test_tuple_slicing(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingLiteralValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((), result)
 
-        invokes = []
-        expected_results = []
+    async def test_tuple_slicing_with_variables(self):
+        await self.set_up_contract('TupleSlicingVariableValues.py')
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2])
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((2,), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_tuple_slicing_negative_start(self):
+        await self.set_up_contract('TupleSlicingNegativeStart.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((2, 3, 4, 5), result)
 
-    def test_tuple_slicing_start_larger_than_ending(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingStartLargerThanEnding.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_tuple_slicing_negative_end(self):
+        await self.set_up_contract('TupleSlicingNegativeEnd.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((0, 1), result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
+    async def test_tuple_slicing_start_omitted(self):
+        await self.set_up_contract('TupleSlicingStartOmitted.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((0, 1, 2), result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_with_variables(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingVariableValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_negative_start(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingNegativeStart.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2, 3, 4, 5])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_negative_end(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingNegativeEnd.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([0, 1])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_start_omitted(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingStartOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([0, 1, 2])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_omitted(self):
+    def test_tuple_slicing_omitted_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -364,438 +267,303 @@ class TestTuple(BoaTest):
             + Opcode.PACK
             + Opcode.RET        # return
         )
-        path = self.get_contract_path('TupleSlicingOmitted.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TupleSlicingOmitted.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_tuple_slicing_omitted_run(self):
+        await self.set_up_contract('TupleSlicingOmitted.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((0, 1, 2, 3, 4, 5), result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([0, 1, 2, 3, 4, 5])
+    async def test_tuple_slicing_end_omitted(self):
+        await self.set_up_contract('TupleSlicingEndOmitted.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=tuple)
+        self.assertEqual((2, 3, 4, 5), result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_end_omitted(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingEndOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2, 3, 4, 5])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_with_stride(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_slicing_with_stride(self):
+        await self.set_up_contract('TupleSlicingWithStride.py')
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2:5:2]
-        invokes.append(runner.call_contract(path, 'literal_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('literal_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:5:2]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:5:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:5:2]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_slicing_with_negative_stride(self):
+        await self.set_up_contract('TupleSlicingWithNegativeStride.py')
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2:5:-1]
-        invokes.append(runner.call_contract(path, 'literal_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('literal_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:5:-1]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[0:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_omitted_with_stride(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_slicing_omitted_with_stride_run(self):
+        await self.set_up_contract('TupleSlicingOmittedWithStride.py')
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[::2]
-        invokes.append(runner.call_contract(path, 'omitted_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:5:2]
-        invokes.append(runner.call_contract(path, 'omitted_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2::2]
-        invokes.append(runner.call_contract(path, 'omitted_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6::2]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999::2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999::2]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_slicing_omitted_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('TupleSlicingOmittedWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_slicing_omitted_with_negative_stride(self):
+        await self.set_up_contract('TupleSlicingOmittedWithNegativeStride.py')
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[::-2]
-        invokes.append(runner.call_contract(path, 'omitted_values',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_values', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:5:-2]
-        invokes.append(runner.call_contract(path, 'omitted_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[2::-2]
-        invokes.append(runner.call_contract(path, 'omitted_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-6::-2]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-1:-2]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[-999::-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:-999:-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[999::-2]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
         a = (0, 1, 2, 3, 4, 5)
         expected_result = a[:999:-2]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=tuple))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=tuple)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_index(self):
-        path, _ = self.get_deploy_file_paths('IndexTuple.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_index(self):
+        await self.set_up_contract('IndexTuple.py')
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 0
         end = 4
-        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
-        expected_results.append(tuple_.index(value, start, end))
+        result, _ = await self.call('main', [tuple_, value, start, end], return_type=int)
+        self.assertEqual(tuple_.index(value, start, end), result)
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 2
         end = 4
-        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
-        expected_results.append(tuple_.index(value, start, end))
+        result, _ = await self.call('main', [tuple_, value, start, end], return_type=int)
+        self.assertEqual(tuple_.index(value, start, end), result)
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 0
         end = -1
-        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
-        expected_results.append(tuple_.index(value, start, end))
+        result, _ = await self.call('main', [tuple_, value, start, end], return_type=int)
+        self.assertEqual(tuple_.index(value, start, end), result)
 
         tuple_ = (1, 2, 3, 4)
         value = 2
         start = 0
         end = 99
-        invokes.append(runner.call_contract(path, 'main', tuple_, value, start, end))
-        expected_results.append(tuple_.index(value, start, end))
+        result, _ = await self.call('main', [tuple_, value, start, end], return_type=int)
+        self.assertEqual(tuple_.index(value, start, end), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [(1, 2, 3, 4), 3, 3, 4], return_type=int)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertRegex(str(context.exception), self.VALUE_NOT_IN_SEQUENCE_ERROR)
 
-        from boa3.internal.model.builtin.builtin import Builtin
-        runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 3, 4)
-        runner.execute()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [(1, 2, 3, 4), 3, 4, -1], return_type=int)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
+        self.assertRegex(str(context.exception), self.VALUE_NOT_IN_SEQUENCE_ERROR)
 
-        runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 4, -1)
-        runner.execute()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [(1, 2, 3, 4), 3, 0, -99], return_type=int)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
+        self.assertRegex(str(context.exception), self.VALUE_NOT_IN_SEQUENCE_ERROR)
 
-        runner.call_contract(path, 'main', (1, 2, 3, 4), 3, 0, -99)
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
-
-    def test_tuple_index_end_default(self):
-        path, _ = self.get_deploy_file_paths('IndexTupleEndDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_index_end_default(self):
+        await self.set_up_contract('IndexTupleEndDefault.py')
 
         tuple_ = (1, 2, 3, 4)
         value = 3
         start = 0
-        invokes.append(runner.call_contract(path, 'main', tuple_, value, start))
-        expected_results.append(tuple_.index(value, start))
+        result, _ = await self.call('main', [tuple_, value, start], return_type=int)
+        self.assertEqual(tuple_.index(value, start), result)
 
         tuple_ = (1, 2, 3, 4)
         value = 2
         start = -10
-        invokes.append(runner.call_contract(path, 'main', tuple_, value, start))
-        expected_results.append(tuple_.index(value, start))
+        result, _ = await self.call('main', [tuple_, value, start], return_type=int)
+        self.assertEqual(tuple_.index(value, start), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [(1, 2, 3, 4), 2, 99], return_type=int)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertRegex(str(context.exception), self.VALUE_NOT_IN_SEQUENCE_ERROR)
 
-        from boa3.internal.model.builtin.builtin import Builtin
-        runner.call_contract(path, 'main', (1, 2, 3, 4), 2, 99)
-        runner.execute()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [(1, 2, 3, 4), 4, -1], return_type=int)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
+        self.assertRegex(str(context.exception), self.VALUE_NOT_IN_SEQUENCE_ERROR)
 
-        runner.call_contract(path, 'main', (1, 2, 3, 4), 4, -1)
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{Builtin.SequenceIndex.exception_message}$')
-
-    def test_tuple_index_defaults(self):
-        path, _ = self.get_deploy_file_paths('IndexTupleDefaults.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_index_defaults(self):
+        await self.set_up_contract('IndexTupleDefaults.py')
 
         tuple_ = (1, 2, 3, 4)
         value = 3
-        invokes.append(runner.call_contract(path, 'main', tuple_, value))
-        expected_results.append(tuple_.index(value))
+        result, _ = await self.call('main', [tuple_, value], return_type=int)
+        self.assertEqual(tuple_.index(value), result)
 
         tuple_ = (1, 2, 3, 4)
         value = 1
-        invokes.append(runner.call_contract(path, 'main', tuple_, value))
-        expected_results.append(tuple_.index(value))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [tuple_, value], return_type=int)
+        self.assertEqual(tuple_.index(value), result)
