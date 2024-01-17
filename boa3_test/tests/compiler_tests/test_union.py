@@ -1,16 +1,13 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestUnion(BoaTest):
+class TestUnion(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/union_test'
 
-    def test_union_return(self):
+    def test_union_return_compile(self):
         integer = Integer(42).to_byte_array()
         string = String('42').to_bytes()
         expected_output = (
@@ -28,27 +25,16 @@ class TestUnion(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('UnionReturn.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('UnionReturn.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_union_return(self):
+        await self.set_up_contract('UnionReturn.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append(42)
-
-        invokes.append(runner.call_contract(path, 'main', False))
-        expected_results.append('42')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [True], return_type=int)
+        self.assertEqual(42, result)
+        result, _ = await self.call('main', [False], return_type=str)
+        self.assertEqual('42', result)
 
     def test_union_variable_reassign(self):
         expected_output = (
@@ -69,60 +55,27 @@ class TestUnion(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('UnionVariableReassign.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('UnionVariableReassign.py')
         self.assertEqual(expected_output, output)
 
-    def test_union_variable_argument(self):
-        path, _ = self.get_deploy_file_paths('UnionVariableArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_union_variable_argument(self):
+        await self.set_up_contract('UnionVariableArgument.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['unittest'], return_type=str)
+        self.assertEqual('string', result)
+        result, _ = await self.call('main', [False], return_type=str)
+        self.assertEqual('boolean', result)
 
-        invokes.append(runner.call_contract(path, 'main', 'unittest'))
-        expected_results.append('string')
+    async def test_union_isinstance_validation(self):
+        await self.set_up_contract('UnionIsInstanceValidation.py')
 
-        invokes.append(runner.call_contract(path, 'main', False))
-        expected_results.append('boolean')
+        result, _ = await self.call('main', ['unittest'], return_type=str)
+        self.assertEqual('unittest', result)
+        result, _ = await self.call('main', [False], return_type=str)
+        self.assertEqual('boolean', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_union_int_none(self):
+        await self.set_up_contract('UnionIntNone.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_union_isinstance_validation(self):
-        path, _ = self.get_deploy_file_paths('UnionIsInstanceValidation.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', 'unittest'))
-        expected_results.append('unittest')
-
-        invokes.append(runner.call_contract(path, 'main', False))
-        expected_results.append('boolean')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_union_int_none(self):
-        path, _ = self.get_deploy_file_paths('UnionIntNone.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(42)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(42, result)
