@@ -7,6 +7,9 @@ executors:
   python311-executor:
     docker:
       - image: cimg/python:3.11.6
+  python312-executor:
+    docker:
+      - image: cimg/python:3.12.0
 
 orbs:
   python: circleci/python@0.2.1
@@ -60,6 +63,51 @@ jobs:
   unit-test-311:
     <<: *unit-test
     executor: python311-executor
+
+  unit-test-312:
+    working_directory: ~/neo3-boa
+    executor: python312-executor
+    steps:
+      - checkout
+      - python/load-cache
+
+      - run:
+          name: Fix openssl for ripemd160 loading
+          command: |
+            wget https://gist.githubusercontent.com/ixje/9bfde300b660276abc98761f7dc32839/raw/95aea8da07dcead2949ac266fbacc47bbf6a1881/fix-ripemd160-loading.py
+            sudo -E python fix-ripemd160-loading.py
+            python -c "import hashlib;print(hashlib.new('ripemd160'))"
+
+      - run:
+          name: Install Dependencies
+          command: |
+            pip install -e .[dev]
+            sudo apt update
+
+            sudo apt-get install -y apt-transport-https
+            wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+            sudo dpkg -i packages-microsoft-prod.deb
+            sudo apt update
+
+            sudo apt remove dotnet* aspnetcore* netstandard*
+            sudo rm /etc/apt/sources.list.d/microsoft-prod.list
+            sudo apt update && \
+              sudo apt-get install -y dotnet-sdk-6.0
+
+            sudo apt install libsnappy-dev libc6-dev librocksdb-dev -y
+            dotnet tool install Neo.Express --version 3.5.20 -g
+            dotnet tool install Neo.Test.Runner --version 3.5.17 -g
+
+      - python/save-cache
+      - run:
+          name: Test
+          command: |
+            export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
+            export PATH="$PATH:$DOTNET_TOOL_PATH"
+            
+            coverage run boa3_test/tests/run_unit_tests.py
+            pip install coveralls
+            coveralls --service=circleci
 
   build_deploy: &build_deploy
     working_directory: ~/neo3-boa
@@ -137,11 +185,16 @@ workflows:
          filters:
            tags:
              only: /.*/
+      - unit-test-312:
+         filters:
+           tags:
+             only: /.*/
       - build_deploy_test:
          context: pypi_test
          requires:
            - unit-test-310
            - unit-test-311
+           - unit-test-312
          filters:
            tags:
              only: /^v.*/
