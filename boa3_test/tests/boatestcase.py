@@ -20,6 +20,8 @@ from neo3.network.payloads.verification import Signer
 from neo3.wallet import account
 
 from boa3.internal import env, constants
+from boa3.internal.analyser.analyser import Analyser
+from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.exception.CompilerWarning import CompilerWarning
 from boa3_test.tests.boa_test import (USE_UNIQUE_NAME,  # move theses to this module when refactoring is done
@@ -322,7 +324,7 @@ class BoaTestCase(SmartContractTestCase):
             py_abs_path,
             root_folder=root_folder,
             fail_fast=fail_fast,
-            kwargs=kwargs
+            **kwargs
         )
 
         return result, {}
@@ -663,3 +665,6 @@ class BoaTestCase(SmartContractTestCase):
                 manifest = json.loads(manifest_output.read())
 
         return output, manifest
+
+    def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
+        return compiler._analyser
