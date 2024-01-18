@@ -844,7 +844,7 @@ class TestFileGeneration(BoaTest):
         return f * self.fact(f - 1)
 
     def test_generate_manifest_file_with_type_hint_list(self):
-        path = self.get_contract_path('test_sc/list_test', 'CopyBool.py')
+        path = self.get_contract_path('test_sc/list_test', 'ListCopyBool.py')
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
