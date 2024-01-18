@@ -39,12 +39,16 @@ if __name__ == '__main__':
         test_discover = unittest.loader.defaultTestLoader.discover(discover_path,
                                                                    top_level_dir=env.PROJECT_ROOT_DIRECTORY,
                                                                    )
+        try:
+            from boaconstructor import SmartContractTestCase
+            can_use_test_constructor = True
+        except (ModuleNotFoundError, ImportError):
+            can_use_test_constructor = False
 
         for test in list_of_tests_gen(test_discover):
-            if sys.version_info < (3, 12):
-                from boa3_test.tests.boatestcase import BoaTestCase
-                if isinstance(test, BoaTestCase):
-                        default_suite.addTest(test)
+            if can_use_test_constructor:
+                if isinstance(test, SmartContractTestCase):
+                    default_suite.addTest(test)
                 else:
                     suite.addTest(test)
             else:
@@ -53,8 +57,8 @@ if __name__ == '__main__':
                 if isinstance(test, BoaTest):
                     suite.addTest(test)
 
-        print(f'Found {suite.countTestCases()} tests\n')
         default_suite.addTest(suite)
+        print(f'Found {default_suite.countTestCases()} tests\n')
 
         test_result = unittest.TextTestRunner(verbosity=2,
                                               resultclass=CustomTestResult,
