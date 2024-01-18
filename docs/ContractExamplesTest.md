@@ -351,7 +351,7 @@
 ## v0.4
 ### Built in function
 
-- <a href="/boa3_test/test_sc/range_test/GetValue.py">GetValue.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeGetValue.py">RangeGetValue.py</a>,
 - <a href="/boa3_test/test_sc/range_test/RangeExpectedSequence.py">RangeExpectedSequence.py</a>,
 - <a href="/boa3_test/test_sc/range_test/RangeGivenLen.py">RangeGivenLen.py</a>,
 - <a href="/boa3_test/test_sc/range_test/RangeGivenStart.py">RangeGivenStart.py</a>,

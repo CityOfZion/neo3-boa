@@ -1,19 +1,17 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
+from boa3_test.tests.boatestcase import FaultException
 
 
-class TestRange(BoaTest):
+class TestRange(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/range_test'
 
     RANGE_ERROR_MESSAGE = String('range() arg 3 must not be zero').to_bytes()
 
-    def test_range_given_length(self):
+    def test_range_given_length_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -62,30 +60,20 @@ class TestRange(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('RangeGivenLen.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RangeGivenLen.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_range_given_length(self):
+        await self.set_up_contract('RangeGivenLen.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('range_example', [5], return_type=list)
+        self.assertEqual(list(range(5)), result)
+        result, _ = await self.call('range_example', [10], return_type=list)
+        self.assertEqual(list(range(10)), result)
+        result, _ = await self.call('range_example', [0], return_type=list)
+        self.assertEqual(list(range(0)), result)
 
-        invokes.append(runner.call_contract(path, 'range_example', 5))
-        expected_results.append([0, 1, 2, 3, 4])
-        invokes.append(runner.call_contract(path, 'range_example', 10))
-        expected_results.append([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-        invokes.append(runner.call_contract(path, 'range_example', 0))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_given_start(self):
+    def test_range_given_start_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -134,28 +122,18 @@ class TestRange(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('RangeGivenStart.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RangeGivenStart.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_range_given_start(self):
+        await self.set_up_contract('RangeGivenStart.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('range_example', [2, 6], return_type=list)
+        self.assertEqual(list(range(2, 6)), result)
+        result, _ = await self.call('range_example', [-10, 0], return_type=list)
+        self.assertEqual(list(range(-10, 0)), result)
 
-        invokes.append(runner.call_contract(path, 'range_example', 2, 6))
-        expected_results.append([2, 3, 4, 5])
-        invokes.append(runner.call_contract(path, 'range_example', -10, 0))
-        expected_results.append([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_given_step(self):
+    def test_range_given_step_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -204,32 +182,22 @@ class TestRange(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('RangeGivenStep.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RangeGivenStep.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_range_given_step(self):
+        await self.set_up_contract('RangeGivenStep.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'range_example', 2, 10, 3))
-        expected_results.append([2, 5, 8])
-        invokes.append(runner.call_contract(path, 'range_example', -2, 10, 3))
-        expected_results.append([-2, 1, 4, 7])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('range_example', [2, 10, 3], return_type=list)
+        self.assertEqual(list(range(2, 10, 3)), result)
+        result, _ = await self.call('range_example', [-2, 10, 3], return_type=list)
+        self.assertEqual(list(range(-2, 10, 3)), result)
 
     def test_range_parameter_mismatched_type(self):
         path = self.get_contract_path('RangeParameterMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_range_as_sequence(self):
+    def test_range_as_sequence_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -278,26 +246,16 @@ class TestRange(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('RangeExpectedSequence.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RangeExpectedSequence.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_range_as_sequence(self):
+        await self.set_up_contract('RangeExpectedSequence.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'range_example', 2, 6))
-        expected_results.append([2, 3, 4, 5])
-        invokes.append(runner.call_contract(path, 'range_example', -10, 0))
-        expected_results.append([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('range_example', [2, 6], return_type=list)
+        self.assertEqual(list(range(2, 6)), result)
+        result, _ = await self.call('range_example', [-10, 0], return_type=list)
+        self.assertEqual(list(range(-10, 0)), result)
 
     def test_range_mismatched_type(self):
         path = self.get_contract_path('RangeMismatchedType.py')
@@ -311,7 +269,7 @@ class TestRange(BoaTest):
         path = self.get_contract_path('RangeTooManyParameters.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_range_get_value(self):
+    def test_range_get_value_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -322,426 +280,286 @@ class TestRange(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('GetValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RangeGetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_range_get_value(self):
+        await self.set_up_contract('RangeGetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [[1, 2, 3, 4]], return_type=int)
+        self.assertEqual(1, result)
+        result, _ = await self.call('Main', [[5, 3, 2]], return_type=int)
+        self.assertEqual(5, result)
 
-        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3, 4]))
-        expected_results.append(1)
-        invokes.append(runner.call_contract(path, 'Main', [5, 3, 2]))
-        expected_results.append(5)
+        with self.assertRaises(FaultException) as context:
+            await self.call('Main', [[]], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', [])
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+        self.assertRegex(str(context.exception), r'The value \d+ is out of range.')
 
     def test_range_set_value(self):
-        path = self.get_contract_path('SetValue.py')
+        path = self.get_contract_path('RangeSetValue.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
-    def test_range_slicing(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingLiteralValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_range_slicing(self):
+        await self.set_up_contract('RangeSlicingLiteralValues.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([2], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2])
+    async def test_range_slicing_start_larger_than_ending(self):
+        await self.set_up_contract('RangeSlicingStartLargerThanEnding.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([], result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_range_slicing_with_variables(self):
+        await self.set_up_contract('RangeSlicingVariableValues.py')
 
-    def test_range_slicing_start_larger_than_ending(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingStartLargerThanEnding.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([2], result)
 
-        invokes = []
-        expected_results = []
+    async def test_range_slicing_negative_start(self):
+        await self.set_up_contract('RangeSlicingNegativeStart.py')
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([2, 3, 4, 5], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_range_slicing_negative_end(self):
+        await self.set_up_contract('RangeSlicingNegativeEnd.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([0, 1], result)
 
-    def test_range_slicing_with_variables(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingVariableValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_range_slicing_start_omitted(self):
+        await self.set_up_contract('RangeSlicingStartOmitted.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([0, 1, 2], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2])
+    async def test_range_slicing_omitted(self):
+        await self.set_up_contract('RangeSlicingOmitted.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([0, 1, 2, 3, 4, 5], result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_range_slicing_end_omitted(self):
+        await self.set_up_contract('RangeSlicingEndOmitted.py')
 
-    def test_range_slicing_negative_start(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingNegativeStart.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([2, 3, 4, 5], result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2, 3, 4, 5])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_negative_end(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingNegativeEnd.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([0, 1])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_start_omitted(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingStartOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([0, 1, 2])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_omitted(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([0, 1, 2, 3, 4, 5])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_end_omitted(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingEndOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([2, 3, 4, 5])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_with_stride(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_range_slicing_with_stride(self):
+        await self.set_up_contract('RangeSlicingWithStride.py')
 
         a = range(6)
         expected_result = a[2:5:2]
-        invokes.append(runner.call_contract(path, 'literal_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('literal_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[2:5:2]
-        invokes.append(runner.call_contract(path, 'literal_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('literal_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-6:5:2]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[0:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-6:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-999:5:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[0:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-999:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[999:5:2]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[0:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[999:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_range_slicing_with_negative_stride(self):
+        await self.set_up_contract('RangeSlicingWithNegativeStride.py')
 
         a = range(6)
         expected_result = a[2:5:-1]
-        invokes.append(runner.call_contract(path, 'literal_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('literal_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-6:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[0:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-6:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-999:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[0:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-999:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[999:5:-1]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[0:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[999:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_omitted_with_stride(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingOmittedWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_range_slicing_omitted_with_stride(self):
+        await self.set_up_contract('RangeSlicingOmittedWithStride.py')
 
         a = range(6)
         expected_result = a[::2]
-        invokes.append(runner.call_contract(path, 'omitted_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('omitted_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:5:2]
-        invokes.append(runner.call_contract(path, 'omitted_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('omitted_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[2::2]
-        invokes.append(runner.call_contract(path, 'omitted_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('omitted_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-6::2]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-999::2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[999::2]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_range_slicing_omitted_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('RangeSlicingOmittedWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_range_slicing_omitted_with_negative_stride(self):
+        await self.set_up_contract('RangeSlicingOmittedWithNegativeStride.py')
 
         a = range(6)
         expected_result = a[::-2]
-        invokes.append(runner.call_contract(path, 'omitted_values'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('omitted_values', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:5:-2]
-        invokes.append(runner.call_contract(path, 'omitted_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('omitted_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[2::-2]
-        invokes.append(runner.call_contract(path, 'omitted_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('omitted_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-6::-2]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:-1:-2]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[-999::-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:-999:-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('negative_really_low_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[999::-2]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_start', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
         a = range(6)
         expected_result = a[:999:-2]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(list(expected_result))
+        result, _ = await self.call('really_high_end', [], return_type=list)
+        self.assertEqual(list(expected_result), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_range_test(self):
+        await self.set_up_contract('RangeBoa2Test.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_range_test(self):
-        path, _ = self.get_deploy_file_paths('RangeBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(list(range(100, 120)))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=list)
+        self.assertEqual(list(range(100, 120)), result)
 
     def test_range_index(self):
         path = self.get_contract_path('IndexRange.py')
