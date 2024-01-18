@@ -67,11 +67,11 @@ class TestRange(boatestcase.BoaTestCase):
         await self.set_up_contract('RangeGivenLen.py')
 
         result, _ = await self.call('range_example', [5], return_type=list)
-        self.assertEqual([0, 1, 2, 3, 4], result)
+        self.assertEqual(list(range(5)), result)
         result, _ = await self.call('range_example', [10], return_type=list)
-        self.assertEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], result)
+        self.assertEqual(list(range(10)), result)
         result, _ = await self.call('range_example', [0], return_type=list)
-        self.assertEqual([], result)
+        self.assertEqual(list(range(0)), result)
 
     def test_range_given_start_compile(self):
         expected_output = (
@@ -129,9 +129,9 @@ class TestRange(boatestcase.BoaTestCase):
         await self.set_up_contract('RangeGivenStart.py')
 
         result, _ = await self.call('range_example', [2, 6], return_type=list)
-        self.assertEqual([2, 3, 4, 5], result)
+        self.assertEqual(list(range(2, 6)), result)
         result, _ = await self.call('range_example', [-10, 0], return_type=list)
-        self.assertEqual([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1], result)
+        self.assertEqual(list(range(-10, 0)), result)
 
     def test_range_given_step_compile(self):
         expected_output = (
@@ -189,9 +189,9 @@ class TestRange(boatestcase.BoaTestCase):
         await self.set_up_contract('RangeGivenStep.py')
 
         result, _ = await self.call('range_example', [2, 10, 3], return_type=list)
-        self.assertEqual([2, 5, 8], result)
+        self.assertEqual(list(range(2, 10, 3)), result)
         result, _ = await self.call('range_example', [-2, 10, 3], return_type=list)
-        self.assertEqual([-2, 1, 4, 7], result)
+        self.assertEqual(list(range(-2, 10, 3)), result)
 
     def test_range_parameter_mismatched_type(self):
         path = self.get_contract_path('RangeParameterMismatchedType.py')
@@ -253,9 +253,9 @@ class TestRange(boatestcase.BoaTestCase):
         await self.set_up_contract('RangeExpectedSequence.py')
 
         result, _ = await self.call('range_example', [2, 6], return_type=list)
-        self.assertEqual([2, 3, 4, 5], result)
+        self.assertEqual(list(range(2, 6)), result)
         result, _ = await self.call('range_example', [-10, 0], return_type=list)
-        self.assertEqual([-10, -9, -8, -7, -6, -5, -4, -3, -2, -1], result)
+        self.assertEqual(list(range(-10, 0)), result)
 
     def test_range_mismatched_type(self):
         path = self.get_contract_path('RangeMismatchedType.py')
