@@ -225,25 +225,25 @@
 
 ### List type
 
-- <a href="/boa3_test/test_sc/list_test/AppendAnyValue.py">AppendAnyValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/AppendIntValue.py">AppendIntValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/AppendIntWithBuiltin.py">AppendIntWithBuiltin.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListAppendAnyValue.py">ListAppendAnyValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListAppendIntValue.py">ListAppendIntValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListAppendIntWithBuiltin.py">ListAppendIntWithBuiltin.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/BoolList.py">BoolList.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/ClearList.py">ClearList.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/EmptyListAssignment.py">EmptyListAssignment.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/ExtendAnyValue.py">ExtendAnyValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/ExtendTupleValue.py">ExtendTupleValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/ExtendWithBuiltin.py">ExtendWithBuiltin.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/GetValue.py">GetValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/GetValueNegativeIndex.py">GetValueNegativeIndex.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListExtendAnyValue.py">ListExtendAnyValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListExtendTupleValue.py">ListExtendTupleValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListExtendWithBuiltin.py">ListExtendWithBuiltin.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListGetValue.py">ListGetValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListGetValueNegativeIndex.py">ListGetValueNegativeIndex.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/IntList.py">IntList.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/ListOfList.py">ListOfList.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListMultipleExpressionsInLine.py">ListMultipleExpressionsInLine.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/ReverseList.py">ReverseList.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/SetValue.py">SetValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/SetValueNegativeIndex.py">SetValueNegativeIndex.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListSetValue.py">ListSetValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListSetValueNegativeIndex.py">ListSetValueNegativeIndex.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/StrList.py">StrList.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/TypeHintAssignment.py">TypeHintAssignment.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListTypeHintAssignment.py">ListTypeHintAssignment.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/VariableList.py">VariableList.py</a>
 
 ### Local variable declarations and assignments
@@ -261,8 +261,8 @@
 ### Multiple expressions in the same line
 
 - <a href="/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Arithmetic)</a>, 
-- <a href="/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Logical)</a>, 
-- <a href="/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (List)</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicMultipleExpressionsInLine.py">LogicMultipleExpressionsInLine (Logical)</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListMultipleExpressionsInLine.py">ListMultipleExpressionsInLine (List)</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Tuple)</a>, 
 - <a href="/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Relational)</a>
 
@@ -423,13 +423,13 @@
 
 ### List type
 
-- <a href="/boa3_test/test_sc/list_test/InsertAnyValue.py">InsertAnyValue.py</a>
-- <a href="/boa3_test/test_sc/list_test/InsertIntNegativeIndex.py">InsertIntNegativeIndex.py</a>
-- <a href="/boa3_test/test_sc/list_test/InsertIntValue.py">InsertIntValue.py</a>
-- <a href="/boa3_test/test_sc/list_test/InsertIntWithBuiltin.py">InsertIntWithBuiltin.py</a>
-- <a href="/boa3_test/test_sc/list_test/RemoveIntValue.py">RemoveIntValue.py</a>
-- <a href="/boa3_test/test_sc/list_test/RemoveIntWithBuiltin.py">RemoveIntWithBuiltin.py</a>
-- <a href="/boa3_test/test_sc/list_test/RemoveValue.py">RemoveValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertAnyValue.py">ListInsertAnyValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertIntNegativeIndex.py">ListInsertIntNegativeIndex.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertIntValue.py">ListInsertIntValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertIntWithBuiltin.py">ListInsertIntWithBuiltin.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListRemoveIntValue.py">ListRemoveIntValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListRemoveIntWithBuiltin.py">ListRemoveIntWithBuiltin.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListRemoveValue.py">ListRemoveValue.py</a>
 
 ## v0.8
 ### Arithmetic augmented assignment operators
