@@ -635,8 +635,8 @@ class TestVariable(boatestcase.BoaTestCase):
         result, _ = await self.call('use_variable_in_func', [], return_type=int)
         self.assertEqual(42, result)
 
-        result, _ = await self.call('use_variable_in_map', [], return_type=dict)
-        self.assertEqual({b'val1': 1, b'val2': 2, b'bar': 42}, result)
+        result, _ = await self.call('use_variable_in_map', [], return_type=dict[str, int])
+        self.assertEqual({'val1': 1, 'val2': 2, 'bar': 42}, result)
 
     async def test_global_variable_same_id_different_scopes(self):
         await self.set_up_contract('GetGlobalSameIdFromImport.py')
