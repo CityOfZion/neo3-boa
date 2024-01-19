@@ -15,11 +15,13 @@ from boaconstructor import SmartContractTestCase, AbortException, AssertExceptio
 from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
 from neo3.contracts import nef, manifest
-from neo3.core import types
+from neo3.core import types, cryptography
 from neo3.network.payloads.verification import Signer
 from neo3.wallet import account
 
 from boa3.internal import env, constants
+from boa3.internal.analyser.analyser import Analyser
+from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.exception.CompilerWarning import CompilerWarning
 from boa3_test.tests.boa_test import (USE_UNIQUE_NAME,  # move theses to this module when refactoring is done
@@ -160,10 +162,13 @@ class BoaTestCase(SmartContractTestCase):
             target_contract: Optional[types.UInt160] = None,
     ) -> tuple[T, list[noderpc.Notification]]:
 
-        if return_type is tuple:
+        return_type_class = return_type.__origin__ if hasattr(return_type, '__origin__') else return_type
+        expected_values = return_type.__args__ if hasattr(return_type, '__args__') else ()
+
+        if return_type_class is tuple:
             internal_return_type = list
         else:
-            internal_return_type = return_type
+            internal_return_type = return_type_class
 
         result, events = await super().call(method,
                                             args,
@@ -173,9 +178,9 @@ class BoaTestCase(SmartContractTestCase):
                                             target_contract=target_contract,
                                             )
 
-        if isinstance(result, list):
-            cls.unwrap_inner_values(result)
-        if return_type is tuple:
+        if isinstance(result, (list, dict)):
+            cls.unwrap_inner_values(result, *expected_values)
+        if return_type_class is tuple:
             result = tuple(result)
 
         return result, events
@@ -218,39 +223,58 @@ class BoaTestCase(SmartContractTestCase):
             return cls.deployed_contracts[_manifest.name]
 
     @classmethod
-    def unwrap_inner_values(cls, value: list | dict):
+    def unwrap_inner_values(cls, value: list | dict, *args: type):
         if isinstance(value, list):
+            list_type = args[0] if len(args) else None
             for index, item in enumerate(value):
                 if not isinstance(item, noderpc.StackItem):
                     continue
 
-                value[index] = cls._unwrap_stack_item(item)
+                value[index] = cls._unwrap_stack_item(item, list_type)
 
         elif isinstance(value, dict):
+            dict_key_type = args[0] if len(args) else None
+            dict_value_type = args[1] if len(args) > 1 else None
             aux = value.copy()
             value.clear()
             for key, item in aux.items():
-                dict_key = key if not isinstance(key, noderpc.StackItem) else cls._unwrap_stack_item(key)
-                dict_item = item if not isinstance(item, noderpc.StackItem) else cls._unwrap_stack_item(item)
+
+                if dict_key_type not in (None, bytes) and isinstance(key, bytes):
+                    key = noderpc.StackItem(
+                        noderpc.StackItemType.BYTE_STRING, key
+                    )
+                if dict_value_type not in (None, bytes) and isinstance(item, bytes):
+                    item = noderpc.StackItem(
+                        noderpc.StackItemType.BYTE_STRING, item
+                    )
+
+                dict_key = key if not isinstance(key, noderpc.StackItem) else cls._unwrap_stack_item(key, dict_key_type)
+                dict_item = item if not isinstance(item, noderpc.StackItem) else cls._unwrap_stack_item(item, dict_value_type)
                 if isinstance(dict_item, list):
                     if dict_item and isinstance(dict_item[0], tuple):
                         dict_item = cls._unwrap_stack_item(
-                            noderpc.MapStackItem(noderpc.StackItemType.MAP, dict_item)
+                            noderpc.MapStackItem(noderpc.StackItemType.MAP, dict_item),
+                            *args[:2]
                         )
                     else:
-                        cls.unwrap_inner_values(dict_item)
+                        cls.unwrap_inner_values(dict_item, *args[:2])
 
                 value[dict_key] = dict_item
 
     @classmethod
-    def _unwrap_stack_item(cls, stack_item: noderpc.StackItem) -> Any:
+    def _unwrap_stack_item(cls, stack_item: noderpc.StackItem, expected_type: type | None = None) -> Any:
         result = None
 
         if stack_item.type is noderpc.StackItemType.BYTE_STRING:
-            try:
+            if expected_type is str:
                 result = stack_item.as_str()
-            except:
+            elif expected_type is bytes:
                 result = stack_item.as_bytes()
+            else:
+                try:
+                    result = stack_item.as_str()
+                except:
+                    result = stack_item.as_bytes()
 
         elif stack_item.type is noderpc.StackItemType.INTEGER:
             result = stack_item.as_int()
@@ -259,27 +283,40 @@ class BoaTestCase(SmartContractTestCase):
             result = stack_item.as_bool()
 
         elif stack_item.type is noderpc.StackItemType.BUFFER:
-            try:
+            if expected_type is str:
+                result = stack_item.as_str()
+            elif expected_type is bytes:
+                result = stack_item.as_bytes()
+            elif expected_type is types.UInt160:
                 result = stack_item.as_uint160()
-            except ValueError:
+            elif expected_type is types.UInt256:
+                result = stack_item.as_uint256()
+            elif expected_type is cryptography.ECPoint:
+                result = stack_item.as_public_key()
+            else:
                 try:
-                    result = stack_item.as_uint256()
+                    result = stack_item.as_uint160()
                 except ValueError:
                     try:
-                        result = stack_item.as_public_key()
-                    except BaseException:
+                        result = stack_item.as_uint256()
+                    except ValueError:
                         try:
-                            result = stack_item.as_str()
+                            result = stack_item.as_public_key()
                         except BaseException:
-                            result = stack_item.as_bytes()
+                            try:
+                                result = stack_item.as_str()
+                            except BaseException:
+                                result = stack_item.as_bytes()
 
         elif stack_item.type is noderpc.StackItemType.ARRAY:
             result = stack_item.as_list()
-            cls.unwrap_inner_values(result)
+            inner_list_type = expected_type.__args__ if hasattr(expected_type, '__args__') else ()
+            cls.unwrap_inner_values(result, inner_list_type)
 
         elif stack_item.type is noderpc.StackItemType.MAP:
             result = stack_item.as_dict()
-            cls.unwrap_inner_values(result)
+            inner_dict_type = expected_type.__args__ if hasattr(expected_type, '__args__') else ()
+            cls.unwrap_inner_values(result, inner_dict_type)
 
         if result is None:
             result = stack_item.value
@@ -322,7 +359,7 @@ class BoaTestCase(SmartContractTestCase):
             py_abs_path,
             root_folder=root_folder,
             fail_fast=fail_fast,
-            kwargs=kwargs
+            **kwargs
         )
 
         return result, {}
@@ -663,3 +700,6 @@ class BoaTestCase(SmartContractTestCase):
                 manifest = json.loads(manifest_output.read())
 
         return output, manifest
+
+    def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
+        return compiler._analyser
