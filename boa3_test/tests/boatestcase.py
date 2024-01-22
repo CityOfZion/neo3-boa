@@ -14,7 +14,7 @@ from typing import Any, Optional, TypeVar, Type, Sequence
 from boaconstructor import SmartContractTestCase, AbortException, AssertException
 from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
-from neo3.contracts import nef, manifest
+from neo3.contracts import manifest
 from neo3.core import types, cryptography
 from neo3.network.payloads.verification import Signer
 from neo3.wallet import account
@@ -392,6 +392,27 @@ class BoaTestCase(SmartContractTestCase):
         if len(expected_logged) > 0:
             raise AssertionError(f'{expected_logged_exception.__name__} was logged: "{expected_logged[0].message}"')
         return output
+
+    def assertObjectEqual(self, first: Any, second: Any, msg: str | None = None):
+        default_message = msg if msg is not None else f'{first} != {second}'
+
+        if first == second:
+            return self.assertEqual(first, second, default_message)
+        elif second == first:
+            return self.assertEqual(second, first, default_message)
+
+        first_variables = ([value for key, value in vars(type(first)).items() if not key.endswith('__')]
+                           + list(vars(first).values())
+                           )
+        if isinstance(second, list):
+            second_variables = second
+        else:
+            second_variables = ([value for key, value in vars(type(second)).items() if not key.endswith('__')]
+                                + list(vars(second).values())
+                                )
+        if msg is None:
+            default_message = f'{first_variables} != {second_variables}'
+        return self.assertEqual(first_variables, second_variables, default_message)
 
     def assertStartsWith(self, first: Any, second: Any):
         if not (hasattr(first, 'startswith') and first.startswith(second)):
