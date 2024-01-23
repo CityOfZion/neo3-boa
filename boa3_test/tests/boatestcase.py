@@ -136,13 +136,15 @@ class BoaTestCase(SmartContractTestCase):
                                  output_name: str = None,
                                  change_manifest_name: bool = False,
                                  signing_account: account.Account = None,
-                                 compile_if_found: bool = False
+                                 compile_if_found: bool = False,
+                                 **kwargs
                                  ) -> types.UInt160:
 
         nef_abs_path, _ = cls.get_deploy_file_paths(contract_path,
                                                     output_name=output_name,
                                                     change_manifest_name=change_manifest_name,
-                                                    compile_if_found=compile_if_found
+                                                    compile_if_found=compile_if_found,
+                                                    **kwargs
                                                     )
 
         if not signing_account:
@@ -569,7 +571,9 @@ class BoaTestCase(SmartContractTestCase):
     @classmethod
     def get_deploy_file_paths(cls, *args: str, output_name: str = None,
                               compile_if_found: bool = False, change_manifest_name: bool = False,
-                              debug: bool = False) -> tuple[str, str]:
+                              debug: bool = False,
+                              **kwargs
+                              ) -> tuple[str, str]:
         contract_path = cls.get_contract_path(*args)
         if isinstance(contract_path, str):
             nef_path, manifest_path = cls.get_deploy_file_paths_without_compiling(contract_path, output_name)
@@ -580,7 +584,8 @@ class BoaTestCase(SmartContractTestCase):
                         cls.compile_and_save(contract_path, output_name=nef_path, log=True,
                                              change_manifest_name=change_manifest_name,
                                              debug=debug,
-                                             use_unique_name=False  # already using unique name
+                                             use_unique_name=False,  # already using unique name
+                                             **kwargs
                                              )
 
             return nef_path, manifest_path
