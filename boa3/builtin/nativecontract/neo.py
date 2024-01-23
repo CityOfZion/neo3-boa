@@ -3,7 +3,7 @@ __all__ = [
 ]
 
 
-from typing import Any, List, Tuple
+from typing import Any
 
 from boa3.builtin.contract import NeoAccountState
 from boa3.builtin.interop.iterator import Iterator
@@ -219,7 +219,7 @@ class NEO:
         pass
 
     @classmethod
-    def get_candidates(cls) -> List[Tuple[ECPoint, int]]:
+    def get_candidates(cls) -> list[tuple[ECPoint, int]]:
         """
         Gets the list of all registered candidates.
 
@@ -227,7 +227,7 @@ class NEO:
         []
 
         :return: all registered candidates
-        :rtype: List[Tuple[ECPoint, int]]
+        :rtype: list[tuple[ECPoint, int]]
         """
         pass
 
@@ -248,7 +248,7 @@ class NEO:
         pass
 
     @classmethod
-    def get_committee(cls) -> List[ECPoint]:
+    def get_committee(cls) -> list[ECPoint]:
         """
         Gets all committee members list.
 
@@ -256,12 +256,12 @@ class NEO:
         [ b'\\x02|\\x84\\xb0V\\xc2j{$XG\\x1em\\xcfgR\\xed\\xd9k\\x96\\x88}x34\\xe3Q\\xdd\\xfe\\x13\\xc4\\xbc\\xa2' ]
 
         :return: all committee members
-        :rtype: List[ECPoint]
+        :rtype: list[ECPoint]
         """
         pass
 
     @classmethod
-    def get_next_block_validators(cls) -> List[ECPoint]:
+    def get_next_block_validators(cls) -> list[ECPoint]:
         """
         Gets validators list of the next block.
 
@@ -269,7 +269,7 @@ class NEO:
         [ b'\\x02|\\x84\\xb0V\\xc2j{$XG\\x1em\\xcfgR\\xed\\xd9k\\x96\\x88}x34\\xe3Q\\xdd\\xfe\\x13\\xc4\\xbc\\xa2' ]
 
         :return: the public keys of the validators
-        :rtype: List[ECPoint]
+        :rtype: list[ECPoint]
         """
         pass
 

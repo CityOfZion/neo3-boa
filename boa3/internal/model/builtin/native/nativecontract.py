@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.native import *
 from boa3.internal.model.builtin.native.oracleclass import OracleClass
@@ -61,7 +59,7 @@ class NativeContract:
 
     # endregion
 
-    package_symbols: List[IdentifiedSymbol] = [
+    package_symbols: list[IdentifiedSymbol] = [
         ContractManagementModule,
         CryptoLibModule,
         GasModule,

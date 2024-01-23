@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.model.builtin.interop.nativecontract import RoleManagement
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
@@ -16,7 +16,7 @@ class RoleManagementClass(INativeContractClass):
         super().__init__('RoleManagement', RoleManagement)
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
         from boa3.internal.model.builtin.interop.interop import Interop
 

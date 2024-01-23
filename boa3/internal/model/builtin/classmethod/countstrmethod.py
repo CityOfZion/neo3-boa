@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.classmethod.countmethod import CountMethod
@@ -10,7 +9,7 @@ class CountStrMethod(CountMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(Type.str),
             'value': Variable(Type.str),
             'start': Variable(Type.int),

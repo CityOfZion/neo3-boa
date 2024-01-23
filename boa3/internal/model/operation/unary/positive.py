@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.internal.model.type.type import IType, Type
@@ -13,7 +11,7 @@ class Positive(UnaryOperation):
     :ivar operand: the operand type. Inherited from :class:`UnaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.int]
+    _valid_types: list[IType] = [Type.int]
 
     def __init__(self, operand: IType = Type.int):
         self.operator: Operator = Operator.Plus

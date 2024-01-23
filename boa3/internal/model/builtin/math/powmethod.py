@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -10,7 +8,7 @@ class PowMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
         identifier = 'pow'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'base': Variable(Type.int),
             'exponent': Variable(Type.int),
         }
@@ -32,5 +30,5 @@ class PowMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return

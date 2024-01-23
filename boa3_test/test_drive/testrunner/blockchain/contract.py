@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
 
@@ -24,7 +22,7 @@ class TestRunnerContract(TestContract):
     def path(self, value: str):
         self._nef_path = value
 
-    def _get_script_hash(self) -> Optional[bytes]:
+    def _get_script_hash(self) -> bytes | None:
         try:
             return UInt160.from_string(self._contract_hash[2:]
                                        if self._contract_hash.startswith('0x')

@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, Optional, List
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.itype import IType
@@ -8,8 +7,8 @@ from boa3.internal.model.variable import Variable
 
 class Nep17InterfaceMethod(IBuiltinMethod):
 
-    def __init__(self, args: Dict[str, Variable], identifier: str,
-                 return_type: IType, defaults: List[ast.AST] = None,
+    def __init__(self, args: dict[str, Variable], identifier: str,
+                 return_type: IType, defaults: list[ast.AST] = None,
                  native_identifier: str = None):
         super().__init__(identifier, args, return_type=return_type, defaults=defaults)
         if native_identifier is None:
@@ -22,7 +21,7 @@ class Nep17InterfaceMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def generate_internal_opcodes(self, code_generator):

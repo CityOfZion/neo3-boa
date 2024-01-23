@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.primitive.ibytestringtype import IByteStringType
@@ -14,7 +14,7 @@ class IsDigitMethod(IBuiltinMethod):
             self_type = Type.bytes
 
         identifier = 'isdigit'
-        args: Dict[str, Variable] = {'self': Variable(self_type)}
+        args: dict[str, Variable] = {'self': Variable(self_type)}
 
         super().__init__(identifier, args, return_type=Type.bool)
 
@@ -98,7 +98,7 @@ class IsDigitMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

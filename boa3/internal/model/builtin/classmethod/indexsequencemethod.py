@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, Optional
 
 from boa3.internal.model.builtin.classmethod.indexmethod import IndexMethod
 from boa3.internal.model.expression import IExpression
@@ -11,14 +10,14 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 class IndexSequenceMethod(IndexMethod):
 
-    def __init__(self, sequence_type: Optional[SequenceType] = None, arg_value: Optional[IType] = None):
+    def __init__(self, sequence_type: SequenceType | None = None, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
         if not isinstance(sequence_type, SequenceType):
             sequence_type = Type.sequence
         if not isinstance(arg_value, IType):
             arg_value = Type.any
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(sequence_type),
             'x': Variable(arg_value),
             'start': Variable(Type.int),

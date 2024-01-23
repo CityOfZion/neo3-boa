@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -32,8 +33,8 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     def __init__(self, analyser, log: bool = False, fail_fast: bool = True):
         super().__init__(analyser.ast_tree, filename=analyser.filename, root_folder=analyser.root,
                          log=log, fail_fast=fail_fast)
-        self.modules: Dict[str, Module] = {}
-        self.symbols: Dict[str, ISymbol] = analyser.symbol_table
+        self.modules: dict[str, Module] = {}
+        self.symbols: dict[str, ISymbol] = analyser.symbol_table
 
         self._is_optimizing: bool = False
         self.has_changes: bool = False
@@ -64,7 +65,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         except BaseException:
             return Undefined
 
-    def parse_to_node(self, expression: str, origin: ast.AST = None, is_origin_str: bool = False) -> Union[ast.AST, Sequence[ast.AST]]:
+    def parse_to_node(self, expression: str, origin: ast.AST = None, is_origin_str: bool = False) -> ast.AST | Sequence[ast.AST]:
         """
         Parses an expression to an ast.
 
@@ -85,7 +86,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     def reset_state(self):
         self.current_scope.reset()
 
-    def get_symbol_id(self, node: ast.AST) -> Optional[str]:
+    def get_symbol_id(self, node: ast.AST) -> str | None:
         parts = []
         cur_node = node
         while isinstance(cur_node, ast.Attribute):
@@ -153,7 +154,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         self.set_variables_value([node.target], value)
         return node
 
-    def set_variables_value(self, targets: List[ast.AST], value: ast.AST):
+    def set_variables_value(self, targets: list[ast.AST], value: ast.AST):
         new_value = self.literal_eval(value)
         for target in targets:
             if isinstance(target, ast.Name) and isinstance(target.ctx, ast.Store):
@@ -203,7 +204,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
 
         return first_op.is_symmetric
 
-    def reorder_operations(self, outer_bin_op: ast.BinOp, inner_bin_op: ast.BinOp) -> Tuple[Any, Any]:
+    def reorder_operations(self, outer_bin_op: ast.BinOp, inner_bin_op: ast.BinOp) -> tuple[Any, Any]:
         inner_first_value = self.literal_eval(inner_bin_op.left)
         inner_second_value = self.literal_eval(inner_bin_op.right)
 
@@ -251,7 +252,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         return self.literal_eval(outer_bin_op), self.literal_eval(outer_bin_op)
 
     def _evaluate_binary_operation(self, left: Any, right: Any,
-                                   op: Union[ast.operator, BinaryOperation]) -> Optional[Any]:
+                                   op: ast.operator | BinaryOperation) -> Any | None:
         operator = Operation.get_operation(op)
         try:
             if operator is Operation.Add:
@@ -291,7 +292,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
         except ValueError:
             return un_op
 
-    def _evaluate_unary_operation(self, operand: Any, op: Union[ast.operator, UnaryOperation]) -> Optional[Any]:
+    def _evaluate_unary_operation(self, operand: Any, op: ast.operator | UnaryOperation) -> Any | None:
         operator = Operation.get_operation(op)
         try:
             if operator is Operation.Add:
@@ -387,7 +388,7 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
     def visit_Try(self, node: ast.Try) -> ast.AST:
         outer_scope = self.current_scope
         try_scope: ScopeValue = self.current_scope.new_scope()
-        except_scopes: List[ScopeValue] = []
+        except_scopes: list[ScopeValue] = []
 
         self.current_scope = try_scope
         for stmt in node.body:

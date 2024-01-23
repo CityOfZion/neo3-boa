@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
 
@@ -13,7 +11,7 @@ class CreateMultisigAccountMethod(InteropMethod):
 
         identifier = 'create_multisig_account'
         syscall = 'System.Contract.CreateMultisigAccount'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'm': Variable(Type.int),
             'pub_keys': Variable(Type.list.build_collection([ECPointType.build()]))
         }

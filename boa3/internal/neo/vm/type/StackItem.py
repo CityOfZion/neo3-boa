@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, List
+from typing import Any
 
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
@@ -27,7 +27,7 @@ class StackItemType(bytes, Enum):
             return StackItemType.Any
 
     @staticmethod
-    def union(stack_item_types: List[StackItemType]) -> StackItemType:
+    def union(stack_item_types: list[StackItemType]) -> StackItemType:
         if len(stack_item_types) == 0:
             return StackItemType.Any
 

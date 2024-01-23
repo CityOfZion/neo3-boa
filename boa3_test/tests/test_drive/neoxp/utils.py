@@ -17,7 +17,6 @@ __all__ = [
 
 
 import logging
-from typing import List, Union
 
 from filelock import FileLock
 
@@ -50,7 +49,7 @@ def get_account_by_identifier(account_identifier: str) -> Account:
     return neoxp_utils.get_account_by_identifier(_NEOXP_CONFIG, account_identifier)
 
 
-def get_account_from_script_hash_or_id(script_hash_or_address: Union[bytes, str]) -> Account:
+def get_account_from_script_hash_or_id(script_hash_or_address: bytes | str) -> Account:
     return neoxp_utils.get_account_from_script_hash_or_id(_NEOXP_CONFIG, script_hash_or_address)
 
 
@@ -82,7 +81,7 @@ def reset_neo_express_instance(neoxp_path: str, check_point_file: str = None) ->
     return _BoaNeoExpressWrapper.reset_neo_express_instance(neoxp_path, check_point_file)
 
 
-def get_deployed_contracts(neoxp_path: str, check_point_file: str = None) -> List[Contract]:
+def get_deployed_contracts(neoxp_path: str, check_point_file: str = None) -> list[Contract]:
     return _BoaNeoExpressWrapper.get_deployed_contracts(neoxp_path, check_point_file)
 
 
@@ -98,7 +97,7 @@ def get_latest_block(neoxp_path: str, check_point_file: str = None) -> Block:
     return _BoaNeoExpressWrapper.get_latest_block(neoxp_path, check_point_file)
 
 
-def get_block(neoxp_path: str, block_hash_or_index: Union[UInt256, int] = None,
+def get_block(neoxp_path: str, block_hash_or_index: UInt256 | int = None,
               check_point_file: str = None) -> Block:
     return _BoaNeoExpressWrapper.get_block(neoxp_path, block_hash_or_index, check_point_file)
 
@@ -108,5 +107,5 @@ def run_batch(neoxp_path: str, batch_path: str, reset: bool = False, check_point
 
 
 def oracle_response(neoxp_path: str, url: str, response_path: str, request_id: int = None,
-                    check_point_file: str = None) -> List[UInt256]:
+                    check_point_file: str = None) -> list[UInt256]:
     return _BoaNeoExpressWrapper.oracle_response(neoxp_path, url, response_path, request_id, check_point_file)

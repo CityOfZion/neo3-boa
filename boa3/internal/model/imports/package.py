@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional
-
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 
 
@@ -15,10 +13,10 @@ class Package(IdentifiedSymbol):
     """
 
     def __init__(self, identifier: str,
-                 properties: List[IdentifiedSymbol] = None,
-                 methods: List[IdentifiedSymbol] = None,
-                 types: List[IdentifiedSymbol] = None,
-                 packages: List[Package] = None,
+                 properties: list[IdentifiedSymbol] = None,
+                 methods: list[IdentifiedSymbol] = None,
+                 types: list[IdentifiedSymbol] = None,
+                 packages: list[Package] = None,
                  other_symbols: dict = None,
                  import_origin=None
                  ):
@@ -37,7 +35,7 @@ class Package(IdentifiedSymbol):
 
         super().__init__(identifier)
 
-        self._all_symbols: List[IdentifiedSymbol] = []
+        self._all_symbols: list[IdentifiedSymbol] = []
 
         if methods is None:
             methods = []
@@ -70,15 +68,15 @@ class Package(IdentifiedSymbol):
             self._additional_symbols = {}
             self.origin = None
 
-        self._aliases: Dict[str, str] = {}
-        self._parent: Optional[Package] = None
+        self._aliases: dict[str, str] = {}
+        self._parent: Package | None = None
 
     @property
     def shadowing_name(self) -> str:
         return 'package'
 
     @property
-    def symbols(self) -> Dict[str, IdentifiedSymbol]:
+    def symbols(self) -> dict[str, IdentifiedSymbol]:
         """
         Gets all the symbols in the package.
 
@@ -92,11 +90,11 @@ class Package(IdentifiedSymbol):
         return symbol_map
 
     @property
-    def inner_packages(self) -> Dict[str, Package]:
+    def inner_packages(self) -> dict[str, Package]:
         return {symbol.raw_identifier: symbol for symbol in self._packages}
 
     @property
-    def parent(self) -> Optional[Package]:
+    def parent(self) -> Package | None:
         """
         Get the parent package of this one. None if it's the root package.
         """

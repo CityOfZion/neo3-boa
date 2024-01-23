@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional, Sized, Tuple
+from collections.abc import Sized
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -26,7 +27,7 @@ class CastTypeMethod(IBuiltinMethod):
             origin_type = origin_type.meta_type if origin_type.has_meta_type else anyType
 
         identifier = 'cast'
-        args: Dict[str, Variable] = {'typ': Variable(type_value),
+        args: dict[str, Variable] = {'typ': Variable(type_value),
                                      'val': Variable(anyType)}
         super().__init__(identifier, args,
                          return_type=cast_to_type.meta_type if isinstance(cast_to_type, MetaType) else anyType)
@@ -65,7 +66,7 @@ class CastTypeMethod(IBuiltinMethod):
         return True
 
     @property
-    def cast_types(self) -> Optional[Tuple[IType, IType]]:
+    def cast_types(self) -> tuple[IType, IType] | None:
         origin_type = self._origin_type
         target_type = (self.typ_arg.type.meta_type
                        if hasattr(self.typ_arg.type, 'meta_type')
@@ -84,7 +85,7 @@ class CastTypeMethod(IBuiltinMethod):
         return 1  # the implementation is the same as x = arg
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         # type should not be converted
         indexes = super().generation_order
         typ_index = list(self.args).index('typ')
@@ -95,7 +96,7 @@ class CastTypeMethod(IBuiltinMethod):
         return indexes
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     @property

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 from abc import ABC
-from typing import Dict, List, Optional, Set, Tuple
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.expression import IExpression
@@ -20,25 +19,25 @@ class Callable(IExpression, ABC):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None,
-                 vararg: Optional[Tuple[str, Variable]] = None,
-                 kwargs: Optional[Dict[str, Variable]] = None,
-                 defaults: List[ast.AST] = None,
+    def __init__(self, args: dict[str, Variable] = None,
+                 vararg: tuple[str, Variable] | None = None,
+                 kwargs: dict[str, Variable] | None = None,
+                 defaults: list[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
-                 decorators: List[Callable] = None,
+                 decorators: list[Callable] = None,
                  external_name: str = None,
                  is_safe: bool = False,
-                 origin_node: Optional[ast.AST] = None):
+                 origin_node: ast.AST | None = None):
 
         if args is None:
             args = {}
-        self.args: Dict[str, Variable] = args.copy()
+        self.args: dict[str, Variable] = args.copy()
 
         if not isinstance(defaults, list):
             defaults = []
-        self.defaults: List[ast.AST] = defaults
+        self.defaults: list[ast.AST] = defaults
 
-        self._vararg: Optional[Tuple[str, Variable]] = None
+        self._vararg: tuple[str, Variable] | None = None
         if (isinstance(vararg, tuple) and len(vararg) == 2
                 and isinstance(vararg[0], str) and isinstance(vararg[1], Variable)):
 
@@ -60,14 +59,14 @@ class Callable(IExpression, ABC):
 
         if kwargs is None:
             kwargs = {}
-        self._kwargs: Dict[str, Variable] = kwargs.copy()
+        self._kwargs: dict[str, Variable] = kwargs.copy()
 
         self.return_type: IType = return_type
 
         if decorators is None:
             decorators = []
         from boa3.internal.model.decorator import IDecorator
-        self.decorators: List[IDecorator] = [decorator for decorator in decorators
+        self.decorators: list[IDecorator] = [decorator for decorator in decorators
                                              if isinstance(decorator, IDecorator)]
 
         from boa3.internal.model.builtin.decorator import PublicDecorator
@@ -82,24 +81,24 @@ class Callable(IExpression, ABC):
             elif self.defined_by_entry:
                 external_name = None
 
-        self.external_name: Optional[str] = external_name
+        self.external_name: str | None = external_name
         self.is_safe: bool = is_safe or (isinstance(public_decorator, PublicDecorator) and public_decorator.safe)
 
-        self._self_calls: Set[ast.AST] = set()
+        self._self_calls: set[ast.AST] = set()
 
         super().__init__(origin_node)
 
-        self.init_address: Optional[int] = None
-        self.init_bytecode: Optional[VMCode] = None
-        self.init_defaults_bytecode: Optional[VMCode] = None
-        self.end_bytecode: Optional[VMCode] = None
+        self.init_address: int | None = None
+        self.init_bytecode: VMCode | None = None
+        self.init_defaults_bytecode: VMCode | None = None
+        self.end_bytecode: VMCode | None = None
 
     @property
     def type(self) -> IType:
         return self.return_type
 
     @property
-    def symbols(self) -> Dict[str, Variable]:
+    def symbols(self) -> dict[str, Variable]:
         """
         Gets all the symbols in the method
 
@@ -108,14 +107,14 @@ class Callable(IExpression, ABC):
         return self.args.copy()
 
     @property
-    def args_without_default(self) -> Dict[str, Variable]:
+    def args_without_default(self) -> dict[str, Variable]:
         num_defaults = len(self.defaults)
         if num_defaults > 0:
             return {key: self.args[key] for key in list(self.args.keys())[:-num_defaults]}
         return self.args
 
     @property
-    def positional_args(self) -> Dict[str, Variable]:
+    def positional_args(self) -> dict[str, Variable]:
         return {key: value for key, value in self.args.items() if key not in self._kwargs}
 
     @property
@@ -123,7 +122,7 @@ class Callable(IExpression, ABC):
         return any(decorator.has_cls_or_self for decorator in self.decorators)
 
     @property
-    def cls_or_self_type(self) -> Optional[IType]:
+    def cls_or_self_type(self) -> IType | None:
         if not self.has_cls_or_self or len(self.args) == 0:
             return None
 
@@ -134,7 +133,7 @@ class Callable(IExpression, ABC):
         return self._vararg is not None
 
     @property
-    def start_address(self) -> Optional[int]:
+    def start_address(self) -> int | None:
         """
         Gets the address where this method starts in the bytecode
 
@@ -147,12 +146,12 @@ class Callable(IExpression, ABC):
             return VMCodeMapping.instance().get_start_address(self.init_bytecode)
 
     @property
-    def start_bytecode(self) -> Optional[VMCode]:
+    def start_bytecode(self) -> VMCode | None:
         return (self.init_defaults_bytecode if len(self.defaults) > 0
                 else self.init_bytecode)
 
     @property
-    def end_address(self) -> Optional[int]:
+    def end_address(self) -> int | None:
         """
         Gets the address of this method's last operation in the bytecode
 
@@ -183,7 +182,7 @@ class Callable(IExpression, ABC):
             return False
 
     def __str__(self) -> str:
-        args_types: List[str] = [str(arg.type) for arg in self.args.values()]
+        args_types: list[str] = [str(arg.type) for arg in self.args.values()]
         if self.return_type is not Type.none:
             signature = '({0}) -> {1}'.format(', '.join(args_types), self.return_type)
         else:

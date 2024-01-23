@@ -1,6 +1,5 @@
 import json
 import os.path
-from typing import List
 
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import utils
@@ -74,7 +73,7 @@ class NeoExpressConfig:
         return self._neo_express_config_path
 
 
-def _wallet_accounts_from_json(wallet_json: dict) -> List[Account]:
+def _wallet_accounts_from_json(wallet_json: dict) -> list[Account]:
     wallet_accounts = []
     name = wallet_json['name']
     default_was_set = False

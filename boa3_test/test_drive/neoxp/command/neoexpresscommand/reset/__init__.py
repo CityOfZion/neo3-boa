@@ -1,12 +1,10 @@
-from typing import Dict, Optional
-
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.neoexpresscommand import NeoExpressCommand
 
 __all__ = ['ResetCommand']
 
 
 class ResetCommand(NeoExpressCommand):
-    def __init__(self, node_index: Optional[int] = None,
+    def __init__(self, node_index: int | None = None,
                  force: bool = False,
                  reset_all: bool = False,
                  neo_express_data_file: str = None):
@@ -23,7 +21,7 @@ class ResetCommand(NeoExpressCommand):
 
         super().__init__(command_id, args)
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if self.force:

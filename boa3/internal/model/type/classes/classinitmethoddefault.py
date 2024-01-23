@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal import constants
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.method import Method
@@ -41,5 +39,5 @@ class ClassInitMethod(IdentifiedSymbol, Method):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None

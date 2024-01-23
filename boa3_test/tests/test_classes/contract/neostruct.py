@@ -1,24 +1,24 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any
 
 
 class NeoStruct(list, ABC):
 
     @classmethod
     @abstractmethod
-    def from_json(cls, json: Dict[str, Any]) -> NeoStruct:
+    def from_json(cls, json: dict[str, Any]) -> NeoStruct:
         pass
 
     @classmethod
-    def _validate_json(cls, json: Dict[str, Any], required_fields: List[str]):
+    def _validate_json(cls, json: dict[str, Any], required_fields: list[str]):
         required = set(required_fields)
         if not required.issubset(json.keys()):
             raise ValueError
 
     @classmethod
-    def _get_param_info(cls, json: Dict[str, Any]) -> list:
+    def _get_param_info(cls, json: dict[str, Any]) -> list:
         _name = 'name'
         _type = 'type'
 

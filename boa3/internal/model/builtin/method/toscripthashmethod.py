@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional, Sized
+from collections.abc import Sized
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -17,7 +18,7 @@ class ScriptHashMethod(IBuiltinMethod):
             data_type = Type.any
 
         identifier = 'to_script_hash'
-        args: Dict[str, Variable] = {'value': Variable(data_type)}
+        args: dict[str, Variable] = {'value': Variable(data_type)}
         from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
         super().__init__(identifier, args, return_type=UInt160Type.build())
 
@@ -97,7 +98,7 @@ class ScriptHashMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

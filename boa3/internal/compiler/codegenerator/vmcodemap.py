@@ -1,15 +1,13 @@
-from typing import List, Dict, Optional
-
 from boa3.internal.neo.vm.VMCode import VMCode
 
 
 class VMCodeMap:
     def __init__(self):
-        self._vm_code_list: List[VMCode] = []
-        self._vm_code_addresses: List[int] = []
+        self._vm_code_list: list[VMCode] = []
+        self._vm_code_addresses: list[int] = []
 
         # optimization so it's not needed to iterate over everything in search of targets
-        self._vm_code_with_target: List[VMCode] = []
+        self._vm_code_with_target: list[VMCode] = []
 
     def __len__(self) -> int:
         return self._vm_code_list.__len__()
@@ -18,14 +16,14 @@ class VMCodeMap:
         self._vm_code_addresses.clear()
         self._vm_code_list.clear()
 
-    def get_code_map(self) -> Dict[int, VMCode]:
+    def get_code_map(self) -> dict[int, VMCode]:
         size = len(self)
         return {self._vm_code_addresses[index]: self._vm_code_list[index] for index in range(size)}
 
-    def get_code_list(self) -> List[VMCode]:
+    def get_code_list(self) -> list[VMCode]:
         return self._vm_code_list
 
-    def get_code_with_target_list(self) -> List[VMCode]:
+    def get_code_with_target_list(self) -> list[VMCode]:
         return self._vm_code_with_target
 
     def get_bytecode_size(self) -> int:
@@ -42,7 +40,7 @@ class VMCodeMap:
             if has_target:
                 self._vm_code_with_target.append(vm_code)
 
-    def get_code(self, address: int) -> Optional[VMCode]:
+    def get_code(self, address: int) -> VMCode | None:
         try:
             index = self._vm_code_addresses.index(address)
         except ValueError:
@@ -79,7 +77,7 @@ class VMCodeMap:
         except ValueError:
             return 0
 
-    def get_addresses(self, start_address: int, end_address: int) -> List[int]:
+    def get_addresses(self, start_address: int, end_address: int) -> list[int]:
         if start_address > end_address:
             start_address, end_address = end_address, start_address
 
@@ -89,7 +87,7 @@ class VMCodeMap:
                 addresses.append(address)
         return addresses
 
-    def get_addresses_from_codes(self, codes: List[VMCode]) -> List[int]:
+    def get_addresses_from_codes(self, codes: list[VMCode]) -> list[int]:
         if len(codes) < 1:
             return []
 
@@ -103,7 +101,7 @@ class VMCodeMap:
 
         return addresses
 
-    def get_opcodes(self, addresses: List[int]) -> List[VMCode]:
+    def get_opcodes(self, addresses: list[int]) -> list[VMCode]:
         codes = []
 
         for address in sorted(addresses):
@@ -142,7 +140,7 @@ class VMCodeMap:
 
                 next_address += self._vm_code_list[index].size
 
-    def move_to_end(self, first_code_address: int, last_code_address: int) -> Optional[int]:
+    def move_to_end(self, first_code_address: int, last_code_address: int) -> int | None:
         if last_code_address < first_code_address:
             return
 
@@ -172,7 +170,7 @@ class VMCodeMap:
         index = self.get_bytecode_size()
         return index
 
-    def remove_opcodes_by_addresses(self, addresses: List[int]):
+    def remove_opcodes_by_addresses(self, addresses: list[int]):
         was_changed = False
         # reversed so we only need to update addresses once after all are removed
         for code_address in sorted(addresses, reverse=True):

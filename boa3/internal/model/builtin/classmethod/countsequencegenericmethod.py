@@ -1,5 +1,3 @@
-from typing import List, Optional, Tuple
-
 from boa3.internal.model.builtin.classmethod.countsequencemethod import CountSequenceMethod
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
@@ -7,10 +5,10 @@ from boa3.internal.model.type.itype import IType
 
 class CountSequenceGenericMethod(CountSequenceMethod):
 
-    def __init__(self, sequence_type: Optional[SequenceType] = None, arg_value: Optional[IType] = None):
+    def __init__(self, sequence_type: SequenceType | None = None, arg_value: IType | None = None):
         super().__init__(sequence_type, arg_value)
 
-    def _generic_verification(self, code_generator) -> Tuple[List[int], List[int]]:
+    def _generic_verification(self, code_generator) -> tuple[list[int], list[int]]:
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.model.type.type import Type

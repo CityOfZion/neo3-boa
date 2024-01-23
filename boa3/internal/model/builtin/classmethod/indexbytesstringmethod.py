@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, Optional
 
 from boa3.internal.model.builtin.classmethod.indexmethod import IndexMethod
 from boa3.internal.model.expression import IExpression
@@ -11,12 +10,12 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 class IndexBytesStringMethod(IndexMethod):
 
-    def __init__(self, self_type: Optional[StrType] = None):
+    def __init__(self, self_type: StrType | None = None):
         from boa3.internal.model.type.type import Type
         if not isinstance(self_type, (StrType, BytesType)):
             self_type = Type.str
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(self_type),
             'x': Variable(self_type),
             'start': Variable(Type.int),

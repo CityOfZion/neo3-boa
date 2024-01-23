@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import enum
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.test_classes.transactionattribute import TransactionAttribute, TransactionAttributeType
@@ -15,7 +15,7 @@ class OracleResponse(TransactionAttribute):
         self._response_code: OracleResponseCode = code
         self._result: bytes = result
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         json = super().to_json()
         json.update({
             'id': self._id,
@@ -25,7 +25,7 @@ class OracleResponse(TransactionAttribute):
         return json
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> OracleResponse:
+    def from_json(cls, json: dict[str, Any]) -> OracleResponse:
         return cls(request_id=json['id'],
                    code=json['code'],
                    result=base64.b64decode(json['result']))

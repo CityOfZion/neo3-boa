@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.neo import to_hex_str
 from boa3.internal.neo3.core.types import UInt160
@@ -23,7 +23,7 @@ class TestRunnerLog:
         return self._message
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> TestRunnerLog:
+    def from_json(cls, json: dict[str, Any]) -> TestRunnerLog:
         """
         Creates a Log object from a json.
 

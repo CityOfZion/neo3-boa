@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.constants import GAS_SCRIPT
 from boa3.internal.model.builtin.interop.contract import GasToken
@@ -17,7 +17,7 @@ class GasClass(INativeContractClass):
         super().__init__('GAS', GasToken)
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
         from boa3.internal.model.builtin.native.nep17_methods import (BalanceOfMethod, DecimalsMethod, SymbolMethod,
                                                                       TotalSupplyMethod, TransferMethod)

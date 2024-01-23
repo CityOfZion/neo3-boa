@@ -1,20 +1,18 @@
 from __future__ import annotations
 
-from typing import Dict, Optional, Tuple, Union
-
 from boa3.internal.constants import FOUR_BYTES_MAX_VALUE
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 
 
-def get_pushdata_and_data(bytestring: Union[str, bytes]) -> Tuple[Opcode, bytes]:
+def get_pushdata_and_data(bytestring: str | bytes) -> tuple[Opcode, bytes]:
     """
     Gets the push opcode and data to the respective str ot bytes value
 
     :param bytestring: value that will be pushed
     :return: the respective opcode and its required data
-    :rtype: Tuple[Opcode, bytes]
+    :rtype: tuple[Opcode, bytes]
     """
     if isinstance(bytestring, str):
         bytestring = String(bytestring).to_bytes()
@@ -34,7 +32,7 @@ def get_pushdata_and_data(bytestring: Union[str, bytes]) -> Tuple[Opcode, bytes]
     return opcode, data
 
 
-def get_pushdata_and_data_from_size(data_size: int) -> Tuple[Opcode, bytes]:
+def get_pushdata_and_data_from_size(data_size: int) -> tuple[Opcode, bytes]:
     bytes_size = Integer(data_size).to_byte_array(min_length=1)
     if len(bytes_size) == 1:
         opcode = Opcode.PUSHDATA1
@@ -47,7 +45,7 @@ def get_pushdata_and_data_from_size(data_size: int) -> Tuple[Opcode, bytes]:
     return opcode, bytes_size
 
 
-def get_literal_push(integer: int) -> Optional[Opcode]:
+def get_literal_push(integer: int) -> Opcode | None:
     """
     Gets the push opcode to the respective integer
 
@@ -62,13 +60,13 @@ def get_literal_push(integer: int) -> Optional[Opcode]:
         return None
 
 
-def get_push_and_data(integer: int) -> Tuple[Opcode, bytes]:
+def get_push_and_data(integer: int) -> tuple[Opcode, bytes]:
     """
     Gets the push opcode and data to the respective integer
 
     :param integer: value that will be pushed
     :return: the respective opcode and its required data
-    :rtype: Tuple[Opcode, bytes]
+    :rtype: tuple[Opcode, bytes]
     """
     opcode = get_literal_push(integer)
     if isinstance(opcode, Opcode):
@@ -114,7 +112,7 @@ def get_larger_opcode(opcode: Opcode):
         return None
 
 
-_larger_opcode: Dict[Opcode, Opcode] = {
+_larger_opcode: dict[Opcode, Opcode] = {
     Opcode.JMP: Opcode.JMP_L,
     Opcode.JMPIF: Opcode.JMPIF_L,
     Opcode.JMPIFNOT: Opcode.JMPIFNOT_L,
@@ -134,7 +132,7 @@ def is_jump(opcode: Opcode) -> bool:
     return Opcode.JMP <= opcode <= Opcode.JMPLE_L
 
 
-def get_try_and_data(except_target: int, finally_target: int = 0, jump_through: bool = False) -> Tuple[Opcode, bytes]:
+def get_try_and_data(except_target: int, finally_target: int = 0, jump_through: bool = False) -> tuple[Opcode, bytes]:
     """
     Gets the try opcode and data to the respective targets
     """
@@ -156,7 +154,7 @@ def get_try_and_data(except_target: int, finally_target: int = 0, jump_through: 
             + jmp_to_finally_placeholder[1].rjust(each_arg_len, b'\x00'))
 
 
-def get_jump_and_data(opcode: Opcode, integer: int, jump_through: bool = False) -> Tuple[Opcode, bytes]:
+def get_jump_and_data(opcode: Opcode, integer: int, jump_through: bool = False) -> tuple[Opcode, bytes]:
     """
     Gets the jump opcode and data to the respective integer
 
@@ -164,7 +162,7 @@ def get_jump_and_data(opcode: Opcode, integer: int, jump_through: bool = False) 
     :param integer: number of bytes that'll be jumped
     :param jump_through: whether it should go over the instructions or not
     :return: the respective opcode and its required data
-    :rtype: Tuple[Opcode, bytes]
+    :rtype: tuple[Opcode, bytes]
     """
     if not has_target(opcode):
         opcode = Opcode.JMP
@@ -194,7 +192,7 @@ def has_target(opcode: Opcode) -> bool:
     return Opcode.JMP <= opcode <= Opcode.CALL_L or Opcode.TRY <= opcode < Opcode.ENDFINALLY
 
 
-def get_drop(position: int) -> Optional[Opcode]:
+def get_drop(position: int) -> Opcode | None:
     """
     Gets the opcode to remove the item n back in the stack
 
@@ -214,7 +212,7 @@ def get_drop(position: int) -> Optional[Opcode]:
             return Opcode.XDROP
 
 
-def get_dup(position: int) -> Optional[Opcode]:
+def get_dup(position: int) -> Opcode | None:
     """
     Gets the opcode to duplicate the item n back in the stack
 
@@ -234,7 +232,7 @@ def get_dup(position: int) -> Optional[Opcode]:
             return Opcode.PICK
 
 
-def get_reverse(no_stack_items: int, rotate: bool = False) -> Optional[Opcode]:
+def get_reverse(no_stack_items: int, rotate: bool = False) -> Opcode | None:
     """
     Gets the opcode to reverse n items on the stack
 
@@ -325,7 +323,7 @@ def is_load_slot(opcode: Opcode) -> bool:
             or Opcode.LDARG0 <= opcode <= Opcode.LDARG)
 
 
-def get_store_from_load(load_opcode) -> Optional[Opcode]:
+def get_store_from_load(load_opcode) -> Opcode | None:
     """
     Gets the store slot opcode equivalent to the given load slot opcode.
 

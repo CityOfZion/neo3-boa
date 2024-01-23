@@ -7,12 +7,12 @@ __all__ = [
     'NeoMetadata',
 ]
 
-from typing import List, Dict, Any, Union, Optional, Tuple
+from typing import Any
 
 from boa3.builtin.type import Event
 
 
-def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '') -> Event:
+def CreateNewEvent(arguments: list[tuple[str, type]] = [], event_name: str = '') -> Event:
     """
     Creates a new Event.
 
@@ -28,7 +28,7 @@ def CreateNewEvent(arguments: List[Tuple[str, type]] = [], event_name: str = '')
     ... )
 
     :param arguments: the list of the events args' names and types
-    :type arguments: List[Tuple[str, type]]
+    :type arguments: list[tuple[str, type]]
     :param event_name: custom name of the event. It's filled with the variable name if not specified
     :type event_name: str
     :return: the new event
@@ -102,7 +102,7 @@ def metadata(*args):
     pass
 
 
-def contract(script_hash: Union[str, bytes]):
+def contract(script_hash: str | bytes):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
 
@@ -183,12 +183,12 @@ class NeoMetadata:
     :ivar name: the smart contract name. Will be the name of the file by default;
     :vartype type name: str
     :ivar supported_standards: Neo standards supported by this smart contract. Empty by default;
-    :vartype supported_standards: List[str]
+    :vartype supported_standards: list[str]
     :ivar permissions: a list of contracts and methods that this smart contract permits to invoke and call. All
      contracts and methods permitted by default;
-    :vartype permissions: List[str]
+    :vartype permissions: list[str]
     :ivar trusts: a list of contracts that this smart contract trust. Empty by default;
-    :vartype trusts: List[str]
+    :vartype trusts: list[str]
     :ivar author: the smart contract author. None by default;
     :vartype author: str or None
     :ivar email: the smart contract author email. None by default;
@@ -200,14 +200,14 @@ class NeoMetadata:
 
     def __init__(self):
         self.name: str = ''
-        self.source: Optional[str] = None
-        self.supported_standards: List[str] = []
-        self._trusts: List[str] = []
-        self._permissions: List[dict] = []
-        self._groups: List[dict] = []
+        self.source: str | None = None
+        self.supported_standards: list[str] = []
+        self._trusts: list[str] = []
+        self._permissions: list[dict] = []
+        self._groups: list[dict] = []
 
     @property
-    def extras(self) -> Dict[str, Any]:
+    def extras(self) -> dict[str, Any]:
         """
         Gets the metadata extra information.
 
@@ -231,18 +231,18 @@ class NeoMetadata:
         return extra
 
     @property
-    def trusts(self) -> List[str]:
+    def trusts(self) -> list[str]:
         from boa3.internal.constants import IMPORT_WILDCARD
         if self._trusts == [IMPORT_WILDCARD]:
             return IMPORT_WILDCARD
         return self._trusts.copy()
 
     @property
-    def permissions(self) -> List[dict]:
+    def permissions(self) -> list[dict]:
         return self._permissions.copy()
 
     @property
-    def groups(self) -> List[dict]:
+    def groups(self) -> list[dict]:
         return self._groups.copy()
 
     def add_trusted_source(self, hash_or_address: str):
@@ -306,7 +306,7 @@ class NeoMetadata:
         if new_group not in self._permissions:
             self._groups.append(new_group)
 
-    def add_permission(self, *, contract: str = IMPORT_WILDCARD, methods: Union[List[str], str] = IMPORT_WILDCARD):
+    def add_permission(self, *, contract: str = IMPORT_WILDCARD, methods: list[str, str] = IMPORT_WILDCARD):
         """
         Adds a valid contract and a valid methods to the permissions in the manifest.
 
@@ -319,7 +319,7 @@ class NeoMetadata:
         :param contract: a contract hash, group public key or '*'
         :type contract: str
         :param methods: a list of methods or '*'
-        :type methods: Union[List[str], str]
+        :type methods: list[str] or str
         """
 
         if isinstance(contract, bytes):

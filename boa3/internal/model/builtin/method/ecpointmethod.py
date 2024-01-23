@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -16,7 +16,7 @@ class ECPointMethod(IBuiltinMethod):
             argument_type = Type.none
 
         identifier = 'ECPoint'
-        args: Dict[str, Variable] = {'arg': Variable(argument_type)}
+        args: dict[str, Variable] = {'arg': Variable(argument_type)}
 
         super().__init__(identifier, args, return_type=return_type)
 
@@ -75,7 +75,7 @@ class ECPointMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.itype import IType
@@ -31,7 +31,7 @@ class FindOptionsType(IntType):
         return isinstance(value, (FindOptions, FindOptionsType))
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         """
         Gets the class symbols of this type
 

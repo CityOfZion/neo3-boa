@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.model.method import Method
@@ -29,7 +29,7 @@ class UInt256Type(BytesType, ClassType):
     def abi_type(self) -> AbiType:
         return AbiType.Hash256
 
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self) -> Method | None:
         return self._constructor
 
     @property
@@ -44,7 +44,7 @@ class UInt256Type(BytesType, ClassType):
     def _is_type_of(cls, value: Any):
         return isinstance(value, UInt256Type)
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+    def is_instance_opcodes(self) -> list[tuple[Opcode, bytes]]:
         from boa3.internal.model.type.classes.pythonclass import PythonClass
         return super(PythonClass, self).is_instance_opcodes()
 
@@ -52,7 +52,7 @@ class UInt256Type(BytesType, ClassType):
         from boa3.internal.model.type.classes.pythonclass import PythonClass
         return super(PythonClass, self).generate_is_instance_type_check(code_generator)
 
-    def _generate_specific_class_type_check(self, code_generator) -> List[int]:
+    def _generate_specific_class_type_check(self, code_generator) -> list[int]:
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
 
@@ -61,7 +61,7 @@ class UInt256Type(BytesType, ClassType):
         code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
         return []
 
-    def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
+    def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> list[tuple[Opcode, bytes]]:
         push_int_opcode, size_data = OpcodeHelper.get_push_and_data(constants.SIZE_OF_INT256)
 
         return [

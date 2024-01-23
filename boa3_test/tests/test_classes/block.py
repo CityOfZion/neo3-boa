@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from boa3_test.test_drive.model.network.payloads.testblock import TestBlock
 from boa3_test.tests.test_classes.transaction import Transaction
@@ -8,7 +8,7 @@ from boa3_test.tests.test_classes.transaction import Transaction
 
 class Block(TestBlock):
     def __init__(self, index: int):
-        self._transactions: List[Transaction] = []
+        self._transactions: list[Transaction] = []
         super().__init__()
 
         import time
@@ -16,12 +16,12 @@ class Block(TestBlock):
         self._timestamp: int = int(time.time_ns() / 1_000_000)
         self._index: int = index
 
-    def get_transactions(self) -> List[Transaction]:
+    def get_transactions(self) -> list[Transaction]:
         """
         Gets a list of the block transactions. Changes in those transactions don't affect the ones inside the block.
 
         :return: the block transactions
-        :rtype: List[Transaction]
+        :rtype: list[Transaction]
         """
         return [tx.copy() for tx in self._transactions]
 
@@ -30,13 +30,13 @@ class Block(TestBlock):
             self._transactions.append(tx)
 
     @property
-    def hash(self) -> Optional[bytes]:
+    def hash(self) -> bytes | None:
         if self._hash is None:
             return None
         else:
             return self._hash.to_array()
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         json_block = super().to_json()
 
         if self._hash is not None:
@@ -45,7 +45,7 @@ class Block(TestBlock):
         return json_block
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> Block:
+    def from_json(cls, json: dict[str, Any]) -> Block:
         block: Block = super().from_json(json)
 
         # 'index' and 'timestamp' fields are required

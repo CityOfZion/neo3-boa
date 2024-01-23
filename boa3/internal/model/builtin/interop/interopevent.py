@@ -1,6 +1,5 @@
 import ast
 from abc import ABC
-from typing import Dict, List
 
 from boa3.internal.model.builtin.method.builtinevent import IBuiltinEvent
 from boa3.internal.model.variable import Variable
@@ -9,7 +8,7 @@ from boa3.internal.model.variable import Variable
 class InteropEvent(IBuiltinEvent, ABC):
 
     def __init__(self, identifier: str, sys_call: str,
-                 args: Dict[str, Variable] = None, defaults: List[ast.AST] = None):
+                 args: dict[str, Variable] = None, defaults: list[ast.AST] = None):
         self._sys_call: str = sys_call
         super().__init__(identifier, args, defaults)
 

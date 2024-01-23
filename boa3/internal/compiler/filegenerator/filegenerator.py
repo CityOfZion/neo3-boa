@@ -1,7 +1,7 @@
 import json
 import logging
 import os.path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.analyser.analyser import Analyser
@@ -28,25 +28,25 @@ class FileGenerator:
     def __init__(self, compiler_result: CompilerOutput, analyser: Analyser, entry_file: str):
         import os
         self._metadata = analyser.metadata
-        self._symbols: Dict[str, ISymbol] = analyser.symbol_table.copy()
+        self._symbols: dict[str, ISymbol] = analyser.symbol_table.copy()
 
         self._entry_file = entry_file
         self._entry_file_full_path = analyser.path.replace(os.sep, constants.PATH_SEPARATOR)
 
-        self._files: List[str] = [self._entry_file_full_path]
+        self._files: list[str] = [self._entry_file_full_path]
         self._nef: NefFile = NefFile(compiler_result.bytecode,
                                      source=self._metadata.source,
                                      method_tokens=compiler_result.method_tokens)
 
-        self.__all_imports: List[Import] = None
-        self._all_methods: Dict[str, Method] = None
-        self._all_static_vars: Dict[str, Variable] = None
+        self.__all_imports: list[Import] = None
+        self._all_methods: dict[str, Method] = None
+        self._all_static_vars: dict[str, Variable] = None
 
         self._inner_methods = None
         self._inner_events = None
 
     @property
-    def _public_methods(self) -> Dict[str, Method]:
+    def _public_methods(self) -> dict[str, Method]:
         """
         Gets a sublist of the symbols containing all public methods
 
@@ -55,15 +55,15 @@ class FileGenerator:
         return {name: method for name, method in self._methods.items() if method.is_public}
 
     @property
-    def _static_variables(self) -> Dict[str, Variable]:
+    def _static_variables(self) -> dict[str, Variable]:
         """
         Gets a sublist of the symbols containing all global variables
 
         :return: a dictionary that maps each global variable with its identifier
         """
         if self._all_static_vars is None:
-            variables: Dict[Tuple[str, str], Variable] = {}
-            imported_symbols: Dict[str, Import] = {}
+            variables: dict[tuple[str, str], Variable] = {}
+            imported_symbols: dict[str, Import] = {}
 
             for name, symbol in self._symbols.items():
                 if isinstance(symbol, Variable) and not symbol.is_reassigned:
@@ -103,7 +103,7 @@ class FileGenerator:
         return self._all_static_vars
 
     @property
-    def _methods(self) -> Dict[str, Method]:
+    def _methods(self) -> dict[str, Method]:
         """
         Gets a sublist of the symbols containing all user methods
 
@@ -126,12 +126,12 @@ class FileGenerator:
         return self._inner_methods
 
     @property
-    def _methods_with_imports(self) -> Dict[Tuple[str, str], Method]:
+    def _methods_with_imports(self) -> dict[tuple[str, str], Method]:
         if self._all_methods is None:
             from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinCallable
 
-            methods: Dict[Tuple[str, str], Method] = {}
-            imported_symbols: Dict[str, Import] = {symbol.origin: symbol for symbol in self._all_imports}
+            methods: dict[tuple[str, str], Method] = {}
+            imported_symbols: dict[str, Import] = {symbol.origin: symbol for symbol in self._all_imports}
 
             for name, symbol in self._symbols.items():
                 if isinstance(symbol, Method) and not isinstance(symbol, IBuiltinCallable):
@@ -179,7 +179,7 @@ class FileGenerator:
         return self._all_methods
 
     @property
-    def _events(self) -> Dict[str, Event]:
+    def _events(self) -> dict[str, Event]:
         """
         Gets a sublist of the symbols containing all user events
 
@@ -202,7 +202,7 @@ class FileGenerator:
         return self._inner_events
 
     @property
-    def _all_imports(self) -> List[Import]:
+    def _all_imports(self) -> list[Import]:
         if self.__all_imports is None:
             all_imports = [imported for imported in self._symbols.values()
                            if (isinstance(imported, (Import, Package))
@@ -294,11 +294,11 @@ class FileGenerator:
 
         :return: the resulting manifest as a byte array
         """
-        data: Dict[str, Any] = self._get_manifest_info()
+        data: dict[str, Any] = self._get_manifest_info()
         json_data: str = json.dumps(data, indent=4)
         return bytes(json_data, constants.ENCODING)
 
-    def _get_manifest_info(self) -> Dict[str, Any]:
+    def _get_manifest_info(self) -> dict[str, Any]:
         """
         Gets the manifest information in a dictionary format
 
@@ -323,7 +323,7 @@ class FileGenerator:
         """
         return self._metadata.name if self._metadata.name else self._entry_file
 
-    def _get_permissions(self) -> List[Dict[str, Any]]:
+    def _get_permissions(self) -> list[dict[str, Any]]:
         """
         Gets the permission information in a dictionary format, if _metadata._permissions is empty, then consider it
         with the import wildcard inside it.
@@ -332,7 +332,7 @@ class FileGenerator:
         """
         return self._metadata.permissions
 
-    def _get_groups(self) -> List[Dict[str, Any]]:
+    def _get_groups(self) -> list[dict[str, Any]]:
         """
         Gets the group information in a dictionary format.
 
@@ -340,7 +340,7 @@ class FileGenerator:
         """
         return self._metadata.groups
 
-    def _get_abi_info(self) -> Dict[str, Any]:
+    def _get_abi_info(self) -> dict[str, Any]:
         """
         Gets the abi information in a dictionary format
 
@@ -351,7 +351,7 @@ class FileGenerator:
             "events": self._get_abi_events()
         }
 
-    def _get_abi_methods(self) -> List[Dict[str, Any]]:
+    def _get_abi_methods(self) -> list[dict[str, Any]]:
         """
         Gets the abi methods in a dictionary format
 
@@ -362,7 +362,7 @@ class FileGenerator:
             for method_id, method in self._public_methods.items()
         ]
 
-    def _construct_abi_method(self, method_id: str, method: Method) -> Dict[str, Any]:
+    def _construct_abi_method(self, method_id: str, method: Method) -> dict[str, Any]:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 
         abi_method_name = method.external_name if isinstance(method.external_name, str) else method_id
@@ -385,7 +385,7 @@ class FileGenerator:
         return method_abi
 
     @staticmethod
-    def _construct_abi_type_hint(var_type: IType, var_id: Optional[str] = None, is_return_type: bool = False) -> Optional[Dict[str, Any]]:
+    def _construct_abi_type_hint(var_type: IType, var_id: str | None = None, is_return_type: bool = False) -> dict[str, Any] | None:
         """
         A recursive function that adds more details to some types on the manifest:
         - Arrays and Maps now have new keys to indicate the type of the items ('generic', 'generickey' and 'genericitem');
@@ -428,7 +428,7 @@ class FileGenerator:
             from boa3.internal.model.type.annotation.optionaltype import OptionalType
             if isinstance(var_type, OptionalType):
 
-                # if Optional is being used only with one type, e.g., Optional[Str], then don't consider it an Union
+                # if Optional is being used only with one type, e.g., Str | None, then don't consider it an Union
                 if len(var_type.optional_types) == 1:
                     extended_type = FileGenerator._construct_abi_type_hint(var_type.optional_types[0],
                                                                            is_return_type=is_return_type)
@@ -460,7 +460,7 @@ class FileGenerator:
 
         return extended_type
 
-    def _get_abi_events(self) -> List[Dict[str, Any]]:
+    def _get_abi_events(self) -> list[dict[str, Any]]:
         """
         Gets the abi events in a dictionary format
 
@@ -478,7 +478,7 @@ class FileGenerator:
             } for name, event in self._events.items() if event.is_called
         ]
 
-    def _get_extras(self) -> Optional[Dict[str, Any]]:
+    def _get_extras(self) -> dict[str, Any] | None:
         """
         Gets the abi information in a dictionary format
 
@@ -504,11 +504,11 @@ class FileGenerator:
 
         :return: the resulting map as a byte array
         """
-        data: Dict[str, Any] = self._get_debug_info()
+        data: dict[str, Any] = self._get_debug_info()
         json_data: str = json.dumps(data, indent=4)
         return bytes(json_data, constants.ENCODING)
 
-    def _get_debug_info(self) -> Dict[str, Any]:
+    def _get_debug_info(self) -> dict[str, Any]:
         """
         Gets the debug information in a dictionary format
 
@@ -523,7 +523,7 @@ class FileGenerator:
             "events": self._get_debug_events()
         }
 
-    def _get_debug_methods(self) -> List[Dict[str, Any]]:
+    def _get_debug_methods(self) -> list[dict[str, Any]]:
         """
         Gets the methods' debug information in a dictionary format
 
@@ -541,7 +541,7 @@ class FileGenerator:
 
         return debug_methods
 
-    def _get_method_debug_info(self, module_id: str, method_id: str, method: Method) -> Dict[str, Any]:
+    def _get_method_debug_info(self, module_id: str, method_id: str, method: Method) -> dict[str, Any]:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
         from boa3.internal.neo.vm.type.AbiType import AbiType
         from boa3.internal.model.type.itype import IType
@@ -578,7 +578,7 @@ class FileGenerator:
         if method.file_origin in self._files:
             return self._files.index(method.file_origin)
 
-        imported_files: List[Import] = [imported for imported in self._symbols.values()
+        imported_files: list[Import] = [imported for imported in self._symbols.values()
                                         if (isinstance(imported, Import)
                                             and not isinstance(imported, BuiltinImport)
                                             and imported.origin is not None)]
@@ -595,7 +595,7 @@ class FileGenerator:
                 self._files.append(imported.origin)
             return self._files.index(imported.origin)
 
-    def _get_debug_events(self) -> List[Dict[str, Any]]:
+    def _get_debug_events(self) -> list[dict[str, Any]]:
         """
         Gets the events' debug information in a dictionary format
 
@@ -619,7 +619,7 @@ class FileGenerator:
 
         return debug_events
 
-    def _get_debug_static_variables(self) -> List[str]:
+    def _get_debug_static_variables(self) -> list[str]:
         """
         Gets the static variables' debug information in a dictionary format
 
@@ -649,7 +649,7 @@ class FileGenerator:
     # endregion
 
     def _get_static_var_unique_name(self, variable_id) -> str:
-        imported_symbols: Dict[str, Import] = {symbol.origin: symbol for symbol in self._all_imports}
+        imported_symbols: dict[str, Import] = {symbol.origin: symbol for symbol in self._all_imports}
 
         for name, symbol in self._symbols.items():
             if isinstance(symbol, Import) and symbol.origin not in imported_symbols:
@@ -680,15 +680,15 @@ class FileGenerator:
 
         return '{0}.{1}'.format(imports_unique_ids[-1], variable_original_id)
 
-    def _get_static_var_slot_index(self, variable_id) -> Optional[int]:
+    def _get_static_var_slot_index(self, variable_id) -> int | None:
         module_globals = list(self._static_variables.keys())
         if variable_id in module_globals:
             return module_globals.index(variable_id)
         return None
 
-    def _get_imports_unique_ids(self, imported_symbols: Dict[str, Import],
+    def _get_imports_unique_ids(self, imported_symbols: dict[str, Import],
                                 importing_methods: bool,
-                                inner_imported_symbols: List[ISymbol] = None) -> Tuple[Dict[str, ImportData], List[str]]:
+                                inner_imported_symbols: list[ISymbol] = None) -> tuple[dict[str, ImportData], list[str]]:
         if not isinstance(imported_symbols, dict):
             return {}, []
         if not isinstance(inner_imported_symbols, list):
@@ -704,7 +704,7 @@ class FileGenerator:
             index += 1
 
         # map the modules that have user modules not imported by the entry file
-        imported_to_map: Dict[str, ImportData] = self._get_imports_to_map(imported_symbols, importing_methods)
+        imported_to_map: dict[str, ImportData] = self._get_imports_to_map(imported_symbols, importing_methods)
 
         # change the full path names to unique small names
         imports_paths = list(imported_to_map)
@@ -742,11 +742,11 @@ class FileGenerator:
 
         return imported_to_map, imports_unique_ids
 
-    def _get_imports_to_map(self, imported_symbols: Dict[str, Import],
-                            importing_methods: bool) -> Dict[str, ImportData]:
+    def _get_imports_to_map(self, imported_symbols: dict[str, Import],
+                            importing_methods: bool) -> dict[str, ImportData]:
 
-        imported_to_map: Dict[str, ImportData] = {}
-        inner_packages: List[Tuple[str, Package]] = []
+        imported_to_map: dict[str, ImportData] = {}
+        inner_packages: list[tuple[str, Package]] = []
 
         for name, imported in imported_symbols.items():
             need_to_map = False

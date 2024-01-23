@@ -10,9 +10,6 @@ __all__ = [
     'find',
 ]
 
-
-from typing import Union
-
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.interop.storage.storagecontext import StorageContext
@@ -66,7 +63,7 @@ def get_read_only_context() -> StorageContext:
     pass
 
 
-def put(key: bytes, value: Union[int, bytes, str], context: StorageContext = get_context()):
+def put(key: bytes, value: int | bytes | str, context: StorageContext = get_context()):
     """
     Inserts a given value in the key-value format into the persistent storage.
 

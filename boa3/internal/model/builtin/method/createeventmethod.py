@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -28,7 +28,7 @@ class CreateEventMethod(IBuiltinMethod):
         return 0
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
 

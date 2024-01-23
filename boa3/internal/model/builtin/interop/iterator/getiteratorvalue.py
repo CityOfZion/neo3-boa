@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.builtin.interop.iterator.iteratortype import IteratorType
@@ -10,7 +8,7 @@ class GetIteratorValue(InteropMethod):
     def __init__(self, iterator: IteratorType):
         syscall = 'System.Iterator.Value'
         identifier = '-get_iterator_value'
-        args: Dict[str, Variable] = {'self': Variable(iterator)}
+        args: dict[str, Variable] = {'self': Variable(iterator)}
 
         result_type = iterator.item_type
         from boa3.internal.model.type.collection.mapping.mappingtype import MappingType

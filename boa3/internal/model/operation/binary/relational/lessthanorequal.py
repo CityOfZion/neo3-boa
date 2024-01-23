@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
@@ -15,7 +13,7 @@ class LessThanOrEqual(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.int]
+    _valid_types: list[IType] = [Type.int]
 
     def __init__(self, left: IType = Type.int, right: IType = None):
         self.operator: Operator = Operator.LtE

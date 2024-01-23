@@ -5,7 +5,8 @@ __all__ = [
 import json
 import os.path
 import subprocess
-from typing import Any, Callable, List, Dict, Optional, Sequence, Tuple, Type, Union
+from collections.abc import Callable, Sequence
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.neo import utils as neo_utils
@@ -44,14 +45,14 @@ class NeoTestRunner:
     def __init__(self, neoxp_path: str, runner_id: str = None):
         self._vm_state: VMState = VMState.NONE
         self._gas_consumed: int = 0
-        self._result_stack: List[Any] = []
-        self._error_message: Optional[str] = None
-        self._last_cli_log: Optional[str] = None
+        self._result_stack: list[Any] = []
+        self._error_message: str | None = None
+        self._last_cli_log: str | None = None
         self._cli_log: str = ''
 
-        self._calling_account: Optional[Account] = None
-        self._notifications: List[Notification] = []
-        self._logs: List[Log] = []
+        self._calling_account: Account | None = None
+        self._notifications: list[Notification] = []
+        self._logs: list[Log] = []
         self._storages: StorageCollection = StorageCollection()
 
         self._neoxp_abs_path = os.path.abspath(neoxp_path)
@@ -69,7 +70,7 @@ class NeoTestRunner:
         self._contracts = ContractCollection()
         self._invokes = NeoInvokeCollection()
         self._invokes_to_batch = 0
-        self._last_execution_results: List[NeoInvokeResult] = []
+        self._last_execution_results: list[NeoInvokeResult] = []
 
     @property
     def file_name(self) -> str:
@@ -100,11 +101,11 @@ class NeoTestRunner:
         return self._gas_consumed
 
     @property
-    def result_stack(self) -> List[Any]:
+    def result_stack(self) -> list[Any]:
         return self._result_stack.copy()
 
     @property
-    def error(self) -> Optional[str]:
+    def error(self) -> str | None:
         return self._error_message
 
     @property
@@ -112,13 +113,13 @@ class NeoTestRunner:
         return self._cli_log
 
     @property
-    def notifications(self) -> List[Notification]:
+    def notifications(self) -> list[Notification]:
         return self._notifications.copy()
 
-    def get_events(self, event_name: str = None, origin: TestContract = None) -> List[Notification]:
+    def get_events(self, event_name: str = None, origin: TestContract = None) -> list[Notification]:
         return self._filter_events(self._notifications, event_name, origin)
 
-    def get_logs(self, origin: TestContract = None) -> List[Log]:
+    def get_logs(self, origin: TestContract = None) -> list[Log]:
         return self._filter_events(self._logs, origin=origin)
 
     def _filter_events(self, events: list, event_name: str = None, origin: TestContract = None) -> list:
@@ -141,7 +142,7 @@ class NeoTestRunner:
                                               and n.origin == origin_bytes)]
 
     @property
-    def logs(self) -> List[Log]:
+    def logs(self) -> list[Log]:
         return self._logs.copy()
 
     @property
@@ -177,7 +178,7 @@ class NeoTestRunner:
     def get_latest_block(self) -> Block:
         return self.get_block(None)
 
-    def get_block(self, block_hash_or_index: Union[UInt256, bytes, int]) -> Optional[Block]:
+    def get_block(self, block_hash_or_index: UInt256 | bytes | int) -> Block | None:
         genesis = self._get_genesis_block()
         if isinstance(genesis, Block) and block_hash_or_index in (genesis.hash, genesis.index):
             # genesis block doesn't change between neo express resets
@@ -188,10 +189,10 @@ class NeoTestRunner:
             self._set_genesis_block(block)  # optimization for consecutive executions
         return block
 
-    def _get_genesis_block(self) -> Optional[Block]:
+    def _get_genesis_block(self) -> Block | None:
         return neoxp_utils.get_genesis_block(self._neoxp_config)
 
-    def _get_block(self, block_hash_or_index) -> Optional[Block]:
+    def _get_block(self, block_hash_or_index) -> Block | None:
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index,
                                      check_point_file=check_point_path)
@@ -200,7 +201,7 @@ class NeoTestRunner:
         if isinstance(genesis, Block):
             self._neoxp_config._genesis_block = genesis
 
-    def get_transaction(self, tx_hash: Union[UInt256, bytes]) -> Optional[Transaction]:
+    def get_transaction(self, tx_hash: UInt256 | bytes) -> Transaction | None:
         if isinstance(tx_hash, bytes):
             tx_hash = UInt256(tx_hash)
 
@@ -211,7 +212,7 @@ class NeoTestRunner:
         return neoxp_utils.get_transaction(self._neoxp_abs_path, tx_hash,
                                            check_point_file=check_point_path)
 
-    def get_transaction_result(self, tx_hash: Union[UInt256, bytes]) -> Optional[TransactionLog]:
+    def get_transaction_result(self, tx_hash: UInt256 | bytes) -> TransactionLog | None:
         if isinstance(tx_hash, bytes):
             tx_hash = UInt256(tx_hash)
 
@@ -239,7 +240,7 @@ class NeoTestRunner:
         return contract
 
     def call_contract(self, nef_path: str, method: str, *arguments: Any,
-                      expected_result_type: Type = None) -> NeoInvokeResult:
+                      expected_result_type: type = None) -> NeoInvokeResult:
         if nef_path not in self._contracts:
             contract = self.deploy_contract(nef_path)
         else:
@@ -250,7 +251,7 @@ class NeoTestRunner:
 
     def run_contract(self, nef_path: str, method: str, *arguments: Any,
                      account: Account = None, witness_scope: WitnessScope = WitnessScope.CalledByEntry,
-                     expected_result_type: Type = None) -> NeoBatchInvoke:
+                     expected_result_type: type = None) -> NeoBatchInvoke:
         if nef_path not in self._contracts:
             contract = self.deploy_contract(nef_path)
         else:
@@ -267,7 +268,7 @@ class NeoTestRunner:
                                         witness_scope=witness_scope,
                                         expected_result_type=expected_result_type)
 
-    def get_contract(self, contract_id: Union[str, bytes]) -> TestContract:
+    def get_contract(self, contract_id: str | bytes) -> TestContract:
         return self._contracts[contract_id]
 
     def update_contracts(self, export_checkpoint: bool = False):
@@ -295,7 +296,7 @@ class NeoTestRunner:
         if batch_has_deploys:
             self._contracts.update_after_deploy()
 
-    def execute(self, account: Account = None, get_storage_from: Union[str, TestContract] = None,
+    def execute(self, account: Account = None, get_storage_from: str | TestContract = None,
                 clear_invokes: bool = True, add_invokes_to_batch: bool = False):
         self._generate_files()
         invoke_file_path = self.get_full_path(self._INVOKE_FILE)
@@ -365,7 +366,7 @@ class NeoTestRunner:
         self._invokes.clear()
         self._invokes_to_batch = 0
 
-    def _update_runner(self, result: Dict[str, Any]):
+    def _update_runner(self, result: dict[str, Any]):
         self.reset_state()
         self._error_message = result['exception'] if 'exception' in result else None
 
@@ -435,7 +436,7 @@ class NeoTestRunner:
 
         self._internal_generate_files(methods_to_call)
 
-    def _internal_generate_files(self, methods_to_call: List[Tuple[Callable, Sequence]]):
+    def _internal_generate_files(self, methods_to_call: list[tuple[Callable, Sequence]]):
         for method, args in methods_to_call:
             method(*args)
 
@@ -457,7 +458,7 @@ class NeoTestRunner:
     def get_full_path(self, file_name: str):
         return self._root + os.path.sep + file_name
 
-    def _run_command_line(self, args: List[str]) -> Tuple[str, str]:
+    def _run_command_line(self, args: list[str]) -> tuple[str, str]:
         process = subprocess.Popen(args,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.STDOUT,
@@ -470,12 +471,12 @@ class NeoTestRunner:
     def oracle_enable(self, account: Account):
         self._batch.oracle_enable(account)
 
-    def oracle_response(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
+    def oracle_response(self, url: str, response_path: str, request_id: int = None) -> list[UInt256]:
         # add to command to batch file and get the tx id
         self._batch.oracle_response(url, response_path, request_id=request_id)
         return self._get_oracle_resp(url, response_path, request_id)
 
-    def _get_oracle_resp(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
+    def _get_oracle_resp(self, url: str, response_path: str, request_id: int = None) -> list[UInt256]:
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return neoxp_utils.oracle_response(self._neoxp_abs_path, url, response_path, request_id,
                                            check_point_file=check_point_path)

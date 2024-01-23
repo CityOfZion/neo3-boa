@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Union
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.neo.utils import contract_parameter_to_json, stack_item_from_json
@@ -12,7 +12,7 @@ from boa3_test.tests.test_classes.nativecontractprefix import get_native_contrac
 
 class Storage:
     def __init__(self):
-        self._dict: Dict[StorageKey, StorageItem] = {}
+        self._dict: dict[StorageKey, StorageItem] = {}
 
     def pop(self, key: bytes) -> StorageItem:
         storage_key = StorageKey(key)
@@ -36,14 +36,14 @@ class Storage:
         storage._dict = self._dict.copy()
         return storage
 
-    def to_json(self) -> List[Dict[str, Any]]:
+    def to_json(self) -> list[dict[str, Any]]:
         return [{'key': key.to_json(),
                  'value': item.to_json()
                  } for key, item in self._dict.items()
                 ]
 
     @classmethod
-    def from_json(cls, json: Union[Dict[str, Any], List[Dict[str, Any]]]) -> Storage:
+    def from_json(cls, json: dict[str | Any, list[dict[str, Any]]]) -> Storage:
         if not isinstance(json, list):
             json = [json]
 
@@ -130,13 +130,13 @@ class StorageKey:
         self._ID: int = _id
         self._key: bytes = key
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         return {'id': self._ID,
                 'key': contract_parameter_to_json(self._key)
                 }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> StorageKey:
+    def from_json(cls, json: dict[str, Any]) -> StorageKey:
         k = stack_item_from_json(json['key'])
         if isinstance(k, str):
             from boa3.internal.neo.vm.type.String import String
@@ -165,13 +165,13 @@ class StorageItem:
     def value(self) -> bytes:
         return self._value
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         return {'isconstant': self._is_constant,
                 'value': contract_parameter_to_json(self._value)
                 }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> StorageItem:
+    def from_json(cls, json: dict[str, Any]) -> StorageItem:
         value = stack_item_from_json(json['value'])
         if isinstance(value, str):
             from boa3.internal.neo.vm.type.String import String

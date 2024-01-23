@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Any
 
 from boa3.internal.neo.smart_contract.notification import Notification
 from boa3.internal.neo3.core.types import UInt160
@@ -19,7 +19,7 @@ class TestRunnerNotification(Notification):
         return self._contract
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], contract_collection: ContractCollection = None,
+    def from_json(cls, json: dict[str, Any], contract_collection: ContractCollection = None,
                   *args, **kwargs) -> Notification:
 
         result = super().from_json(json)

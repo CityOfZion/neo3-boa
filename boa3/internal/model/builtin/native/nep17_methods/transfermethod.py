@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model.builtin.interop.nativecontract import Nep17Method
 from boa3.internal.model.variable import Variable
@@ -13,7 +12,7 @@ class TransferMethod(Nep17Method):
 
         identifier = 'transfer'
         native_identifier = 'transfer'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'from_address': Variable(UInt160Type.build()),
             'to_address': Variable(UInt160Type.build()),
             'amount': Variable(Type.int),

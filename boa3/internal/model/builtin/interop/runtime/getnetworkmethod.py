@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
 
@@ -10,5 +8,5 @@ class GetNetworkMethod(InteropMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'get_network'
         syscall = 'System.Runtime.GetNetwork'
-        args: Dict[str, Variable] = {}
+        args: dict[str, Variable] = {}
         super().__init__(identifier, syscall, args, return_type=Type.int)

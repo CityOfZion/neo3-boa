@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
 
@@ -11,5 +9,5 @@ class StorageContextAsReadOnlyMethod(InteropMethod):
 
         identifier = 'as_read_only'
         syscall = 'System.Storage.AsReadOnly'
-        args: Dict[str, Variable] = {'self': Variable(_StorageContext)}
+        args: dict[str, Variable] = {'self': Variable(_StorageContext)}
         super().__init__(identifier, syscall, args, return_type=_StorageContext)

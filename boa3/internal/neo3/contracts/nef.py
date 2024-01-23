@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import hashlib
-from typing import List, Tuple
 
 from boa3.internal.neo3 import contracts
 from boa3.internal.neo3.core import Size as s, serialization, types, utils
@@ -71,7 +70,7 @@ class Version(serialization.ISerializable):
         self.revision = int(revision)
 
     @classmethod
-    def _parse_component(self, c: str) -> Tuple[bool, int]:
+    def _parse_component(self, c: str) -> tuple[bool, int]:
         try:
             r = int(c)
         except ValueError:
@@ -125,7 +124,7 @@ class NEF(serialization.ISerializable):
     def __init__(self,
                  compiler_name: str = None,
                  script: bytes = None,
-                 tokens: List[MethodToken] = None,
+                 tokens: list[MethodToken] = None,
                  source: str = None,
                  _magic: int = 0x3346454E):
         self.magic = _magic

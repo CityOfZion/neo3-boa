@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -17,7 +17,7 @@ class InsertMethod(IBuiltinMethod):
         item_arg = Variable(sequence_type.value_type)
 
         identifier = 'insert'
-        args: Dict[str, Variable] = {'self': self_arg,
+        args: dict[str, Variable] = {'self': self_arg,
                                      '__index': index_arg,
                                      '__object': item_arg}
         super().__init__(identifier, args)
@@ -41,7 +41,7 @@ class InsertMethod(IBuiltinMethod):
             return False
         return sequence_type.key_type.is_type_of(index_type) and sequence_type.value_type.is_type_of(value_type)
 
-    def validate_negative_arguments(self) -> List[int]:
+    def validate_negative_arguments(self) -> list[int]:
         return [list(self.args).index('__index')]
 
     def generate_internal_opcodes(self, code_generator):
@@ -109,7 +109,7 @@ class InsertMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

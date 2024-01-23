@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import List
-
 from boa3.internal import constants
 from boa3.internal.neo import from_hex_str
 from boa3.internal.neo3.core.types import UInt160
@@ -33,7 +31,7 @@ class Signer(TestSigner):
             if script_hash not in self._allowed_contracts:
                 self._allowed_contracts.append(script_hash)
 
-    def add_permitted_groups(self, groups_pubkeys: List[bytes]):
+    def add_permitted_groups(self, groups_pubkeys: list[bytes]):
         for group_pubkey in groups_pubkeys:
             if isinstance(group_pubkey, str):
                 group = from_hex_str(group_pubkey)

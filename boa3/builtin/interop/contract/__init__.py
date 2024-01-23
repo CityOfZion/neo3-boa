@@ -15,7 +15,8 @@ __all__ = [
 ]
 
 
-from typing import Any, List, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
@@ -156,7 +157,7 @@ def create_standard_account(pub_key: ECPoint) -> UInt160:
     pass
 
 
-def create_multisig_account(m: int, pub_keys: List[ECPoint]) -> UInt160:
+def create_multisig_account(m: int, pub_keys: list[ECPoint]) -> UInt160:
     """
     Calculates corresponding multisig account script hash for the given public keys.
 
@@ -166,7 +167,7 @@ def create_multisig_account(m: int, pub_keys: List[ECPoint]) -> UInt160:
     :param m: the minimum number of correct signatures need to be provided in order for the verification to pass.
     :type m: int
     :param pub_keys: the public keys of the account
-    :type pub_keys: List[ECPoint]
+    :type pub_keys: list[ECPoint]
 
     :return: the hash of the corresponding account
     :rtype: UInt160

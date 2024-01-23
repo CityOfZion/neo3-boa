@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Dict, List, Optional, Sized
+from collections.abc import Sized
+from typing import Any
 
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.internal.model.type.type import Type
@@ -9,7 +10,7 @@ from boa3.internal.model.variable import Variable
 class PublicDecorator(IBuiltinDecorator):
     def __init__(self):
         identifier = 'public'
-        args: Dict[str, Variable] = {'name': Variable(Type.str),
+        args: dict[str, Variable] = {'name': Variable(Type.str),
                                      'safe': Variable(Type.bool),
                                      }
 
@@ -19,7 +20,7 @@ class PublicDecorator(IBuiltinDecorator):
         defaults = [name_default, safe_default]
         super().__init__(identifier, args, defaults)
 
-        self.name: Optional[str] = None
+        self.name: str | None = None
         self.safe = False
 
     def build(self, *args) -> IBuiltinDecorator:
@@ -41,7 +42,7 @@ class PublicDecorator(IBuiltinDecorator):
 
         return self
 
-    def validate_values(self, *params: Any) -> List[Any]:
+    def validate_values(self, *params: Any) -> list[Any]:
         values = []
         if len(params) != 2:
             return values

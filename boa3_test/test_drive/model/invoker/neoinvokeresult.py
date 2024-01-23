@@ -1,11 +1,11 @@
-from typing import Type, Iterable
+from collections.abc import Iterable
 
 from boa3_test.test_drive.model.invoker import invokeresult
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 
 
 class NeoInvokeResult:
-    def __init__(self, invoke: NeoInvoke, expected_result_type: Type = None):
+    def __init__(self, invoke: NeoInvoke, expected_result_type: type = None):
         self._invoke: NeoInvoke = invoke
         self._result = invokeresult.NOT_EXECUTED
 

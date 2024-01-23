@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.model import set_internal_call
@@ -14,7 +13,7 @@ class ConstructAnalyser(IAstAnalyser, ast.NodeTransformer):
     These methods are used to walk through the Python abstract syntax tree.
     """
 
-    def __init__(self, analyser, ast_tree: ast.AST, symbol_table: Dict[str, ISymbol],
+    def __init__(self, analyser, ast_tree: ast.AST, symbol_table: dict[str, ISymbol],
                  log: bool = False, fail_fast: bool = True):
         super().__init__(ast_tree, root_folder=analyser.root, log=log, fail_fast=fail_fast)
         self.symbols = symbol_table.copy()

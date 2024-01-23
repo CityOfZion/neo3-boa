@@ -1,4 +1,4 @@
-from typing import Type, Iterable
+from collections.abc import Iterable
 
 from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 from boa3_test.test_drive.model.invoker import invokeresult
@@ -6,7 +6,7 @@ from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
 
 
 class NeoBatchInvoke(ITransactionObject):
-    def __init__(self, invoke: NeoInvoke, tx_pos: int, expected_result_type: Type = None):
+    def __init__(self, invoke: NeoInvoke, tx_pos: int, expected_result_type: type = None):
         super().__init__()
         self._invoke: NeoInvoke = invoke
         self._tx_pos: int = tx_pos

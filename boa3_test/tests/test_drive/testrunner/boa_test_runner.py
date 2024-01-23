@@ -4,7 +4,7 @@ __all__ = [
 
 import os.path
 import threading
-from typing import Callable, List, Sequence, Optional, Tuple, Union
+from collections.abc import Callable, Sequence
 
 from boa3.internal import env
 from boa3.internal.neo3.core.types import UInt256
@@ -39,20 +39,20 @@ class BoaTestRunner(NeoTestRunner):
         runner_specific_id = utils.create_custom_id(file_name)
         super()._set_up_generate_file_names(runner_specific_id)
 
-    def add_neo(self, script_hash_or_address: Union[bytes, str], amount: int):
+    def add_neo(self, script_hash_or_address: bytes | str, amount: int):
         address = boa_neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     quantity=amount,
                                     asset='NEO')
 
-    def add_gas(self, script_hash_or_address: Union[bytes, str], amount: int):
+    def add_gas(self, script_hash_or_address: bytes | str, amount: int):
         address = boa_neoxp_utils.get_account_from_script_hash_or_id(script_hash_or_address)
         gas_decimals = 8
         self._batch.transfer_assets(sender=self._DEFAULT_ACCOUNT, receiver=address,
                                     asset='GAS', decimals=gas_decimals,
                                     quantity=(amount / (10 ** gas_decimals)))
 
-    def _internal_generate_files(self, methods_to_call: List[Tuple[Callable, Sequence]]):
+    def _internal_generate_files(self, methods_to_call: list[tuple[Callable, Sequence]]):
         worker_threads = []
 
         if len(methods_to_call) > 0:
@@ -70,10 +70,10 @@ class BoaTestRunner(NeoTestRunner):
         for worker in worker_threads:
             worker.join()
 
-    def _get_genesis_block(self) -> Optional[Block]:
+    def _get_genesis_block(self) -> Block | None:
         return boa_neoxp_utils.get_genesis_block()
 
-    def _get_block(self, block_hash_or_index) -> Optional[Block]:
+    def _get_block(self, block_hash_or_index) -> Block | None:
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return boa_neoxp_utils.get_block(self._neoxp_abs_path, block_hash_or_index,
                                          check_point_file=check_point_path)
@@ -89,7 +89,7 @@ class BoaTestRunner(NeoTestRunner):
                                                    check_point_file=check_point_path,
                                                    contract_collection=contract_collection)
 
-    def _get_oracle_resp(self, url: str, response_path: str, request_id: int = None) -> List[UInt256]:
+    def _get_oracle_resp(self, url: str, response_path: str, request_id: int = None) -> list[UInt256]:
         check_point_path = self.get_full_path(self._CHECKPOINT_FILE)
         return boa_neoxp_utils.oracle_response(self._neoxp_abs_path, url, response_path, request_id,
                                                check_point_file=check_point_path)

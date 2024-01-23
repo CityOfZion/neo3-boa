@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.interop.nativecontract import OracleMethod
 from boa3.internal.model.variable import Variable
 
@@ -11,7 +9,7 @@ class OracleRequestMethod(OracleMethod):
 
         identifier = 'request'
         syscall = 'request'
-        args: Dict[str, Variable] = {'url': Variable(Type.str),
+        args: dict[str, Variable] = {'url': Variable(Type.str),
                                      'request_filter': Variable(Type.str),
                                      'callback': Variable(Type.str),
                                      'user_data': Variable(Type.any),
@@ -24,5 +22,5 @@ class OracleRequestMethod(OracleMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None

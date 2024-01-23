@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.method import Method
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.type import Type
@@ -8,7 +6,7 @@ from boa3.internal.model.variable import Variable
 
 class StandardMethod(Method):
     def __init__(self, display_name: str,
-                 args: Dict[str, IType] = None,
+                 args: dict[str, IType] = None,
                  return_type: IType = Type.none,
                  safe: bool = False,
                  literal_implementation: bool = True):

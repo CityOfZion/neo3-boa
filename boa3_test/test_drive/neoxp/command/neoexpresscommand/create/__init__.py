@@ -1,12 +1,10 @@
-from typing import Dict, Optional
-
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.neoexpresscommand import NeoExpressCommand
 
 __all__ = ['CreateCommand']
 
 
 class CreateCommand(NeoExpressCommand):
-    def __init__(self, config_output: Optional[str] = None,
+    def __init__(self, config_output: str | None = None,
                  node_count: int = None,
                  address_version: int = None,
                  force: bool = False):
@@ -26,7 +24,7 @@ class CreateCommand(NeoExpressCommand):
 
         super().__init__(command_id, args)
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if isinstance(self.address_version, int):

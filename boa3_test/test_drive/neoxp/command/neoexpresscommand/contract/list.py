@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.contract.icontractcommand import IContractCommand
 
 
@@ -12,7 +10,7 @@ class ContractListCommand(IContractCommand):
 
         super().__init__('list')
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if self.json_output:
