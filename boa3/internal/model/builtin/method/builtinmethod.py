@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 from boa3.internal.model.method import Method
@@ -11,10 +11,10 @@ from boa3.internal.model.variable import Variable
 
 
 class IBuiltinMethod(IBuiltinCallable, Method, ABC):
-    def __init__(self, identifier: str, args: Dict[str, Variable] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None,
-                 vararg: Optional[Tuple[str, Variable]] = None,
-                 kwargs: Optional[Dict[str, Variable]] = None):
+    def __init__(self, identifier: str, args: dict[str, Variable] = None,
+                 defaults: list[ast.AST] = None, return_type: IType = None,
+                 vararg: tuple[str, Variable] | None = None,
+                 kwargs: dict[str, Variable] | None = None):
         super().__init__(identifier, args, vararg, kwargs, defaults, return_type)
 
     @property
@@ -38,7 +38,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         return False
 
     @property
-    def cast_types(self) -> Optional[Tuple[IType, IType]]:
+    def cast_types(self) -> tuple[IType, IType] | None:
         """
         If `is_cast` is True, must return the original type and the target type of the cast.
         Otherwise, must return None
@@ -132,7 +132,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         pass
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         """
         Gets the indexes order that need to be used during code generation.
         If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))
@@ -146,12 +146,12 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
 
         return indexes
 
-    def validate_negative_arguments(self) -> List[int]:
+    def validate_negative_arguments(self) -> list[int]:
         """
         Returns a list of the arguments that have to be positive values and need validation.
 
         :return: list with the arguments indexes that need to be fixed.
-        :rtype: List[int]
+        :rtype: list[int]
         """
         return []
 
@@ -175,7 +175,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         return Undefined
 
     @property
-    def body(self) -> Optional[str]:
+    def body(self) -> str | None:
         """
         Gets the body of the method.
 
@@ -185,7 +185,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
 
     @property
     @abstractmethod
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         """
         Gets the body of the method.
 

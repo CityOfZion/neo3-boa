@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model.builtin.interop.nativecontract import ContractManagementMethod
 from boa3.internal.model.variable import Variable
@@ -11,7 +10,7 @@ class UpdateMethod(ContractManagementMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'update_contract'
         syscall = 'update'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'nef_file': Variable(Type.bytes),
             'manifest': Variable(Type.bytes),
             'data': Variable(Type.any)

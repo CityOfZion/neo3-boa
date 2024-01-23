@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Dict, Iterable, List, Sized
+from collections.abc import Iterable, Sized
+from typing import Any
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
@@ -23,7 +24,7 @@ class StoragePutMethod(InteropMethod):
                                                Type.str,
                                                ])
 
-        args: Dict[str, Variable] = {'key': Variable(Type.bytes),
+        args: dict[str, Variable] = {'key': Variable(Type.bytes),
                                      'value': Variable(storage_value_type),
                                      'context': Variable(context_type)}
 
@@ -34,7 +35,7 @@ class StoragePutMethod(InteropMethod):
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.none)
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         """
         Gets the indexes order that need to be used during code generation.
         If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))

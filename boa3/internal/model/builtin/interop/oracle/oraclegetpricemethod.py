@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.interop.nativecontract import OracleMethod
 from boa3.internal.model.variable import Variable
 
@@ -11,7 +9,7 @@ class OracleGetPriceMethod(OracleMethod):
 
         identifier = 'get_price'
         syscall = 'getPrice'
-        args: Dict[str, Variable] = {}
+        args: dict[str, Variable] = {}
 
         super().__init__(identifier, syscall, args, return_type=Type.int)
 
@@ -20,5 +18,5 @@ class OracleGetPriceMethod(OracleMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None

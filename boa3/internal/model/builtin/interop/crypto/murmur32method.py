@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.internal.model.variable import Variable
 
@@ -10,7 +8,7 @@ class Murmur32Method(CryptoLibMethod):
 
         identifier = 'murmur32'
         native_identifier = 'murmur32'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'data': Variable(Type.bytes),
             'seed': Variable(Type.int),
         }

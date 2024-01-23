@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal import constants
 from boa3.internal.neo import to_hex_str
 from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
@@ -13,20 +11,20 @@ class TestContract(ITransactionObject):
         self._nef_path: str = file_path
         self._manifest_path: str = manifest_path
         self._manifest: dict = self._read_manifest()
-        self._script_hash: Optional[bytes] = None
+        self._script_hash: bytes | None = None
 
     @property
     def path(self) -> str:
         return self._nef_path
 
     @property
-    def script_hash(self) -> Optional[bytes]:
+    def script_hash(self) -> bytes | None:
         if not isinstance(self._script_hash, bytes) and len(self._log) > 0 and not self._log.isspace():
             self._handle_log()
         return self._script_hash
 
     @script_hash.setter
-    def script_hash(self, new_value: Optional[bytes]):
+    def script_hash(self, new_value: bytes | None):
         if self._script_hash is None and isinstance(new_value, bytes) and len(new_value) == constants.SIZE_OF_INT160:
             self._script_hash = new_value
 

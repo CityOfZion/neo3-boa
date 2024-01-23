@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.type.classes.classtype import ClassType
 from boa3.internal.model.type.classes.contractinterfacehash import ContractHashProperty
@@ -8,8 +6,8 @@ from boa3.internal.neo3.core.types import UInt160
 
 
 class ContractInterfaceClass(UserClass):
-    def __init__(self, identifier: str, contract_hash: UInt160, decorators: List[Callable] = None,
-                 bases: List[ClassType] = None):
+    def __init__(self, identifier: str, contract_hash: UInt160, decorators: list[Callable] = None,
+                 bases: list[ClassType] = None):
         from boa3.internal.model.builtin.builtin import Builtin, ContractDecorator
 
         if not isinstance(decorators, list):

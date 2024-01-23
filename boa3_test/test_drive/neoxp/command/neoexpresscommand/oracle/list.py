@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.oracle.ioraclecommand import IOracleCommand
 
 
@@ -13,5 +11,5 @@ class OracleListCommand(IOracleCommand):
 
         super().__init__(command_id)
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         return super()._get_options()

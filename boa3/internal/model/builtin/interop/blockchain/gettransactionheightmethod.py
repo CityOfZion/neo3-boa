@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import LedgerMethod
 from boa3.internal.model.variable import Variable
 
@@ -12,5 +10,5 @@ class GetTransactionHeightMethod(LedgerMethod):
 
         identifier = 'get_transaction_height'
         syscall = 'getTransactionHeight'
-        args: Dict[str, Variable] = {'hash_': Variable(UInt256Type.build())}
+        args: dict[str, Variable] = {'hash_': Variable(UInt256Type.build())}
         super().__init__(identifier, syscall, args, return_type=Type.int)

@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import NeoContractMethod
 from boa3.internal.model.variable import Variable
 
@@ -13,7 +11,7 @@ class UnVoteMethod(NeoContractMethod):
 
         identifier = 'un_vote'
         native_identifier = 'vote'  # un_vote is not neo native
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'account': Variable(UInt160Type.build()),
         }
 

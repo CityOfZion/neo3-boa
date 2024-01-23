@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any, Set
+from typing import Any
 
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
@@ -10,7 +10,7 @@ class MutableSequenceType(SequenceType, ABC):
     An interface used to represent Python mutable sequence type
     """
 
-    def __init__(self, identifier: str, values_type: Set[IType]):
+    def __init__(self, identifier: str, values_type: set[IType]):
         super().__init__(identifier, values_type)
 
     def _init_class_symbols(self):

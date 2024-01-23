@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Any
 
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.method import IBuiltinMethod
@@ -21,7 +21,7 @@ class GetEnvMethod(IBuiltinMethod):
         code_generator.convert_literal(self._env)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def update_with_analyser(self, analyser):

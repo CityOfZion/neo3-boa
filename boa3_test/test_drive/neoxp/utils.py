@@ -23,8 +23,6 @@ __all__ = [
     'TransactionLog'
 ]
 
-from typing import List, Union
-
 from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.wallet import utils as wallet_utils
 from boa3_test.test_drive.model.wallet.account import Account
@@ -64,7 +62,7 @@ def get_genesis_block(neoxp_config: NeoExpressConfig) -> Block:
     return neoxp_config.genesis_block
 
 
-def get_account_from_script_hash_or_id(neoxp_config: NeoExpressConfig, script_hash_or_address: Union[bytes, str]) -> Account:
+def get_account_from_script_hash_or_id(neoxp_config: NeoExpressConfig, script_hash_or_address: bytes | str) -> Account:
     if isinstance(script_hash_or_address, bytes):
         script_hash = script_hash_or_address
         address = wallet_utils.address_from_script_hash(script_hash, neoxp_config.version)
@@ -91,7 +89,7 @@ def reset_neo_express_instance(neoxp_path: str, check_point_file: str = None) ->
     return NeoExpressWrapper.reset_neo_express_instance(neoxp_path, check_point_file)
 
 
-def get_deployed_contracts(neoxp_path: str, check_point_file: str = None) -> List[Contract]:
+def get_deployed_contracts(neoxp_path: str, check_point_file: str = None) -> list[Contract]:
     return NeoExpressWrapper.get_deployed_contracts(neoxp_path, check_point_file)
 
 
@@ -107,7 +105,7 @@ def get_latest_block(neoxp_path: str, check_point_file: str = None) -> Block:
     return NeoExpressWrapper.get_latest_block(neoxp_path, check_point_file)
 
 
-def get_block(neoxp_path: str, block_hash_or_index: Union[UInt256, int] = None,
+def get_block(neoxp_path: str, block_hash_or_index: UInt256 | int = None,
               check_point_file: str = None) -> Block:
     return NeoExpressWrapper.get_block(neoxp_path, block_hash_or_index, check_point_file)
 
@@ -117,5 +115,5 @@ def run_batch(neoxp_path: str, batch_path: str, reset: bool = False, check_point
 
 
 def oracle_response(neoxp_path: str, url: str, response_path: str, request_id: int = None,
-                    check_point_file: str = None) -> List[UInt256]:
+                    check_point_file: str = None) -> list[UInt256]:
     return NeoExpressWrapper.oracle_response(neoxp_path, url, response_path, request_id, check_point_file)

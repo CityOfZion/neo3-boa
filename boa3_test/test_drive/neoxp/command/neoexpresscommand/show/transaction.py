@@ -1,11 +1,9 @@
-from typing import Dict, Union
-
 from boa3_test.test_drive.neoxp.command import utils
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.show.ishowcommand import IShowCommand
 
 
 class ShowTransactionCommand(IShowCommand):
-    def __init__(self, transaction_hash: Union[bytes, str],
+    def __init__(self, transaction_hash: bytes | str,
                  neo_express_data_file: str = None):
 
         if isinstance(transaction_hash, bytes):
@@ -16,5 +14,5 @@ class ShowTransactionCommand(IShowCommand):
 
         super().__init__('transaction', [transaction_hash])
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         return super()._get_options()

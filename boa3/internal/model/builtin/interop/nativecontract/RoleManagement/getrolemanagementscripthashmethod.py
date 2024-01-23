@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
 from boa3.internal.model.variable import Variable
@@ -10,7 +8,7 @@ class GetRoleManagementScriptHashMethod(ContractGetHashMethod):
         from boa3.internal.constants import ROLE_MANAGEMENT
         from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
         identifier = '-get_role-management'
-        args: Dict[str, Variable] = {}
+        args: dict[str, Variable] = {}
         super().__init__(ROLE_MANAGEMENT, identifier, args, return_type=UInt160Type.build())
 
     @property
@@ -18,7 +16,7 @@ class GetRoleManagementScriptHashMethod(ContractGetHashMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
 

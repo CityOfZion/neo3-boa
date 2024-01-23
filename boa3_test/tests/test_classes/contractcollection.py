@@ -1,12 +1,10 @@
-from typing import List
-
 from boa3.internal import constants
 from boa3_test.tests.test_classes.testcontract import TestContract
 
 
 class ContractCollection:
     def __init__(self):
-        self._internal_list: List[TestContract] = []
+        self._internal_list: list[TestContract] = []
 
     def append(self, new_contract: TestContract):
         return self._internal_list.append(new_contract)

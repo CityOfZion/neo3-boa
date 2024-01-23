@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List
 
 from boa3.internal.model.builtin.interop.nativecontract.RoleManagement.getrolemanagementscripthashmethod import \
     RoleManagement
@@ -10,7 +9,7 @@ from boa3.internal.model.variable import Variable
 
 class RoleManagementMethod(NativeContractMethod):
 
-    def __init__(self, identifier: str, syscall: str, args: Dict[str, Variable] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None,
+    def __init__(self, identifier: str, syscall: str, args: dict[str, Variable] = None,
+                 defaults: list[ast.AST] = None, return_type: IType = None,
                  internal_call_args: int = None):
         super().__init__(RoleManagement.getter, identifier, syscall, args, defaults, return_type, internal_call_args)

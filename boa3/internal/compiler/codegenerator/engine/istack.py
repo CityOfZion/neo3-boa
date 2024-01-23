@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 import abc
-from typing import TypeVar, Union, Type
+from typing import TypeVar
 
 T = TypeVar("T")
 
 
 class IStack(abc.ABC):
-    def __init__(self, stack_type: Type[T]):
+    def __init__(self, stack_type: type[T]):
         self._stack_type = stack_type
         self._stack: list[T] = []
 
@@ -32,7 +32,7 @@ class IStack(abc.ABC):
     def __len__(self) -> int:
         return len(self._stack)
 
-    def __getitem__(self, index_or_slice: Union[int, slice]):
+    def __getitem__(self, index_or_slice: int | slice):
         return self._stack[index_or_slice]
 
     def reverse(self, start: int = 0, end: int = None, *, rotate: bool = False):

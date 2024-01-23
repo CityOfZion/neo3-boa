@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
@@ -17,7 +16,7 @@ class LoadScriptMethod(InteropMethod):
         syscall = 'System.Runtime.LoadScript'
         call_flags: CallFlagsType = CallFlagsType.build()
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'script': Variable(Type.bytes),
             'args': Variable(Type.sequence),
             'call_flags': Variable(call_flags)
@@ -32,7 +31,7 @@ class LoadScriptMethod(InteropMethod):
         super().__init__(identifier, syscall, args, defaults=[args_default, call_flags_default], return_type=Type.any)
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         indexes = super().generation_order
         context_index = list(self.args).index('args')
 

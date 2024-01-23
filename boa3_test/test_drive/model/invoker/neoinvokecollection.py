@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Type
+from typing import Any
 
 from boa3.internal.neo3.vm import VMState
 from boa3_test.test_drive.model.invoker.neoinvoke import NeoInvoke
@@ -11,9 +11,9 @@ __all__ = ['NeoInvokeCollection']
 
 class NeoInvokeCollection:
     def __init__(self):
-        self._internal_list: List[NeoInvoke] = []
-        self._invoke_results: List[NeoInvokeResult] = []
-        self._pending_results: List[NeoInvokeResult] = []
+        self._internal_list: list[NeoInvoke] = []
+        self._invoke_results: list[NeoInvokeResult] = []
+        self._pending_results: list[NeoInvokeResult] = []
 
     def create_contract_invoke(self, contract: TestContract, operation: str, *args: Any) -> NeoInvoke:
         invoker = NeoInvoke(contract.name, operation, *args)
@@ -21,7 +21,7 @@ class NeoInvokeCollection:
         return invoker
 
     def append_contract_invoke(self, contract: TestContract, operation: str, *args: Any,
-                               expected_result_type: Type = None) -> NeoInvokeResult:
+                               expected_result_type: type = None) -> NeoInvokeResult:
         invoker = NeoInvoke(contract.name, operation, *args)
         invoker._contract = contract
         invoke_result = NeoInvokeResult(invoker, expected_result_type=expected_result_type)
@@ -46,7 +46,7 @@ class NeoInvokeCollection:
 
         return [{}]
 
-    def set_results(self, new_result_stack: List[Any], calling_account: Optional[Account] = None) -> List[NeoInvokeResult]:
+    def set_results(self, new_result_stack: list[Any], calling_account: Account | None = None) -> list[NeoInvokeResult]:
         no_iterations = min(len(new_result_stack), len(self._pending_results)) + 1
         pending_results = self._pending_results.copy()
 

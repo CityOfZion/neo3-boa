@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.operation.binaryop import BinaryOp
@@ -9,14 +9,14 @@ from boa3.internal.model.variable import Variable
 
 class SortMethod(IBuiltinMethod):
 
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
 
         if not Type.list.is_type_of(arg_value):
             arg_value = Type.list
 
         identifier = 'sort'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(arg_value),
             'reverse': Variable(Type.bool)
         }
@@ -168,7 +168,7 @@ class SortMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

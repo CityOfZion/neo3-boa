@@ -1,4 +1,4 @@
-from typing import Any, Set
+from typing import Any
 
 from boa3.internal.model.type.collection.icollection import ICollectionType
 from boa3.internal.model.type.itype import IType
@@ -9,7 +9,7 @@ class GenericCollectionType(ICollectionType):
     An class used to represent a generic Python collection type
     """
 
-    def __init__(self, keys_type: Set[IType] = None, values_type: Set[IType] = None):
+    def __init__(self, keys_type: set[IType] = None, values_type: set[IType] = None):
         identifier: str = 'collection'
         keys_type = self.filter_types(keys_type)
         values_type = self.filter_types(values_type)
@@ -40,8 +40,8 @@ class GenericCollectionType(ICollectionType):
                 keys = value.key_type
                 values = value.value_type
 
-            keys_types: Set[IType] = cls.get_types(keys)
-            values_types: Set[IType] = cls.get_types(values)
+            keys_types: set[IType] = cls.get_types(keys)
+            values_types: set[IType] = cls.get_types(values)
             return cls(keys_types, values_types)
 
     def __hash__(self):

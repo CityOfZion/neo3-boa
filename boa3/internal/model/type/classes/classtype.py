@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
 
 from boa3.internal.compiler.codegenerator import get_bytes_count
 from boa3.internal.model.symbol import ISymbol
@@ -19,7 +18,7 @@ class ClassType(IType, ABC):
     """
 
     def __init__(self, identifier: str, decorators: list = None,
-                 bases: List[ClassType] = None):
+                 bases: list[ClassType] = None):
         super().__init__(identifier)
 
         if decorators is None:
@@ -34,13 +33,13 @@ class ClassType(IType, ABC):
 
         if not isinstance(bases, list):
             bases = []
-        self.bases: List[ClassType] = bases
+        self.bases: list[ClassType] = bases
 
     @property
     @abstractmethod
     def class_variables(self):
         """
-        :rtype: Dict[str, boa3.internal.model.variable.Variable]
+        :rtype: dict[str, boa3.internal.model.variable.Variable]
         """
         class_vars = {}
         for base in self.bases:
@@ -51,7 +50,7 @@ class ClassType(IType, ABC):
     @abstractmethod
     def instance_variables(self):
         """
-        :rtype: Dict[str, boa3.internal.model.variable.Variable]
+        :rtype: dict[str, boa3.internal.model.variable.Variable]
         """
         instance_vars = {}
         for base in self.bases:
@@ -61,7 +60,7 @@ class ClassType(IType, ABC):
     @property
     def variables(self):
         """
-        :rtype: Dict[str, boa3.internal.model.variable.Variable]
+        :rtype: dict[str, boa3.internal.model.variable.Variable]
         """
         variables = self.class_variables.copy()
         variables.update(self.instance_variables)
@@ -70,7 +69,7 @@ class ClassType(IType, ABC):
     @property
     def _all_variables(self):
         """
-        :rtype: Dict[str, boa3.internal.model.variable.Variable]
+        :rtype: dict[str, boa3.internal.model.variable.Variable]
         """
         return self.variables
 
@@ -78,7 +77,7 @@ class ClassType(IType, ABC):
     @abstractmethod
     def properties(self):
         """
-        :rtype: Dict[str, boa3.internal.model.property.Property]
+        :rtype: dict[str, boa3.internal.model.property.Property]
         """
         props = {}
         for base in self.bases:
@@ -89,7 +88,7 @@ class ClassType(IType, ABC):
     @abstractmethod
     def static_methods(self):
         """
-        :rtype: Dict[str, boa3.internal.model.method.Method]
+        :rtype: dict[str, boa3.internal.model.method.Method]
         """
         static_funcs = {}
         for base in self.bases:
@@ -100,7 +99,7 @@ class ClassType(IType, ABC):
     @abstractmethod
     def class_methods(self):
         """
-        :rtype: Dict[str, boa3.internal.model.method.Method]
+        :rtype: dict[str, boa3.internal.model.method.Method]
         """
         class_funcs = {}
         for base in self.bases:
@@ -111,7 +110,7 @@ class ClassType(IType, ABC):
     @abstractmethod
     def instance_methods(self):
         """
-        :rtype: Dict[str, boa3.internal.model.method.Method]
+        :rtype: dict[str, boa3.internal.model.method.Method]
         """
         instance_funcs = {}
         for base in self.bases:
@@ -121,7 +120,7 @@ class ClassType(IType, ABC):
     @property
     def methods(self):
         """
-        :rtype: Dict[str, boa3.internal.model.method.Method]
+        :rtype: dict[str, boa3.internal.model.method.Method]
         """
         methods = self.static_methods.copy()
         methods.update(self.class_methods)
@@ -138,7 +137,7 @@ class ClassType(IType, ABC):
         pass
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         s = {}
         s.update(self.methods)
         s.update(self.variables)
@@ -146,16 +145,16 @@ class ClassType(IType, ABC):
         return s
 
     @property
-    def class_symbols(self) -> Dict[str, ISymbol]:
-        s: Dict[str, ISymbol] = {}
+    def class_symbols(self) -> dict[str, ISymbol]:
+        s: dict[str, ISymbol] = {}
         s.update(self.class_methods)  # class methods and variables can be accessed both
         s.update(self.class_variables)  # from class name or instance object
         s.update(self.static_methods)
         return s
 
     @property
-    def instance_symbols(self) -> Dict[str, ISymbol]:
-        s: Dict[str, ISymbol] = {}
+    def instance_symbols(self) -> dict[str, ISymbol]:
+        s: dict[str, ISymbol] = {}
         s.update(self.class_methods)  # class methods and variables can be accessed both
         s.update(self.class_variables)  # from class name or instance object
         s.update(self.instance_methods)
@@ -213,7 +212,7 @@ class ClassType(IType, ABC):
         code_generator.convert_literal(False)
         code_generator.convert_end_if(begin_else, is_internal=True)
 
-    def _generate_specific_class_type_check(self, code_generator) -> List[int]:
+    def _generate_specific_class_type_check(self, code_generator) -> list[int]:
         """
         :type code_generator: boa3.internal.compiler.codegenerator.codegenerator.CodeGenerator
 
@@ -256,7 +255,7 @@ class ClassType(IType, ABC):
         inner_validations.insert(0, begin_if)
         return inner_validations
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+    def is_instance_opcodes(self) -> list[tuple[Opcode, bytes]]:
         is_type_opcodes = [
             (Opcode.DUP, b''),  # if is the same internal type
             (Opcode.ISTYPE, self.stack_item)
@@ -287,7 +286,7 @@ class ClassType(IType, ABC):
 
         return final_instructions
 
-    def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> List[Tuple[Opcode, bytes]]:
+    def _is_instance_inner_opcodes(self, jmp_to_if_false: int = 0) -> list[tuple[Opcode, bytes]]:
         if self.stack_item not in (StackItemType.Array, StackItemType.Struct, StackItemType.Map):
             return []
 

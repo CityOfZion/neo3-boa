@@ -1,5 +1,6 @@
 from abc import ABC
-from typing import Any, Iterable, Set, Sized
+from collections.abc import Iterable, Sized
+from typing import Any
 
 from boa3.internal.model.type.collection.icollection import ICollectionType
 from boa3.internal.model.type.itype import IType
@@ -12,7 +13,7 @@ class MappingType(ICollectionType, ABC):
     An interface used to represent Python mapping type
     """
 
-    def __init__(self, identifier: str, keys_type: Set[IType], values_type: Set[IType]):
+    def __init__(self, identifier: str, keys_type: set[IType], values_type: set[IType]):
         super().__init__(identifier, keys_type=keys_type, values_type=values_type)
 
     @property
@@ -51,7 +52,7 @@ class MappingType(ICollectionType, ABC):
         return self.key_type
 
     @classmethod
-    def filter_types(cls, values_type) -> Set[IType]:
+    def filter_types(cls, values_type) -> set[IType]:
         if values_type is None:
             values_type = set()
         elif not isinstance(values_type, set):
@@ -91,8 +92,8 @@ class MappingType(ICollectionType, ABC):
                 keys = value.key_type
                 values = value.value_type
 
-            keys_types: Set[IType] = cls.get_types(keys)
-            values_types: Set[IType] = cls.get_types(values)
+            keys_types: set[IType] = cls.get_types(keys)
+            values_types: set[IType] = cls.get_types(values)
             return cls(keys_types, values_types)
 
         elif isinstance(value, Sized) and len(value) == 2:

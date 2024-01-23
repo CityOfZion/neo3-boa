@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.opcode.OpcodeInformation import OpcodeInformation
@@ -24,7 +22,7 @@ class VMCode:
         if data is None:
             data = bytes(op_info.data_len)
         self._info: OpcodeInformation = op_info
-        self._target: Optional[VMCode] = None
+        self._target: VMCode | None = None
         self._data: bytes = data
 
     @property

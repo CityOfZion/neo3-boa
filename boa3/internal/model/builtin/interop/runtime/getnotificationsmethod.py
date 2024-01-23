@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
@@ -17,7 +16,7 @@ class GetNotificationsMethod(InteropMethod):
         syscall = 'System.Runtime.GetNotifications'
         uint160 = UInt160Type.build()
 
-        args: Dict[str, Variable] = {'script_hash': Variable(Type.optional.build(uint160))}
+        args: dict[str, Variable] = {'script_hash': Variable(Type.optional.build(uint160))}
         args_default = set_internal_call(ast.parse("{0}".format(Type.none.default_value)
                                                    ).body[0].value)
 

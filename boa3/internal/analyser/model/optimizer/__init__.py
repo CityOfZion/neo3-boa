@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Set
+from typing import Any
 
 
 class ScopeValue:
     def __init__(self):
-        self._values: Dict[str, Any] = {}
-        self._assigned_variables: Set[str] = set()
-        self._parent_scope: Optional[ScopeValue] = None
+        self._values: dict[str, Any] = {}
+        self._assigned_variables: set[str] = set()
+        self._parent_scope: ScopeValue | None = None
 
     def new_scope(self) -> ScopeValue:
         scope = ScopeValue()
@@ -16,7 +16,7 @@ class ScopeValue:
         scope._parent_scope = self
         return scope
 
-    def previous_scope(self) -> Optional[ScopeValue]:
+    def previous_scope(self) -> ScopeValue | None:
         return self._parent_scope
 
     def update_values(self, *scopes, is_loop_scope: bool = False):
@@ -25,8 +25,8 @@ class ScopeValue:
             return
 
         first_scope = other_scopes[0]
-        common_keys: Set[str] = set(first_scope._values)
-        common_assigns: Set[str] = first_scope._assigned_variables
+        common_keys: set[str] = set(first_scope._values)
+        common_assigns: set[str] = first_scope._assigned_variables
 
         for scope in other_scopes[1:]:
             common_keys = common_keys.intersection(set(scope._values))

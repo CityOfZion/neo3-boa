@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.internal.model.variable import Variable
 
@@ -13,7 +11,7 @@ class VerifyWithECDsaMethod(CryptoLibMethod):
 
         identifier = 'verify_with_ecdsa'
         native_identifier = 'verifyWithECDsa'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'data': Variable(Type.bytes),
             'pubkey': Variable(ECPointType.build()),
             'signature': Variable(Type.bytes),

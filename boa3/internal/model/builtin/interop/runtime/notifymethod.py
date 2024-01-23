@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.interopevent import InteropEvent
 from boa3.internal.model.variable import Variable
 
@@ -12,7 +10,7 @@ class NotifyMethod(InteropEvent):
         from boa3.internal.model.type.type import Type
         identifier = 'notify'
         syscall = 'System.Runtime.Notify'
-        args: Dict[str, Variable] = {'state': Variable(Type.any),
+        args: dict[str, Variable] = {'state': Variable(Type.any),
                                      self._event_name_key: Variable(Type.str)
                                      }
         import ast
@@ -25,7 +23,7 @@ class NotifyMethod(InteropEvent):
         return False
 
     @property
-    def args_to_generate(self) -> Dict[str, Variable]:
+    def args_to_generate(self) -> dict[str, Variable]:
         return {key_name: value_type
                 for key_name, value_type in self.args.items()
                 if key_name != self._event_name_key}

@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Callable, Dict, List, Optional, Type
+from collections.abc import Callable
+from typing import Any
 
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.exception import CompilerError
@@ -18,9 +19,9 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
 
         self._origin: IAstAnalyser = origin
 
-        # all methods validators must be (IBuiltinMethod, List[IType]) -> None
-        self._methods_validators: Dict[Type[IBuiltinMethod],
-                                       Callable[[IBuiltinMethod, List[IType]], None]] = {
+        # all methods validators must be (IBuiltinMethod, list[IType]) -> None
+        self._methods_validators: dict[type[IBuiltinMethod],
+                                       Callable[[IBuiltinMethod, list[IType]], None]] = {
             IsInstanceMethod: self._validate_IsInstanceMethod
         }
 
@@ -34,10 +35,10 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
 
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
-                   check_raw_id: bool = False) -> Optional[ISymbol]:
+                   check_raw_id: bool = False) -> ISymbol | None:
         return self._origin.get_symbol(symbol_id, is_internal)
 
-    def get_symbol_from_node(self, node: ast.AST) -> Optional[ISymbol]:
+    def get_symbol_from_node(self, node: ast.AST) -> ISymbol | None:
         if isinstance(node, ast.Name):
             return self.get_symbol(node.id)
 
@@ -66,7 +67,7 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
             return True
         return False
 
-    def _validate_IsInstanceMethod(self, method: IsInstanceMethod, args_types: List[IType]):
+    def _validate_IsInstanceMethod(self, method: IsInstanceMethod, args_types: list[IType]):
         """
         Validates the arguments for `isinstance` method
 
@@ -82,7 +83,7 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
                 args_types[-1] = args_types[-1].value_type
             elif len(last_arg.elts) > 1:
                 # if there are more than one type, updates information in the instance of the method
-                types: List[IType] = [self.get_symbol_from_node(name) for name in last_arg.elts]
+                types: list[IType] = [self.get_symbol_from_node(name) for name in last_arg.elts]
                 method.set_instance_type(types)
                 self.call.args[-1] = last_arg.elts[-1]
                 return

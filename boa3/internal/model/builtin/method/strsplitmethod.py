@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List
 
 from boa3.internal.model.builtin.interop.nativecontract import StdLibMethod
 from boa3.internal.model.variable import Variable
@@ -11,7 +10,7 @@ class StrSplitMethod(StdLibMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'split'
         syscall = 'stringSplit'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(Type.str),
             'sep': Variable(Type.str),
             'maxsplit': Variable(Type.int)
@@ -32,7 +31,7 @@ class StrSplitMethod(StdLibMethod):
                          internal_call_args=len(neo_internal_args))
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         # the original string must be the top value in the stack
         indexes = list(range(len(self.args)))
         str_index = list(self.args).index('self')

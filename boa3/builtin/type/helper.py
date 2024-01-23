@@ -5,10 +5,8 @@ __all__ = [
     'to_str',
 ]
 
-from typing import Union
 
-
-def to_bytes(value: Union[str, int]) -> bytes:
+def to_bytes(value: str | int) -> bytes:
     """
     Converts a str or integer value to an array of bytes
 

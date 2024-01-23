@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.internal.model.variable import Variable
 
@@ -9,7 +7,7 @@ class Hash256Method(CryptoLibMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'hash256'
         native_identifier = ''  # hash256 is not neo native
-        args: Dict[str, Variable] = {'key': Variable(Type.any)}
+        args: dict[str, Variable] = {'key': Variable(Type.any)}
         super().__init__(identifier, native_identifier, args, return_type=Type.bytes)
 
     @property

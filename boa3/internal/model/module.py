@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
@@ -18,7 +16,7 @@ class Module(ISymbol):
     :ivar imported_symbols: a dictionary that maps each imported symbol with its name. Empty by default.
     """
 
-    def __init__(self, variables: Dict[str, Variable] = None, methods: Dict[str, Method] = None):
+    def __init__(self, variables: dict[str, Variable] = None, methods: dict[str, Method] = None):
         if variables is None:
             variables = {}
         self.variables = variables
@@ -26,8 +24,8 @@ class Module(ISymbol):
         if methods is None:
             methods = {}
         self.methods = methods
-        self.callables: Dict[str, Callable] = {}
-        self.classes: Dict[str, ClassType] = {}
+        self.callables: dict[str, Callable] = {}
+        self.classes: dict[str, ClassType] = {}
 
         self.defined_by_entry = True
         self.imported_symbols = {}
@@ -110,7 +108,7 @@ class Module(ISymbol):
                 self.imported_symbols[symbol_id] = symbol
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         """
         Gets all the symbols in the module
 

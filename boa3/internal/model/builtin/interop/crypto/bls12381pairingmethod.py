@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.internal.model.variable import Variable
 
@@ -13,7 +11,7 @@ class Bls12381PairingMethod(CryptoLibMethod):
 
         identifier = 'bls12_381_pairing'
         native_identifier = 'bls12381Pairing'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'g1': Variable(bls12_381_type),
             'g2': Variable(bls12_381_type),
         }

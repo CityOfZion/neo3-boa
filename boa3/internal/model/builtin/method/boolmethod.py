@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -11,7 +9,7 @@ class BoolMethod(IBuiltinMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'bool'
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'value': Variable(Type.any),
         }
         super().__init__(identifier, args, return_type=Type.bool)
@@ -65,5 +63,5 @@ class BoolMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return

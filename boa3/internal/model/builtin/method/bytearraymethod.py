@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -11,11 +11,11 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 class ByteArrayMethod(IBuiltinMethod):
 
-    def __init__(self, argument_type: Union[IType, Dict] = None):
+    def __init__(self, argument_type: IType | dict = None):
         identifier = 'bytearray'
         from boa3.internal.model.type.type import Type
 
-        if isinstance(argument_type, Dict):
+        if isinstance(argument_type, dict):
             args = argument_type
             defaults = []
         else:
@@ -23,7 +23,7 @@ class ByteArrayMethod(IBuiltinMethod):
             if argument_type is None or not self.validate_parameters(argument_type):
                 argument_type = Type.none
 
-            args: Dict[str, Variable] = {'object': Variable(argument_type)}
+            args: dict[str, Variable] = {'object': Variable(argument_type)}
             object_default = ast.parse(f"{Type.int.default_value}"
                                        ).body[0].value
             defaults = [object_default]
@@ -85,7 +85,7 @@ class ByteArrayMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

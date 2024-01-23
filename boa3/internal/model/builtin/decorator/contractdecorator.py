@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Dict, List, Sized
+from collections.abc import Sized
+from typing import Any
 
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.internal.model.variable import Variable
@@ -11,7 +12,7 @@ class ContractDecorator(IBuiltinDecorator):
         from boa3.internal.model.type.type import Type
 
         identifier = 'contract'
-        args: Dict[str, Variable] = {'script_hash': Variable(Type.union.build([Type.bytes,
+        args: dict[str, Variable] = {'script_hash': Variable(Type.union.build([Type.bytes,
                                                                                Type.str
                                                                                ]))}
         super().__init__(identifier, args)
@@ -32,7 +33,7 @@ class ContractDecorator(IBuiltinDecorator):
 
         return self
 
-    def validate_values(self, *params: Any) -> List[Any]:
+    def validate_values(self, *params: Any) -> list[Any]:
         values = []
         if len(params) != 2:
             return values

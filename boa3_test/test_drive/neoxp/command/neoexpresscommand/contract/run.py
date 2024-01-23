@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any
 
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
@@ -8,7 +8,7 @@ from boa3_test.test_drive.neoxp.command.neoexpresscommand.contract.icontractcomm
 
 
 class ContractRunCommand(IContractCommand):
-    def __init__(self, contract: Union[str, UInt160], method: str, *args: Any,
+    def __init__(self, contract: str | UInt160, method: str, *args: Any,
                  account: Account = None,
                  witness_scope: WitnessScope = WitnessScope.CalledByEntry,
                  results_only: bool = False,
@@ -37,7 +37,7 @@ class ContractRunCommand(IContractCommand):
 
         super().__init__('run', arguments)
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if isinstance(self.account, Account):

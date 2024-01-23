@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
@@ -10,7 +8,7 @@ class GetBlockTimeMethod(InteropMethod):
         from boa3.internal.model.type.type import Type
         identifier = '-get_time'
         syscall = 'System.Runtime.GetTime'
-        args: Dict[str, Variable] = {}
+        args: dict[str, Variable] = {}
         super().__init__(identifier, syscall, args, return_type=Type.int)
 
 

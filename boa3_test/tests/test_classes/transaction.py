@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from boa3.internal.neo3.vm import VMState, vmstate
 from boa3_test.test_drive.model.network.payloads.testtransaction import TestTransaction
@@ -10,9 +10,9 @@ from boa3_test.tests.test_classes.witness import Witness
 
 
 class Transaction(TestTransaction):
-    def __init__(self, script: bytes, signers: List[Signer] = None, witnesses: List[Witness] = None):
+    def __init__(self, script: bytes, signers: list[Signer] = None, witnesses: list[Witness] = None):
         super().__init__(None, script, signers, witnesses)
-        self._attributes: List[tx_attribute.TransactionAttribute] = []
+        self._attributes: list[tx_attribute.TransactionAttribute] = []
         self._state: VMState = VMState.NONE
 
     def add_attribute(self, tx_attr: tx_attribute.TransactionAttribute):
@@ -20,7 +20,7 @@ class Transaction(TestTransaction):
             self._attributes.append(tx_attr)
 
     @property
-    def hash(self) -> Optional[bytes]:
+    def hash(self) -> bytes | None:
         if self._hash is None:
             return None
 
@@ -30,7 +30,7 @@ class Transaction(TestTransaction):
     def state(self) -> VMState:
         return self._state
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         json = super().to_json()
 
         json.pop('hash')  # don't include hash in this json
@@ -39,7 +39,7 @@ class Transaction(TestTransaction):
         return json
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> Transaction:
+    def from_json(cls, json: dict[str, Any]) -> Transaction:
         tx: Transaction = super().from_json(json)
 
         if 'attributes' in json:

@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.internal.neo.core.types.InteropInterface import InteropInterface
 from boa3.internal.neo.vm.type.AbiType import AbiType
@@ -7,7 +8,7 @@ from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
 
 
-def stack_item_from_json(item: Dict[str, Any]) -> Any:
+def stack_item_from_json(item: dict[str, Any]) -> Any:
     if 'type' not in item:
         return None
 
@@ -73,7 +74,7 @@ def stack_item_from_json(item: Dict[str, Any]) -> Any:
     return value
 
 
-def bytes_from_json(item: Dict[str, Any]) -> Optional[bytes]:
+def bytes_from_json(item: dict[str, Any]) -> bytes | None:
     value = stack_item_from_json(item)
 
     if isinstance(value, str):
@@ -84,7 +85,7 @@ def bytes_from_json(item: Dict[str, Any]) -> Optional[bytes]:
     return value if isinstance(value, bytes) else None
 
 
-def contract_parameter_to_json(value: Any) -> Dict[str, Any]:
+def contract_parameter_to_json(value: Any) -> dict[str, Any]:
     if value is None:
         return {'type': AbiType.Any}
 

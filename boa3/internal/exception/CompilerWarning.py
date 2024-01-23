@@ -1,12 +1,12 @@
 from abc import ABC
-from typing import Iterable, Optional, Union
+from collections.abc import Iterable
 
 
 class CompilerWarning(ABC, BaseException):
     def __init__(self, line: int, col: int):
         self.line: int = line
         self.col: int = col
-        self.filepath: Optional[str] = None
+        self.filepath: str | None = None
 
     @property
     def message(self) -> str:
@@ -16,7 +16,7 @@ class CompilerWarning(ABC, BaseException):
         return '{0}:{1}{2}'.format(self.line, self.col, message)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         return None
 
     def __str__(self) -> str:
@@ -38,7 +38,7 @@ class DeprecatedSymbol(CompilerWarning):
         super().__init__(line, col)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         if self.symbol_id is not None:
             return f'Using deprecated feature: {self.symbol_id}'
 
@@ -53,7 +53,7 @@ class InvalidArgument(CompilerWarning):
         super().__init__(line, col)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         message = "One or more arguments are invalid values"
         if self.custom_error_message is not None:
             message += f": {self.custom_error_message}"
@@ -72,7 +72,7 @@ class NameShadowing(CompilerWarning):
         super().__init__(line, col)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         if self.symbol_id is not None:
             return "Shadowing {0} name '{1}'".format(self.existing_symbol.shadowing_name, self.symbol_id)
 
@@ -87,7 +87,7 @@ class RedeclaredSymbol(CompilerWarning):
         super().__init__(line, col)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         if self.symbol_id is not None:
             return "Redeclared '{0}' defined above".format(self.symbol_id)
 
@@ -97,8 +97,8 @@ class TypeCasting(CompilerWarning):
     A warning raised when a type castings is used.
     """
 
-    def __init__(self, line: int, col: int, origin_type_id: Union[str, Iterable[str]],
-                 cast_type_id: Union[str, Iterable[str]]):
+    def __init__(self, line: int, col: int, origin_type_id: str | Iterable[str],
+                 cast_type_id: str | Iterable[str]):
         if isinstance(origin_type_id, str):
             origin_type_id = [origin_type_id]
         if isinstance(cast_type_id, str):
@@ -109,7 +109,7 @@ class TypeCasting(CompilerWarning):
         super().__init__(line, col)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         origin_types = join_args(self.origin_types)
         cast_types = join_args(self.cast_types)
         return ("Casting {0} to {1}. Be aware that casting types may lead to runtime errors."
@@ -126,7 +126,7 @@ class UnreachableCode(CompilerWarning):
         super().__init__(line, col)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         return "Unreachable code"
 
 
@@ -140,7 +140,7 @@ class UsingSpecificException(CompilerWarning):
         super().__init__(line, col)
 
     @property
-    def _warning_message(self) -> Optional[str]:
+    def _warning_message(self) -> str | None:
         return "{0} will be interpreted as BaseException when running in the blockchain".format(self._exception_id)
 
 

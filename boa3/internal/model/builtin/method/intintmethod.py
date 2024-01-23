@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model.builtin.method.intmethod import IntMethod
 from boa3.internal.model.variable import Variable
@@ -9,7 +8,7 @@ class IntIntMethod(IntMethod):
 
     def __init__(self):
         from boa3.internal.model.type.type import Type
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'value': Variable(Type.int),
         }
 

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.model.callable import Callable
@@ -13,18 +13,18 @@ from boa3.internal.model.variable import Variable
 
 
 class UserClass(ClassArrayType):
-    def __init__(self, identifier: str, decorators: List[Callable] = None,
-                 bases: List[ClassType] = None):
+    def __init__(self, identifier: str, decorators: list[Callable] = None,
+                 bases: list[ClassType] = None):
         super(ClassArrayType, self).__init__(identifier, decorators, bases)
 
-        self._static_methods: Dict[str, Method] = {}
+        self._static_methods: dict[str, Method] = {}
 
-        self._class_variables: Dict[str, Variable] = {}
-        self._class_methods: Dict[str, Method] = {}
+        self._class_variables: dict[str, Variable] = {}
+        self._class_methods: dict[str, Method] = {}
 
-        self._instance_variables: Dict[str, Variable] = {}
-        self._instance_methods: Dict[str, Method] = {}
-        self._properties: Dict[str, Property] = {}
+        self._instance_variables: dict[str, Variable] = {}
+        self._instance_methods: dict[str, Method] = {}
+        self._properties: dict[str, Property] = {}
 
         self.imported_symbols = {}
 
@@ -33,37 +33,37 @@ class UserClass(ClassArrayType):
         return 'class'
 
     @property
-    def class_variables(self) -> Dict[str, Variable]:
+    def class_variables(self) -> dict[str, Variable]:
         class_vars = super().class_variables
         class_vars.update(self._class_variables)
         return class_vars
 
     @property
-    def instance_variables(self) -> Dict[str, Variable]:
+    def instance_variables(self) -> dict[str, Variable]:
         instance_vars = super().instance_variables
         instance_vars.update(self._instance_variables)
         return instance_vars
 
     @property
-    def properties(self) -> Dict[str, Property]:
+    def properties(self) -> dict[str, Property]:
         props = super().properties
         props.update(self._properties)
         return props
 
     @property
-    def static_methods(self) -> Dict[str, Method]:
+    def static_methods(self) -> dict[str, Method]:
         static_funcs = super().static_methods
         static_funcs.update(self._static_methods)
         return static_funcs
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         class_funcs = super().class_methods
         class_funcs.update(self._class_methods)
         return class_funcs
 
     @property
-    def instance_methods(self) -> Dict[str, Method]:
+    def instance_methods(self) -> dict[str, Method]:
         instance_funcs = super().instance_methods
         instance_funcs.update(self._instance_methods)
         return instance_funcs
@@ -131,7 +131,7 @@ class UserClass(ClassArrayType):
             else:
                 self.imported_symbols[symbol_id] = symbol
 
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self) -> Method | None:
         if constants.INIT_METHOD_ID not in self._class_methods:
             from boa3.internal.model.type.classes.classinitmethoddefault import ClassInitMethod
             self._class_methods[constants.INIT_METHOD_ID] = ClassInitMethod(self)

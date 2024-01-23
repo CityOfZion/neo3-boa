@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
 
@@ -12,7 +10,7 @@ class CheckMultisigMethod(InteropMethod):
 
         identifier = 'check_multisig'
         syscall = 'System.Crypto.CheckMultisig'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'pubkeys': Variable(Type.list.build_collection([ECPointType.build()])),
             'signatures': Variable(Type.list.build_collection([Type.bytes]))
         }

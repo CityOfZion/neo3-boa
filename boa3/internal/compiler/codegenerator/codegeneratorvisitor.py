@@ -1,7 +1,6 @@
 import ast
 import os.path
 from inspect import isclass
-from typing import Dict, List, Optional
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -41,16 +40,16 @@ class VisitorCodeGenerator(IAstAnalyser):
         super().__init__(ast.parse(""), filename=filename, root_folder=root, log=True, fail_fast=True)
 
         self.generator = generator
-        self.current_method: Optional[Method] = None
-        self.current_class: Optional[UserClass] = None
+        self.current_method: Method | None = None
+        self.current_class: UserClass | None = None
         self.symbols = generator.symbol_table
 
-        self.global_stmts: List[ast.AST] = []
+        self.global_stmts: list[ast.AST] = []
         self._is_generating_initialize = False
         self._root_module: ast.AST = self._tree
 
     @property
-    def _symbols(self) -> Dict[str, ISymbol]:
+    def _symbols(self) -> dict[str, ISymbol]:
         symbol_table = self.symbols.copy()
 
         if isinstance(self.current_class, UserClass):
@@ -64,12 +63,12 @@ class VisitorCodeGenerator(IAstAnalyser):
             from boa3.internal.model.debuginstruction import DebugInstruction
             self.current_method.include_instruction(DebugInstruction.build(node, bytecode))
 
-    def build_data(self, origin_node: Optional[ast.AST],
-                   symbol_id: Optional[str] = None,
-                   symbol: Optional[ISymbol] = None,
-                   result_type: Optional[IType] = None,
-                   index: Optional[int] = None,
-                   origin_object_type: Optional[ISymbol] = None,
+    def build_data(self, origin_node: ast.AST | None,
+                   symbol_id: str | None = None,
+                   symbol: ISymbol | None = None,
+                   result_type: IType | None = None,
+                   index: int | None = None,
+                   origin_object_type: ISymbol | None = None,
                    already_generated: bool = False) -> GeneratorData:
 
         if isinstance(symbol, IType) and result_type is None:
@@ -171,7 +170,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return variable_id in self.symbols
 
-    def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
+    def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: int | None = None):
         self.generator._remove_inserted_opcodes_since(last_address, last_stack_size)
 
     def _get_unique_name(self, name_id: str, node: ast.AST) -> str:
@@ -442,7 +441,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         :param assign: the python ast variable assignment node
         """
-        vars_ids: List[VariableGenerationData] = []
+        vars_ids: list[VariableGenerationData] = []
         for target in assign.targets:
             var_value_address = self.generator.bytecode_size
             target_data: GeneratorData = self.visit(target)
@@ -872,7 +871,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         if self.is_implemented_class_type(symbol):
             self.generator.convert_init_user_class(symbol)
             symbol = symbol.constructor_method()
-        args_addresses: List[int] = []
+        args_addresses: list[int] = []
 
         has_cls_or_self_argument = isinstance(symbol, Method) and symbol.has_cls_or_self
         if not has_cls_or_self_argument:
@@ -960,7 +959,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         :param try_node: the python ast try node
         """
         try_address: int = self.generator.convert_begin_try()
-        try_end: Optional[int] = None
+        try_end: int | None = None
         for stmt in try_node.body:
             self.visit_to_map(stmt, generate=True)
 
@@ -1303,7 +1302,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return self.build_data(pass_node, result_type=result_type, already_generated=generated)
 
-    def _create_array(self, values: List[ast.AST], array_type: IType):
+    def _create_array(self, values: list[ast.AST], array_type: IType):
         """
         Creates a new array from a literal sequence
 

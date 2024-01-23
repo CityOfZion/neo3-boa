@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.operation.unary import *
 from boa3.internal.model.operation.unary.unaryoperation import UnaryOperation
@@ -16,7 +14,7 @@ class UnaryOp:
     BitNot = LogicNot()
 
     @classmethod
-    def validate_type(cls, operator: Operator, operand: IType) -> Optional[UnaryOperation]:
+    def validate_type(cls, operator: Operator, operand: IType) -> UnaryOperation | None:
         """
         Gets a unary operation given the operator and the operand type.
 
@@ -30,7 +28,7 @@ class UnaryOp:
                 return op.build(operand)
 
     @classmethod
-    def get_operation_by_operator(cls, operator: Operator) -> Optional[UnaryOperation]:
+    def get_operation_by_operator(cls, operator: Operator) -> UnaryOperation | None:
         """
         Gets a unary operation given the operator.
 
@@ -44,7 +42,7 @@ class UnaryOp:
                 return op
 
     @classmethod
-    def get_operation(cls, operation: UnaryOperation) -> Optional[UnaryOperation]:
+    def get_operation(cls, operation: UnaryOperation) -> UnaryOperation | None:
         """
         Gets an unary operation given another operation.
 

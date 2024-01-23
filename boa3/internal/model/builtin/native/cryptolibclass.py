@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibContract
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
@@ -16,7 +16,7 @@ class CryptoLibClass(INativeContractClass):
         super().__init__('CryptoLib', CryptoLibContract)
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
         from boa3.internal.model.builtin.interop.interop import Interop
 

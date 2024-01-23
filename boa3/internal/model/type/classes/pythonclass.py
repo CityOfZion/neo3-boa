@@ -1,5 +1,4 @@
 import abc
-from typing import List, Tuple
 
 from boa3.internal import constants
 from boa3.internal.model.type.classes import classtype
@@ -112,7 +111,7 @@ class PythonClass(classtype.ClassType, abc.ABC):
         """
         return super().stack_item
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+    def is_instance_opcodes(self) -> list[tuple[Opcode, bytes]]:
         return [(Opcode.ISTYPE, self.stack_item)]
 
     def generate_is_instance_type_check(self, code_generator):

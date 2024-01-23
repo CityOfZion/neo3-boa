@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Dict, Any
+from typing import Any
 
 from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.network.payloads.testblock import TestBlock
@@ -12,7 +12,7 @@ from boa3_test.test_drive.testrunner.blockchain.transaction import TestRunnerTra
 
 class TestRunnerBlock(TestBlock):
     def __init__(self):
-        self._transactions: List[TestRunnerTransaction] = []
+        self._transactions: list[TestRunnerTransaction] = []
         super().__init__()
         self._hash: UInt256 = UInt256.zero()
         self._size = 0
@@ -22,7 +22,7 @@ class TestRunnerBlock(TestBlock):
         self._nonce = 0
         self._primary_index = 0
         self._next_consensus: Account = None
-        self._witnesses: List[Witness] = []
+        self._witnesses: list[Witness] = []
 
     @property
     def hash(self) -> UInt256:
@@ -57,14 +57,14 @@ class TestRunnerBlock(TestBlock):
         return self._next_consensus
 
     @property
-    def witnesses(self) -> List[Witness]:
+    def witnesses(self) -> list[Witness]:
         return self._witnesses.copy()
 
     @property
-    def transactions(self) -> List[TestRunnerTransaction]:
+    def transactions(self) -> list[TestRunnerTransaction]:
         return self._transactions.copy()
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         json_block = super().to_json()
 
         # timestamp in this implementation is exported as time
@@ -74,7 +74,7 @@ class TestRunnerBlock(TestBlock):
         return json_block
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestRunnerBlock:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> TestRunnerBlock:
         from boa3.internal.neo import from_hex_str
 
         block: TestRunnerBlock = super().from_json(json)

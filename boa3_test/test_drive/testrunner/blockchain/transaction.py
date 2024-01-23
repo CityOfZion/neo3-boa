@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Dict, Any, Union
+from typing import Any
 
 from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.network.payloads.signer import Signer
@@ -11,7 +11,7 @@ from boa3_test.test_drive.neoxp import utils
 
 
 class TestRunnerTransaction(TestTransaction):
-    def __init__(self, tx_hash: Union[UInt256, bytes], script: bytes, sender: Account):
+    def __init__(self, tx_hash: UInt256 | bytes, script: bytes, sender: Account):
         super().__init__(tx_hash, script)
         self._size = 0
         self._version = 0
@@ -54,7 +54,7 @@ class TestRunnerTransaction(TestTransaction):
         return self._valid_until_block
 
     @property
-    def signers(self) -> List[Signer]:
+    def signers(self) -> list[Signer]:
         return self._signers.copy()
 
     @property
@@ -62,11 +62,11 @@ class TestRunnerTransaction(TestTransaction):
         return self._attributes.copy()
 
     @property
-    def witnesses(self) -> List[Witness]:
+    def witnesses(self) -> list[Witness]:
         return self._witnesses.copy()
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestRunnerTransaction:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> TestRunnerTransaction:
         tx: TestRunnerTransaction = super().from_json(json)
 
         if 'neoxp_config' in kwargs:

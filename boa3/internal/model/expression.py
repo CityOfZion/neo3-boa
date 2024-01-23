@@ -1,6 +1,5 @@
 import ast
 from abc import abstractmethod
-from typing import Optional
 
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.itype import IType
@@ -11,7 +10,7 @@ class IExpression(ISymbol):
     An interface used to represent expressions
     """
 
-    def __init__(self, origin_node: Optional[ast.AST] = None):
+    def __init__(self, origin_node: ast.AST | None = None):
         self._origin_node = origin_node
 
     @property

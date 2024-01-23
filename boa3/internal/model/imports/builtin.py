@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Tuple, Union
-
 from boa3.internal import constants
 from boa3.internal.model.builtin.builtin import Builtin, BoaPackage
 from boa3.internal.model.builtin.interop.interop import Interop
@@ -19,11 +17,11 @@ __all__ = ['get_package',
            ]
 
 
-def get_package(package_full_path: str) -> Optional[Package]:
+def get_package(package_full_path: str) -> Package | None:
     return CompilerBuiltin.instance().get_package(package_full_path)
 
 
-def get_internal_symbol(symbol_id: str) -> Optional[ISymbol]:
+def get_internal_symbol(symbol_id: str) -> ISymbol | None:
     return CompilerBuiltin.instance().get_internal_symbol(symbol_id)
 
 
@@ -37,8 +35,8 @@ class CompilerBuiltin:
         return cls._instance
 
     def __init__(self):
-        self.packages: List[Package] = []
-        self._events: List[Event] = []
+        self.packages: list[Package] = []
+        self._events: list[Event] = []
 
         self._generate_builtin_package('typing', TypeUtils.get_types_from_typing_lib())
         self._generate_builtin_package('math', Math.get_methods_from_math_lib())
@@ -64,11 +62,11 @@ class CompilerBuiltin:
             if hasattr(pkg, 'update_with_analyser'):
                 pkg.update_with_analyser(analyser)
 
-    def _set_events(self, events: List[Event]):
+    def _set_events(self, events: list[Event]):
         self._events.extend(events)
 
     def _generate_builtin_package(self, package_full_path: str,
-                                  symbols: Union[Dict[str, ISymbol], List[IdentifiedSymbol]] = None):
+                                  symbols: dict[str | ISymbol, list[IdentifiedSymbol]] = None):
         if isinstance(symbols, list):
             symbols = {symbol.identifier: symbol for symbol in symbols}
         if not isinstance(symbols, dict):
@@ -101,7 +99,7 @@ class CompilerBuiltin:
             for symbol_id, symbol in symbols.items():
                 cur_package.include_symbol(symbol_id, symbol)
 
-    def get_package(self, package_full_path: str) -> Optional[Package]:
+    def get_package(self, package_full_path: str) -> Package | None:
         package_ids = package_full_path.split(constants.ATTRIBUTE_NAME_SEPARATOR)
 
         cur_package: Package = next((root_package for root_package in self._instance.packages
@@ -118,8 +116,8 @@ class CompilerBuiltin:
 
         return cur_package
 
-    def get_internal_symbol(self, symbol_id: str) -> Optional[ISymbol]:
-        packages_stack: List[Tuple[list, int]] = []
+    def get_internal_symbol(self, symbol_id: str) -> ISymbol | None:
+        packages_stack: list[tuple[list, int]] = []
         current_list = self._instance.packages
         current_index = 0
 

@@ -10,8 +10,6 @@ __all__ = [
     'ContractParameterType',
 ]
 
-from typing import List, Optional
-
 from boa3.builtin.type import ECPoint, UInt160
 from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
 
@@ -31,30 +29,30 @@ class ContractManifest:
     :ivar name: The name of the contract.
     :vartype name: str
     :ivar groups: The groups of the contract.
-    :vartype groups: List[ContractGroup]
+    :vartype groups: list[ContractGroup]
     :ivar supported_standards: Indicates which standards the contract supports. It can be a list of NEPs.
-    :vartype supported_standards: List[str]
+    :vartype supported_standards: list[str]
     :ivar abi: The ABI of the contract.
     :vartype abi: ContractAbi
     :ivar permissions: The permissions of the contract.
-    :vartype permissions: List[ContractPermission]
+    :vartype permissions: list[ContractPermission]
     :ivar trusts:
         The trusted contracts and groups of the contract.
 
         If a contract is trusted, the user interface will not give any warnings when called by the contract.
 
-    :vartype trusts: List[ContractPermissionDescriptor] or None
+    :vartype trusts: list[ContractPermissionDescriptor] or None
     :ivar extras: Custom user data as a json string.
     :vartype extras: str
     """
 
     def __init__(self):
         self.name: str = ''
-        self.groups: List[ContractGroup] = []
-        self.supported_standards: List[str] = []
+        self.groups: list[ContractGroup] = []
+        self.supported_standards: list[str] = []
         self.abi: ContractAbi = None
-        self.permissions: List[ContractPermission] = []
-        self.trusts: Optional[List[ContractPermissionDescriptor]] = None
+        self.permissions: list[ContractPermission] = []
+        self.trusts: list[ContractPermissionDescriptor] | None = None
         self.extras: str = ''
 
 
@@ -81,12 +79,12 @@ class ContractPermission:
         It can also be assigned with a wildcard \\*. If it is a wildcard \\*, then it means that any method can be
         called.
 
-    :vartype methods: List[str] or None
+    :vartype methods: list[str] or None
     """
 
     def __init__(self):
-        self.contract: Optional[ContractPermissionDescriptor] = None
-        self.methods: Optional[List[str]] = None
+        self.contract: ContractPermissionDescriptor | None = None
+        self.methods: list[str] | None = None
 
 
 class ContractPermissionDescriptor:
@@ -100,8 +98,8 @@ class ContractPermissionDescriptor:
     """
 
     def __init__(self):
-        self.hash: Optional[UInt160] = None
-        self.group: Optional[ECPoint] = None
+        self.hash: UInt160 | None = None
+        self.group: ECPoint | None = None
 
 
 class ContractGroup:
@@ -133,14 +131,14 @@ class ContractAbi:
     `Neo's Documentation <https://developers.neo.org/docs/n3/develop/write/manifest#manifest>`__.
 
     :ivar methods: Gets the methods in the ABI.
-    :vartype methods: List[ContractMethodDescriptor]
+    :vartype methods: list[ContractMethodDescriptor]
     :ivar events: Gets the events in the ABI.
-    :vartype events: List[ContractEventDescriptor]
+    :vartype events: list[ContractEventDescriptor]
     """
 
     def __init__(self):
-        self.methods: List[ContractMethodDescriptor] = []
-        self.events: List[ContractEventDescriptor] = []
+        self.methods: list[ContractMethodDescriptor] = []
+        self.events: list[ContractEventDescriptor] = []
 
 
 class ContractMethodDescriptor:
@@ -150,7 +148,7 @@ class ContractMethodDescriptor:
     :ivar name: The name of the method.
     :vartype name: str
     :ivar parameters: The parameters of the method.
-    :vartype parameters: List[ContractParameterDefinition]
+    :vartype parameters: list[ContractParameterDefinition]
     :ivar return_type: Indicates the return type of the method.
     :vartype return_type: ContractParameterType
     :ivar offset: The position of the method in the contract script.
@@ -166,7 +164,7 @@ class ContractMethodDescriptor:
 
     def __init__(self):
         self.name: str = ''
-        self.parameters: List[ContractParameterDefinition] = []
+        self.parameters: list[ContractParameterDefinition] = []
         self.return_type: ContractParameterType = ContractParameterType.Any
         self.offset: int = 0
         self.safe: bool = False
@@ -179,12 +177,12 @@ class ContractEventDescriptor:
     :ivar name: The name of the event.
     :vartype name: str
     :ivar parameters: The parameters of the event.
-    :vartype parameters: List[ContractParameterDefinition]
+    :vartype parameters: list[ContractParameterDefinition]
     """
 
     def __init__(self):
         self.name: str = ''
-        self.parameters: List[ContractParameterDefinition] = []
+        self.parameters: list[ContractParameterDefinition] = []
 
 
 class ContractParameterDefinition:

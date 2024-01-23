@@ -1,16 +1,14 @@
-from typing import List, Tuple
-
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 
 
-def get_bytes(instructions: List[Tuple[Opcode, bytes]]) -> bytes:
+def get_bytes(instructions: list[tuple[Opcode, bytes]]) -> bytes:
     return b''.join([opcode + arg for opcode, arg in instructions])
 
 
-def get_bytes_count(instructions: List[Tuple[Opcode, bytes]]) -> int:
+def get_bytes_count(instructions: list[tuple[Opcode, bytes]]) -> int:
     return sum([len(opcode) + len(arg) for opcode, arg in instructions])
 
 

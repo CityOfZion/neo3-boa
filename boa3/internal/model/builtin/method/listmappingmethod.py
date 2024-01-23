@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.method.listmethod import ListMethod
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
@@ -13,7 +11,7 @@ class ListMappingMethod(ListMethod):
         if mapping_type is None:
             mapping_type = Type.mapping
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'value': Variable(mapping_type),
         }
 

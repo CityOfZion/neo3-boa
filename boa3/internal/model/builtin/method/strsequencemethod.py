@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.builtin.method.strmethod import StrMethod
@@ -9,11 +9,11 @@ from boa3.internal.model.variable import Variable
 
 class StrSequenceMethod(StrMethod):
 
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         if arg_value is None:
             arg_value = Type.sequence
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'object': Variable(arg_value),
         }
 

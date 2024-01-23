@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List, Tuple
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -16,17 +15,17 @@ class InitStatementsVisitor(IAstAnalyser):
 
     """
 
-    def __init__(self, symbols: Dict[str, ISymbol], fail_fast: bool = True):
+    def __init__(self, symbols: dict[str, ISymbol], fail_fast: bool = True):
         super().__init__(ast.parse(""), log=True, fail_fast=fail_fast)
         self.symbols = symbols.copy()
 
-        self._deploy_instructions: List[ast.AST] = []
-        self._init_instructions: List[ast.AST] = []
+        self._deploy_instructions: list[ast.AST] = []
+        self._init_instructions: list[ast.AST] = []
 
     @classmethod
     def separate_global_statements(cls,
-                                   symbol_table: Dict[str, ISymbol],
-                                   statements: List[ast.AST]) -> Tuple[List[ast.AST], List[ast.AST]]:
+                                   symbol_table: dict[str, ISymbol],
+                                   statements: list[ast.AST]) -> tuple[list[ast.AST], list[ast.AST]]:
 
         visitor = InitStatementsVisitor(symbol_table)
 

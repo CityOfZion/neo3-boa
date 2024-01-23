@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.blockchain.blocktype import BlockType
 from boa3.internal.model.builtin.interop.nativecontract import LedgerMethod
 from boa3.internal.model.variable import Variable
@@ -13,6 +11,6 @@ class GetBlockMethod(LedgerMethod):
 
         identifier = 'get_block'
         syscall = 'getBlock'
-        args: Dict[str, Variable] = {'index': Variable(Type.union.build([Type.int,
+        args: dict[str, Variable] = {'index': Variable(Type.union.build([Type.int,
                                                                          UInt256Type.build()]))}
         super().__init__(identifier, syscall, args, return_type=Type.optional.build(block_type))

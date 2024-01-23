@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Any
 
 from boa3_test.test_drive.model.network.payloads.transactionattribute import TransactionAttribute, \
     TransactionAttributeType
@@ -13,7 +13,7 @@ class OracleResponse(TransactionAttribute):
         self._code = code
         self._result = result
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         import base64
         import json
         json_response = super().to_json()
@@ -25,7 +25,7 @@ class OracleResponse(TransactionAttribute):
         return json_response
 
     @staticmethod
-    def from_json(json: Dict[str, Any]) -> OracleResponse:
+    def from_json(json: dict[str, Any]) -> OracleResponse:
         oracle_response: OracleResponse = OracleResponse(json['id'], json['code'], json['result'])
 
         return oracle_response

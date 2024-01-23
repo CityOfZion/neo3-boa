@@ -3,7 +3,7 @@ __all__ = [
 ]
 
 
-from typing import Union, Any
+from typing import Any
 
 from boa3.builtin.type import UInt160
 
@@ -19,7 +19,7 @@ class Oracle:
     hash: UInt160
 
     @classmethod
-    def request(cls, url: str, request_filter: Union[str, None], callback: str, user_data: Any, gas_for_response: int):
+    def request(cls, url: str, request_filter: str | None, callback: str, user_data: Any, gas_for_response: int):
         """
         Requests an information from outside the blockchain.
 

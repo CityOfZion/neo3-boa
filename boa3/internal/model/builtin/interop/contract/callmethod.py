@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
@@ -16,7 +15,7 @@ class CallMethod(InteropMethod):
         syscall = 'System.Contract.Call'
 
         call_flags = CallFlagsType.build()
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'script_hash': Variable(UInt160Type.build()),
             'method': Variable(Type.str),
             'args': Variable(Type.sequence),  # TODO: change when *args is implemented #2kq1hzg
@@ -31,7 +30,7 @@ class CallMethod(InteropMethod):
         super().__init__(identifier, syscall, args, defaults=[args_default, call_flags_default], return_type=Type.any)
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         """
         Gets the indexes order that need to be used during code generation.
         If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))

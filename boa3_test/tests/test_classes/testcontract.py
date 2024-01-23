@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 from boa3.internal.neo import to_hex_str
 from boa3.internal.neo.vm.type.StackItem import StackItemType
@@ -10,7 +9,7 @@ class TestContract:
         self._nef_path: str = file_path
         self._manifest_path: str = manifest_path
         self._manifest: dict = self._read_manifest()
-        self._script_hash: Optional[bytes] = self._get_script_hash()
+        self._script_hash: bytes | None = self._get_script_hash()
 
     def _get_script_hash(self) -> bytes:
         file_path = self._nef_path
@@ -51,7 +50,7 @@ class TestContract:
         return self._nef_path
 
     @property
-    def script_hash(self) -> Optional[bytes]:
+    def script_hash(self) -> bytes | None:
         return self._script_hash
 
     def __str__(self) -> str:

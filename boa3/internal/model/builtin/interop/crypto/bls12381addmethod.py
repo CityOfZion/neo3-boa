@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.internal.model.variable import Variable
 
@@ -12,7 +10,7 @@ class Bls12381AddMethod(CryptoLibMethod):
 
         identifier = 'bls12_381_add'
         native_identifier = 'bls12381Add'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'x': Variable(bls12_381_type),
             'y': Variable(bls12_381_type),
         }
