@@ -1,18 +1,15 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestAssert(BoaTest):
+class TestAssert(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/assert_test'
 
-    def test_assert_unary_boolean_operation(self):
+    def test_assert_unary_boolean_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -24,31 +21,19 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertUnaryOperation.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertUnaryOperation.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_unary_boolean_operation_run(self):
+        await self.set_up_contract('AssertUnaryOperation.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [False, 10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', False, 10))
-        expected_results.append(10)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('Main', [True, 20], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', True, 20)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_assert_binary_boolean_operation(self):
+    def test_assert_binary_boolean_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -61,31 +46,19 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertBinaryOperation.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertBinaryOperation.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_binary_boolean_operation_run(self):
+        await self.set_up_contract('AssertBinaryOperation.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [10, 20], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 10, 20))
-        expected_results.append(10)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('Main', [20, 20], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', 20, 20)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_assert_with_message(self):
+    def test_assert_with_message_compile(self):
         assert_msg = String('a must be greater than zero').to_bytes()
 
         expected_output = (
@@ -102,11 +75,22 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertWithMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertWithMessage.py')
         self.assertEqual(expected_output, output)
 
-    def test_assert_with_bytes_message(self):
+    async def test_assert_with_message_run(self):
+        await self.set_up_contract('AssertWithMessage.py')
+
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
+
+        assert_msg = 'a must be greater than zero'
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('Main', [0], return_type=int)
+
+        self.assertRegex(str(context.exception),  assert_msg)
+
+    def test_assert_with_bytes_message_compile(self):
         assert_msg = String('a must be greater than zero').to_bytes()
 
         expected_output = (
@@ -123,9 +107,20 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertWithBytesMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertWithBytesMessage.py')
         self.assertEqual(expected_output, output)
+
+    async def test_assert_with_bytes_message_run(self):
+        await self.set_up_contract('AssertWithBytesMessage.py')
+
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
+
+        assert_msg = b'a must be greater than zero'
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('Main', [0], return_type=int)
+
+        self.assertRegex(String(str(context.exception)).to_bytes(), assert_msg)
 
     def test_assert_with_int_message(self):
         path = self.get_contract_path('AssertWithIntMessage.py')
@@ -139,7 +134,7 @@ class TestAssert(BoaTest):
         path = self.get_contract_path('AssertWithListMessage.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_assert_with_str_var_message(self):
+    def test_assert_with_str_var_message_compile(self):
         assert_msg = String('a must be greater than zero').to_bytes()
 
         expected_output = (
@@ -159,11 +154,22 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertWithStrVarMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertWithStrVarMessage.py')
         self.assertEqual(expected_output, output)
 
-    def test_assert_with_str_function_message(self):
+    async def test_assert_with_str_var_message_run(self):
+        await self.set_up_contract('AssertWithStrVarMessage.py')
+
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
+
+        assert_msg = 'a must be greater than zero'
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('Main', [0], return_type=int)
+
+        self.assertRegex(str(context.exception), assert_msg)
+
+    def test_assert_with_str_function_message_compile(self):
         assert_msg = String('a must be greater than zero').to_bytes()
 
         expected_output = (
@@ -183,11 +189,22 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertWithStrFunctionMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertWithStrFunctionMessage.py')
         self.assertEqual(expected_output, output)
 
-    def test_assert_int(self):
+    async def test_assert_with_str_function_message_run(self):
+        await self.set_up_contract('AssertWithStrFunctionMessage.py')
+
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
+
+        assert_msg = 'a must be greater than zero'
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('Main', [0], return_type=int)
+
+        self.assertRegex(str(context.exception), assert_msg)
+
+    def test_assert_int_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -198,33 +215,21 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertInt.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertInt.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_int_run(self):
+        await self.set_up_contract('AssertInt.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
+        result, _ = await self.call('Main', [-10], return_type=int)
+        self.assertEqual(-10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
-        invokes.append(runner.call_contract(path, 'Main', -10))
-        expected_results.append(-10)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('Main', [0], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', 0)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_assert_str(self):
+    def test_assert_str_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -235,31 +240,19 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertStr.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertStr.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_str_run(self):
+        await self.set_up_contract('AssertStr.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['unittest'], return_type=str)
+        self.assertEqual('unittest', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'unittest'))
-        expected_results.append('unittest')
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('Main', [''], return_type=str)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', '')
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_assert_bytes(self):
+    def test_assert_bytes_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -270,32 +263,19 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertBytes.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertBytes.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_bytes_run(self):
+        await self.set_up_contract('AssertBytes.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [b'unittest'], return_type=bytes)
+        self.assertEqual(b'unittest', result)
 
-        invokes.append(runner.call_contract(path, 'Main', b'unittest',
-                                            expected_result_type=bytes))
-        expected_results.append(b'unittest')
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('Main', [b''], return_type=bytes)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', b'')
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_assert_list(self):
+    def test_assert_list_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -308,31 +288,19 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertList.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertList.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_list_run(self):
+        await self.set_up_contract('AssertList.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [[1,2,3]], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3]))
-        expected_results.append(3)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('Main', [[]], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', [])
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_assert_dict(self):
+    def test_assert_dict_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -345,31 +313,19 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertDict.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_dict_run(self):
+        await self.set_up_contract('AssertDict.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [{1: 2, 2: 5}], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', {1: 2, 2: 5}))
-        expected_results.append(2)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('Main', [{}], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', {})
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_assert_any(self):
+    def test_assert_any_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -389,42 +345,20 @@ class TestAssert(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssertAny.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AssertAny.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assert_any_run(self):
+        await self.set_up_contract('AssertAny.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'Main', True))
-        expected_results.append(None)
+    async def test_boa2_throw_test(self):
+        await self.set_up_contract('ThrowBoa2Test.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [1], return_type=bool)
+        self.assertEqual(True, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_throw_test(self):
-        path, _ = self.get_deploy_file_paths('ThrowBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'main', 4)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('main', [4], return_type=bool)
