@@ -134,7 +134,7 @@ class BoaTestCase(SmartContractTestCase):
     @classmethod
     async def compile_and_deploy(cls,
                                  contract_path: str,
-                                 *,
+                                 *extra_args: str,
                                  output_name: str = None,
                                  change_manifest_name: bool = False,
                                  signing_account: account.Account = None,
@@ -142,7 +142,7 @@ class BoaTestCase(SmartContractTestCase):
                                  **kwargs
                                  ) -> types.UInt160:
 
-        nef_abs_path, _ = cls.get_deploy_file_paths(contract_path,
+        nef_abs_path, _ = cls.get_deploy_file_paths(*(contract_path, *extra_args),
                                                     output_name=output_name,
                                                     change_manifest_name=change_manifest_name,
                                                     compile_if_found=compile_if_found,
@@ -423,13 +423,15 @@ class BoaTestCase(SmartContractTestCase):
         elif second == first:
             return self.assertEqual(second, first, default_message)
 
-        first_variables = ([value for key, value in vars(type(first)).items() if not key.endswith('__')]
+        first_variables = ([value for key, value in vars(type(first)).items()
+                            if not key.endswith('__') and not callable(value)]
                            + list(vars(first).values())
                            )
         if isinstance(second, list):
             second_variables = second
         else:
-            second_variables = ([value for key, value in vars(type(second)).items() if not key.endswith('__')]
+            second_variables = ([value for key, value in vars(type(second)).items()
+                                 if not key.endswith('__') and not callable(value)]
                                 + list(vars(second).values())
                                 )
         if msg is None:

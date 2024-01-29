@@ -397,15 +397,17 @@ class TestImport(boatestcase.BoaTestCase):
 
     async def test_import_user_class_inner_files(self):
         await self.set_up_contract('ImportUserClassInnerFiles.py')
-        inner_path, _ = self.get_deploy_file_paths('class_import', 'ImportUserClass.py')
-        contract_2 = await self.compile_and_deploy(inner_path)
+        contract_2 = await self.compile_and_deploy('class_import', 'ImportUserClass.py')
+
+        from boa3_test.test_sc.import_test.class_import.example import Example
+        expected_result = Example(42, '42')
 
         result, _ = await self.call('build_example_object', [], return_type=list,
                                     target_contract=contract_2)
-        self.assertEqual([42, '42'], result)
+        self.assertObjectEqual(expected_result, result)
 
         result, _ = await self.call('build_example_object', [], return_type=str)
-        self.assertEqual('42', result)
+        self.assertEqual(expected_result.var_str, result)
 
     def test_from_import_not_existing_method(self):
         path = self.get_contract_path('FromImportNotExistingMethod.py')
