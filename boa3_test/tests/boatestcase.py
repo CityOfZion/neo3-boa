@@ -116,7 +116,8 @@ class BoaTestCase(SmartContractTestCase):
                               output_name: str = None,
                               change_manifest_name: bool = False,
                               signing_account: account.Account = None,
-                              compile_if_found: bool = False
+                              compile_if_found: bool = False,
+                              **kwargs
                               ) -> GenericContract:
 
         contract_path = cls.get_contract_path(*contract_path)
@@ -124,7 +125,8 @@ class BoaTestCase(SmartContractTestCase):
                                                          output_name=output_name,
                                                          change_manifest_name=change_manifest_name,
                                                          signing_account=signing_account,
-                                                         compile_if_found=compile_if_found
+                                                         compile_if_found=compile_if_found,
+                                                         **kwargs
                                                          )
 
         return cls.contract
@@ -181,7 +183,7 @@ class BoaTestCase(SmartContractTestCase):
                                             )
 
         if isinstance(result, (list, dict)):
-            cls.unwrap_inner_values(result, *expected_values)
+            cls.unwrap_inner_values(result, *expected_values, expected_result=return_type_class)
         if return_type_class is tuple:
             result = tuple(result)
 
@@ -225,16 +227,24 @@ class BoaTestCase(SmartContractTestCase):
             return cls.deployed_contracts[_manifest.name]
 
     @classmethod
-    def unwrap_inner_values(cls, value: list | dict, *args: type):
+    def unwrap_inner_values(cls, value: list | dict, *args: type, expected_result: Type[T] | None = None):
         if isinstance(value, list):
+            if expected_result not in (list, tuple):
+                expected_result = list
+
             list_type = args[0] if len(args) else None
             for index, item in enumerate(value):
                 if not isinstance(item, noderpc.StackItem):
                     continue
 
+                if expected_result is tuple:
+                    list_type = args[index] if len(args) > index else None
                 value[index] = cls._unwrap_stack_item(item, list_type)
 
         elif isinstance(value, dict):
+            if expected_result is not dict:
+                expected_result = dict
+
             dict_key_type = args[0] if len(args) else None
             dict_value_type = args[1] if len(args) > 1 else None
             aux = value.copy()
@@ -272,6 +282,12 @@ class BoaTestCase(SmartContractTestCase):
                 result = stack_item.as_str()
             elif expected_type is bytes:
                 result = stack_item.as_bytes()
+            elif expected_type is types.UInt160:
+                result = stack_item.as_uint160()
+            elif expected_type is types.UInt256:
+                result = stack_item.as_uint256()
+            elif expected_type is cryptography.ECPoint:
+                result = stack_item.as_public_key()
             else:
                 try:
                     result = stack_item.as_str()
@@ -312,13 +328,17 @@ class BoaTestCase(SmartContractTestCase):
 
         elif stack_item.type is noderpc.StackItemType.ARRAY:
             result = stack_item.as_list()
-            inner_list_type = expected_type.__args__ if hasattr(expected_type, '__args__') else ()
-            cls.unwrap_inner_values(result, inner_list_type)
+            inner_list_type = expected_type.__origin__ if hasattr(expected_type, '__origin__') else expected_type
+            inner_list_args = expected_type.__args__ if hasattr(expected_type, '__args__') else ()
+            cls.unwrap_inner_values(result, *inner_list_args, expected_result=inner_list_type)
+
+            if inner_list_type is tuple:
+                result = tuple(result)
 
         elif stack_item.type is noderpc.StackItemType.MAP:
             result = stack_item.as_dict()
             inner_dict_type = expected_type.__args__ if hasattr(expected_type, '__args__') else ()
-            cls.unwrap_inner_values(result, inner_dict_type)
+            cls.unwrap_inner_values(result, *inner_dict_type, expected_result=dict)
 
         if result is None:
             result = stack_item.value
