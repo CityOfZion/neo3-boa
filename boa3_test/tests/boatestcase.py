@@ -373,18 +373,28 @@ class BoaTestCase(SmartContractTestCase):
                       *,
                       root_folder: str = None,
                       fail_fast: bool = False,
+                      get_manifest: bool = False,
                       **kwargs
                       ) -> CompilerOutput:
 
         py_abs_path = self.get_contract_path(contract_path)
-        result = self.compile(
-            py_abs_path,
-            root_folder=root_folder,
-            fail_fast=fail_fast,
-            **kwargs
-        )
+        if not get_manifest:
+            result_manifest = {}
+            result = self.compile(
+                py_abs_path,
+                root_folder=root_folder,
+                fail_fast=fail_fast,
+                **kwargs
+            )
+        else:
+            result, result_manifest = self.compile_and_save(
+                py_abs_path,
+                root_folder=root_folder,
+                fail_fast=fail_fast,
+                **kwargs
+            )
 
-        return result, {}
+        return result, result_manifest
 
     def assertCompilerLogs(self,
                            expected_logged_exception,
