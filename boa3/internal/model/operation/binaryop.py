@@ -36,6 +36,10 @@ class BinaryOp:
     IsNot = NotIdentity()
     Eq = ObjectEquality()
     NotEq = ObjectInequality()
+    StrBytesGt = StrBytesGreaterThan()
+    StrBytesGtE = StrBytesGreaterThanOrEqual()
+    StrBytesLt = StrBytesLessThan()
+    StrBytesLtE = StrBytesLessThanOrEqual()
 
     # Logical operations
     And = BooleanAnd()

@@ -1,39 +1,26 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts import FindOptions
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestRelational(BoaTest):
+class TestRelational(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/relational_test'
 
     # region GreaterThan
 
-    def test_builtin_type_greater_than_operation(self):
-        path, _ = self.get_deploy_file_paths('BuiltinTypeGreaterThan.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_builtin_type_greater_than_operation(self):
+        await self.set_up_contract('BuiltinTypeGreaterThan.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(FindOptions.VALUES_ONLY > FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES], return_type=bool)
+        self.assertEqual(FindOptions.VALUES_ONLY > FindOptions.DESERIALIZE_VALUES, result)
 
     def test_mixed_greater_than_operation(self):
         path = self.get_contract_path('MixedGreaterThan.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_number_greater_than_operation(self):
+    def test_number_greater_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -44,88 +31,67 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NumGreaterThan.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NumGreaterThan.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_number_greater_than_operation_run(self):
+        await self.set_up_contract('NumGreaterThan.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=bool)
+        self.assertEqual(1 > 2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 2, 2))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 2, 1))
-        expected_results.append(True)
+        result, _ = await self.call('Main', [2, 2], return_type=bool)
+        self.assertEqual(2 > 2, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [2, 1], return_type=bool)
+        self.assertEqual(2 > 1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_greater_than_operation(self):
+    def test_string_greater_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + Opcode.GT
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.PUSHM1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.PUSHT
+            + Opcode.JMP + b'\x03'
+            + Opcode.PUSHF
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StrGreaterThan.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrGreaterThan.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_greater_than_operation_run(self):
+        await self.set_up_contract('StrGreaterThan.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['test', 'unit'], return_type=bool)
+        self.assertEqual('test' > 'unit', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'test', 'unit'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'unit'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'test'))
-        expected_results.append(False)
+        result, _ = await self.call('Main', ['unit', 'unit'], return_type=bool)
+        self.assertEqual('unit' > 'unit', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', ['unit', 'test'], return_type=bool)
+        self.assertEqual('unit' > 'test', result)
 
     # endregion
 
     # region GreaterThanOrEqual
 
-    def test_builtin_type_greater_than_or_equal_operation(self):
-        path, _ = self.get_deploy_file_paths('BuiltinTypeGreaterThanOrEqual.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_builtin_type_greater_than_or_equal_operation(self):
+        await self.set_up_contract('BuiltinTypeGreaterThanOrEqual.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.VALUES_ONLY >= FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY], return_type=bool)
+        self.assertEqual(FindOptions.VALUES_ONLY >= FindOptions.VALUES_ONLY, result)
 
     def test_mixed_greater_or_equal_than_operation(self):
         path = self.get_contract_path('MixedGreaterOrEqual.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_number_greater_or_equal_than_operation(self):
+    def test_number_greater_or_equal_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -136,267 +102,176 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NumGreaterOrEqual.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NumGreaterOrEqual.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_number_greater_or_equal_than_operation_run(self):
+        await self.set_up_contract('NumGreaterOrEqual.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=bool)
+        self.assertEqual(1 >= 2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 2, 2))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 2, 1))
-        expected_results.append(True)
+        result, _ = await self.call('Main', [2, 2], return_type=bool)
+        self.assertEqual(2 >= 2, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [2, 1], return_type=bool)
+        self.assertEqual(2 >= 1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_greater_or_equal_than_operation(self):
+    def test_string_greater_or_equal_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + Opcode.GE
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.PUSH1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.PUSHF
+            + Opcode.JMP + b'\x03'
+            + Opcode.PUSHT
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StrGreaterOrEqual.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrGreaterOrEqual.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_greater_or_equal_than_operation_run(self):
+        await self.set_up_contract('StrGreaterOrEqual.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['test', 'unit'], return_type=bool)
+        self.assertEqual('test' >= 'unit', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'test', 'unit'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'unit'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'test'))
-        expected_results.append(False)
+        result, _ = await self.call('Main', ['unit', 'unit'], return_type=bool)
+        self.assertEqual('unit' >= 'unit', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', ['unit', 'test'], return_type=bool)
+        self.assertEqual('unit' >= 'test', result)
 
     # endregion
 
     # region Identity
 
-    def test_boolean_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('BoolIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_boolean_identity_operation(self):
+        await self.set_up_contract('BoolIdentity.py')
 
         a = True
         b = True
-        invokes.append(runner.call_contract(path, 'without_attribution_true'))
-        expected_results.append(a is b)
+        result, _ = await self.call('without_attribution_true', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         a = True
         b = False
-        invokes.append(runner.call_contract(path, 'without_attribution_false'))
-        expected_results.append(a is b)
+        result, _ = await self.call('without_attribution_false', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         c = True
         d = c
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(c is d)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(c is d, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_list_identity(self):
-        path, _ = self.get_deploy_file_paths('ListIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_list_identity(self):
+        await self.set_up_contract('ListIdentity.py')
 
         a = [1, 2, 3]
         b = a
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(a is b)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         a = [1, 2, 3]
         b = [1, 2, 3]
-        invokes.append(runner.call_contract(path, 'without_attribution'))
-        expected_results.append(a is b)
+        result, _ = await self.call('without_attribution', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mixed_identity(self):
-        path, _ = self.get_deploy_file_paths('MixedIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_mixed_identity(self):
+        await self.set_up_contract('MixedIdentity.py')
 
         # a mixed identity should always result in False, but will compile
-        invokes.append(runner.call_contract(path, 'mixed'))
-        expected_results.append(False)
+        result, _ = await self.call('mixed', [], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_none_identity_operation(self):
+        await self.set_up_contract('NoneIdentity.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [1], return_type=bool)
+        self.assertEqual(1 is None, result)
 
-    def test_none_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('NoneIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [True], return_type=bool)
+        self.assertEqual(True is None, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['string'], return_type=bool)
+        self.assertEqual('string' is None, result)
 
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append(False)
+        result, _ = await self.call('main', [b'bytes'], return_type=bool)
+        self.assertEqual(b'bytes' is None, result)
 
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append(False)
+        result, _ = await self.call('main', [None], return_type=bool)
+        self.assertEqual(None is None, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'string'))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'main', b'bytes'))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'main', None))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_number_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('NumIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_number_identity_operation(self):
+        await self.set_up_contract('NumIdentity.py')
 
         a = 1
         b = 1
-        invokes.append(runner.call_contract(path, 'without_attribution_true'))
-        expected_results.append(a is b)
+        result, _ = await self.call('without_attribution_true', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         a = 1
         b = 2
-        invokes.append(runner.call_contract(path, 'without_attribution_false'))
-        expected_results.append(a is b)
+        result, _ = await self.call('without_attribution_false', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         c = 1
         d = c
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(c is d)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(c is d, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('StrIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_identity_operation(self):
+        await self.set_up_contract('StrIdentity.py')
 
         a = 'unit'
         b = 'unit'
-        invokes.append(runner.call_contract(path, 'without_attribution_true'))
-        expected_results.append(a is b)
+        result, _ = await self.call('without_attribution_true', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         a = 'unit'
         b = 'test'
-        invokes.append(runner.call_contract(path, 'without_attribution_false'))
-        expected_results.append(a is b)
+        result, _ = await self.call('without_attribution_false', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         c = 'unit'
         d = c
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(c is d)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(c is d, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_identity(self):
-        path, _ = self.get_deploy_file_paths('TupleIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_identity(self):
+        await self.set_up_contract('TupleIdentity.py')
 
         a = (1, 2, 3)
         b = a
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(a is b)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(a is b, result)
 
         # Python will try conserve memory and will make a and b reference the same position, since Tuples are immutable
         # this will deviate from Neo's expected behavior
-        invokes.append(runner.call_contract(path, 'without_attribution'))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('without_attribution', [], return_type=bool)
+        self.assertEqual(False, result)
 
     # endregion
 
     # region LessThan
 
-    def test_builtin_type_less_than_operation(self):
-        path, _ = self.get_deploy_file_paths('BuiltinTypeLessThan.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_builtin_type_less_than_operation(self):
+        await self.set_up_contract('BuiltinTypeLessThan.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.VALUES_ONLY < FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY], return_type=bool)
+        self.assertEqual(FindOptions.VALUES_ONLY < FindOptions.VALUES_ONLY, result)
 
     def test_mixed_less_than_operation(self):
         path = self.get_contract_path('MixedLessThan.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_number_less_than_operation(self):
+    def test_number_less_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -407,88 +282,67 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NumLessThan.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NumLessThan.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_number_less_than_operation_run(self):
+        await self.set_up_contract('NumLessThan.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=bool)
+        self.assertEqual(1 < 2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 2, 2))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 2, 1))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [2, 2], return_type=bool)
+        self.assertEqual(2 < 2, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [2, 1], return_type=bool)
+        self.assertEqual(2 < 1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_less_than_operation(self):
+    def test_string_less_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + Opcode.LT
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.PUSH1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.PUSHT
+            + Opcode.JMP + b'\x03'
+            + Opcode.PUSHF
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StrLessThan.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrLessThan.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_less_than_operation_run(self):
+        await self.set_up_contract('StrLessThan.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['test', 'unit'], return_type=bool)
+        self.assertEqual('test' < 'unit', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'test', 'unit'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'unit'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'test'))
-        expected_results.append(True)
+        result, _ = await self.call('Main', ['unit', 'unit'], return_type=bool)
+        self.assertEqual('unit' < 'unit', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', ['unit', 'test'], return_type=bool)
+        self.assertEqual('unit' < 'test', result)
 
     # endregion
 
     # region LessThanOrEqual
 
-    def test_builtin_type_less_than_or_equal_operation(self):
-        path, _ = self.get_deploy_file_paths('BuiltinTypeLessThanOrEqual.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_builtin_type_less_than_or_equal_operation(self):
+        await self.set_up_contract('BuiltinTypeLessThanOrEqual.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.VALUES_ONLY <= FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY], return_type=bool)
+        self.assertEqual(FindOptions.VALUES_ONLY <= FindOptions.VALUES_ONLY, result)
 
     def test_mixed_less_or_equal_than_operation(self):
         path = self.get_contract_path('MixedLessOrEqual.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_number_less_or_equal_than_operation(self):
+    def test_number_less_or_equal_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -499,68 +353,57 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NumLessOrEqual.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NumLessOrEqual.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_number_less_or_equal_than_operation_run(self):
+        await self.set_up_contract('NumLessOrEqual.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=bool)
+        self.assertEqual(1 <= 2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 2, 2))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 2, 1))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [2, 2], return_type=bool)
+        self.assertEqual(2 <= 2, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [2, 1], return_type=bool)
+        self.assertEqual(2 <= 1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_less_or_equal_than_operation(self):
+    def test_string_less_or_equal_than_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
             + b'\x02'
             + Opcode.LDARG0
             + Opcode.LDARG1
-            + Opcode.LE
+            + Opcode.CALLT + b'\x00\x00'
+            + Opcode.PUSHM1
+            + Opcode.JMPNE + b'\x05'
+            + Opcode.PUSHF
+            + Opcode.JMP + b'\x03'
+            + Opcode.PUSHT
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StrLessOrEqual.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrLessOrEqual.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_less_or_equal_than_operation_run(self):
+        await self.set_up_contract('StrLessOrEqual.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['test', 'unit'], return_type=bool)
+        self.assertEqual('test' <= 'unit', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'test', 'unit'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'unit'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'test'))
-        expected_results.append(True)
+        result, _ = await self.call('Main', ['unit', 'unit'], return_type=bool)
+        self.assertEqual('unit' <= 'unit', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', ['unit', 'test'], return_type=bool)
+        self.assertEqual('unit' <= 'test', result)
 
     # endregion
 
     # region MixedEquality
 
-    def test_mixed_equality_operation(self):
+    def test_mixed_equality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -571,68 +414,50 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MixedEquality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('MixedEquality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_mixed_equality_operation_run(self):
+        await self.set_up_contract('MixedEquality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 'unit'], return_type=bool)
+        self.assertEqual(1 == 'unit', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 'unit'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 123, '123'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', Integer.from_bytes(b'123'), '123'))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [123, '123'], return_type=bool)
+        self.assertEqual(123 == '123', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [Integer.from_bytes(b'123'), '123'], return_type=bool)
+        self.assertEqual(Integer.from_bytes(b'123') == '123', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_boa2_equality_test2(self):
+        await self.set_up_contract('Equality2Boa2Test.py')
 
-    def test_boa2_equality_test2(self):
-        path, _ = self.get_deploy_file_paths('Equality2Boa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [1], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [2], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append(False)
+        result, _ = await self.call('main', [3], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'main', 2))
-        expected_results.append(False)
+        result, _ = await self.call('main', [4], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'main', 3))
-        expected_results.append(True)
+        result, _ = await self.call('main', [5], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'main', 4))
-        expected_results.append(False)
+        result, _ = await self.call('main', [6], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'main', 5))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'main', 6))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'main', 7))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [7], return_type=bool)
+        self.assertEqual(False, result)
 
     # endregion
 
     # region MixedInequality
 
-    def test_mixed_inequality_operation(self):
+    def test_mixed_inequality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -643,196 +468,128 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MixedInequality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('MixedInequality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_mixed_inequality_operation_run(self):
+        await self.set_up_contract('MixedInequality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 'unit'], return_type=bool)
+        self.assertEqual(1 != 'unit', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 'unit'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 123, '123'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', Integer.from_bytes(b'123'), '123'))
-        expected_results.append(True)
+        result, _ = await self.call('Main', [123, '123'], return_type=bool)
+        self.assertEqual(123 != '123', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [Integer.from_bytes(b'123'), '123'], return_type=bool)
+        self.assertEqual(Integer.from_bytes(b'123') != '123', result)
 
     # endregion
 
     # region NotIdentity
 
-    def test_boolean_not_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('BoolNotIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_boolean_not_identity_operation(self):
+        await self.set_up_contract('BoolNotIdentity.py')
 
         a = True
         b = False
-        invokes.append(runner.call_contract(path, 'without_attribution_true'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('without_attribution_true', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         a = True
         b = True
-        invokes.append(runner.call_contract(path, 'without_attribution_false'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('without_attribution_false', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         c = True
         d = c
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(c is not d)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(c is not d, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_list_not_identity(self):
-        path, _ = self.get_deploy_file_paths('ListNotIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_list_not_identity(self):
+        await self.set_up_contract('ListNotIdentity.py')
 
         a = [1, 2, 3]
         b = a
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         a = [1, 2, 3]
         b = [1, 2, 3]
-        invokes.append(runner.call_contract(path, 'without_attribution'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('without_attribution', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_none_not_identity_operation(self):
+        await self.set_up_contract('NoneNotIdentity.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [1], return_type=bool)
+        self.assertEqual(1 is not None, result)
 
-    def test_none_not_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('NoneNotIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [True], return_type=bool)
+        self.assertEqual(True is not None, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['string'], return_type=bool)
+        self.assertEqual('string' is not None, result)
 
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append(True)
+        result, _ = await self.call('main', [b'bytes'], return_type=bool)
+        self.assertEqual(b'bytes' is not None, result)
 
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append(True)
+        result, _ = await self.call('main', [None], return_type=bool)
+        self.assertEqual(None is not None, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'string'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'main', b'bytes'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'main', None))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_number_not_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('NumNotIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_number_not_identity_operation(self):
+        await self.set_up_contract('NumNotIdentity.py')
 
         a = 1
         b = 2
-        invokes.append(runner.call_contract(path, 'without_attribution_true'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('without_attribution_true', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         a = 1
         b = 1
-        invokes.append(runner.call_contract(path, 'without_attribution_false'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('without_attribution_false', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         c = 1
         d = c
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(c is not d)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(c is not d, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_not_identity_operation(self):
-        path, _ = self.get_deploy_file_paths('StrNotIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_not_identity_operation(self):
+        await self.set_up_contract('StrNotIdentity.py')
 
         a = 'unit'
         b = 'test'
-        invokes.append(runner.call_contract(path, 'without_attribution_true'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('without_attribution_true', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         a = 'unit'
         b = 'unit'
-        invokes.append(runner.call_contract(path, 'without_attribution_false'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('without_attribution_false', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         c = 'unit'
         d = c
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(c is not d)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(c is not d, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_tuple_not_identity(self):
-        path, _ = self.get_deploy_file_paths('TupleNotIdentity.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_tuple_not_identity(self):
+        await self.set_up_contract('TupleNotIdentity.py')
 
         a = (1, 2, 3)
         b = a
-        invokes.append(runner.call_contract(path, 'with_attribution'))
-        expected_results.append(a is not b)
+        result, _ = await self.call('with_attribution', [], return_type=bool)
+        self.assertEqual(a is not b, result)
 
         # Python will try conserve memory and will make a and b reference the same position, since Tuples are immutable
         # this will deviate from Neo's expected behavior
-        invokes.append(runner.call_contract(path, 'without_attribution'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('without_attribution', [], return_type=bool)
+        self.assertEqual(True, result)
 
     # endregion
 
     # region NumericEquality
 
-    def test_boolean_equality_operation(self):
+    def test_boolean_equality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -843,44 +600,25 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BoolEquality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BoolEquality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boolean_equality_operation_run(self):
+        await self.set_up_contract('BoolEquality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, False], return_type=bool)
+        self.assertEqual(True == False, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', True, True))
-        expected_results.append(True)
+        result, _ = await self.call('Main', [True, True], return_type=bool)
+        self.assertEqual(True == True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_builtin_equality_operation(self):
+        await self.set_up_contract('BuiltinTypeEquality.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY], return_type=bool)
+        self.assertEqual(FindOptions.VALUES_ONLY == FindOptions.VALUES_ONLY, result)
 
-    def test_builtin_equality_operation(self):
-        path, _ = self.get_deploy_file_paths('BuiltinTypeEquality.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.VALUES_ONLY == FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_multiple_comparisons(self):
+    def test_multiple_comparisons_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -895,32 +633,25 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NumRange.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NumRange.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiple_comparisons_compile_run(self):
+        await self.set_up_contract('NumRange.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2, 5], return_type=bool)
+        self.assertEqual(2 <= 1 <= 5, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2, 5))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 2, 1, 5))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 5, 1, 2))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 2, 5, 1))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [2, 1, 5], return_type=bool)
+        self.assertEqual(1 <= 2 <= 5, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [5, 1, 2], return_type=bool)
+        self.assertEqual(1 <= 5 <= 2, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [2, 5, 1], return_type=bool)
+        self.assertEqual(5 <= 2 <= 1, result)
 
-    def test_number_equality_operation(self):
+    def test_number_equality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -931,32 +662,23 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NumEquality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NumEquality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_number_equality_operation_run(self):
+        await self.set_up_contract('NumEquality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=bool)
+        self.assertEqual(1 == 2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 2, 2))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [2, 2], return_type=bool)
+        self.assertEqual(2 == 2, result)
 
     # endregion
 
     # region NumericInequality
 
-    def test_boolean_inequality_operation(self):
+    def test_boolean_inequality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -967,44 +689,25 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BoolInequality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BoolInequality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boolean_inequality_operation_run(self):
+        await self.set_up_contract('BoolInequality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, False], return_type=bool)
+        self.assertEqual(True != False, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True, False))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', True, True))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [True, True], return_type=bool)
+        self.assertEqual(True != True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_builtin_inequality_operation(self):
+        await self.set_up_contract('BuiltinTypeInequality.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY], return_type=bool)
+        self.assertEqual(FindOptions.VALUES_ONLY != FindOptions.VALUES_ONLY, result)
 
-    def test_builtin_inequality_operation(self):
-        path, _ = self.get_deploy_file_paths('BuiltinTypeInequality.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.VALUES_ONLY != FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_number_inequality_operation(self):
+    def test_number_inequality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1015,26 +718,17 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NumInequality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NumInequality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_number_inequality_operation_run(self):
+        await self.set_up_contract('NumInequality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=bool)
+        self.assertEqual(1 != 2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 2, 2))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [2, 2], return_type=bool)
+        self.assertEqual(2 != 2, result)
 
     def test_number_inequality_operation_2(self):
         path = self.get_contract_path('NumInequalityPython2.py')
@@ -1046,88 +740,46 @@ class TestRelational(BoaTest):
 
     # region ObjectEquality
 
-    def test_compare_same_value_argument(self):
-        path, _ = self.get_deploy_file_paths('CompareSameValueArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_compare_same_value_argument(self):
+        await self.set_up_contract('CompareSameValueArgument.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('testing_something', [bytes(20)], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'testing_something', bytes(20)))
-        expected_results.append(True)
+    async def test_compare_same_value_hard_coded(self):
+        await self.set_up_contract('CompareSameValueHardCoded.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('testing_something', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_compare_string(self):
+        await self.set_up_contract('CompareString.py')
 
-    def test_compare_same_value_hard_coded(self):
-        path, _ = self.get_deploy_file_paths('CompareSameValueHardCoded.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('test1', ['|'], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('test2', ['|'], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'testing_something'))
-        expected_results.append(True)
+        result, _ = await self.call('test3', ['|'], return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('test4', ['|'], return_type=bool)
+        self.assertEqual(True, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_list_equality_with_slice(self):
+        await self.set_up_contract('ListEqualityWithSlice.py')
 
-    def test_compare_string(self):
-        path, _ = self.get_deploy_file_paths('CompareString.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [['unittest', '123'], 'unittest'], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [['unittest', '123'], '123'], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'test1', '|'))
-        expected_results.append(True)
+        with self.assertRaises(boatestcase.FaultException):
+            await self.call('main', [[], ''], return_type=bool)
 
-        invokes.append(runner.call_contract(path, 'test2', '|'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'test3', '|'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'test4', '|'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_list_equality_with_slice(self):
-        path, _ = self.get_deploy_file_paths('ListEqualityWithSlice.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', ['unittest', '123'], 'unittest'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'main', ['unittest', '123'], '123'))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'main', [], '')
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
-
-    def test_string_equality_operation(self):
+    def test_string_equality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1138,32 +790,23 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StrEquality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrEquality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_equality_operation_run(self):
+        await self.set_up_contract('StrEquality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['unit', 'test'], return_type=bool)
+        self.assertEqual('unit' == 'test', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'test'))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'unit'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', ['unit', 'unit'], return_type=bool)
+        self.assertEqual('unit' == 'unit', result)
 
     # endregion
 
     # region ObjectInequality
 
-    def test_string_inequality_operation(self):
+    def test_string_inequality_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1174,25 +817,16 @@ class TestRelational(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StrInequality.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrInequality.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_inequality_operation_run(self):
+        await self.set_up_contract('StrInequality.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['unit', 'test'], return_type=bool)
+        self.assertEqual('unit' != 'test', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'test'))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 'unit'))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', ['unit', 'unit'], return_type=bool)
+        self.assertEqual('unit' != 'unit', result)
 
     # endregion
