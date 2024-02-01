@@ -4,6 +4,7 @@ from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to
 
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
+from boa3.internal.compiler.codegenerator.optimizerhelper import OptimizationLevel
 from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -196,7 +197,7 @@ class TestConstant(BoaTest):
         analyser = Analyser(ast.parse(str(input)))
         analyser.symbol_table['x'] = Variable(Type.any)
         with LOCK:
-            output = CodeGenerator.generate_code(analyser).bytecode
+            output = CodeGenerator.generate_code(analyser, OptimizationLevel.DEFAULT).bytecode
 
         self.assertEqual(expected_output, output)
 

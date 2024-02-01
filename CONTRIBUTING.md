@@ -27,7 +27,7 @@ Create a product that is easy to maintain and upgrade. Use unit tests, typed and
 
 ### Releases
 After finishing a batch of issues, a branch will be created and those issues will be cherry-picked to be released. With
-the help of [bump2version](https://github.com/c4urself/bump2version), we update Neo3-boa's version and add a tag to indicate 
+the help of [bump-my-version](https://github.com/callowayproject/bump-my-version), we update Neo3-boa's version and add a tag to indicate 
 a new release, we also update the changelog detailing what has changed. The branch will be merged into the master branch 
 and CircleCI will run all tests to check the integrity and will also await for approval to release this new version on 
 PyPi. After approving the release, the new documentation will also be published.
@@ -57,13 +57,13 @@ file, and also have the [.NET 6.0](https://dotnet.microsoft.com/en-us/download/d
 installed.
 
 ```shell
-pip install -r requirements_dev.txt
+pip install -e .[dev,test]
 dotnet tool install Neo.Express --version 3.5.20 -g
 dotnet tool install Neo.Test.Runner --version 3.5.17 -g
 ```
 
-> You can compile your smart contracts using your local Neo3-boa project by installing it with pip using the `--editable` 
-> flag, i.e. `pip install -e path/to/local/clone/of/Neo3-boa`.
+> Some tests will fail if you have the neo3-boa package installed. We only need the dependencies, that's why the 
+> neo3-boa package is being uninstalled.
 
 
 ## Writing changes

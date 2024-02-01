@@ -17,7 +17,7 @@ class ByteArrayEncodingMethod(ByteArrayMethod):
 
     @property
     def is_supported(self) -> bool:
-        # TODO: change when building bytearray from string encoding
+        # TODO: change when building bytearray from string encoding #86a1cu16e
         return False
 
     @property

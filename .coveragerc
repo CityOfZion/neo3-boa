@@ -1,8 +1,0 @@
-[run]
-source = boa3
-omit =
-  boa3/builtin/*
-
-[report]
-omit =
-  boa3_test/*

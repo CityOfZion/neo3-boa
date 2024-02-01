@@ -130,7 +130,6 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if self.is_exception_name(result.symbol_id):
                     self.generator.convert_new_exception()
                 else:
-                    # TODO: validate function calls
                     is_internal = hasattr(node, 'is_internal_call') and node.is_internal_call
                     class_type = result.type if isinstance(node, ast.Attribute) else None
 
@@ -162,6 +161,15 @@ class VisitorCodeGenerator(IAstAnalyser):
             if isclass(symbol) and issubclass(symbol, BaseException):
                 return True
         return False
+
+    def is_global_variable(self, variable_id: str) -> bool:
+        if self.current_class and variable_id in self.current_class.variables:
+            return False
+        if self.current_method and (variable_id in self.current_method.args
+                                    or variable_id in self.current_method.locals):
+            return False
+
+        return variable_id in self.symbols
 
     def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
         self.generator._remove_inserted_opcodes_since(last_address, last_stack_size)
@@ -419,7 +427,13 @@ class VisitorCodeGenerator(IAstAnalyser):
                 and hasattr(ann_assign, 'origin')
                 and isinstance(ann_assign.origin, ast.AST)):
             var_id = self._get_unique_name(var_id, ann_assign.origin)
-        self.store_variable(VariableGenerationData(var_id, None, var_value_address), value=ann_assign.value)
+
+        if not (isinstance(var_data.symbol, Variable) and
+                self.is_global_variable(var_id) and
+                not self.generator.store_constant_variable(var_data.symbol)
+        ):
+            self.store_variable(VariableGenerationData(var_id, None, var_value_address), value=ann_assign.value)
+
         return self.build_data(ann_assign)
 
     def visit_Assign(self, assign: ast.Assign) -> GeneratorData:
@@ -436,6 +450,13 @@ class VisitorCodeGenerator(IAstAnalyser):
             var_id = target_data.symbol_id
             var_index = target_data.index
 
+            if (
+                    isinstance(target_data.symbol, Variable) and
+                    self.is_global_variable(var_id) and
+                    not self.generator.store_constant_variable(target_data.symbol)
+            ):
+                continue
+
             # filter to find the imported variables
             if (var_id not in self.generator.symbol_table
                     and hasattr(assign, 'origin')
@@ -444,7 +465,8 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             vars_ids.append(VariableGenerationData(var_id, var_index, var_value_address))
 
-        self.store_variable(*vars_ids, value=assign.value)
+        if vars_ids:
+            self.store_variable(*vars_ids, value=assign.value)
         return self.build_data(assign)
 
     def visit_AugAssign(self, aug_assign: ast.AugAssign) -> GeneratorData:
@@ -604,7 +626,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         if isinstance(un_op.op, UnaryOperation):
             self._convert_unary_operation(un_op.operand, un_op.op)
 
-        return self.build_data(un_op)
+        return self.build_data(un_op, result_type=un_op.op.result)
 
     def visit_Compare(self, compare: ast.Compare) -> GeneratorData:
         """
@@ -672,6 +694,45 @@ class VisitorCodeGenerator(IAstAnalyser):
         self.generator.convert_end_loop_else(start_addr, else_begin_address, len(while_node.orelse) > 0)
         return self.build_data(while_node, index=start_addr)
 
+    def visit_Match(self, match_node: ast.Match) -> GeneratorData:
+        case_addresses = []
+
+        for index, case in enumerate(match_node.cases):
+            # if it's the wildcard to accept all values
+            if hasattr(case.pattern, 'pattern') and case.pattern.pattern is None:
+                for stmt in case.body:
+                    self.visit_to_map(stmt, generate=True)
+                self.generator.convert_end_if(case_addresses[-1])
+            else:
+                subject = self.visit_to_map(match_node.subject, generate=True)
+                if isinstance(case.pattern, ast.MatchSingleton):
+                    self.generator.convert_literal(case.pattern.value)
+                    pattern_type = self.get_type(case.pattern.value)
+                else:
+                    pattern = self.visit_to_generate(case.pattern.value)
+                    pattern_type = pattern.type
+
+                self.generator.duplicate_stack_item(2)
+                pattern_type.generate_is_instance_type_check(self.generator)
+
+                self.generator.swap_reverse_stack_items(3)
+                self.generator.convert_operation(BinaryOp.NumEq)
+                self.generator.convert_operation(BinaryOp.And)
+
+                case_addresses.append(self.generator.convert_begin_if())
+                for stmt in case.body:
+                    self.visit_to_map(stmt, generate=True)
+
+                ends_with_if = len(case.body) > 0 and isinstance(case.body[-1], ast.If)
+
+                if index < len(match_node.cases) - 1:
+                    case_addresses[index] = self.generator.convert_begin_else(case_addresses[index], ends_with_if)
+
+        for case_addr in reversed(range(len(case_addresses))):
+            self.generator.convert_end_if(case_addresses[case_addr])
+
+        return self.build_data(match_node)
+
     def visit_For(self, for_node: ast.For) -> GeneratorData:
         """
         Visitor of for statement node
@@ -692,7 +753,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         for stmt in for_node.body:
             self.visit_to_map(stmt, generate=True)
 
-        # TODO: remove when optimizing for generation
+        # TODO: remove when optimizing for generation #864e6me36
         if self.current_method is not None:
             self.current_method.remove_instruction(for_node.lineno, for_node.col_offset)
 
@@ -1183,6 +1244,48 @@ class VisitorCodeGenerator(IAstAnalyser):
             self.generator.convert_set_item(value_data.index)
 
         return self.build_data(dict_node, result_type=result_type, already_generated=True)
+
+    def visit_JoinedStr(self, fstring: ast.JoinedStr) -> GeneratorData:
+        """
+        Visitor of an f-string node
+
+        :param string: the python ast string node
+        """
+        result_type = Type.str
+        index = self.generator.bytecode_size
+        for index, value in enumerate(fstring.values):
+            self.visit_to_generate(value)
+            if index != 0:
+                self.generator.convert_operation(BinaryOp.Concat)
+                if index < len(fstring.values) - 1:
+                    self._remove_inserted_opcodes_since(self.generator.last_code_start_address)
+
+        return self.build_data(fstring, result_type=result_type, index=index, already_generated=True)
+
+    def visit_FormattedValue(self, formatted_value: ast.FormattedValue) -> GeneratorData:
+        """
+        Visitor of a formatted_value node
+
+        :param formatted_value: the python ast string node
+        """
+        generated_value = self.visit_to_generate(formatted_value.value)
+        if generated_value.type == Type.str:
+            return generated_value
+
+        else:
+            match generated_value.type:
+                case Type.bool:
+                    self.generator.convert_builtin_method_call(Builtin.StrBool)
+                case Type.int:
+                    self.generator.convert_builtin_method_call(Builtin.StrInt)
+                case Type.bytes:
+                    self.generator.convert_builtin_method_call(Builtin.StrBytes)
+                case x if Type.sequence.is_type_of(x):
+                    self.generator.convert_builtin_method_call(Builtin.StrSequence)
+                case x if isinstance(x, UserClass):
+                    self.generator.convert_builtin_method_call(Builtin.StrClass.build(x))
+
+            return self.build_data(formatted_value, result_type=Type.str, already_generated=True)
 
     def visit_Pass(self, pass_node: ast.Pass) -> GeneratorData:
         """

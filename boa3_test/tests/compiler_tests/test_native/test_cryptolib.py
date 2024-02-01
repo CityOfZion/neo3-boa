@@ -325,6 +325,10 @@ class TestCryptoLibClass(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_bls12_381_add_mismatched_type(self):
+        path = self.get_contract_path('Bls12381AddMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_bls12_381_deserialize(self):
         expected_output = (
             Opcode.INITSLOT
@@ -354,6 +358,10 @@ class TestCryptoLibClass(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_bls12_381_equal_mismatched_type(self):
+        path = self.get_contract_path('Bls12381EqualMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_bls12_381_mul(self):
         expected_output = (
             Opcode.INITSLOT
@@ -370,6 +378,10 @@ class TestCryptoLibClass(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_bls12_381_mul_mismatched_type(self):
+        path = self.get_contract_path('Bls12381MulMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_bls12_381_pairing(self):
         expected_output = (
             Opcode.INITSLOT
@@ -385,6 +397,10 @@ class TestCryptoLibClass(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_bls12_381_pairing_mismatched_type(self):
+        path = self.get_contract_path('Bls12381PairingMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
     def test_bls12_381_serialize(self):
         expected_output = (
             Opcode.INITSLOT
@@ -398,3 +414,7 @@ class TestCryptoLibClass(BoaTest):
         path = self.get_contract_path('Bls12381Serialize.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+    def test_bls12_381_serialize_mismatched_type(self):
+        path = self.get_contract_path('Bls12381SerializeMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

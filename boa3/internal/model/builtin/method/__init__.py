@@ -25,7 +25,9 @@ __all__ = ['AbsMethod',
            'ScriptHashMethod',
            'StrBoolMethod',
            'StrBytesMethod',
+           'StrClassMethod',
            'StrIntMethod',
+           'StrSequenceMethod',
            'StrSplitMethod',
            'SumMethod',
            'SuperMethod',
@@ -61,7 +63,9 @@ from boa3.internal.model.builtin.method.rangemethod import RangeMethod
 from boa3.internal.model.builtin.method.reversedmethod import ReversedMethod
 from boa3.internal.model.builtin.method.strboolmethod import StrBoolMethod
 from boa3.internal.model.builtin.method.strbytestringmethod import StrBytesMethod
+from boa3.internal.model.builtin.method.strclassmethod import StrClassMethod
 from boa3.internal.model.builtin.method.strintmethod import StrIntMethod
+from boa3.internal.model.builtin.method.strsequencemethod import StrSequenceMethod
 from boa3.internal.model.builtin.method.strsplitmethod import StrSplitMethod
 from boa3.internal.model.builtin.method.summethod import SumMethod
 from boa3.internal.model.builtin.method.supermethod import SuperMethod

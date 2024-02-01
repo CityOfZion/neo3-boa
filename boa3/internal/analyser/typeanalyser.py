@@ -299,29 +299,44 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
     def _has_return(self, node: ast.AST) -> bool:
-        if not hasattr(node, 'body'):
+        if not hasattr(node, 'body') and not hasattr(node, 'cases'):
             return False
 
-        has_else_stmt: bool = hasattr(node, 'orelse')
-        has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.body)
-        if has_body_return and not has_else_stmt:
-            # if any statement in the function body is a return, all flow has a return
-            return True
+        if isinstance(node, ast.Match):
+            body = [stmt for stmt in node.cases]
+            body_has_inner_return: bool = (
+                    len(body) > 0 and
+                    # checks if all cases have a return inside
+                    all(self._has_return(stmt) for stmt in body) and
+                    # checks if there is a default case
+                    any(hasattr(stmt.pattern, 'pattern') and stmt.pattern.pattern is None for stmt in body)
+            )
 
-        body = [stmt for stmt in node.body if hasattr(stmt, 'body')]
-        body_has_inner_return: bool = len(body) > 0 and all(self._has_return(stmt) for stmt in body)
-        if not has_body_return and not body_has_inner_return:
-            # for and while nodes must to check if there is a return inside the else statement
-            if not isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
-                return False
+            return body_has_inner_return
 
-        if has_else_stmt:
-            if any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.orelse):
+        else:
+
+            has_else_stmt: bool = hasattr(node, 'orelse')
+            has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.body)
+            if has_body_return and not has_else_stmt:
+                # if any statement in the function body is a return, all flow has a return
                 return True
-            else:
-                orelse = [stmt for stmt in node.orelse if hasattr(stmt, 'body')]
-                return len(orelse) > 0 and all(self._has_return(stmt) for stmt in orelse)
-        return body_has_inner_return
+
+            body = [stmt for stmt in node.body if hasattr(stmt, 'body') or hasattr(stmt, 'cases')]
+            body_has_inner_return: bool = len(body) > 0 and all(self._has_return(stmt) for stmt in body)
+            if not has_body_return and not body_has_inner_return:
+                # for and while nodes must to check if there is a return inside the else statement
+                if not isinstance(node, (ast.For, ast.AsyncFor, ast.While)):
+                    return False
+
+            if has_else_stmt:
+                if any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.orelse):
+                    return True
+                else:
+                    orelse = [stmt for stmt in node.orelse if hasattr(stmt, 'body')]
+                    return len(orelse) > 0 and all(self._has_return(stmt) for stmt in orelse)
+
+            return body_has_inner_return
 
     def _check_base_init_call(self, node: ast.AST):
         if not self._current_method.is_init or not isinstance(self._current_class, ClassType):
@@ -378,7 +393,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(value, ast.Name):
                 symbol: ISymbol = self.get_symbol(value.id)
 
-                # TODO: change when assign functions to variable is implemented
+                # TODO: change when assign functions to variable is implemented #2ewenh8
                 if isinstance(symbol, Method):
                     self._log_error(
                         CompilerError.NotSupportedOperation(
@@ -595,7 +610,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         upper = upper if upper is not Type.none else symbol_type.valid_key
         step = step if step is not Type.none else symbol_type.valid_key
 
-        # TODO: remove when slices of other sequence types are implemented
         if (not symbol_type.is_valid_key(lower)
                 or not symbol_type.is_valid_key(upper)
                 or (step is not Type.none and not symbol_type.is_valid_key(step))
@@ -653,7 +667,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     expected_type_id=Type.sequence.identifier)
             )
 
-        # TODO: change when optimizing for loops
+        # TODO: change when optimizing for loops #864e6me36
         elif self.get_type(for_node.target) != iterator_type.item_type:
             target_id = self.visit(for_node.target)
             if isinstance(target_id, ast.Name):
@@ -666,6 +680,38 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             self.visit(stmt)
         for stmt in for_node.orelse:
             self.visit(stmt)
+
+    def visit_Match(self, match_node: ast.Match):
+        subject = self.visit(match_node.subject)
+        subject_type = self.get_type(subject)
+
+        case_symbols = []
+
+        for case in match_node.cases:
+            if (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)) or
+                    isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None
+            ):
+                self.new_local_scope()
+                if not isinstance(case.pattern, ast.MatchAs):
+                    self.visit(case.pattern.value)
+
+                for stmt in case.body:
+                    self.visit(stmt)
+                case_symbols.append(self.pop_local_scope().symbols)
+
+        last_scope = self._current_scope if len(self._scope_stack) > 0 else self._current_method
+        intersected_ids = set() if len(case_symbols) == 0 else set(case_symbols[0].keys())
+        for index in range(1, len(case_symbols)):
+            intersected_ids &= case_symbols[index].keys()
+
+        for changed_symbol in intersected_ids:
+            new_type = Type.union.build(
+                [self.get_type(case_[changed_symbol]) for case_ in case_symbols]
+            )
+            last_scope.include_symbol(changed_symbol, Variable(new_type))
+
+        for case_ in case_symbols:
+            self._include_symbols_to_scope(last_scope, case_, intersected_ids)
 
     def visit_If(self, if_node: ast.If):
         """
@@ -1000,7 +1046,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             if not Type.str.is_type_of(msg_type) and not Type.bytes.is_type_of(msg_type):
 
-                # TODO: remove this error when str constructor is implemented
+                # TODO: remove this error when str constructor is called here #86a1ctv27
                 self._log_error(
                     CompilerError.MismatchedTypes(
                         assert_.msg.lineno, assert_.msg.col_offset,
@@ -1298,10 +1344,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         attribute_type = self.get_type(attribute_symbol)
         if not isinstance(attribute_type, UserClass):
-            # TODO: change when class specific scopes are implemented in the built-ins
             return True
 
-        # TODO: remove this verification when calling an instance function from a class is implemented
+        # TODO: remove this verification when calling an instance function from a class is implemented #2ewexau
         if is_from_type_name and isinstance(callable, Method) and hasattr(attribute_symbol, 'instance_methods') \
                 and callable_id in attribute_symbol.instance_methods:
             callable_complete_id = f'{attribute_type.identifier}.{callable_id}'
@@ -1345,7 +1390,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             args = [self.get_type(param, use_metatype=True) for param in call_args]
 
             from boa3.internal.model.builtin.method import SuperMethod
-            # TODO: change when implementing super() with args
+            # TODO: change when implementing super() with args #2kq1rw4
             if (isinstance(callable_target, SuperMethod)
                     and isinstance(self._current_method, Method) and self._current_method.has_cls_or_self):
                 args.insert(0, self._current_class)
@@ -1410,13 +1455,13 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 already_called_arg = call.keywords[index].value
             index += 1
 
-        if len_call_args > len(callable_target.args) or unexpected_kwarg is not None or already_called_arg is not None:
+        if len_call_args > len(callable_target.positional_args) or unexpected_kwarg is not None or already_called_arg is not None:
             if unexpected_kwarg is not None:
                 unexpected_arg = unexpected_kwarg
             elif already_called_arg is not None:
                 unexpected_arg = already_called_arg
             else:
-                unexpected_arg = call.args[len(callable_target.args) + ignore_first_argument]
+                unexpected_arg = call.args[len(callable_target.positional_args) + ignore_first_argument]
 
             from boa3.internal.model.builtin.method import SuperMethod
             if isinstance(callable_target, SuperMethod):
@@ -1584,7 +1629,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             logged_errors = True
 
         if node.name is not None:
-            # TODO: remove when getting the exception is implemented
+            # naming exceptions is not supported
             self._log_error(
                 CompilerError.NotSupportedOperation(line=node.lineno,
                                                     col=node.col_offset,
@@ -1909,15 +1954,29 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return slice_node.lower, slice_node.upper, slice_node.step
 
-    def visit_JoinedStr(self, fstring_node: ast.JoinedStr) -> str:
+    def visit_JoinedStr(self, fstring_node: ast.JoinedStr) -> IType:
         """
         Visitor of an f-string node
 
         :param fstring_node:
         :return: the object with the index value information
         """
-        self._log_error(
-            CompilerError.NotSupportedOperation(fstring_node.lineno, fstring_node.col_offset, 'f-string')
-        )
+        for node in fstring_node.values:
+            self.visit(node)
+        return Type.str
 
-        return self.generic_visit(fstring_node)
+    def visit_FormattedValue(self, formatted_value: ast.FormattedValue) -> IType:
+        formatted_value_type = self.get_type(formatted_value.value)
+        if not (formatted_value_type is Type.str or
+                formatted_value_type is Type.int or
+                formatted_value_type is Type.bool or
+                formatted_value_type is Type.bytes or
+                Type.sequence.is_type_of(formatted_value_type) or
+                isinstance(formatted_value_type, UserClass)
+        ):
+            self._log_error(
+                CompilerError.NotSupportedOperation(line=formatted_value.lineno, col=formatted_value.col_offset,
+                                                    symbol_id=f"F-string with a {formatted_value_type.identifier} variable")
+            )
+
+        return formatted_value_type

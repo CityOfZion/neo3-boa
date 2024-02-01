@@ -177,7 +177,6 @@ class ClassType(IType, ABC):
 
     @property
     def is_interface(self) -> bool:
-        # TODO: change when other interfaces identifiers are implemented
         from boa3.internal.model.builtin.decorator import ContractDecorator
         return any(isinstance(decorator, ContractDecorator) for decorator in self.decorators)
 
@@ -224,6 +223,9 @@ class ClassType(IType, ABC):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
 
+        if self.stack_item not in (StackItemType.Array, StackItemType.Struct, StackItemType.Map):
+            return []
+
         # check variable count
         code_generator.duplicate_stack_top_item()
         code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
@@ -234,21 +236,22 @@ class ClassType(IType, ABC):
 
         last_index = len(self._all_variables) - 1
         inner_validations = []
-        for var_index, (var_id, var) in list(enumerate(self._all_variables.items())):
-            if var.type.stack_item != StackItemType.Any:
-                code_generator.duplicate_stack_top_item()
-                # validate primitive types only to avoid recursive code
-                if self.stack_item == StackItemType.Map:
-                    code_generator.convert_literal(var_id)
-                else:
-                    code_generator.convert_literal(var_index)
-                code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
-                code_generator.insert_type_check(var.type.stack_item)
+        if len(self._all_variables) > 0:
+            for var_index, (var_id, var) in list(enumerate(self._all_variables.items())):
+                if var.type.stack_item != StackItemType.Any:
+                    code_generator.duplicate_stack_top_item()
+                    # validate primitive types only to avoid recursive code
+                    if self.stack_item == StackItemType.Map:
+                        code_generator.convert_literal(var_id)
+                    else:
+                        code_generator.convert_literal(var_index)
+                    code_generator.convert_get_item(index_inserted_internally=True, test_is_negative_index=False)
+                    code_generator.insert_type_check(var.type.stack_item)
 
-                if var_index < last_index:
-                    inner_validations.append(code_generator.convert_begin_if())
+                    if var_index < last_index:
+                        inner_validations.append(code_generator.convert_begin_if())
 
-        code_generator.remove_stack_item(2)
+            code_generator.remove_stack_item(2)
 
         inner_validations.insert(0, begin_if)
         return inner_validations

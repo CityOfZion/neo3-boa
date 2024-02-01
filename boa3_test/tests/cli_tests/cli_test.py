@@ -3,6 +3,10 @@ from boa3_test.tests.boa_test import (BoaTest,  # needs to be the first import t
                                       _LOGGING_LOCK as LOG_LOCK
                                       )
 
+__all__ = [
+    'BoaCliTest',
+]
+
 import abc
 import io
 from contextlib import redirect_stdout, redirect_stderr

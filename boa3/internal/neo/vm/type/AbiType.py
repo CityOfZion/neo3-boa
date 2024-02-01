@@ -27,6 +27,11 @@ class AbiType(str, Enum):
         if len(abi_types) == 1:
             return abi_types[0]
 
+        if AbiType.Void in abi_types:
+            abi_types.remove(AbiType.Void)
+            if len(abi_types) == 1:
+                return abi_types[0]
+
         abis = abi_types[:1]
         for abi in abi_types[1:]:
             if abi not in abis:
@@ -61,3 +66,6 @@ class AbiType(str, Enum):
             return generic_abis[0]
         else:
             return AbiType.Any
+
+    def __str__(self):
+        return self.value

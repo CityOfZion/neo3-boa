@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.compile_time import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.type import UInt160
 from boa3_test.test_sc.metadata_test.aux_package import internal_package
 
@@ -10,7 +10,6 @@ def Main() -> int:
     return 5
 
 
-@metadata
 def standards_manifest() -> NeoMetadata:
     meta = NeoMetadata()
     meta.supported_standards = ['NEP-17']

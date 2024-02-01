@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.interop import storage
 
 
@@ -7,7 +7,6 @@ def Main():
     storage.put(b'hello', b'world')
 
 
-@metadata
 def manifest() -> NeoMetadata:
     meta = NeoMetadata()
 

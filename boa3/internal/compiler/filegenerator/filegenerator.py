@@ -189,7 +189,14 @@ class FileGenerator:
             events = set()
             for imported in self._all_imports:
                 events.update([event for event in imported.all_symbols.values() if isinstance(event, Event)])
-            events.update([event for event in self._symbols.values() if isinstance(event, Event)])
+
+            for symbol in self._symbols.values():
+                if isinstance(symbol, Event):
+                    events.add(symbol)
+                elif isinstance(symbol, Package):
+                    for package_symbol in symbol.symbols.values():
+                        if isinstance(package_symbol, Event):
+                            events.add(package_symbol)
 
             self._inner_events = {event.name: event for event in events}
         return self._inner_events
@@ -297,7 +304,6 @@ class FileGenerator:
 
         :return: a dictionary with the manifest information
         """
-        # TODO: fill the information of the manifest
         return {
             "name": self._get_name(),
             "groups": self._get_groups(),
@@ -602,7 +608,7 @@ class FileGenerator:
             dbg_id = str(id(event))
             dbg_event = {
                 "id": dbg_id,
-                "name": ',{0}'.format(event_id),  # TODO: include module name
+                "name": ',{0}'.format(event_id),
                 "params": [
                     '{0},{1}'.format(name, var.type.abi_type) for name, var in event.args.items()
                 ]

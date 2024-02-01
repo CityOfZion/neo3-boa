@@ -279,6 +279,10 @@ class TestList(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+    def test_list_set_into_list_slice(self):
+        path = self.get_contract_path('SetListIntoListSlice.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
     def test_list_set_value(self):
         path = self.get_contract_path('SetValue.py')
         self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
@@ -2186,6 +2190,86 @@ class TestList(BoaTest):
 
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
+
+    # endregion
+
+    # region TestSort
+
+    def test_list_sort(self):
+        path = self.get_contract_path('SortList.py')
+        self.compile_and_save(path, debug=True)
+        path, _ = self.get_deploy_file_paths('SortList.py')
+
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        sorted_list = [5, 4, 3, 2, 6, 1]
+        sorted_list.sort()
+        invokes.append(runner.call_contract(path, 'sort_test'))
+        expected_results.append(sorted_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_list_sort_with_args(self):
+        # list.sort arguments must be used as kwargs
+        path = self.get_contract_path('SortArgsList.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_list_sort_reverse_true(self):
+        path, _ = self.get_deploy_file_paths('SortReverseTrueList.py')
+
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        sorted_list = [5, 4, 3, 2, 6, 1]
+        sorted_list.sort(reverse=True)
+        invokes.append(runner.call_contract(path, 'sort_test'))
+        expected_results.append(sorted_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_list_sort_reverse_false(self):
+        path, _ = self.get_deploy_file_paths('SortReverseFalseList.py')
+
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        sorted_list = [5, 4, 3, 2, 6, 1]
+        sorted_list.sort(reverse=False)
+        invokes.append(runner.call_contract(path, 'sort_test'))
+        expected_results.append(sorted_list)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_list_sort_key(self):
+        path = self.get_contract_path('SortKeyList.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_list_any_sort(self):
+        path = self.get_contract_path('SortListAny.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_list_of_list_sort(self):
+        path = self.get_contract_path('SortListOfList.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     # endregion
 

@@ -75,7 +75,9 @@ class Builtin:
     Reversed = ReversedMethod()
     StrBool = StrBoolMethod()
     StrBytes = StrBytesMethod()
+    StrClass = StrClassMethod()
     StrInt = StrIntMethod()
+    StrSequence = StrSequenceMethod()
     Super = SuperMethod()
 
     # python class method
@@ -86,10 +88,12 @@ class Builtin:
     BytesStringStartswith = StartsWithMethod()
     BytesStringStrip = StripMethod()
     BytesStringUpper = UpperMethod()
+    BytesStringReplace = ReplaceMethod()
     CountSequenceGeneric = CountSequenceGenericMethod()
     CountSequencePrimitive = CountSequencePrimitiveMethod()
     CountStr = CountStrMethod()
     Copy = CopyListMethod()
+    ListSort = SortMethod()
     SequenceAppend = AppendMethod()
     SequenceClear = ClearMethod()
     SequenceExtend = ExtendMethod()
@@ -125,6 +129,7 @@ class Builtin:
                                                 BytesStringStartswith,
                                                 BytesStringStrip,
                                                 BytesStringUpper,
+                                                BytesStringReplace,
                                                 ClassMethodDecorator,
                                                 ConvertToBool,
                                                 ConvertToBytes,
@@ -140,6 +145,7 @@ class Builtin:
                                                 Exit,
                                                 IsInstance,
                                                 Len,
+                                                ListSort,
                                                 Max,
                                                 Min,
                                                 Print,
@@ -189,6 +195,9 @@ class Builtin:
     # boa events
     Nep11Transfer = Nep11TransferEvent()
     Nep17Transfer = Nep17TransferEvent()
+
+    # boa contract interfaces
+    Nep17Contract = Nep17ContractClass()
 
     # boa smart contract methods
     Abort = AbortMethod()
@@ -268,6 +277,7 @@ class Builtin:
                               NeoAccountState,
                               Nep11Transfer,
                               Nep17Transfer,
+                              Nep17Contract,
                               ScriptHashMethod_,
                               ToHexStr,
                               ],

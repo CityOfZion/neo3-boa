@@ -892,7 +892,7 @@ class TestString(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        # TODO: upper was implemented for ASCII characters only
+        # upper was implemented for ASCII characters only
         self.assertNotEqual(string.upper(), not_as_expected.result)
 
     def test_string_lower(self):
@@ -923,7 +923,7 @@ class TestString(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result)
 
-        # TODO: lower was implemented for ASCII characters only
+        # lower was implemented for ASCII characters only
         self.assertNotEqual(string.lower(), not_as_expected.result)
 
     def test_string_startswith_method(self):
@@ -1477,6 +1477,204 @@ class TestString(BoaTest):
         for x in range(len(invokes)):
             self.assertEqual(expected_results[x], invokes[x].result, msg=x)
 
-    def test_formatted_string_literal(self):
-        path = self.get_contract_path('FormattedStringLiteral.py')
+    def test_f_string_literal(self):
+        path, _ = self.get_deploy_file_paths('FStringLiteral.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invoke = runner.call_contract(path, 'main')
+        expected_result = "unit test"
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        self.assertEqual(expected_result, invoke.result)
+
+    def test_f_string_string_var(self):
+        path, _ = self.get_deploy_file_paths('FStringStringVar.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', "unit test"))
+        expected_results.append("F-string: unit test")
+
+        invokes.append(runner.call_contract(path, 'main', ""))
+        expected_results.append("F-string: ")
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_f_string_int_var(self):
+        path, _ = self.get_deploy_file_paths('FStringIntVar.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 123))
+        expected_results.append("F-string: 123")
+
+        invokes.append(runner.call_contract(path, 'main', -100))
+        expected_results.append("F-string: -100")
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_f_string_bool_var(self):
+        path, _ = self.get_deploy_file_paths('FStringBoolVar.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', True))
+        expected_results.append("F-string: True")
+
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append("F-string: False")
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_f_string_bytes_var(self):
+        path, _ = self.get_deploy_file_paths('FStringBytesVar.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', b"unit test"))
+        expected_results.append("F-string: unit test")
+
+        invokes.append(runner.call_contract(path, 'main', ""))
+        expected_results.append("F-string: ")
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_f_string_sequence_var(self):
+        path, _ = self.get_deploy_file_paths('FStringSequenceVar.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', [1, 2, 3]))
+        expected_results.append("F-string: [1,2,3]")
+
+        invokes.append(runner.call_contract(path, 'main', []))
+        expected_results.append("F-string: []")
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_f_string_user_class_var(self):
+        path, _ = self.get_deploy_file_paths('FStringUserClassVar.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main'))
+        expected_results.append('F-string: {"string":"unit test","number":123}')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_f_string_any_var(self):
+        path = self.get_contract_path('FStringAnyVar.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_f_string_union_var(self):
+        path = self.get_contract_path('FStringUnionVar.py')
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_string_replace(self):
+        path, _ = self.get_deploy_file_paths('ReplaceStringMethod.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        old = 'a'
+        new = 'o'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        old = 'a'
+        new = 'oo'
+        count = -1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = 1
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = 2
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        count = 3
+        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
+        expected_results.append(string.replace(old, new, count))
+
+        string = 'banana'
+        old = 'an'
+        new = 'o'
+        invokes.append(runner.call_contract(path, 'main_default_count', string, old, new))
+        expected_results.append(string.replace(old, new))
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+
+    def test_string_replace_mismatched_type(self):
+        path = self.get_contract_path('ReplaceStringMethodMismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+
+    def test_string_replace_too_many_arguments(self):
+        path = self.get_contract_path('ReplaceStringMethodTooManyArguments.py')
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+
+    def test_string_replace_too_few_arguments(self):
+        path = self.get_contract_path('ReplaceStringMethodTooFewArguments.py')
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)

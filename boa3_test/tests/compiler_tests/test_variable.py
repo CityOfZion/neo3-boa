@@ -484,6 +484,10 @@ class TestVariable(BoaTest):
 
     def test_global_assignment_with_type(self):
         expected_output = (
+            Opcode.PUSH10
+            + Opcode.RET
+        )
+        expected_output_no_optimization = (
             Opcode.LDSFLD0
             + Opcode.RET
             + Opcode.INITSSLOT  # global variables
@@ -495,6 +499,9 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('GlobalAssignmentWithType.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        output = self.compile(path, optimize=False)
+        self.assertEqual(expected_output_no_optimization, output)
 
         path, _ = self.get_deploy_file_paths(path)
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -513,6 +520,10 @@ class TestVariable(BoaTest):
 
     def test_global_assignment_without_type(self):
         expected_output = (
+            Opcode.PUSH10
+            + Opcode.RET
+        )
+        expected_output_no_optimization = (
             Opcode.LDSFLD0
             + Opcode.RET
             + Opcode.INITSSLOT  # global variables
@@ -524,6 +535,9 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('GlobalAssignmentWithoutType.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        output = self.compile(path, optimize=False)
+        self.assertEqual(expected_output_no_optimization, output)
 
         path, _ = self.get_deploy_file_paths(path)
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -545,7 +559,7 @@ class TestVariable(BoaTest):
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
     def test_global_chained_multiple_assignments(self):
-        path, _ = self.get_deploy_file_paths('GlobalMultipleAssignments.py')
+        path, _ = self.get_deploy_file_paths('GlobalMultipleAssignments.py', compile_if_found=True)
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -571,6 +585,19 @@ class TestVariable(BoaTest):
 
     def test_many_global_assignments(self):
         expected_output = (
+            Opcode.PUSH7
+            + Opcode.PUSH6
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH8
+            + Opcode.PACK       # return [a, b, c, d, e, f, g, h]
+            + Opcode.RET
+        )
+        expected_output_no_optimization = (
             Opcode.LDSFLD + b'\x07'
             + Opcode.LDSFLD6    # [a, b, c, d, e, f, g, h]
             + Opcode.LDSFLD5
@@ -606,6 +633,9 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('ManyGlobalAssignments.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        output = self.compile(path, optimize=False)
+        self.assertEqual(expected_output_no_optimization, output)
 
         path, _ = self.get_deploy_file_paths(path)
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -647,6 +677,12 @@ class TestVariable(BoaTest):
 
     def test_global_assignment_between_functions(self):
         expected_output = (
+            Opcode.PUSH10
+            + Opcode.RET
+            + Opcode.PUSH5
+            + Opcode.RET
+        )
+        expected_output_no_optimization = (
             Opcode.LDSFLD0
             + Opcode.RET
             + Opcode.LDSFLD1
@@ -662,6 +698,9 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('GlobalAssignmentBetweenFunctions.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
+
+        output = self.compile(path, optimize=False)
+        self.assertEqual(expected_output_no_optimization, output)
 
         path, _ = self.get_deploy_file_paths(path)
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -720,6 +759,19 @@ class TestVariable(BoaTest):
 
     def test_get_global_variable_value_written_after(self):
         expected_output = (
+            Opcode.PUSH7
+            + Opcode.PUSH6    # [a, b, c, d, e, f, g, h]
+            + Opcode.PUSH5
+            + Opcode.PUSH4
+            + Opcode.PUSH3
+            + Opcode.PUSH2
+            + Opcode.PUSH1
+            + Opcode.PUSH0
+            + Opcode.PUSH8
+            + Opcode.PACK       # return [a, b, c, d, e, f, g, h]
+            + Opcode.RET
+        )
+        expected_output_no_optimization = (
             Opcode.LDSFLD + b'\x07'
             + Opcode.LDSFLD6    # [a, b, c, d, e, f, g, h]
             + Opcode.LDSFLD5
@@ -755,6 +807,9 @@ class TestVariable(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
+        output = self.compile(path, optimize=False)
+        self.assertEqual(expected_output_no_optimization, output)
+
         path, _ = self.get_deploy_file_paths(path)
         runner = BoaTestRunner(runner_id=self.method_name())
 
@@ -779,6 +834,9 @@ class TestVariable(BoaTest):
             + Opcode.STLOC0
             + Opcode.LDLOC0     # variable address
             + Opcode.RET
+        )
+        expected_output_no_optimization = (
+            expected_output
             + Opcode.INITSSLOT  # global variables
             + b'\x01'           # number of globals
             + Opcode.PUSH0      # b = 0
@@ -788,6 +846,9 @@ class TestVariable(BoaTest):
         path = self.get_contract_path('AssignLocalWithArgumentShadowingGlobal.py')
         output = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
+
+        output = self.compile(path, optimize=False)
+        self.assertEqual(expected_output_no_optimization, output)
 
         path, _ = self.get_deploy_file_paths(path)
         runner = BoaTestRunner(runner_id=self.method_name())
@@ -981,3 +1042,131 @@ class TestVariable(BoaTest):
     def test_assign_function(self):
         path = self.get_contract_path('AssignFunction.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    def test_elvis_operator_any_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorAnyParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'not empty string'))
+        expected_results.append('not empty string')
+
+        invokes.append(runner.call_contract(path, 'main', 123456))
+        expected_results.append(123456)
+
+        invokes.append(runner.call_contract(path, 'main', True))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'main', None))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', ''))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', 0))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append('some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_bytes_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorBytesParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', b'not empty string', expected_result_type=bytes))
+        expected_results.append(b'not empty string')
+
+        invokes.append(runner.call_contract(path, 'main', b'', expected_result_type=bytes))
+        expected_results.append(b'some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_str_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorStrParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'not empty string'))
+        expected_results.append('not empty string')
+
+        invokes.append(runner.call_contract(path, 'main', ''))
+        expected_results.append('some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_int_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorIntParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 100))
+        expected_results.append(100)
+
+        invokes.append(runner.call_contract(path, 'main', 0))
+        expected_results.append(123456)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_bool_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorBoolParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', True))
+        expected_results.append(True)
+
+        invokes.append(runner.call_contract(path, 'main', False))
+        expected_results.append(True)
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)
+
+    def test_elvis_operator_optional_param(self):
+        path, _ = self.get_deploy_file_paths('ElvisOperatorOptionalParam.py')
+        runner = BoaTestRunner(runner_id=self.method_name())
+
+        invokes = []
+        expected_results = []
+
+        invokes.append(runner.call_contract(path, 'main', 'unit test'))
+        expected_results.append('unit test')
+
+        invokes.append(runner.call_contract(path, 'main', ''))
+        expected_results.append('some default value')
+        invokes.append(runner.call_contract(path, 'main', None))
+        expected_results.append('some default value')
+
+        runner.execute()
+        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+
+        for x in range(len(invokes)):
+            self.assertEqual(expected_results[x], invokes[x].result)

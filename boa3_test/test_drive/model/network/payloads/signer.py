@@ -15,7 +15,6 @@ class Signer:
         self._scopes: WitnessScope = scopes
         self._allowed_contracts: List[UInt160] = []
         self._allowed_groups: List[bytes] = []
-        # TODO: implement allowed witness rules
 
     @property
     def account(self) -> UInt160:
@@ -45,7 +44,6 @@ class Signer:
                                      if 'allowedcontracts' in json else [])
         signer._allowed_groups = ([from_hex_str(group_hex) for group_hex in json['allowedgroups']]
                                   if 'allowedgroups' in json else [])
-        # TODO: implement allowed witness rules
         return signer
 
     def __str__(self) -> str:

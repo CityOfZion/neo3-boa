@@ -35,6 +35,9 @@ class VMState(IntEnum):
     :meta hide-value:
     """
 
+    def __str__(self) -> str:
+        return self.name
+
 
 def get_vm_state(state_name: str) -> VMState:
     try:

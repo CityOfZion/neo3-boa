@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
+from boa3.internal.analyser import asthelper
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.analyser.importanalyser import ImportAnalyser
 from boa3.internal.analyser.model.ManifestSymbol import ManifestSymbol
@@ -13,6 +14,7 @@ from boa3.internal.analyser.model.optimizer import UndefinedType
 from boa3.internal.analyser.model.symbolscope import SymbolScope
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.builtin import Builtin
+from boa3.internal.model.builtin.compile_time.neometadatatype import MetadataTypeSingleton
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -35,6 +37,7 @@ from boa3.internal.model.type.classes.pythonclass import PythonClass
 from boa3.internal.model.type.classes.userclass import UserClass
 from boa3.internal.model.type.collection.icollection import ICollectionType as Collection
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
+from boa3.internal.model.type.primitive.primitivetype import PrimitiveType
 from boa3.internal.model.type.type import IType, Type
 from boa3.internal.model.variable import Variable
 
@@ -144,9 +147,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     def analysed_files(self) -> Dict[str, Any]:
         return self._analysed_files.copy()
 
-    def __include_variable(self, var_id: str, var_type_id: Union[str, IType],
+    def __include_variable(self,
+                           var_id: str, var_type_id: Union[str, IType],
                            source_node: ast.AST,
-                           var_enumerate_type: IType = Type.none, assignment: bool = True):
+                           var_enumerate_type: IType = Type.none,
+                           assignment: bool = True,
+                           literal_value: Any = asthelper.INVALID_NODE_RESULT):
         """
         Includes the variable in the symbol table if the id was not used
 
@@ -167,11 +173,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             var_id, var_type_id = variables[x], var_types[x]
 
             outer_symbol = self.get_symbol(var_id)
+            first_assign = outer_symbol is None
             if var_id in self._current_symbol_scope.symbols:
                 if hasattr(outer_symbol, 'set_is_reassigned'):
-                    # don't mark as reassigned if it is outside of a function
                     is_module_scope = isinstance(self._current_scope, Module)
                     if not is_module_scope:
+                        outer_symbol.set_is_reassigned()
+                    elif isinstance(source_node, ast.AugAssign):
+                        # augmented assignments of global variables shouldn't be evaluated in the module analyser
                         outer_symbol.set_is_reassigned()
                     self.__set_source_origin(source_node, is_module_scope)
             else:
@@ -181,6 +190,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         self._log_warning(
                             CompilerWarning.NameShadowing(source_node.lineno, source_node.col_offset, outer_symbol, var_id)
                         )
+                        first_assign = True
 
                 var_type = None
                 if isinstance(var_type_id, SequenceType):
@@ -201,6 +211,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         if isinstance(var_type, SequenceType):
                             var_type = var_type.build_collection(var_enumerate_type)
                         var = Variable(var_type, origin_node=source_node)
+
+                    if first_assign and isinstance(Type.get_type(literal_value), PrimitiveType):
+                        var.set_initial_assign(literal_value)
 
                     self._current_symbol_scope.include_symbol(var_id, var)
                     if isinstance(source_node, ast.AnnAssign):
@@ -622,7 +635,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if result is Builtin.Metadata:
                 module.body.remove(stmt)
 
-        # TODO: include the body of the builtin methods to the ast
         self.modules['main'] = mod
         module_scope = self._scope_stack.pop()
         for symbol_id, symbol in module_scope.symbols.items():
@@ -646,7 +658,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 base_type_id = base_type_id.id
 
             base_symbol = self.get_symbol(base_type_id)
-            # TODO: change when class inheritance with builtin types is implemented
+            # TODO: change when class inheritance with builtin types is implemented #2kq1ght
             if not isinstance(base_symbol, UserClass):
                 self._log_error(
                     CompilerError.NotSupportedOperation(
@@ -656,7 +668,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             bases.append(base_symbol)
 
-        # TODO: change when class inheritance with multiple bases is implemented
+        # TODO: change when class inheritance with multiple bases is implemented #2kq1gmc
         if len(bases) > 1:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -665,7 +677,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: change when base classes with keyword is implemented
+        # TODO: change when base classes with keyword is implemented #2kq1gqy
         if len(class_node.keywords) > 0:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -674,7 +686,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: change when class decorators are implemented
+        # TODO: change when class decorators are implemented #2ewf04r
         class_decorators: List[Method] = self._get_decorators(class_node)
         if not all(isinstance(decorator, IBuiltinDecorator) and decorator.is_class_decorator
                    for decorator in class_decorators):
@@ -723,6 +735,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         fun_decorators: List[Method] = self._get_decorators(function)
         if Builtin.Metadata in fun_decorators:
+            self._log_warning(
+                CompilerWarning.DeprecatedSymbol(
+                    function.lineno, function.col_offset,
+                    symbol_id=Builtin.Metadata.identifier
+                )
+            )
             self._read_metadata_object(function)
             return Builtin.Metadata
 
@@ -748,7 +766,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 decorator.update_args(function.args, self._current_scope)
                 valid_decorators.append(decorator)
 
-            # TODO: remove when user-created decorators are implemented
+            # TODO: remove when user-created decorators are implemented #86a19uwzn
             elif isinstance(decorator, Method):
                 self._log_error(
                     CompilerError.NotSupportedOperation(
@@ -806,7 +824,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
             fun_rtype_symbol = Type.none
 
-        # TODO: remove when dictionary unpacking operator is implemented
+        # TODO: remove when dictionary unpacking operator is implemented #2kq1hbr
         if function.args.kwarg is not None:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -815,7 +833,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        # TODO: remove when keyword-only arguments are implemented
+        # TODO: remove when keyword-only arguments are implemented #2ewewtz
         if len(function.args.kwonlyargs) > 0:
             self._log_error(
                 CompilerError.NotSupportedOperation(
@@ -826,6 +844,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if isinstance(fun_rtype_symbol, str):
             symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
+            if symbol is MetadataTypeSingleton:
+                self._read_metadata_object(function)
+                return Builtin.Metadata
+
             fun_rtype_symbol = self.get_type(symbol)
 
         fun_return: IType = self.get_type(fun_rtype_symbol)
@@ -1058,22 +1080,33 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Multiple variable assignments')
             )
 
+        elif isinstance(assign.targets[0], ast.Subscript) and isinstance(assign.targets[0].slice, ast.Slice):
+            self._log_error(
+                CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset, 'Assigning a value into a slice')
+            )
+
         else:
-            var_type = self.visit_type(assign.value)
+            return self._visit_assign_value(assign)
 
-            if var_type is Type.none and isinstance(assign.value, ast.Name):
-                symbol = self.get_symbol(assign.value.id)
-                if isinstance(symbol, Event):
-                    var_type = Builtin.Event
-                    self._current_event = symbol
+    def _visit_assign_value(self, assign: ast.Assign | ast.AugAssign) -> IType:
+        targets = assign.targets if isinstance(assign, ast.Assign) else [assign.target]
+        var_type = self.visit_type(assign.value)
 
-            return_type = var_type
-            for target in assign.targets:
-                var_id = self.visit(target)
-                if not isinstance(var_id, ISymbol):
-                    return_type = self.assign_value(var_id, var_type, source_node=assign)
+        if var_type is Type.none and isinstance(assign.value, ast.Name):
+            symbol = self.get_symbol(assign.value.id)
+            if isinstance(symbol, Event):
+                var_type = Builtin.Event
+                self._current_event = symbol
 
-            return return_type
+        return_type = var_type
+        for target in targets:
+            var_id = self.visit(target)
+            if not isinstance(var_id, ISymbol):
+                return_type = self.assign_value(var_id, var_type,
+                                                source_node=assign,
+                                                literal_value=asthelper.literal_eval_node(assign.value))
+
+        return return_type
 
     def visit_AnnAssign(self, ann_assign: ast.AnnAssign):
         """
@@ -1090,10 +1123,23 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._check_annotation_type(ann_assign.annotation, ann_assign)
 
-        # TODO: check if the annotated type and the value type are the same
-        return self.assign_value(var_id, var_type, source_node=ann_assign, assignment=ann_assign.value is not None)
+        # TODO: check if the annotated type and the value type are the same #86a1ctmwy
+        return self.assign_value(var_id, var_type,
+                                 source_node=ann_assign,
+                                 assignment=ann_assign.value is not None,
+                                 literal_value=asthelper.literal_eval_node(ann_assign.value)
+                                 )
 
-    def assign_value(self, var_id: str, var_type: IType, source_node: ast.AST, assignment: bool = True) -> IType:
+    def visit_AugAssign(self, aug_assign: ast.AugAssign):
+        return self._visit_assign_value(aug_assign)
+
+    def assign_value(self,
+                     var_id: str,
+                     var_type: IType,
+                     source_node: ast.AST,
+                     assignment: bool = True,
+                     literal_value: Any = None) -> IType:
+
         if var_type is Builtin.Event and self._current_event is not None:
             if '' in self._current_module.symbols and self._current_module.symbols[''] is self._current_event:
                 self._current_scope.callables[var_id] = self._current_scope.callables.pop('')
@@ -1106,7 +1152,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 var = Variable(var_type, source_node)
                 self.__include_class_variable(var_id, var)
             else:
-                self.__include_variable(var_id, var_type, source_node=source_node, assignment=assignment)
+                self.__include_variable(var_id, var_type,
+                                        source_node=source_node,
+                                        assignment=assignment,
+                                        literal_value=literal_value)
         return var_type
 
     def visit_Global(self, global_node: ast.Global):
@@ -1387,6 +1436,19 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         # continue to walk through the tree
         self.generic_visit(for_node)
 
+    def visit_Match(self, match_node: ast.Match):
+        for case in match_node.cases:
+            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)) or
+                    isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None and case.guard is None
+            ):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(
+                        case.pattern.lineno, case.pattern.col_offset,
+                        symbol_id='case pattern with guard'
+                    )
+                )
+        return super().generic_visit(match_node)
+
     def visit_ListComp(self, node: ast.ListComp):
         return self._visit_comprehension(node)
 
@@ -1397,7 +1459,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return self._visit_comprehension(node)
 
     def _visit_comprehension(self, node):
-        # TODO: refactor when comprehension is implemented
+        # TODO: refactor when comprehension is implemented #2ewev7w #8678dw2ak
         self._log_error(
             CompilerError.NotSupportedOperation(
                 node.lineno, node.col_offset,
@@ -1417,7 +1479,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return name.id
 
     def visit_Starred(self, node: ast.Starred):
-        # TODO: refactor when starred variables are implemented
+        # TODO: refactor when starred variables are implemented #2kq1hzg
         self._log_error(
             CompilerError.NotSupportedOperation(
                 node.lineno, node.col_offset,
@@ -1461,6 +1523,17 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the value of the string
         """
         return str.s
+
+    def visit_JoinedStr(self, joined_str: ast.JoinedStr):
+        """
+        Visitor of joined string node
+
+        :param joined_str:
+        :return: the value of the string
+
+        """
+        for node in joined_str.values:
+            self.visit(node)
 
     def visit_Bytes(self, btes: ast.Bytes) -> bytes:
         """

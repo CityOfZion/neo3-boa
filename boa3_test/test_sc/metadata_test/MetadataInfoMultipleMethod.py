@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, public
 
 
 @public
@@ -6,7 +6,6 @@ def Main() -> int:
     return 5
 
 
-@metadata
 def manifest_func1() -> NeoMetadata:
     from boa3.builtin.compile_time import NeoMetadata
     meta = NeoMetadata()
@@ -14,7 +13,7 @@ def manifest_func1() -> NeoMetadata:
     return meta
 
 
-@metadata  # this decorator can be applied to one function only
+# this function will be ignored by the compiler
 def manifest_func2() -> NeoMetadata:
     from boa3.builtin.compile_time import NeoMetadata
     meta = NeoMetadata()
