@@ -1,11 +1,10 @@
-from boa3.builtin.compile_time import NeoMetadata, metadata
+from boa3.builtin.compile_time import NeoMetadata
 
 
 def Main() -> int:
     return 5
 
 
-@metadata
 def name_manifest() -> NeoMetadata:
     meta = NeoMetadata()
 

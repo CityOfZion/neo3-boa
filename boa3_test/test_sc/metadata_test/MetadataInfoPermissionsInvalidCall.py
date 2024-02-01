@@ -1,10 +1,9 @@
 from typing import Any
 
-from boa3.builtin.compile_time import NeoMetadata, metadata, public
-from boa3.builtin.interop.contract import call_contract, NEO
+from boa3.builtin.compile_time import NeoMetadata, public
+from boa3.builtin.interop.contract import NEO, call_contract
 
 
-@metadata
 def permissions_manifest() -> NeoMetadata:
     meta = NeoMetadata()
 

@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
+from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.interop import storage, runtime
 from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.runtime import check_witness
@@ -23,8 +23,6 @@ TOKEN_TOTAL_SUPPLY = 10_000_000 * 10 ** 8  # 10m total supply * 10^8 (decimals)
 # METADATA
 # -------------------------------------------
 
-
-@metadata
 def manifest_metadata() -> NeoMetadata:
     """
     Defines this smart contract's metadata information.

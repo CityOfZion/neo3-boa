@@ -1,6 +1,6 @@
 from typing import Any, Union
 
-from boa3.builtin.compile_time import NeoMetadata, metadata, public, CreateNewEvent
+from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
@@ -13,8 +13,6 @@ from boa3.builtin.type import UInt160, helper as type_helper
 # METADATA
 # -------------------------------------------
 
-
-@metadata
 def manifest_metadata() -> NeoMetadata:
     """
     Defines this smart contract's metadata information
