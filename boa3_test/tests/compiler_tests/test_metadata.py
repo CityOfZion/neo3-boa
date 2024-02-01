@@ -27,6 +27,16 @@ class TestMetadata(BoaTest):
         self.assertIn('extra', manifest)
         self.assertIsNone(manifest['extra'])
 
+    def test_metadata_info_method_with_decorator(self):
+        expected_output = (
+            Opcode.PUSH5  # return 5
+            + Opcode.RET
+        )
+
+        path = self.get_contract_path('MetadataInfoWithDecorator.py')
+        output = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, path)
+        self.assertEqual(expected_output, output)
+
     def test_metadata_info_method_mismatched_type(self):
         path = self.get_contract_path('MetadataInfoMethodMismatchedReturn.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

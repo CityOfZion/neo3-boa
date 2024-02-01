@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import contract, public, metadata, NeoMetadata
+from boa3.builtin.compile_time import NeoMetadata, contract, public
 from boa3.builtin.type import UInt160
 
 
@@ -11,7 +11,6 @@ class ContractInterface:
         pass
 
 
-@metadata
 def contract_metadata() -> NeoMetadata:
     obj = NeoMetadata()
     obj.add_permission(contract=ContractInterface.hash)
