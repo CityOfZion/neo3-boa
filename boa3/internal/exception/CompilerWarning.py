@@ -28,6 +28,21 @@ class CompilerWarning(ABC, BaseException):
         return self.message == other.message
 
 
+class DeprecatedSymbol(CompilerWarning):
+    """
+    A warning raised when a deprecated symbol is used.
+    """
+
+    def __init__(self, line: int, col: int, symbol_id: str):
+        self.symbol_id: str = symbol_id
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> Optional[str]:
+        if self.symbol_id is not None:
+            return f'Using deprecated feature: {self.symbol_id}'
+
+
 class InvalidArgument(CompilerWarning):
     """
     An warning raised when an attempt of method evaluation fails during optimization because an argument is invalid.

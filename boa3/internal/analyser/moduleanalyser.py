@@ -14,6 +14,7 @@ from boa3.internal.analyser.model.optimizer import UndefinedType
 from boa3.internal.analyser.model.symbolscope import SymbolScope
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.builtin import Builtin
+from boa3.internal.model.builtin.compile_time.neometadatatype import MetadataTypeSingleton
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -734,6 +735,12 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         fun_decorators: List[Method] = self._get_decorators(function)
         if Builtin.Metadata in fun_decorators:
+            self._log_warning(
+                CompilerWarning.DeprecatedSymbol(
+                    function.lineno, function.col_offset,
+                    symbol_id=Builtin.Metadata.identifier
+                )
+            )
             self._read_metadata_object(function)
             return Builtin.Metadata
 
@@ -837,6 +844,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if isinstance(fun_rtype_symbol, str):
             symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
+            if symbol is MetadataTypeSingleton:
+                self._read_metadata_object(function)
+                return Builtin.Metadata
+
             fun_rtype_symbol = self.get_type(symbol)
 
         fun_return: IType = self.get_type(fun_rtype_symbol)

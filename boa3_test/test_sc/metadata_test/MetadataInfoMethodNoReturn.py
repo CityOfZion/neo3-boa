@@ -1,10 +1,9 @@
-from boa3.builtin.compile_time import NeoMetadata, metadata
+from boa3.builtin.compile_time import NeoMetadata
 
 
 def Main() -> int:
     return 5
 
 
-@metadata
 def manifest() -> NeoMetadata:
     "Missing metadata object return"

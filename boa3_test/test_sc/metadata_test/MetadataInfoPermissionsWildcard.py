@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.nativecontract.neo import NEO
 
 
@@ -7,7 +7,6 @@ def main() -> int:
     return NEO.totalSupply()
 
 
-@metadata
 def permissions_manifest() -> NeoMetadata:
     meta = NeoMetadata()
 

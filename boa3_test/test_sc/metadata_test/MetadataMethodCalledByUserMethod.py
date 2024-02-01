@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import NeoMetadata, metadata
+from boa3.builtin.compile_time import NeoMetadata
 
 
 def Main() -> int:
@@ -6,7 +6,6 @@ def Main() -> int:
     return 5
 
 
-@metadata
 def example() -> NeoMetadata:
     # this function won't exist in the scope of the smart contract, so it can't be called by other functions
     meta = NeoMetadata()

@@ -43,7 +43,7 @@ Use the `contract` decorator from `boa3.builtin.compile_time` using the script h
 same methods you want call.
 ```python
 # calling_with_interface.py
-from boa3.builtin.compile_time import public, contract
+from boa3.builtin.compile_time import contract, public
 from boa3.builtin.type import UInt160
 
 @public

@@ -1,6 +1,6 @@
 from typing import Any, Dict
 
-from boa3.builtin.compile_time import NeoMetadata, metadata, public
+from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.contract import Nep11TransferEvent
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.type import UInt160
@@ -8,7 +8,6 @@ from boa3.builtin.type import UInt160
 on_transfer = Nep11TransferEvent
 
 
-@metadata
 def standards_manifest() -> NeoMetadata:
     meta = NeoMetadata()
     meta.supported_standards = ['NEP-11']  # for nep11, boa checks if the standard is implemented
