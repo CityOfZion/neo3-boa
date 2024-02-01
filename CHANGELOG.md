@@ -6,19 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Support to Python 3.12
+- Included `Nep17Contract` interface
+- Support to Python's builtins:
+  - fstrings and match-case with primitive types (`bool`, `int` and `str`) 
+  - `str.replace` and `list.sort` methods
 
 
 ### Changed
 
 
 ### Deprecated
-- Deprecated @metadata decorator to identify metadata function.
+- Deprecated `@metadata` decorator to identify metadata function.
 
 
 ### Removed
 
 
 ### Fixed
+- Changed exit code on compilation error
+- Fixed notify not being executed when calling it from the imported package
+- Changed manifest abi types related to `Optional` and `Union` with `None` types
 
 
 ## [1.1.0] - 2023-10-16
