@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+
+
+### Changed
+
+
+### Deprecated
+
+
+### Removed
+
+
+### Fixed
+
+
+## [1.1.1] - 2024-02-01
+### Added
 - Support to Python 3.12
 - Included `Nep17Contract` interface
 - Support to Python's builtins:
@@ -13,14 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `str.replace` and `list.sort` methods
 
 
-### Changed
-
-
 ### Deprecated
 - Deprecated `@metadata` decorator to identify metadata function.
-
-
-### Removed
 
 
 ### Fixed
@@ -544,6 +554,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...staging
+[1.1.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.1.1
 [1.1.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.1.0
 [1.0.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.0.0
 [0.14.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v0.14.0
