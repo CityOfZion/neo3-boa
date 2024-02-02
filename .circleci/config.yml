@@ -21,6 +21,13 @@ jobs:
     steps:
       - checkout
       - python/load-cache
+      - run:
+          name: Test Build Package
+          command: |
+            python3 -m pip install --upgrade pip
+            pip install twine build
+            python3 -m build
+            twine check dist/*
 
       - run:
           name: Fix openssl for ripemd160 loading
@@ -95,7 +102,9 @@ jobs:
       - run:
           name: Build Package
           command: |
-            python3 setup.py sdist bdist_wheel
+            python3 -m pip install --upgrade pip
+            pip install twine build
+            python3 -m build
             twine check dist/*
 
       - run:

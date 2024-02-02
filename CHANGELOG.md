@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 
-## [1.1.1] - 2024-02-01
+## [1.1.1] - 2024-02-02
 ### Added
 - Support to Python 3.12
 - Included `Nep17Contract` interface
