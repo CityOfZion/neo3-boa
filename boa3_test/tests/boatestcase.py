@@ -3,6 +3,7 @@ __all__ = [
     'AbortException',
     'FaultException',
     'AssertException',
+    '_COMPILER_LOCK'
 ]
 
 import asyncio
@@ -66,7 +67,7 @@ class BoaTestCase(SmartContractTestCase):
         cls.dirname = constants.PATH_SEPARATOR.join(folders[:-3])
         cls.test_root_dir = constants.PATH_SEPARATOR.join(folders[-3:-2])
         cls.default_test_folder = (constants.PATH_SEPARATOR.join((cls.test_root_dir, cls.default_folder))
-                                   if len(cls.default_folder) else cls.test_root_dir)
+                                   if hasattr(cls, 'default_folder') and len(cls.default_folder) else cls.test_root_dir)
 
         super(BoaTestCase, cls).setUpClass()
 

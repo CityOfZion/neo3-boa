@@ -1,7 +1,5 @@
 import ast
 
-from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
-
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.optimizerhelper import OptimizationLevel
@@ -10,9 +8,11 @@ from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
+from boa3_test.tests import boatestcase
 
 
-class TestConstant(BoaTest):
+class TestConstant(boatestcase.BoaTestCase):
+
     def build_code_generator(self) -> CodeGenerator:
         from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 
@@ -23,7 +23,7 @@ class TestConstant(BoaTest):
         input = 7
         expected_output = Opcode.PUSH7
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(input)
             output = generator.bytecode
@@ -37,7 +37,7 @@ class TestConstant(BoaTest):
             + Opcode.NEGATE
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(input)
             output = generator.bytecode
@@ -52,7 +52,7 @@ class TestConstant(BoaTest):
             + byte_input
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(input)
             output = generator.bytecode
@@ -67,7 +67,7 @@ class TestConstant(BoaTest):
             + byte_input
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(input)
             output = generator.bytecode
@@ -82,7 +82,7 @@ class TestConstant(BoaTest):
             + byte_input[:32]
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(input)
             output = generator.bytecode
@@ -97,7 +97,7 @@ class TestConstant(BoaTest):
             + byte_input[:32]
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(input)
             output = generator.bytecode
@@ -117,7 +117,7 @@ class TestConstant(BoaTest):
             + unsigned_byte_input
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(unsigned)
             output = generator.bytecode
@@ -131,7 +131,7 @@ class TestConstant(BoaTest):
             + signed_byte_input
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_integer_literal(signed)
             output = generator.bytecode
@@ -147,7 +147,7 @@ class TestConstant(BoaTest):
             + byte_input
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_string_literal(input)
             output = generator.bytecode
@@ -164,7 +164,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -196,7 +196,7 @@ class TestConstant(BoaTest):
 
         analyser = Analyser(ast.parse(str(input)))
         analyser.symbol_table['x'] = Variable(Type.any)
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             output = CodeGenerator.generate_code(analyser, OptimizationLevel.DEFAULT).bytecode
 
         self.assertEqual(expected_output, output)
@@ -215,7 +215,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -245,7 +245,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -262,7 +262,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -289,7 +289,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -310,7 +310,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -340,7 +340,7 @@ class TestConstant(BoaTest):
             + Opcode.PACK
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -365,7 +365,7 @@ class TestConstant(BoaTest):
             + Opcode.SETITEM
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -400,7 +400,7 @@ class TestConstant(BoaTest):
             + Opcode.SETITEM
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
@@ -429,7 +429,7 @@ class TestConstant(BoaTest):
             + Opcode.SETITEM
         )
 
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             generator = self.build_code_generator()
             generator.convert_literal(input)
             output = generator.bytecode
