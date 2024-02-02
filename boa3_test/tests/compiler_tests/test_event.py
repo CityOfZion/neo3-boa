@@ -1,16 +1,15 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
-from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestEvent(BoaTest):
+class TestEvent(boatestcase.BoaTestCase):
+    from boa3.internal.model.builtin.interop.interop import Interop
+
     default_folder: str = 'test_sc/event_test'
+    notify_syscall = Interop.Notify.interop_method_hash
 
     def test_event_without_arguments(self):
         event_id = 'Event'
@@ -21,28 +20,24 @@ class TestEvent(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
+            + self.notify_syscall
             + Opcode.RET       # return
         )
 
-        path = self.get_contract_path('EventWithoutArguments.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EventWithoutArguments.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main')
+    async def test_event_without_arguments_run(self):
+        await self.set_up_contract('EventWithoutArguments.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        result, events = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual((), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0])
+        self.assertEqual((), event.state)
 
-    def test_event_with_arguments(self):
+    def test_event_with_arguments_compile(self):
         event_id = 'Event'
         event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
@@ -53,28 +48,25 @@ class TestEvent(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
+            + self.notify_syscall
             + Opcode.RET       # return
         )
 
-        path = self.get_contract_path('EventWithArgument.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EventWithArgument.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main')
+    async def test_event_with_arguments_run(self):
+        await self.set_up_contract('EventWithArgument.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        result, events = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
+        self.assertGreater(len(events), 0)
 
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual((10,), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], int)
+        self.assertEqual((10,), event.state)
 
-    def test_event_with_name(self):
+    def test_event_with_name_compile(self):
         event_id = 'example'
         event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
@@ -85,28 +77,24 @@ class TestEvent(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
+            + self.notify_syscall
             + Opcode.RET      # return
         )
 
-        path = self.get_contract_path('EventWithName.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EventWithName.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main')
+    async def test_event_with_name_run(self):
+        await self.set_up_contract('EventWithName.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        result, events = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual((10,), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], int)
+        self.assertEqual((10,), event.state)
 
-    def test_event_with_annotation(self):
+    def test_event_with_annotation_compile(self):
         event_id = 'example'
         event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
@@ -117,28 +105,24 @@ class TestEvent(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
+            + self.notify_syscall
             + Opcode.RET      # return
         )
 
-        path = self.get_contract_path('EventWithAnnotation.py')
-        output, manifest = self.compile_and_save(path)
+        output, _ = self.assertCompile('EventWithAnnotation.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main')
+    async def test_event_with_annotation(self):
+        await self.set_up_contract('EventWithAnnotation.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        result, events = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual((10,), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], int)
+        self.assertEqual((10,), event.state)
 
-    def test_event_nep17_transfer(self):
+    def test_event_nep17_transfer_compile(self):
         event_id = 'Transfer'
         event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
@@ -153,28 +137,25 @@ class TestEvent(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
+            + self.notify_syscall
             + Opcode.RET       # return
         )
 
-        path = self.get_contract_path('EventNep17Transfer.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EventNep17Transfer.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
+    async def test_event_nep17_transfer_run(self):
+        await self.set_up_contract('EventNep17Transfer.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        transfer_args = b'1', b'2', 10
+        result, events = await self.call('Main', [*transfer_args], return_type=None)
+        self.assertIsNone(result)
 
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], bytes, bytes, int)
+        self.assertEqual(transfer_args, event.state)
 
-    def test_event_nep17_transfer_built(self):
+    def test_event_nep17_transfer_built_compile(self):
         event_id = 'Transfer'
         event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
@@ -189,28 +170,25 @@ class TestEvent(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
+            + self.notify_syscall
             + Opcode.RET       # return
         )
 
-        path = self.get_contract_path('EventNep17TransferBuilt.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EventNep17TransferBuilt.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10)
+    async def test_event_nep17_transfer_built_run(self):
+        await self.set_up_contract('EventNep17TransferBuilt.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        transfer_args = b'1', b'2', 10
+        result, events = await self.call('Main', [*transfer_args], return_type=None)
+        self.assertIsNone(result)
 
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual(('1', '2', 10), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], bytes, bytes, int)
+        self.assertEqual(transfer_args, event.state)
 
-    def test_event_nep11_transfer(self):
+    def test_event_nep11_transfer_compile(self):
         event_id = 'Transfer'
         event_name = String(event_id).to_bytes(min_length=1)
         expected_output = (
@@ -226,47 +204,39 @@ class TestEvent(BoaTest):
             + Integer(len(event_name)).to_byte_array(min_length=1)
             + event_name
             + Opcode.SYSCALL
-            + Interop.Notify.interop_method_hash
+            + self.notify_syscall
             + Opcode.RET       # return
         )
 
-        path = self.get_contract_path('EventNep11Transfer.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EventNep11Transfer.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'Main', b'1', b'2', 10, b'someToken')
+    async def test_event_nep11_transfer_run(self):
+        await self.set_up_contract('EventNep11Transfer.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        transfer_args = b'1', b'2', 10, b'someToken'
+        result, events = await self.call('Main', [*transfer_args], return_type=None)
+        self.assertIsNone(result)
 
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual(('1', '2', 10, 'someToken'), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], bytes, bytes, int, bytes)
+        self.assertEqual(transfer_args, event.state)
 
     def test_event_without_types(self):
         path = self.get_contract_path('EventWithoutTypes.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_event_with_duplicated_name(self):
-        path, _ = self.get_deploy_file_paths('EventWithDuplicatedName.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_event_with_duplicated_name(self):
+        await self.set_up_contract('EventWithDuplicatedName.py')
 
         arg = 10
         event_id = 'example'
-        invoke = runner.call_contract(path, 'example', arg)
+        result, events = await self.call('example', [arg], return_type=None)
+        self.assertIsNone(result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
-
-        event_notifications = runner.get_events(event_name=event_id)
-        self.assertEqual(1, len(event_notifications))
-        self.assertEqual((arg,), event_notifications[0].arguments)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], int)
+        self.assertEqual((arg,), event.state)
 
     def test_event_call_too_many_arguments(self):
         path = self.get_contract_path('TooManyArgumentsCallEvent.py')
@@ -316,47 +286,31 @@ class TestEvent(BoaTest):
         path = self.get_contract_path('MismatchedTypeCreateEventWithInteropInterface.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_event_with_abort(self):
-        path = self.get_contract_path('EventWithAbort.py')
-        self.compile_and_save(path)
-        path, _ = self.get_deploy_file_paths(path)
+    async def test_event_with_abort(self):
+        await self.set_up_contract('EventWithAbort.py')
 
-        runner = BoaTestRunner(runner_id=self.method_name())
-        runner.call_contract(path, 'send_event_with_abort')
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
-        self.assertGreater(len(runner.notifications), 0)
+        result, events = await self.call('send_event', [], return_type=None)
+        self.assertIsNone(result)
 
-        invoke = runner.call_contract(path, 'send_event')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsNone(invoke.result)
-        self.assertGreater(len(runner.notifications), 0)
+        self.assertEqual(1, len(events))
+        event = boatestcase.TestEvent.from_notification(events[0], int)
+        self.assertEqual((10,), event.state)
 
-    def test_boa2_event_test(self):
-        path, _ = self.get_deploy_file_paths('EventBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-        invoke = runner.call_contract(path, 'main')
+        with self.assertRaises(boatestcase.AbortException):
+            await self.call('send_event_with_abort', [], return_type=None)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_event_test(self):
+        await self.set_up_contract('EventBoa2Test.py')
 
-        result = invoke.result
-        self.assertIsNotNone(result)
+        result, events = await self.call('main', [], return_type=int)
         self.assertEqual(7, result)
 
-        event_notifications1 = runner.get_events('transfer_test')
-        self.assertEqual(1, len(event_notifications1))
-        self.assertEqual(3, len(event_notifications1[0].arguments))
-        from_address, to_address, amount = event_notifications1[0].arguments
-        self.assertEqual(2, from_address)
-        self.assertEqual(5, to_address)
-        self.assertEqual(7, amount)
+        self.assertEqual(2, len(events))
+        transfer_event = boatestcase.TestEvent.from_notification(events[0], int, int, int)
+        refund_event = boatestcase.TestEvent.from_notification(events[1], str, int)
 
-        event_notifications2 = runner.get_events('refund')
-        self.assertEqual(1, len(event_notifications2))
-        self.assertEqual(2, len(event_notifications2[0].arguments))
-        to_address, amount = event_notifications2[0].arguments
-        self.assertEqual('me', to_address)
-        self.assertEqual(52, amount)
+        self.assertEqual('transfer_test', transfer_event.name)
+        self.assertEqual((2, 5, 7), transfer_event.state)
+
+        self.assertEqual('refund', refund_event.name)
+        self.assertEqual(('me', 52), refund_event.state)
