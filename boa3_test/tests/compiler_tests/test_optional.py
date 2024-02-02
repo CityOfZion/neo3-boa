@@ -1,5 +1,5 @@
-from boa3_test.tests import boatestcase
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3_test.tests import boatestcase
 
 
 class TestOptional(boatestcase.BoaTestCase):

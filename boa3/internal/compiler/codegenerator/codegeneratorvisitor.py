@@ -5,7 +5,6 @@ from typing import Dict, List, Optional
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
-from boa3.internal.compiler.codegenerator import optimizerhelper
 from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData

@@ -1,10 +1,9 @@
-from boa3_test.tests import boatestcase
-
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo3.vm import VMState
+from boa3_test.tests import boatestcase
 from boa3_test.tests.boatestcase import FaultException
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 

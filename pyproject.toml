@@ -65,9 +65,14 @@ version = { attr = 'boa3.__version__' }
 
 
 [tool.bumpversion]
-current_version = '1.1.0'
+current_version = '1.1.1'
 commit = true
 tag = true
+
+[[tool.bumpversion.files]]
+filename = './pyproject.toml'
+search = "current_version = '{current_version}'"
+replace = "current_version = '{new_version}'"
 
 [[tool.bumpversion.files]]
 filename = './boa3/__init__.py'

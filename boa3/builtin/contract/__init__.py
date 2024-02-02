@@ -10,8 +10,8 @@ __all__ = [
 
 from typing import Any, Optional, Union
 
-from boa3.builtin.contract.Nep17Contract import Nep17Contract
 from boa3.builtin.compile_time import CreateNewEvent
+from boa3.builtin.contract.Nep17Contract import Nep17Contract
 from boa3.builtin.type import ECPoint, UInt160, Event
 
 Nep11TransferEvent: Event = CreateNewEvent(

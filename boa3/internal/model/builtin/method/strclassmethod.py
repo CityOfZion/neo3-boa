@@ -4,7 +4,6 @@ from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.builtin.method.strmethod import StrMethod
 from boa3.internal.model.type.classes.userclass import UserClass
 from boa3.internal.model.type.itype import IType
-from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 

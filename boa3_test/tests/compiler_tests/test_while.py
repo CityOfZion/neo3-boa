@@ -1,10 +1,11 @@
+from neo3.api import noderpc
+from neo3.contracts.contract import CONTRACT_HASHES
+from neo3.core import types
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3_test.tests import boatestcase
-from neo3.api import noderpc
-from neo3.contracts.contract import CONTRACT_HASHES
-from neo3.core import types
 
 
 class TestWhile(boatestcase.BoaTestCase):

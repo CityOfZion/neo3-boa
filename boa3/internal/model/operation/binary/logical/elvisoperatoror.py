@@ -3,7 +3,6 @@ from typing import List
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class ElvisOperatorOr(BinaryOperation):

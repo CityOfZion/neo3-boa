@@ -1,7 +1,6 @@
-from boa3_test.tests import boatestcase
-
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
+from boa3_test.tests import boatestcase
 
 
 class TestIf(boatestcase.BoaTestCase):

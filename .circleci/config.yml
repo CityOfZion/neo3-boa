@@ -21,6 +21,13 @@ jobs:
     steps:
       - checkout
       - python/load-cache
+      - run:
+          name: Test Build Package
+          command: |
+            python3 -m pip install --upgrade pip
+            pip install twine build
+            python3 -m build
+            twine check dist/*
 
       - run:
           name: Fix openssl for ripemd160 loading
@@ -70,6 +77,13 @@ jobs:
     steps:
       - checkout
       - python/load-cache
+      - run:
+          name: Test Build Package
+          command: |
+            python3 -m pip install --upgrade pip
+            pip install twine build
+            python3 -m build
+            twine check dist/*
 
       - run:
           name: Fix openssl for ripemd160 loading
@@ -81,7 +95,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            pip install -e .[dev]
+            pip install -e .[dev,test]
             sudo apt update
 
             sudo apt-get install -y apt-transport-https
@@ -134,7 +148,9 @@ jobs:
       - run:
           name: Build Package
           command: |
-            python3 setup.py sdist bdist_wheel
+            python3 -m pip install --upgrade pip
+            pip install twine build
+            python3 -m build
             twine check dist/*
 
       - run:
@@ -156,8 +172,7 @@ jobs:
         - run:
             name: Install Dependencies
             command: |
-              apt-get install latexmk
-              pip install -e .[dev,test]
+              pip install -e .[docs]
 
         - run:
             name: install aws cli

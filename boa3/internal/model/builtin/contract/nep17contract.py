@@ -1,7 +1,6 @@
 from typing import Dict, List
 
 from boa3.internal.model.builtin.interop.contract import ContractType
-
 from boa3.internal.model.method import Method
 
 

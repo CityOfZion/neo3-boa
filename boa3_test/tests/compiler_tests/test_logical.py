@@ -1,8 +1,7 @@
-from boa3_test.tests import boatestcase
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.contracts import FindOptions
+from boa3_test.tests import boatestcase
 
 
 class TestLogical(boatestcase.BoaTestCase):
