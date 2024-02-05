@@ -24,6 +24,7 @@ __all__ = [
 
 from typing import Any, List, Union, Sequence
 
+from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
@@ -268,7 +269,7 @@ b'\\tK\\xb31\\xa8\\x13\\x80`\\xad\\xf6\\xda\\xdf\\xc6R\\x9b\\xfdB\\xbf\\x83\\x8f
 :meta hide-value:
 """
 
-script_container: Any = None
+script_container: Transaction = Transaction()
 """
 Gets the current script container.
 
