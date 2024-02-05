@@ -5,6 +5,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
+from boa3_test.tests.boatestcase import FaultException
 
 
 class TestDict(boatestcase.BoaTestCase):
@@ -238,7 +239,7 @@ class TestDict(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [{0: 'zero'}], return_type=str)
         self.assertEqual('zero', result)
 
-        with self.assertRaises(Exception) as context: #TODO: Change exception type
+        with self.assertRaises(FaultException) as context:
             await self.call('Main', [{1: 'one'}], return_type=str)
 
         self.assertRegex(str(context.exception), self.MAP_KEY_NOT_FOUND_ERROR_MSG)
@@ -538,7 +539,7 @@ class TestDict(boatestcase.BoaTestCase):
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'key not inside'
-        with self.assertRaises(Exception) as context: #TODO: Change exception type
+        with self.assertRaises(FaultException) as context:
             await self.call('main', [dict_, key], return_type=tuple[dict[str, int], int])
 
         self.assertRegex(str(context.exception), self.MAP_KEY_NOT_FOUND_ERROR_MSG)
