@@ -266,20 +266,18 @@ class TestWhile(boatestcase.BoaTestCase):
         from dataclasses import dataclass
 
         @dataclass
-        class TestEvent:
+        class NotifyTestEvent(boatestcase.BoaTestEvent):
             token: types.UInt160
             executing: types.UInt160
             fee_receiver: types.UInt160
             fee_amount: int
 
             @classmethod
-            def from_notification(cls, n: noderpc.Notification):
-                stack = n.state.as_list()[0].as_list()
-                token = stack[0].as_uint160()
-                executing = stack[1].as_uint160()
-                fee_receiver = stack[2].as_uint160()
-                fee_amount = stack[3].as_int()
-                return cls(token, executing, fee_receiver, fee_amount)
+            def from_untyped_notification(cls, n: noderpc.Notification):
+                inner_args_types = tuple(cls.__annotations__.values())
+                e = super().from_notification(n, tuple[inner_args_types])
+                stack = e.state[0]
+                return cls(e.contract, e.name, e.state, *stack)
 
         await self.set_up_contract('WhileWithInteropCondition.py', compile_if_found=True)
 
@@ -289,13 +287,13 @@ class TestWhile(boatestcase.BoaTestCase):
         # test notifications inserted into the code for validating if the code flow is correct
         self.assertEqual(2, len(notifications))
 
-        event = TestEvent.from_notification(notifications[0])
+        event = NotifyTestEvent.from_notification(notifications[0])
         self.assertEqual(CONTRACT_HASHES.GAS_TOKEN, event.token)
         self.assertEqual(self.contract_hash, event.executing)
         self.assertEqual(types.UInt160.zero(), event.fee_receiver)
         self.assertEqual(10, event.fee_amount)
 
-        event = TestEvent.from_notification(notifications[1])
+        event = NotifyTestEvent.from_notification(notifications[1])
         self.assertEqual(CONTRACT_HASHES.NEO_TOKEN, event.token)
         self.assertEqual(self.contract_hash, event.executing)
         self.assertEqual(types.UInt160.zero(), event.fee_receiver)

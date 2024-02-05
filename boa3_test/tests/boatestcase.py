@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 __all__ = [
     'BoaTestCase',
+    'BoaTestEvent',
     'AbortException',
     'AssertException',
     'FaultException',
-    'TestEvent',
     '_COMPILER_LOCK'
 ]
 
+import abc
 import asyncio
 import logging
 import os
@@ -47,20 +50,31 @@ class FaultException(Exception):
 
 
 @dataclass
-class TestEvent:
+class BoaTestEvent:
     contract: types.UInt160
     name: str
     state: tuple
 
     @classmethod
-    def from_notification(cls, n: noderpc.Notification, *state_type: Type):
-        if state_type:
-            expected_type = tuple[state_type]
-        else:
+    def from_notification(cls, n: noderpc.Notification, *state_type: Type) -> BoaTestEvent:
+        if not state_type:
+            if cls is not BoaTestEvent:
+                # for inherited classes
+                return cls.from_untyped_notification(n)
             expected_type = tuple
+        else:
+            expected_type = tuple[state_type]
 
         state = BoaTestCase._unwrap_stack_item(n.state, expected_type=expected_type)
-        return cls(n.contract, n.event_name, state)
+        return BoaTestEvent(contract=n.contract,
+                            name=n.event_name,
+                            state=state
+                            )
+
+    @classmethod
+    @abc.abstractmethod
+    def from_untyped_notification(cls, n: noderpc.Notification):
+        return cls.from_notification(n, *cls.__annotations__.values())
 
 
 class BoaTestCase(SmartContractTestCase):
