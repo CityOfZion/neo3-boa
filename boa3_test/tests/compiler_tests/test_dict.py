@@ -1,15 +1,13 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestDict(BoaTest):
+class TestDict(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/dict_test'
+    MAP_KEY_NOT_FOUND_ERROR_MSG = 'Key not found in Map'
 
     def test_dict_int_keys(self):
         expected_output = (
@@ -33,8 +31,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('IntKeyDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('IntKeyDict.py')
         self.assertEqual(expected_output, output)
 
     def test_dict_str_keys(self):
@@ -69,8 +66,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StrKeyDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StrKeyDict.py')
         self.assertEqual(expected_output, output)
 
     def test_dict_any_value(self):
@@ -99,8 +95,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AnyValueDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AnyValueDict.py')
         self.assertEqual(expected_output, output)
 
     def test_dict_of_dicts(self):
@@ -149,8 +144,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('DictOfDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('DictOfDict.py')
         self.assertEqual(expected_output, output)
 
     def test_dict_assign_empty_dict(self):
@@ -163,8 +157,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('EmptyDictAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EmptyDictAssignment.py')
         self.assertEqual(expected_output, output)
 
     def test_dict_type_hint_assignment(self):
@@ -189,8 +182,7 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TypeHintAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TypeHintAssignment.py')
         self.assertEqual(expected_output, output)
 
     def test_dict_variable_keys_and_values(self):
@@ -221,11 +213,10 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('VariableDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('VariableDict.py')
         self.assertEqual(expected_output, output)
 
-    def test_dict_get_value(self):
+    def test_dict_get_value_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -236,36 +227,25 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GetValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('DictGetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_dict_get_value(self):
+        await self.set_up_contract('GetValueDictGetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [{0: 'zero'}], return_type=str)
+        self.assertEqual('zero', result)
 
-        invokes.append(runner.call_contract(path, 'Main', {0: 'zero'}))
-        expected_results.append('zero')
+        with self.assertRaises(Exception) as context: #TODO: Change exception type
+            await self.call('Main', [{1: 'one'}], return_type=str)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', {1: 'one'})
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.MAP_KEY_NOT_FOUND_ERROR_MSG)
+        self.assertRegex(str(context.exception), self.MAP_KEY_NOT_FOUND_ERROR_MSG)
 
     def test_dict_get_value_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeGetValue.py')
+        path = self.get_contract_path('MismatchedTypeDictGetValue.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_dict_set_value(self):
+    def test_dict_set_value_compile(self):
         ok = String('ok').to_bytes()
 
         expected_output = (
@@ -282,32 +262,23 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('SetValue.py')
+        path = self.get_contract_path('DictSetValue.py')
         output = self.assertCompilerNotLogs(CompilerWarning.NameShadowing, path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_dict_set_value(self):
+        await self.set_up_contract('DictSetValue.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', {0: 'zero'}))
-        expected_results.append({0: 'ok'})
-        invokes.append(runner.call_contract(path, 'Main', {1: 'one'}))
-        expected_results.append({0: 'ok', 1: 'one'})
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [{0: 'zero'}], return_type=dict[int, str])
+        self.assertEqual({0: 'ok'}, result)
+        result, _ = await self.call('Main', [{1: 'one'}], return_type=dict[int, str])
+        self.assertEqual({0: 'ok', 1: 'one'}, result)
 
     def test_dict_set_value_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeSetValue.py')
+        path = self.get_contract_path('MismatchedTypeDictSetValue.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_dict_keys(self):
+    def test_dict_keys_compile(self):
         one = String('one').to_bytes()
         two = String('two').to_bytes()
         three = String('three').to_bytes()
@@ -343,26 +314,16 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('KeysDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('KeysDict.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_dict_keys(self):
+        await self.set_up_contract('KeysDict.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list[str])
+        self.assertEqual(['one', 'two', 'three'], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(['one', 'two', 'three'])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_dict_keys_mismatched_type(self):
+    def test_dict_keys_mismatched_type_compile(self):
         one = String('one').to_bytes()
         two = String('two').to_bytes()
         three = String('three').to_bytes()
@@ -399,25 +360,16 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('MismatchedTypeKeysDict.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_dict_keys_mismatched_type(self):
+        await self.set_up_contract('MismatchedTypeKeysDict.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list[str])
+        self.assertEqual(['one', 'two', 'three'], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(['one', 'two', 'three'])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_dict_values(self):
+    def test_dict_values_compile(self):
         one = String('one').to_bytes()
         two = String('two').to_bytes()
         three = String('three').to_bytes()
@@ -453,26 +405,16 @@ class TestDict(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ValuesDict.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ValuesDict.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_dict_values(self):
+        await self.set_up_contract('ValuesDict.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list[int])
+        self.assertEqual([1, 2, 3], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([1, 2, 3])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_dict_values_mismatched_type(self):
+    def test_dict_values_mismatched_type_compile(self):
         one = String('one').to_bytes()
         two = String('two').to_bytes()
         three = String('three').to_bytes()
@@ -509,287 +451,148 @@ class TestDict(BoaTest):
         )
 
         path = self.get_contract_path('MismatchedTypeValuesDict.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_dict_values_mismatched_type(self):
+        await self.set_up_contract('MismatchedTypeValuesDict.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list[int])
+        self.assertEqual([1, 2, 3], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([1, 2, 3])
+    async def test_dict_boa2_test2(self):
+        await self.set_up_contract('DictBoa2Test2.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(7, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_dict_any_key_and_value(self):
+        await self.set_up_contract('DictAnyKeyAndValue.py')
 
-    def test_dict_boa2_test2(self):
-        path, _ = self.get_deploy_file_paths('DictBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(66, result)
 
-        invokes = []
-        expected_results = []
+    async def test_boa2_dict_test1(self):
+        await self.set_up_contract('DictBoa2Test1.py')
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(7)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_dict_any_key_and_value(self):
-        path, _ = self.get_deploy_file_paths('DictAnyKeyAndValue.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(66)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_dict_test1(self):
-        path, _ = self.get_deploy_file_paths('DictBoa2Test1.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invoke = runner.call_contract(path, 'main')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=dict[any, int])
 
         from typing import Dict
-        self.assertIsInstance(invoke.result, Dict)
+        self.assertIsInstance(result, Dict)
 
-    def test_boa2_dict_test3(self):
-        path, _ = self.get_deploy_file_paths('DictBoa2Test3.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_dict_test3(self):
+        await self.set_up_contract('DictBoa2Test3.py')
 
-        invoke = runner.call_contract(path, 'main')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=dict)
 
         from typing import Dict
-        self.assertIsInstance(invoke.result, Dict)
-        self.assertEqual({}, invoke.result)
+        self.assertIsInstance(result, Dict)
+        self.assertEqual({}, result)
 
-    def test_boa2_dict_test4(self):
-        path, _ = self.get_deploy_file_paths('DictBoa2Test4.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_dict_test4(self):
+        await self.set_up_contract('DictBoa2Test4.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_dict_test5_should_not_compile(self):
+    async def test_boa2_dict_test5_should_not_compile(self):
         # this doesn't compile in boa2, but should compile here
-        path, _ = self.get_deploy_file_paths('DictBoa2Test5ShouldNotCompile.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        await self.set_up_contract('DictBoa2Test5ShouldNotCompile.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=dict[str, int])
+        self.assertEqual({'a': 2}, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append({'a': 2})
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_dict_test6_should_not_compile(self):
+    async def test_boa2_dict_test6_should_not_compile(self):
         # this doesn't compile in boa2, but should compile here
-        path, _ = self.get_deploy_file_paths('DictBoa2Test6ShouldNotCompile.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        await self.set_up_contract('DictBoa2Test6ShouldNotCompile.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=dict[any, int])
+        self.assertEqual({'a': 1, 'b': 2}, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append({'a': 1, 'b': 2})
+    async def test_boa2_dict_test_keys(self):
+        await self.set_up_contract('DictBoa2TestKeys.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('abblahmzmcallltrs', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_boa2_dict_test_values(self):
+        await self.set_up_contract('DictBoa2TestValues.py')
 
-    def test_boa2_dict_test_keys(self):
-        path, _ = self.get_deploy_file_paths('DictBoa2TestKeys.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(55, result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append('abblahmzmcallltrs')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_dict_test_values(self):
-        path, _ = self.get_deploy_file_paths('DictBoa2TestValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(55)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_dict_pop(self):
-        path, _ = self.get_deploy_file_paths('DictPop.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_dict_pop(self):
+        await self.set_up_contract('DictPop.py')
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'a'
-        invokes.append(runner.call_contract(path, 'main', dict_, key))
+        result, _ = await self.call('main', [dict_, key], return_type=tuple[dict[any, any], any])
         value = dict_.pop(key)
-        expected_results.append([dict_, value])
+        self.assertEqual([dict_, value], result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'd'
-        invokes.append(runner.call_contract(path, 'main', dict_, key))
+        result, _ = await self.call('main', [dict_, key], return_type=tuple[dict[any, any], any])
         value = dict_.pop(key)
-        expected_results.append([dict_, value])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertEqual([dict_, value], result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'key not inside'
-        runner.call_contract(path, 'main', dict_, key)
-        runner.execute()
+        with self.assertRaises(Exception) as context: #TODO: Change exception type
+            await self.call('main', [dict_, key], return_type=tuple[dict[any, any], any])
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.MAP_KEY_NOT_FOUND_ERROR_MSG)
+        self.assertRegex(str(context.exception), self.MAP_KEY_NOT_FOUND_ERROR_MSG)
         self.assertRaises(KeyError, dict_.pop, key)
 
-    def test_dict_pop_default(self):
-        path, _ = self.get_deploy_file_paths('DictPopDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_dict_pop_default(self):
+        await self.set_up_contract('DictPopDefault.py')
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'a'
         default = 'test'
-        invokes.append(runner.call_contract(path, 'main', dict_, key, default))
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
         value = dict_.pop(key, default)
-        expected_results.append([dict_, value])
+        self.assertEqual([dict_, value], result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'd'
         default = 'test'
-        invokes.append(runner.call_contract(path, 'main', dict_, key, default))
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
         value = dict_.pop(key, default)
-        expected_results.append([dict_, value])
+        self.assertEqual([dict_, value], result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'not inside'
         default = 'test'
-        invokes.append(runner.call_contract(path, 'main', dict_, key, default))
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
         value = dict_.pop(key, default)
-        expected_results.append([dict_, value])
+        self.assertEqual([dict_, value], result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'not inside'
         default = 123456
-        invokes.append(runner.call_contract(path, 'main', dict_, key, default))
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
         value = dict_.pop(key, default)
-        expected_results.append([dict_, value])
+        self.assertEqual([dict_, value], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_dict_copy(self):
-        path, _ = self.get_deploy_file_paths('DictCopy.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_dict_copy(self):
+        await self.set_up_contract('DictCopy.py')
 
         _dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}
-        invokes.append(runner.call_contract(path, 'copy_dict', _dict))
-        expected_results.append([{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5},
-                                 {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'unit': 'test'}
-                                 ])
+        result, _ = await self.call('copy_dict', [_dict], return_type=list[dict[any, any]])
+        self.assertEqual([{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}, {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'unit': 'test'}], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_dict_copy_builtin_call(self):
+        await self.set_up_contract('CopyDictBuiltinCall.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('copy_dict', [{0: 10, 1: 11, 2: 12}, 3, 13], return_type=tuple[dict[any], dict[any]])
+        self.assertEqual([{0: 10, 1: 11, 2: 12}, {0: 10, 1: 11, 2: 12, 3: 13}], result)
 
-    def test_dict_copy_builtin_call(self):
-        path, _ = self.get_deploy_file_paths('CopyDictBuiltinCall.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('copy_dict', [{'dict': 1, 'unit': 2, 'test': 3}, 'copy', 4], return_type=tuple[dict[any], dict[any]])
+        self.assertEqual([{'dict': 1, 'unit': 2, 'test': 3}, {'dict': 1, 'unit': 2, 'test': 3, 'copy': 4}], result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'copy_dict', {0: 10, 1: 11, 2: 12}, 3, 13))
-        expected_results.append([{0: 10, 1: 11, 2: 12},
-                                 {0: 10, 1: 11, 2: 12, 3: 13}
-                                 ])
-
-        invokes.append(runner.call_contract(path, 'copy_dict', {'dict': 1, 'unit': 2, 'test': 3}, 'copy', 4))
-        expected_results.append([{'dict': 1, 'unit': 2, 'test': 3},
-                                 {'dict': 1, 'unit': 2, 'test': 3, 'copy': 4}
-                                 ])
-
-        invokes.append(runner.call_contract(path, 'copy_dict', {True: 1, False: 0}, True, 99))
-        expected_results.append([{True: 1, False: 0},
-                                 {True: 99, False: 0}
-                                 ])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('copy_dict', [{True: 1, False: 0}, True, 99], return_type=tuple[dict[any], dict[any]])
+        self.assertEqual([{True: 1, False: 0}, {True: 99, False: 0}], result)
 
     def test_del_dict_pair(self):
         path = self.get_contract_path('DelPair.py')
