@@ -34,7 +34,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0])
+        event = boatestcase.BoaTestEvent.from_notification(events[0])
         self.assertEqual((), event.state)
 
     def test_event_with_arguments_compile(self):
@@ -63,7 +63,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertGreater(len(events), 0)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], int)
         self.assertEqual((10,), event.state)
 
     def test_event_with_name_compile(self):
@@ -91,7 +91,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], int)
         self.assertEqual((10,), event.state)
 
     def test_event_with_annotation_compile(self):
@@ -119,7 +119,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], int)
         self.assertEqual((10,), event.state)
 
     def test_event_nep17_transfer_compile(self):
@@ -152,7 +152,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], bytes, bytes, int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], bytes, bytes, int)
         self.assertEqual(transfer_args, event.state)
 
     def test_event_nep17_transfer_built_compile(self):
@@ -185,7 +185,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], bytes, bytes, int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], bytes, bytes, int)
         self.assertEqual(transfer_args, event.state)
 
     def test_event_nep11_transfer_compile(self):
@@ -219,7 +219,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], bytes, bytes, int, bytes)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], bytes, bytes, int, bytes)
         self.assertEqual(transfer_args, event.state)
 
     def test_event_with_return(self):
@@ -235,7 +235,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], int)
         self.assertEqual((arg,), event.state)
 
     def test_event_call_too_many_arguments(self):
@@ -293,7 +293,7 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.TestEvent.from_notification(events[0], int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], int)
         self.assertEqual((10,), event.state)
 
         with self.assertRaises(boatestcase.AbortException):
@@ -306,8 +306,8 @@ class TestEvent(boatestcase.BoaTestCase):
         self.assertEqual(7, result)
 
         self.assertEqual(2, len(events))
-        transfer_event = boatestcase.TestEvent.from_notification(events[0], int, int, int)
-        refund_event = boatestcase.TestEvent.from_notification(events[1], str, int)
+        transfer_event = boatestcase.BoaTestEvent.from_notification(events[0], int, int, int)
+        refund_event = boatestcase.BoaTestEvent.from_notification(events[1], str, int)
 
         self.assertEqual('transfer_test', transfer_event.name)
         self.assertEqual((2, 5, 7), transfer_event.state)
