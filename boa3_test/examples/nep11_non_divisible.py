@@ -352,7 +352,7 @@ def _deploy(data: Any, upgrade: bool):
     if type_helper.to_bool(get(DEPLOYED, get_read_only_context())):
         return
 
-    tx = cast(Transaction, script_container)
+    tx = script_container
     debug(["tx.sender: ", tx.sender, get_network()])
     owner: UInt160 = tx.sender
     network = get_network()
@@ -602,7 +602,7 @@ def verify() -> bool:
     """
     serialized = get(AUTH_ADDRESSES, get_read_only_context())
     auth = cast(list[UInt160], deserialize(serialized))
-    tx = cast(Transaction, script_container)
+    tx = script_container
     for addr in auth:
         if check_witness(addr):
             debug(["Verification successful", addr, tx.sender])

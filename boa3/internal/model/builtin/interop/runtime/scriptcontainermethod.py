@@ -11,7 +11,8 @@ class ScriptContainerMethod(InteropMethod):
         identifier = '-get_script_container'
         syscall = 'System.Runtime.GetScriptContainer'
         args: Dict[str, Variable] = {}
-        super().__init__(identifier, syscall, args, return_type=Type.any)
+        from boa3.internal.model.builtin.interop.blockchain import TransactionType
+        super().__init__(identifier, syscall, args, return_type=TransactionType.build())
 
 
 class ScriptContainerProperty(IBuiltinProperty):
