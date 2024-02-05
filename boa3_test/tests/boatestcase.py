@@ -1,15 +1,20 @@
+from __future__ import annotations
+
 __all__ = [
     'BoaTestCase',
+    'BoaTestEvent',
     'AbortException',
-    'FaultException',
     'AssertException',
+    'FaultException',
     '_COMPILER_LOCK'
 ]
 
+import abc
 import asyncio
 import logging
 import os
 import threading
+from dataclasses import dataclass
 from typing import Any, Optional, TypeVar, Type, Sequence
 
 from boaconstructor import SmartContractTestCase, AbortException, AssertException
@@ -42,6 +47,34 @@ _CONTRACT_LOCK = threading.RLock()
 
 class FaultException(Exception):
     pass
+
+
+@dataclass
+class BoaTestEvent:
+    contract: types.UInt160
+    name: str
+    state: tuple
+
+    @classmethod
+    def from_notification(cls, n: noderpc.Notification, *state_type: Type) -> BoaTestEvent:
+        if not state_type:
+            if cls is not BoaTestEvent:
+                # for inherited classes
+                return cls.from_untyped_notification(n)
+            expected_type = tuple
+        else:
+            expected_type = tuple[state_type]
+
+        state = BoaTestCase._unwrap_stack_item(n.state, expected_type=expected_type)
+        return BoaTestEvent(contract=n.contract,
+                            name=n.event_name,
+                            state=state
+                            )
+
+    @classmethod
+    @abc.abstractmethod
+    def from_untyped_notification(cls, n: noderpc.Notification):
+        return cls.from_notification(n, *cls.__annotations__.values())
 
 
 class BoaTestCase(SmartContractTestCase):
