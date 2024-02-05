@@ -1,3 +1,5 @@
+from typing import Any
+
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -231,7 +233,7 @@ class TestDict(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     async def test_dict_get_value(self):
-        await self.set_up_contract('GetValueDictGetValue.py')
+        await self.set_up_contract('DictGetValue.py')
 
         result, _ = await self.call('Main', [{0: 'zero'}], return_type=str)
         self.assertEqual('zero', result)
@@ -457,7 +459,7 @@ class TestDict(boatestcase.BoaTestCase):
     async def test_dict_values_mismatched_type(self):
         await self.set_up_contract('MismatchedTypeValuesDict.py')
 
-        result, _ = await self.call('Main', [], return_type=list[int])
+        result, _ = await self.call('Main', [], return_type=list)
         self.assertEqual([1, 2, 3], result)
 
     async def test_dict_boa2_test2(self):
@@ -475,18 +477,16 @@ class TestDict(boatestcase.BoaTestCase):
     async def test_boa2_dict_test1(self):
         await self.set_up_contract('DictBoa2Test1.py')
 
-        result, _ = await self.call('main', [], return_type=dict[any, int])
+        result, _ = await self.call('main', [], return_type=dict)
 
-        from typing import Dict
-        self.assertIsInstance(result, Dict)
+        self.assertIsInstance(result, dict)
 
     async def test_boa2_dict_test3(self):
         await self.set_up_contract('DictBoa2Test3.py')
 
         result, _ = await self.call('main', [], return_type=dict)
 
-        from typing import Dict
-        self.assertIsInstance(result, Dict)
+        self.assertIsInstance(result, dict)
         self.assertEqual({}, result)
 
     async def test_boa2_dict_test4(self):
@@ -506,7 +506,7 @@ class TestDict(boatestcase.BoaTestCase):
         # this doesn't compile in boa2, but should compile here
         await self.set_up_contract('DictBoa2Test6ShouldNotCompile.py')
 
-        result, _ = await self.call('main', [], return_type=dict[any, int])
+        result, _ = await self.call('main', [], return_type=dict[str, int])
         self.assertEqual({'a': 1, 'b': 2}, result)
 
     async def test_boa2_dict_test_keys(self):
@@ -526,20 +526,20 @@ class TestDict(boatestcase.BoaTestCase):
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'a'
-        result, _ = await self.call('main', [dict_, key], return_type=tuple[dict[any, any], any])
+        result, _ = await self.call('main', [dict_, key], return_type=tuple[dict[str, int], int])
         value = dict_.pop(key)
-        self.assertEqual([dict_, value], result)
+        self.assertEqual((dict_, value), result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'd'
-        result, _ = await self.call('main', [dict_, key], return_type=tuple[dict[any, any], any])
+        result, _ = await self.call('main', [dict_, key], return_type=tuple[dict[str, int], int])
         value = dict_.pop(key)
-        self.assertEqual([dict_, value], result)
+        self.assertEqual((dict_, value), result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'key not inside'
         with self.assertRaises(Exception) as context: #TODO: Change exception type
-            await self.call('main', [dict_, key], return_type=tuple[dict[any, any], any])
+            await self.call('main', [dict_, key], return_type=tuple[dict[str, int], int])
 
         self.assertRegex(str(context.exception), self.MAP_KEY_NOT_FOUND_ERROR_MSG)
         self.assertRaises(KeyError, dict_.pop, key)
@@ -550,49 +550,49 @@ class TestDict(boatestcase.BoaTestCase):
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'a'
         default = 'test'
-        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[str, int], int])
         value = dict_.pop(key, default)
-        self.assertEqual([dict_, value], result)
+        self.assertEqual((dict_, value), result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'd'
         default = 'test'
-        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[str, int], int])
         value = dict_.pop(key, default)
-        self.assertEqual([dict_, value], result)
+        self.assertEqual((dict_, value), result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'not inside'
         default = 'test'
-        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[str, int], int])
         value = dict_.pop(key, default)
-        self.assertEqual([dict_, value], result)
+        self.assertEqual((dict_, value), result)
 
         dict_ = {'a': 1, 'b': 2, 'c': 3, 'd': 4}
         key = 'not inside'
         default = 123456
-        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[any, any], any])
+        result, _ = await self.call('main', [dict_, key, default], return_type=tuple[dict[str, int], int])
         value = dict_.pop(key, default)
-        self.assertEqual([dict_, value], result)
+        self.assertEqual((dict_, value), result)
 
     async def test_dict_copy(self):
         await self.set_up_contract('DictCopy.py')
 
         _dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}
-        result, _ = await self.call('copy_dict', [_dict], return_type=list[dict[any, any]])
+        result, _ = await self.call('copy_dict', [_dict], return_type=list[dict[str, Any]])
         self.assertEqual([{'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}, {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5, 'unit': 'test'}], result)
 
     async def test_dict_copy_builtin_call(self):
         await self.set_up_contract('CopyDictBuiltinCall.py')
 
-        result, _ = await self.call('copy_dict', [{0: 10, 1: 11, 2: 12}, 3, 13], return_type=tuple[dict[any], dict[any]])
-        self.assertEqual([{0: 10, 1: 11, 2: 12}, {0: 10, 1: 11, 2: 12, 3: 13}], result)
+        result, _ = await self.call('copy_dict', [{0: 10, 1: 11, 2: 12}, 3, 13], return_type=tuple[dict, dict])
+        self.assertEqual(({0: 10, 1: 11, 2: 12}, {0: 10, 1: 11, 2: 12, 3: 13}), result)
 
-        result, _ = await self.call('copy_dict', [{'dict': 1, 'unit': 2, 'test': 3}, 'copy', 4], return_type=tuple[dict[any], dict[any]])
-        self.assertEqual([{'dict': 1, 'unit': 2, 'test': 3}, {'dict': 1, 'unit': 2, 'test': 3, 'copy': 4}], result)
+        result, _ = await self.call('copy_dict', [{'dict': 1, 'unit': 2, 'test': 3}, 'copy', 4], return_type=tuple[dict[str, Any], dict[str, Any]])
+        self.assertEqual(({'dict': 1, 'unit': 2, 'test': 3}, {'dict': 1, 'unit': 2, 'test': 3, 'copy': 4}), result)
 
-        result, _ = await self.call('copy_dict', [{True: 1, False: 0}, True, 99], return_type=tuple[dict[any], dict[any]])
-        self.assertEqual([{True: 1, False: 0}, {True: 99, False: 0}], result)
+        result, _ = await self.call('copy_dict', [{True: 1, False: 0}, True, 99], return_type=tuple[dict, dict])
+        self.assertEqual(({True: 1, False: 0}, {True: 99, False: 0}), result)
 
     def test_del_dict_pair(self):
         path = self.get_contract_path('DelPair.py')
