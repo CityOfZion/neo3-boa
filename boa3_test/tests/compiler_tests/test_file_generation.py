@@ -860,7 +860,7 @@ class TestFileGeneration(BoaTest):
         self.assertIn('type', abi_method_main_parameters[0]['generic'])
 
     def test_generate_manifest_file_with_type_hint_dict(self):
-        path = self.get_contract_path('test_sc/dict_test', 'SetValue.py')
+        path = self.get_contract_path('test_sc/dict_test', 'DictSetValue.py')
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
