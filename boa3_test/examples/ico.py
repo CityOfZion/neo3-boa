@@ -105,7 +105,7 @@ def _deploy(data: Any, update: bool):
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
     if not update:
-        container: Transaction = runtime.script_container
+        container = runtime.script_container
         owner = container.sender
         storage.put(TOKEN_OWNER_KEY, owner)
 

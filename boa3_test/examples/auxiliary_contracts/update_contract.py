@@ -85,7 +85,7 @@ def _deploy(data: Any, update: bool):
     Initializes the storage when the smart contract is deployed. When this smart contract is updated, it should do nothing.
     """
     if not update:
-        container: Transaction = runtime.script_container
+        container = runtime.script_container
 
         storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
         storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
