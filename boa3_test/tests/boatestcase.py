@@ -402,6 +402,36 @@ class BoaTestCase(SmartContractTestCase):
         except ValueError as e:
             raise FaultException(receipt.exception)
 
+    def get_all_symbols(self,
+                        compiler: Compiler,
+                        *,
+                        symbol_type: Type[T],
+                        debug_info: bool = False
+                        ) -> dict[str, T]:
+
+        from boa3.internal.compiler.filegenerator.filegenerator import FileGenerator
+        from boa3.internal.model.method import Method
+
+        generator = FileGenerator(compiler.result, compiler._analyser, compiler._entry_smart_contract)
+        symbols = {}
+
+        if debug_info and symbol_type is Method:
+            iterate_target = generator._methods_with_imports
+        else:
+            compiler_analyser = self.get_compiler_analyser(compiler)
+            iterate_target = compiler_analyser.symbol_table
+
+        for name, symbol in iterate_target.items():
+            if isinstance(symbol, symbol_type):
+                if isinstance(name, tuple):
+                    name = constants.VARIABLE_NAME_SEPARATOR.join(name)
+
+                symbols[name] = symbol
+                if hasattr(symbol, 'name') and symbol.name not in symbols:
+                    symbols[symbol.name] = symbol
+
+        return symbols
+
     def assertCompile(self,
                       contract_path: str,
                       *,
