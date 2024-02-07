@@ -1,7 +1,4 @@
 import os
-from typing import Dict, Tuple
-
-from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.compiler.compiler import Compiler
@@ -13,9 +10,10 @@ from boa3.internal.model.variable import Variable
 from boa3.internal.neo.contracts.neffile import NefFile
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.Integer import Integer
+from boa3_test.tests import boatestcase
 
 
-class TestFileGeneration(BoaTest):
+class TestFileGeneration(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/generation_test'
 
     def test_generate_files(self):
@@ -137,15 +135,10 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            events: Dict[str, Event] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Event)
-            }
-
+            events = self.get_all_symbols(compiler, symbol_type=Event)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -176,16 +169,10 @@ class TestFileGeneration(BoaTest):
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            events: Dict[str, Event] = {}
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items():
-                if isinstance(method, Event):
-                    events[name] = method
-                    if method.name not in events:
-                        events[method.name] = method
-
+            events = self.get_all_symbols(compiler, symbol_type=Event)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -348,15 +335,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
@@ -367,10 +349,9 @@ class TestFileGeneration(BoaTest):
 
         for debug_method in debug_info['methods']:
             self.assertIn('name', debug_method)
-            parsed_name = debug_method['name'].split(constants.VARIABLE_NAME_SEPARATOR)
-            self.assertEqual(2, len(parsed_name))
-            self.assertIn(parsed_name[-1], methods)
-            actual_method = methods[parsed_name[-1]]
+            debug_method_name = debug_method['name']
+            self.assertIn(debug_method_name, methods)
+            actual_method = methods[debug_method_name]
 
             # validate id
             self.assertIn('id', debug_method)
@@ -401,15 +382,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            events: Dict[str, Event] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Event)
-            }
-
+            events = self.get_all_symbols(compiler, symbol_type=Event, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
@@ -444,15 +420,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            variables: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Variable)
-            }
-
+            variables = self.get_all_symbols(compiler, symbol_type=Variable, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
@@ -484,15 +455,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_all_imported_methods(compiler).items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_output))
@@ -540,14 +506,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_all_imported_methods(compiler).items()
-                if isinstance(method, Method)
-            }
+            methods = self.get_all_symbols(compiler, symbol_type=Method, debug_info=True)
 
             debug_info = self.get_debug_info(nef_output)
 
@@ -642,15 +604,10 @@ class TestFileGeneration(BoaTest):
         nef_output, manifest_path = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(manifest_path))
@@ -673,15 +630,10 @@ class TestFileGeneration(BoaTest):
         nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertGreater(len(methods), 0)
@@ -722,15 +674,10 @@ class TestFileGeneration(BoaTest):
         nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             output, manifest = self.get_output(nef_output)
 
         self.assertGreater(len(methods), 0)
@@ -819,7 +766,7 @@ class TestFileGeneration(BoaTest):
         with self.assertRaises(NotLoadedException):
             from boa3.boa3 import Boa3
 
-            with LOCK:
+            with boatestcase._COMPILER_LOCK:
                 Boa3.compile_and_save(path)
 
         with self.assertRaises(NotLoadedException):
@@ -1130,18 +1077,13 @@ class TestFileGeneration(BoaTest):
         self.assertIn('type', abi_method_main['returngeneric'])
         self.assertEqual('Any', abi_method_main['returngeneric']['type'])
 
-    def verify_parameters_and_return_manifest(self, path: str) -> Tuple[dict, list]:
+    def verify_parameters_and_return_manifest(self, path: str) -> tuple[dict, list]:
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            methods: Dict[str, Event] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -1168,7 +1110,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('ManifestEventRuntimeNotify.py')
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
             _, manifest = self.get_output(nef_output)
 
@@ -1179,7 +1121,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('test_sc/generation_test', 'ManifestOptionalUnionEvent.py')
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
             _, manifest = self.get_output(nef_output)
 
