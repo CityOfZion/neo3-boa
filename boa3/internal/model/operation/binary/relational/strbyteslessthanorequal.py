@@ -4,7 +4,6 @@ from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class StrBytesLessThanOrEqual(BinaryOperation):
@@ -37,6 +36,8 @@ class StrBytesLessThanOrEqual(BinaryOperation):
             return Type.none
 
     def generate_internal_opcodes(self, code_generator):
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
         # comparing strings, on the stack the first string is the right one and the second is the left one
         Interop.MemoryCompare.generate_internal_opcodes(code_generator)
         # -1 means the left string is greater than the right string
@@ -45,11 +46,5 @@ class StrBytesLessThanOrEqual(BinaryOperation):
 
         # if comparison equals -1 (the left string is greater than the right string), then return False
         code_generator.convert_literal(-1)
-        if_comparison_equals_m1 = code_generator.convert_begin_if()
-        code_generator.change_jump(if_comparison_equals_m1, Opcode.JMPNE)
-        code_generator.convert_literal(False)
-
+        code_generator.convert_operation(BinaryOp.NumNotEq)
         # else, return True
-        if_comparison_not_equals_m1 = code_generator.convert_begin_else(if_comparison_equals_m1)
-        code_generator.convert_literal(True)
-        code_generator.convert_end_if(if_comparison_not_equals_m1)

@@ -55,10 +55,7 @@ class TestRelational(boatestcase.BoaTestCase):
             + Opcode.LDARG1
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.PUSHM1
-            + Opcode.JMPNE + b'\x05'
-            + Opcode.PUSHT
-            + Opcode.JMP + b'\x03'
-            + Opcode.PUSHF
+            + Opcode.NUMEQUAL
             + Opcode.RET
         )
 
@@ -126,10 +123,7 @@ class TestRelational(boatestcase.BoaTestCase):
             + Opcode.LDARG1
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.PUSH1
-            + Opcode.JMPNE + b'\x05'
-            + Opcode.PUSHF
-            + Opcode.JMP + b'\x03'
-            + Opcode.PUSHT
+            + Opcode.NUMNOTEQUAL
             + Opcode.RET
         )
 
@@ -306,10 +300,7 @@ class TestRelational(boatestcase.BoaTestCase):
             + Opcode.LDARG1
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.PUSH1
-            + Opcode.JMPNE + b'\x05'
-            + Opcode.PUSHT
-            + Opcode.JMP + b'\x03'
-            + Opcode.PUSHF
+            + Opcode.NUMEQUAL
             + Opcode.RET
         )
 
@@ -377,10 +368,7 @@ class TestRelational(boatestcase.BoaTestCase):
             + Opcode.LDARG1
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.PUSHM1
-            + Opcode.JMPNE + b'\x05'
-            + Opcode.PUSHF
-            + Opcode.JMP + b'\x03'
-            + Opcode.PUSHT
+            + Opcode.NUMNOTEQUAL
             + Opcode.RET
         )
 
