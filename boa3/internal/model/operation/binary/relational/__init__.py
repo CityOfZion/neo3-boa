@@ -7,7 +7,11 @@ __all__ = ['LessThan',
            'NumericEquality',
            'NumericInequality',
            'ObjectEquality',
-           'ObjectInequality'
+           'ObjectInequality',
+           'StrBytesGreaterThan',
+           'StrBytesGreaterThanOrEqual',
+           'StrBytesLessThan',
+           'StrBytesLessThanOrEqual',
            ]
 
 from boa3.internal.model.operation.binary.relational.greaterthan import GreaterThan
@@ -20,3 +24,7 @@ from boa3.internal.model.operation.binary.relational.numericequality import Nume
 from boa3.internal.model.operation.binary.relational.numericinequality import NumericInequality
 from boa3.internal.model.operation.binary.relational.objectequality import ObjectEquality
 from boa3.internal.model.operation.binary.relational.objectinequality import ObjectInequality
+from boa3.internal.model.operation.binary.relational.strbytesgreaterthan import StrBytesGreaterThan
+from boa3.internal.model.operation.binary.relational.strbytesgreaterthanorequal import StrBytesGreaterThanOrEqual
+from boa3.internal.model.operation.binary.relational.strbyteslessthan import StrBytesLessThan
+from boa3.internal.model.operation.binary.relational.strbyteslessthanorequal import StrBytesLessThanOrEqual

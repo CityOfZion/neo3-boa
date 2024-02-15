@@ -15,7 +15,7 @@ class GreaterThan(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.int, Type.str]
+    _valid_types: List[IType] = [Type.int]
 
     def __init__(self, left: IType = Type.int, right: IType = None):
         self.operator: Operator = Operator.Gt
