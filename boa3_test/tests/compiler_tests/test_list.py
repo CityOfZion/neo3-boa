@@ -5,7 +5,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
-from boa3_test.tests.boatestcase import FaultException
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
@@ -137,7 +136,7 @@ class TestList(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [[5, 3, 2]], return_type=int)
         self.assertEqual(5, result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[]], return_type=int)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
@@ -169,7 +168,7 @@ class TestList(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [[5, 3, 2]], return_type=int)
         self.assertEqual(2, result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[]], return_type=int)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
@@ -259,7 +258,7 @@ class TestList(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [[5, 3, 2]], return_type=list)
         self.assertEqual([1, 3, 2], result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[]], return_type=list)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
@@ -276,7 +275,7 @@ class TestList(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [[5, 3, 2]], return_type=list)
         self.assertEqual([5, 3, 1], result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[]], return_type=list)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
@@ -347,12 +346,12 @@ class TestList(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [[[1, 2], [3, 4]]], return_type=int)
         self.assertEqual(1, result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[]], return_type=int)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[[], [1, 2], [3, 4]]], return_type=int)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
@@ -1321,7 +1320,7 @@ class TestList(boatestcase.BoaTestCase):
 
         list_ = [1, 2, 3, 4, 5]
         index = 99999
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('pop_test', [index], return_type=int)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
@@ -1329,7 +1328,7 @@ class TestList(boatestcase.BoaTestCase):
 
         list_ = [1, 2, 3, 4, 5]
         index = -99999
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('pop_test', [index], return_type=int)
 
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
@@ -1451,7 +1450,7 @@ class TestList(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [[1, 2, 3, 2, 3], 3], return_type=list)
         self.assertEqual([1, 2, 2, 3], result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[1, 2, 3, 4], 6], return_type=list)
 
         self.assertRegex(str(context.exception), self.INVALID_INDEX_MSG)
@@ -1559,17 +1558,17 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual(list_.index(value, start, end), result)
 
         from boa3.internal.model.builtin.builtin import Builtin
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [[1, 2, 3, 4], 3, 3, 4], return_type=int)
 
         self.assertRegex(str(context.exception), f'{Builtin.SequenceIndex.exception_message}')
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [[1, 2, 3, 4], 3, 4, -1], return_type=int)
 
         self.assertRegex(str(context.exception), f'{Builtin.SequenceIndex.exception_message}')
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [[1, 2, 3, 4], 3, 0, -99], return_type=int)
 
         self.assertRegex(str(context.exception), f'{Builtin.SequenceIndex.exception_message}')
@@ -1590,12 +1589,12 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual(list_.index(value, start), result)
 
         from boa3.internal.model.builtin.builtin import Builtin
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [[1, 2, 3, 4], 2, 99], return_type=int)
 
         self.assertRegex(str(context.exception), f'{Builtin.SequenceIndex.exception_message}')
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [[1, 2, 3, 4], 4, -1], return_type=int)
 
         self.assertRegex(str(context.exception), f'{Builtin.SequenceIndex.exception_message}')
