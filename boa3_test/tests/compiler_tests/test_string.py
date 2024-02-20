@@ -5,7 +5,6 @@ from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
-from boa3_test.tests.boatestcase import FaultException
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
@@ -41,7 +40,7 @@ class TestString(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', ['123'], return_type=str)
         self.assertEqual('1', result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [''], return_type=str)
 
         self.assertRegex(str(context.exception), self.INVALID_OFFSET_MSG)
@@ -75,7 +74,7 @@ class TestString(boatestcase.BoaTestCase):
         result, _ = await self.call('main', ['abc'], return_type=str)
         self.assertEqual('c', result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [[]], return_type=str)
 
         self.assertRegex(str(context.exception), self.NEGATIVE_INDEX_MSG)
@@ -133,7 +132,7 @@ class TestString(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', ['123'], return_type=str)
         self.assertEqual('1', result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [''], return_type=str)
 
         self.assertRegex(str(context.exception), self.INVALID_OFFSET_MSG)
@@ -969,17 +968,17 @@ class TestString(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [string, substring, start, end], return_type=int)
         self.assertEqual(string.index(substring, start, end), result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', ['unit test', 'i', 3, 4], return_type=int)
 
         self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', ['unit test', 'i', 4, -1], return_type=int)
 
         self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', ['unit test', 'i', 0, -99], return_type=int)
 
         self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
@@ -1014,7 +1013,7 @@ class TestString(boatestcase.BoaTestCase):
         string = 'unit test'
         substring = 'i'
         start = 99
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [string, substring, start], return_type=int)
 
         self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
@@ -1023,7 +1022,7 @@ class TestString(boatestcase.BoaTestCase):
         string = 'unit test'
         substring = 's'
         start = -1
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [string, substring, start], return_type=int)
 
         self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
