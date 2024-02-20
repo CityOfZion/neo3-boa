@@ -311,6 +311,9 @@ class BoaTestCase(SmartContractTestCase):
     def _unwrap_stack_item(cls, stack_item: noderpc.StackItem, expected_type: type | None = None) -> Any:
         result = None
 
+        if stack_item.type is noderpc.StackItemType.STRUCT:
+            stack_item.type = noderpc.StackItemType.ARRAY
+
         if stack_item.type is noderpc.StackItemType.BYTE_STRING:
             if expected_type is str:
                 result = stack_item.as_str()
