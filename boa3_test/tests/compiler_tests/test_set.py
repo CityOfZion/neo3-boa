@@ -1,9 +1,8 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
+from boa3_test.tests import boatestcase
 
 
-class TestSet(BoaTest):
+class TestSet(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/set_test'
 
     def test_set_from_typing(self):
