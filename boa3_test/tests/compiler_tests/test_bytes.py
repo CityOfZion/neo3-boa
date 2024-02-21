@@ -4,7 +4,6 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
-from boa3_test.tests.boatestcase import FaultException
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
@@ -1276,15 +1275,15 @@ class TestBytes(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [bytes_, bytes_sequence, start, end], return_type=int)
         self.assertEqual(bytes_.index(bytes_sequence, start, end), result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', ['unit test', 'i', 3, 4], return_type=int)
         self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', ['unit test', 'i', 4, -1], return_type=int)
         self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', ['unit test', 'i', 0, -99], return_type=int)
         self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
@@ -1318,14 +1317,14 @@ class TestBytes(boatestcase.BoaTestCase):
         bytes_ = b'unit test'
         bytes_sequence = b'i'
         start = 99
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
         self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
         bytes_ = b'unit test'
         bytes_sequence = b's'
         start = -1
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
         self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 

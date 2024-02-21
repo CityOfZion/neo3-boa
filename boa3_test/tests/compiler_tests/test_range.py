@@ -3,7 +3,6 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
-from boa3_test.tests.boatestcase import FaultException
 
 
 class TestRange(boatestcase.BoaTestCase):
@@ -291,7 +290,7 @@ class TestRange(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [[5, 3, 2]], return_type=int)
         self.assertEqual(5, result)
 
-        with self.assertRaises(FaultException) as context:
+        with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [[]], return_type=int)
 
         self.assertRegex(str(context.exception), r'The value \d+ is out of range.')
