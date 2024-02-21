@@ -4,7 +4,6 @@ from boa3.internal import constants
 from boa3.internal.constants import IMPORT_WILDCARD
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
-from boa3.internal.neo3.core.types import UInt160
 from boa3_test.tests import boatestcase
 from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
 
@@ -432,8 +431,7 @@ class TestMetadata(boatestcase.BoaTestCase):
         for item in manifest_struct[5]:
             contract = item[0]
 
-            from boa3.internal.neo3.core.types import UInt160
-            if isinstance(contract, UInt160):
+            if hasattr(contract, 'to_array'):
                 contract = contract.to_array()
             manifest_struct_permissions.append([contract, item[1]])
 
@@ -519,7 +517,7 @@ class TestMetadata(boatestcase.BoaTestCase):
         output, manifest = self.compile_and_save(path)
 
         expected_permission = {
-            'contract': str(UInt160(constants.MANAGEMENT_SCRIPT)),
+            'contract': f'0x{types.UInt160(constants.MANAGEMENT_SCRIPT)}',
             'methods': ['update', 'destroy']
         }
         self.assertIn('permissions', manifest)
