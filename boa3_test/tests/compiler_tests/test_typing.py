@@ -1,14 +1,11 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestTyping(BoaTest):
+class TestTyping(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/typing_test'
 
     def test_cast_to_int(self):
@@ -23,7 +20,7 @@ class TestTyping(BoaTest):
         )
 
         path = self.get_contract_path('CastToInt.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
     def test_cast_to_str(self):
@@ -38,7 +35,7 @@ class TestTyping(BoaTest):
         )
 
         path = self.get_contract_path('CastToStr.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
     def test_cast_to_list(self):
@@ -53,7 +50,7 @@ class TestTyping(BoaTest):
         )
 
         path = self.get_contract_path('CastToList.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
     def test_cast_to_typed_list(self):
@@ -70,7 +67,7 @@ class TestTyping(BoaTest):
         )
 
         path = self.get_contract_path('CastToTypedList.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
     def test_cast_to_dict(self):
@@ -85,7 +82,7 @@ class TestTyping(BoaTest):
         )
 
         path = self.get_contract_path('CastToDict.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
     def test_cast_to_typed_dict(self):
@@ -105,33 +102,34 @@ class TestTyping(BoaTest):
         )
 
         path = self.get_contract_path('CastToTypedDict.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
     def test_cast_mismatched_type(self):
         path = self.get_contract_path('CastMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
-    def test_cast_to_uint160(self):
+    def test_cast_to_uint160_compile(self):
+        expected_output = (
+            Opcode.INITSLOT
+            + b'\x01'
+            + b'\x01'
+            + Opcode.LDARG0     # x = cast(UInt160, value)
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # return x
+            + Opcode.RET
+        )
+
         path = self.get_contract_path('CastToUInt160.py')
-        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_cast_to_uint160_run(self):
+        await self.set_up_contract('CastToUInt160.py')
 
         value = bytes(range(20))
-        invokes.append(runner.call_contract(path, 'Main', value,
-                                            expected_result_type=bytes))
-        expected_results.append(value)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [value], return_type=bytes)
+        self.assertEqual(value, result)
 
     def test_cast_to_transaction(self):
         expected_output = (
@@ -145,38 +143,18 @@ class TestTyping(BoaTest):
         )
 
         path = self.get_contract_path('CastToTransaction.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
         self.assertEqual(expected_output, output)
 
-    def test_cast_inside_if(self):
-        path, _ = self.get_deploy_file_paths('CastInsideIf.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_cast_inside_if(self):
+        await self.set_up_contract('CastInsideIf.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('body', result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append('body')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_cast_persisted_in_scope(self):
-        path, _ = self.get_deploy_file_paths('CastPersistedInScope.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_cast_persisted_in_scope(self):
+        await self.set_up_contract('CastPersistedInScope.py')
 
         test_address = bytes(20)
-        invokes.append(runner.call_contract(path, 'main', test_address, 10, None))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [test_address, 10, None], return_type=None)
+        self.assertIsNone(result)
