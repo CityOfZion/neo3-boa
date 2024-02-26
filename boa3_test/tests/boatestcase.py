@@ -3,6 +3,7 @@ from __future__ import annotations
 __all__ = [
     'BoaTestCase',
     'BoaTestEvent',
+    'Nep17TransferEvent',
     'AbortException',
     'AssertException',
     'FaultException',
@@ -17,7 +18,11 @@ import threading
 from dataclasses import dataclass
 from typing import Any, Optional, TypeVar, Type, Sequence
 
-from boaconstructor import SmartContractTestCase, AbortException, AssertException
+from boaconstructor import (SmartContractTestCase,
+                            AbortException,
+                            AssertException,
+                            Nep17TransferEvent as _Nep17TransferEvent
+                            )
 from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
 from neo3.contracts import manifest
@@ -77,6 +82,29 @@ class BoaTestEvent:
         return cls.from_notification(n, *cls.__annotations__.values())
 
 
+@dataclass
+class Nep17TransferEvent(_Nep17TransferEvent):
+    @classmethod
+    def from_notification(cls, n: noderpc.Notification):
+        try:
+            return super().from_notification(n)
+        except ValueError:
+            stack = n.state.as_list()
+
+            try:
+                source = stack[0].as_uint160()
+            except ValueError:
+                source = stack[0].as_none()
+
+            try:
+                destination = stack[1].as_uint160()
+            except ValueError:
+                destination = stack[1].as_none()
+
+            amount = stack[2].as_int()
+            return cls(source, destination, amount)
+
+
 class BoaTestCase(SmartContractTestCase):
     dirname: str
     test_root_dir: str
@@ -108,6 +136,8 @@ class BoaTestCase(SmartContractTestCase):
         cls.contract_hash = None
         cls.deployed_contracts = {}
 
+        cls.setupTestCase()
+
         # Due to a lack of an asyncSetupClass we have to do it manually
         # Use this if you for example want to initialise some blockchain state
 
@@ -121,8 +151,12 @@ class BoaTestCase(SmartContractTestCase):
             asyncio.ensure_future(cls.asyncSetupClass(), loop=running_loop)
 
     @classmethod
-    async def asyncSetupClass(cls) -> None:
+    def setupTestCase(cls):
         cls.genesis = cls.node.wallet.account_get_by_label("committee")
+
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        pass
 
     def tearDown(self):
         if self.contract_hash is not None:
