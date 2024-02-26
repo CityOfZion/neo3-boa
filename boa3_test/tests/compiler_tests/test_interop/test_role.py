@@ -1,20 +1,12 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
-from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
-from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.contracts import CallFlags
+from boa3_test.tests import boatestcase
 
 
-class TestRoleInterop(BoaTest):
+class TestRoleInterop(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/interop_test/role'
 
     def test_get_designated_by_role(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String(Interop.GetDesignatedByRole.method_name).to_bytes()
-
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x02'
@@ -24,8 +16,7 @@ class TestRoleInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GetDesignatedByRole.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('GetDesignatedByRole.py')
         self.assertEqual(expected_output, output)
 
     def test_get_designated_by_role_too_many_parameters(self):
@@ -37,9 +28,6 @@ class TestRoleInterop(BoaTest):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
     def test_import_role(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String(Interop.GetDesignatedByRole.method_name).to_bytes()
-
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x02'
@@ -49,14 +37,10 @@ class TestRoleInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ImportRole.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ImportRole.py')
         self.assertEqual(expected_output, output)
 
     def test_import_interop_role(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String(Interop.GetDesignatedByRole.method_name).to_bytes()
-
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x02'
@@ -66,6 +50,5 @@ class TestRoleInterop(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ImportInteropRole.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ImportInteropRole.py')
         self.assertEqual(expected_output, output)
