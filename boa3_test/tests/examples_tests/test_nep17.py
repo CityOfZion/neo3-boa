@@ -156,7 +156,7 @@ class TestNEP17Template(boatestcase.BoaTestCase):
         amount = 10
 
         balance, _ = await self.call('balanceOf', [no_balance_account.script_hash], return_type=int)
-        self.assertEquals(0, balance)
+        self.assertEqual(0, balance)
 
         result, _ = await self.call(
             'transfer',
