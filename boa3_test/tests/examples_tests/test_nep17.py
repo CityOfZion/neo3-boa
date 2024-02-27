@@ -1,314 +1,312 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.contracts.contract import CONTRACT_HASHES
+from neo3.wallet import account
 
-from boa3.internal import constants
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive import neoxp
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestNEP17Template(BoaTest):
+class TestNEP17Template(boatestcase.BoaTestCase):
     default_folder: str = 'examples'
 
-    OWNER = neoxp.utils.get_account_by_name('owner')
-    OTHER_ACCOUNT = neoxp.utils.get_account_by_name('testAccount1')
-    GAS_TO_DEPLOY = 1000 * 10 ** 8
+    DECIMALS = 8
+    TOTAL_SUPPLY = 10_000_000 * 10 ** DECIMALS
+    OWNER_BALANCE = TOTAL_SUPPLY
 
-    def test_nep17_compile(self):
+    owner: account.Account
+    account1: account.Account
+    account2: account.Account
+
+    @classmethod
+    def setupTestCase(cls):
+        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
+        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
+        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
+
+        cls.OWNER_BALANCE = cls.TOTAL_SUPPLY
+        super().setupTestCase()
+
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        await super().asyncSetupClass()
+
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 100)
+
+        await cls.set_up_contract('nep17.py', signing_account=cls.owner)
+        mint_amount = 100
+        await cls.transfer(
+            cls.contract_hash,
+            cls.owner.script_hash,
+            cls.account1.script_hash,
+            mint_amount,
+            signing_account=cls.owner
+        )
+        cls.OWNER_BALANCE -= mint_amount * 10 ** cls.DECIMALS
+
+    def test_compile(self):
         path = self.get_contract_path('nep17.py')
-        output, manifest = self.compile_and_save(path)
+        _, manifest = self.assertCompile(path, get_manifest=True)
 
         self.assertIn('supportedstandards', manifest)
         self.assertIsInstance(manifest['supportedstandards'], list)
         self.assertGreater(len(manifest['supportedstandards']), 0)
         self.assertIn('NEP-17', manifest['supportedstandards'])
 
-    def test_nep17_symbol(self):
-        path, _ = self.get_deploy_file_paths('nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_symbol(self):
+        expected = 'NEP17'
+        result, _ = await self.call('symbol', return_type=str)
+        self.assertEqual(expected, result)
 
-        invoke = runner.call_contract(path, 'symbol')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual('NEP17', invoke.result)
+    async def test_decimals(self):
+        expected = self.DECIMALS
+        result, _ = await self.call('decimals', return_type=int)
+        self.assertEqual(expected, result)
 
-    def test_nep17_decimals(self):
-        path, _ = self.get_deploy_file_paths('nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_before_mint_total_supply(self):
+        total_supply = self.TOTAL_SUPPLY
+        result, _ = await self.call('totalSupply', return_type=int)
+        self.assertEqual(total_supply, result)
 
-        invoke = runner.call_contract(path, 'decimals')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(8, invoke.result)
+    async def test_balance_of(self):
+        expected = self.OWNER_BALANCE
+        owner_account = self.owner.script_hash
+        result, _ = await self.call('balanceOf', [owner_account], return_type=int)
+        self.assertEqual(expected, result)
 
-    def test_nep17_total_supply(self):
-        total_supply = 10_000_000 * 10 ** 8
+        bad_account = bytes(10)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call("balanceOf", [bad_account], return_type=int)
 
-        path, _ = self.get_deploy_file_paths('nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        bad_account = bytes(30)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call("balanceOf", [bad_account], return_type=int)
 
-        invoke = runner.call_contract(path, 'totalSupply')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(total_supply, invoke.result)
+    async def test_transfer_success(self):
+        from_account = self.account1
+        to_account = self.account2
 
-    def test_nep17_total_balance_of(self):
-        total_supply = 10_000_000 * 10 ** 8
+        from_script_hash = from_account.script_hash
+        to_script_hash = to_account.script_hash
+        amount = 10
 
-        path, _ = self.get_deploy_file_paths('nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        invoke = runner.call_contract(path, 'balanceOf', self.OWNER.script_hash.to_array())
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(total_supply, invoke.result)
-
-        # should fail when the script length is not 20
-        runner.call_contract(path, 'balanceOf', bytes(10))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.call_contract(path, 'balanceOf', bytes(30))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_nep17_total_transfer(self):
-        transferred_amount = 10 * 10 ** 8  # 10 tokens
-        invokes = []
-        expected_results = []
-        owner_script_hash = self.OWNER.script_hash.to_array()
-        test_account = self.OTHER_ACCOUNT
-        test_account_script_hash = self.OTHER_ACCOUNT.script_hash.to_array()
-
-        path, _ = self.get_deploy_file_paths('nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        # should fail if the sender doesn't sign
-        invokes.append(runner.call_contract(path, 'transfer', owner_script_hash, test_account_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(False)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        # should fail if the sender doesn't have enough balance
-        invokes.append(runner.call_contract(path, 'transfer', test_account_script_hash, owner_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(False)
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        balance_from, _ = await self.call('balanceOf', [from_script_hash], return_type=int)
+        balance_to, _ = await self.call('balanceOf', [to_script_hash], return_type=int)
+        self.assertGreater(balance_from, amount)
 
         # transferring tokens to yourself
-        balance_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
-        invokes.append(runner.call_contract(path, 'transfer', owner_script_hash, owner_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(True)
-        balance_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
-
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, notifications = await self.call(
+            'transfer',
+            [from_script_hash, from_script_hash, amount, None],
+            return_type=bool,
+            signing_accounts=[from_account]
+        )
+        self.assertEqual(True, result)
 
         # fire the transfer event when transferring to yourself
-        transfer_events = runner.get_events('Transfer')
+        transfer_events = notifications
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        event = boatestcase.Nep17TransferEvent.from_notification(notifications[0])
 
-        sender, receiver, amount = transfer_events[0].arguments
-        self.assertEqual(owner_script_hash, sender)
-        self.assertEqual(owner_script_hash, receiver)
-        self.assertEqual(transferred_amount, amount)
+        self.assertEqual(from_script_hash, event.source)
+        self.assertEqual(from_script_hash, event.destination)
+        self.assertEqual(amount, event.amount)
 
-        # transferring to yourself doesn't change the balance
-        self.assertEqual(balance_before.result, balance_after.result)
+        # # transferring tokens to another account
+        result, notifications = await self.call(
+            'transfer',
+            [from_script_hash, to_script_hash, amount, None],
+            return_type=bool,
+            signing_accounts=[from_account]
+        )
+        self.assertEqual(True, result)
 
-        # transferring tokens to another account
-        balance_sender_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
-        balance_receiver_before = runner.call_contract(path, 'balanceOf', test_account_script_hash)
-        invokes.append(runner.call_contract(path, 'transfer', owner_script_hash, test_account_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(True)
-        balance_sender_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
-        balance_receiver_after = runner.call_contract(path, 'balanceOf', test_account_script_hash)
-
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        transfer_events = runner.get_events('Transfer')
+        # fire the transfer event when transferring to yourself
+        transfer_events = notifications
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        event = boatestcase.Nep17TransferEvent.from_notification(notifications[0])
 
-        sender, receiver, amount = transfer_events[0].arguments
-        self.assertEqual(owner_script_hash, sender)
-        self.assertEqual(test_account_script_hash, receiver)
-        self.assertEqual(transferred_amount, amount)
+        self.assertEqual(from_script_hash, event.source)
+        self.assertEqual(to_script_hash, event.destination)
+        self.assertEqual(amount, event.amount)
 
-        # transferring to someone other than yourself does change the balance
-        self.assertEqual(balance_sender_before.result - transferred_amount, balance_sender_after.result)
-        self.assertEqual(balance_receiver_before.result + transferred_amount, balance_receiver_after.result)
+        new_balance_from, _ = await self.call('balanceOf', [from_script_hash], return_type=int)
+        new_balance_to, _ = await self.call('balanceOf', [to_script_hash], return_type=int)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertEqual(balance_from - amount, new_balance_from)
+        self.assertEqual(balance_to + amount, new_balance_to)
+
+    async def test_transfer_fail_no_sign(self):
+        from_account = self.owner.script_hash
+        to_account = self.account1.script_hash
+        amount = 10
+
+        balance, _ = await self.call('balanceOf', [from_account], return_type=int)
+        self.assertGreater(balance, amount)
+
+        result, _ = await self.call(
+            'transfer',
+            [from_account, to_account, amount, None],
+            return_type=bool
+        )
+        self.assertEqual(False, result)
+
+    async def test_transfer_fail_insufficient_balance(self):
+        no_balance_account = self.account2
+        other_account = self.account1.script_hash
+        amount = 10
+
+        balance, _ = await self.call('balanceOf', [no_balance_account.script_hash], return_type=int)
+        self.assertEqual(0, balance)
+
+        result, _ = await self.call(
+            'transfer',
+            [no_balance_account.script_hash, other_account, amount, None],
+            return_type=bool,
+            signing_accounts=[no_balance_account]
+        )
+        self.assertEqual(False, result)
+
+    async def test_transfer_fail_bad_account(self):
+        bad_account = bytes(10)
+        other_account = self.owner
+        account_script_hash = other_account.script_hash
+        amount = 10
 
         # should fail when any of the scripts' length is not 20
-        runner.call_contract(path, 'transfer', owner_script_hash, bytes(10), transferred_amount, "")
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call(
+                'transfer',
+                [account_script_hash, bad_account, amount, None],
+                return_type=bool,
+                signing_accounts=[other_account]
+            )
 
-        runner.call_contract(path, 'transfer', bytes(10), test_account_script_hash, transferred_amount, "")
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call(
+                'transfer',
+                [bad_account, account_script_hash, amount, None],
+                return_type=bool,
+                signing_accounts=[other_account]
+            )
 
-        # should fail when the amount is less than 0
-        runner.call_contract(path, 'transfer', owner_script_hash, test_account_script_hash, -10, None)
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+    async def test_transfer_fail_invalid_amount(self):
+        from_account = self.owner.script_hash
+        to_account = self.account1.script_hash
+        amount = -1
 
-    def test_nep17_on_nep17_payment(self):
-        invokes = []
-        expected_results = []
-        test_account = self.OTHER_ACCOUNT
-        test_account_script_hash = self.OTHER_ACCOUNT.script_hash.to_array()
-        transferred_amount_neo = 10             # 10 tokens
-        transferred_amount_gas = 10 * 10 ** 8   # 10 tokens
+        # should fail when any of the scripts' length is not 20
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call(
+                'transfer',
+                [from_account, to_account, amount, None],
+                return_type=bool,
+                signing_accounts=[self.owner]
+            )
 
-        path, _ = self.get_deploy_file_paths('nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        nep17_contract = runner.deploy_contract(path, account=self.OWNER)
-        runner.update_contracts(export_checkpoint=True)
-
-        nep17_contract_script_hash = nep17_contract.script_hash
-
-        runner.add_gas(test_account.address, self.GAS_TO_DEPLOY)
-        runner.add_neo(test_account.address, transferred_amount_neo)
-
+    async def test_on_nep17_payment_receive_neo(self):
         # transferring NEO to the smart contract
         # saving the balance before the transfer to be able to compare after it
-        neo_balance_sender_before = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', test_account_script_hash)
-        neo_balance_nep17_before = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', nep17_contract_script_hash)
-        nep17_balance_sender_before = runner.call_contract(path, 'balanceOf', test_account_script_hash)
+        sender = self.genesis
+        sender_script_hash = sender.script_hash
+        neo_amount = 10
+        neo_decimals = 0
+        mint_per_neo = 10 * 10 ** neo_decimals
 
-        invokes.append(runner.call_contract(constants.NEO_SCRIPT, 'transfer', test_account_script_hash,
-                                            nep17_contract_script_hash, transferred_amount_neo, None))
-        expected_results.append(True)
+        balance_sender, _ = await self.call(
+            'balanceOf',
+            [sender_script_hash],
+            return_type=int
+        )
 
-        # saving the balance after the transfer to compare it with the previous data
-        neo_balance_sender_after = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', test_account_script_hash)
-        neo_balance_nep17_after = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', nep17_contract_script_hash)
-        nep17_balance_sender_after = runner.call_contract(path, 'balanceOf', test_account_script_hash)
+        mint_amount = mint_per_neo * neo_amount
+        result, transfer_events = await self.transfer(
+            CONTRACT_HASHES.NEO_TOKEN,
+            sender_script_hash,
+            self.contract_hash,
+            neo_amount,
+            signing_account=sender
+        )
+        self.assertEqual(True, result)
 
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertGreater(len(transfer_events), 1)
+        neo_transfer_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[0])
+        self.assertEqual(sender_script_hash, neo_transfer_event.source)
+        self.assertEqual(self.contract_hash, neo_transfer_event.destination)
+        self.assertEqual(neo_amount, neo_transfer_event.amount)
 
-        transfer_events = runner.get_events('Transfer')
-        self.assertEqual(2, len(transfer_events))
-        neo_transfer_event = transfer_events[0]
-        transfer_event = transfer_events[1]
-        self.assertEqual(3, len(neo_transfer_event.arguments))
-        self.assertEqual(3, len(transfer_event.arguments))
+        nep17_mint_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[1])
+        self.assertIsNone(nep17_mint_event.source)
+        self.assertEqual(sender_script_hash, nep17_mint_event.destination)
+        self.assertEqual(mint_amount, nep17_mint_event.amount)
 
-        # this is the event NEO emitted
-        sender, receiver, amount = neo_transfer_event.arguments
-        self.assertEqual(test_account_script_hash, sender)
-        self.assertEqual(nep17_contract_script_hash, receiver)
-        self.assertEqual(transferred_amount_neo, amount)
+        new_balance_sender, _ = await self.call(
+            'balanceOf',
+            [sender_script_hash],
+            return_type=int
+        )
+        self.assertEqual(balance_sender + mint_amount, new_balance_sender)
 
-        # this is the event NEP17 emitted
-        sender, receiver, amount = transfer_event.arguments
-        self.assertEqual(None, sender)
-        self.assertEqual(test_account_script_hash, receiver)
-        # transferred_amount is multiplied by 10, because this smart contract is minting the NEO received
-        self.assertEqual(transferred_amount_neo * 10, amount)
-
-        self.assertEqual(neo_balance_sender_before.result - transferred_amount_neo, neo_balance_sender_after.result)
-        self.assertEqual(neo_balance_nep17_before.result + transferred_amount_neo, neo_balance_nep17_after.result)
-        # transferred_amount is multiplied by 10, because this smart contract is minting the NEO received
-        self.assertEqual(nep17_balance_sender_before.result + transferred_amount_neo * 10,
-                         nep17_balance_sender_after.result)
-
+    async def test_on_nep17_payment_receive_gas(self):
         # transferring GAS to the smart contract
         # saving the balance before the transfer to be able to compare after it
-        gas_balance_sender_before = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', test_account_script_hash)
-        gas_balance_nep17_before = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', nep17_contract_script_hash)
-        nep17_balance_sender_before = runner.call_contract(path, 'balanceOf', test_account_script_hash)
+        sender = self.genesis
+        sender_script_hash = sender.script_hash
+        gas_amount = 10
+        gas_decimals = 8
+        mint_per_gas = 2 * 10 ** gas_decimals
 
-        invokes.append(runner.call_contract(constants.GAS_SCRIPT, 'transfer', test_account_script_hash,
-                                            nep17_contract_script_hash, transferred_amount_gas, None))
-        expected_results.append(True)
+        balance_sender, _ = await self.call(
+            'balanceOf',
+            [sender_script_hash],
+            return_type=int
+        )
 
-        # saving the balance after the transfer to compare it with the previous data
-        gas_balance_sender_after = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', test_account_script_hash)
-        gas_balance_nep17_after = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', nep17_contract_script_hash)
-        nep17_balance_sender_after = runner.call_contract(path, 'balanceOf', test_account_script_hash)
+        mint_amount = mint_per_gas * gas_amount
+        result, transfer_events = await self.transfer(
+            CONTRACT_HASHES.GAS_TOKEN,
+            sender_script_hash,
+            self.contract_hash,
+            gas_amount,
+            signing_account=sender
+        )
+        self.assertEqual(True, result)
 
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertGreater(len(transfer_events), 1)
+        gas_transfer_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[0])
+        self.assertEqual(sender_script_hash, gas_transfer_event.source)
+        self.assertEqual(self.contract_hash, gas_transfer_event.destination)
+        self.assertEqual(gas_amount * 10 ** gas_decimals, gas_transfer_event.amount)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        nep17_mint_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[1])
+        self.assertIsNone(nep17_mint_event.source)
+        self.assertEqual(sender_script_hash, nep17_mint_event.destination)
+        self.assertEqual(mint_amount, nep17_mint_event.amount)
 
-        transfer_events = runner.get_events('Transfer')
-        self.assertEqual(2, len(transfer_events))
-        gas_transfer_event = transfer_events[0]
-        transfer_event = transfer_events[1]
-        self.assertEqual(3, len(gas_transfer_event.arguments))
-        self.assertEqual(3, len(transfer_event.arguments))
+        new_balance_sender, _ = await self.call(
+            'balanceOf',
+            [sender_script_hash],
+            return_type=int
+        )
+        self.assertEqual(balance_sender + mint_amount, new_balance_sender)
 
-        # this is the event GAS emitted
-        sender, receiver, amount = gas_transfer_event.arguments
-        self.assertEqual(test_account_script_hash, sender)
-        self.assertEqual(nep17_contract_script_hash, receiver)
-        self.assertEqual(transferred_amount_gas, amount)
-
-        # this is the event NEP17 emitted
-        sender, receiver, amount = transfer_event.arguments
-        self.assertEqual(None, sender)
-        self.assertEqual(test_account_script_hash, receiver)
-        # transferred_amount is multiplied by 2, because this smart contract is minting the GAS received
-        self.assertEqual(transferred_amount_gas * 2, amount)
-
-        self.assertEqual(gas_balance_sender_before.result - transferred_amount_gas, gas_balance_sender_after.result)
-        self.assertEqual(gas_balance_nep17_before.result + transferred_amount_gas, gas_balance_nep17_after.result)
-        # transferred_amount is multiplied by 2, because this smart contract is minting the GAS received
-        self.assertEqual(nep17_balance_sender_before.result + transferred_amount_gas * 2, nep17_balance_sender_after.result)
-
+    async def test_on_nep17_payment_abort(self):
         # trying to call onNEP17Payment() will result in an abort if the one calling it is not NEO or GAS contracts
-        runner.call_contract(path, 'onNEP17Payment', self.OWNER.script_hash.to_array(), transferred_amount_gas, None)
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
+        with self.assertRaises(boatestcase.AbortException):
+            await self.call(
+                'onNEP17Payment',
+                [self.owner.script_hash, 0, None],
+                return_type=None,
+                signing_accounts=[self.owner]
+            )
 
-    def test_nep17_verify(self):
-        path, _ = self.get_deploy_file_paths('nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-        runner.update_contracts(export_checkpoint=True)
-
+    async def test_verify(self):
         # should fail without signature
-        invoke = runner.call_contract(path, 'verify')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(False, invoke.result)
+        result, _ = await self.call('verify', return_type=bool)
+        self.assertEqual(False, result)
 
         # should fail if not signed by the owner
-        invoke = runner.call_contract(path, 'verify')
-        runner.execute(account=self.OTHER_ACCOUNT)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(False, invoke.result)
+        result, _ = await self.call('verify', return_type=bool, signing_accounts=[self.account1])
+        self.assertEqual(False, result)
 
-        invoke = runner.call_contract(path, 'verify')
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(True, invoke.result)
+        result, _ = await self.call('verify', return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(True, result)
