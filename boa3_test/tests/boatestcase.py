@@ -21,7 +21,8 @@ from typing import Any, Callable, Optional, Protocol, TypeVar, Type, Sequence
 from boaconstructor import (SmartContractTestCase,
                             AbortException,
                             AssertException,
-                            Nep17TransferEvent as _Nep17TransferEvent
+                            Nep17TransferEvent as _Nep17TransferEvent,
+                            PostProcessor,
                             )
 from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
@@ -249,6 +250,9 @@ class BoaTestCase(SmartContractTestCase):
         else:
             internal_return_type = return_type_class
 
+        if signing_accounts is None:
+            signing_accounts = [cls.genesis]
+
         result, events = await super().call(method,
                                             args,
                                             return_type=internal_return_type,
@@ -299,6 +303,27 @@ class BoaTestCase(SmartContractTestCase):
                 raise e
 
             return cls.deployed_contracts[_manifest.name]
+
+    @classmethod
+    async def get_storage(
+            cls,
+            prefix: Optional[bytes] = None,
+            *,
+            target_contract: Optional[types.UInt160] = None,
+            remove_prefix: bool = False,
+            key_post_processor: Optional[PostProcessor] = None,
+            values_post_processor: Optional[PostProcessor] = None,
+    ) -> dict[bytes, bytes]:
+        try:
+            return await super().get_storage(
+                prefix,
+                target_contract=target_contract,
+                remove_prefix=remove_prefix,
+                key_post_processor=key_post_processor,
+                values_post_processor=values_post_processor
+            )
+        except TypeError:
+            return {}
 
     @classmethod
     def unwrap_inner_values(cls, value: list | dict, *args: type, expected_result: Type[T] | None = None):
