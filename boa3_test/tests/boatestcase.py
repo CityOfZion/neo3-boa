@@ -16,7 +16,7 @@ import logging
 import os
 import threading
 from dataclasses import dataclass
-from typing import Any, Optional, TypeVar, Type, Sequence
+from typing import Any, Callable, Optional, Protocol, TypeVar, Type, Sequence
 
 from boaconstructor import (SmartContractTestCase,
                             AbortException,
@@ -46,6 +46,13 @@ JsonToken = int | str | bool | None | list['JsonToken'] | dict[str, 'JsonToken']
 JsonObject = dict[str, JsonToken]
 ContractScript = bytes
 CompilerOutput = tuple[ContractScript, JsonObject]
+
+
+class TestNotification(Protocol):
+    @classmethod
+    def from_notification(cls, n: noderpc.Notification) -> TestNotification:
+        ...
+
 
 _CONTRACT_LOCK = threading.RLock()
 
@@ -257,7 +264,6 @@ class BoaTestCase(SmartContractTestCase):
 
         return result, events
 
-
     @classmethod
     async def deploy(
             cls, path_to_nef: str, signing_account: account.Account
@@ -415,6 +421,38 @@ class BoaTestCase(SmartContractTestCase):
             result = stack_item.value
         return result
 
+    def filter_events(self,
+                      events: list[noderpc.Notification],
+                      *,
+                      origin: types.UInt160 | list[types.UInt160] = None,
+                      event_name: str = None,
+                      notification_type: Type[T] = noderpc.Notification
+                      ) -> list[T]:
+
+        if issubclass(notification_type, BoaTestEvent):
+            convert_event: Callable[[noderpc.Notification], BoaTestEvent] = notification_type.from_untyped_notification
+        elif hasattr(notification_type, 'from_notification'):
+            convert_event: Callable[[noderpc.Notification], TestNotification] = notification_type.from_notification
+        else:
+            convert_event: Callable[[noderpc.Notification], noderpc.Notification] = lambda event: event
+
+        if origin is None and event_name is None:
+            return [convert_event(notification) for notification in events]
+
+        if origin is None:
+            return [convert_event(notification) for notification in events if notification.event_name == event_name]
+        elif not isinstance(origin, list):
+            origin = [origin]
+
+        if event_name is None:
+            return [convert_event(notification) for notification in events
+                    if notification.contract in origin
+                    ]
+        else:
+            return [convert_event(notification) for notification in events
+                    if notification.event_name == event_name and notification.contract in origin
+                    ]
+
     @classmethod
     async def get_valid_tx(cls) -> types.UInt256 | None:
         """
@@ -423,6 +461,11 @@ class BoaTestCase(SmartContractTestCase):
         """
         block_ = None
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
+            best_block_hash = await rpc_client.get_best_block_hash()
+            best_block = await rpc_client.get_block(best_block_hash)
+            if len(best_block.transactions):
+                return best_block.transactions[0].hash()
+
             genesis_balances = await rpc_client.get_nep17_balances(cls.genesis.address)
             for asset in genesis_balances.balances:
                 block_ = await rpc_client.get_block(asset.last_updated_block)
