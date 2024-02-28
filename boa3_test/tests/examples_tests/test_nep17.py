@@ -103,9 +103,9 @@ class TestNEP17Template(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
         # fire the transfer event when transferring to yourself
-        transfer_events = notifications
+        transfer_events = self.filter_events(notifications, notification_type=boatestcase.Nep17TransferEvent)
         self.assertEqual(1, len(transfer_events))
-        event = boatestcase.Nep17TransferEvent.from_notification(notifications[0])
+        event = transfer_events[0]
 
         self.assertEqual(from_script_hash, event.source)
         self.assertEqual(from_script_hash, event.destination)
@@ -121,9 +121,9 @@ class TestNEP17Template(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
         # fire the transfer event when transferring to yourself
-        transfer_events = notifications
+        transfer_events = self.filter_events(notifications, notification_type=boatestcase.Nep17TransferEvent)
         self.assertEqual(1, len(transfer_events))
-        event = boatestcase.Nep17TransferEvent.from_notification(notifications[0])
+        event = transfer_events[0]
 
         self.assertEqual(from_script_hash, event.source)
         self.assertEqual(to_script_hash, event.destination)
@@ -219,7 +219,7 @@ class TestNEP17Template(boatestcase.BoaTestCase):
         )
 
         mint_amount = mint_per_neo * neo_amount
-        result, transfer_events = await self.transfer(
+        result, notifications = await self.transfer(
             CONTRACT_HASHES.NEO_TOKEN,
             sender_script_hash,
             self.contract_hash,
@@ -228,13 +228,17 @@ class TestNEP17Template(boatestcase.BoaTestCase):
         )
         self.assertEqual(True, result)
 
-        self.assertGreater(len(transfer_events), 1)
-        neo_transfer_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[0])
+        transfer_events = self.filter_events(notifications,
+                                             origin=[self.contract_hash, CONTRACT_HASHES.NEO_TOKEN],
+                                             notification_type=boatestcase.Nep17TransferEvent
+                                             )
+        self.assertEqual(len(transfer_events), 2)
+        neo_transfer_event, nep17_mint_event = transfer_events
+
         self.assertEqual(sender_script_hash, neo_transfer_event.source)
         self.assertEqual(self.contract_hash, neo_transfer_event.destination)
         self.assertEqual(neo_amount, neo_transfer_event.amount)
 
-        nep17_mint_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[1])
         self.assertIsNone(nep17_mint_event.source)
         self.assertEqual(sender_script_hash, nep17_mint_event.destination)
         self.assertEqual(mint_amount, nep17_mint_event.amount)
@@ -262,7 +266,7 @@ class TestNEP17Template(boatestcase.BoaTestCase):
         )
 
         mint_amount = mint_per_gas * gas_amount
-        result, transfer_events = await self.transfer(
+        result, notifications = await self.transfer(
             CONTRACT_HASHES.GAS_TOKEN,
             sender_script_hash,
             self.contract_hash,
@@ -271,13 +275,17 @@ class TestNEP17Template(boatestcase.BoaTestCase):
         )
         self.assertEqual(True, result)
 
-        self.assertGreater(len(transfer_events), 1)
-        gas_transfer_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[0])
+        transfer_events = self.filter_events(notifications,
+                                             origin=[self.contract_hash, CONTRACT_HASHES.GAS_TOKEN],
+                                             notification_type=boatestcase.Nep17TransferEvent
+                                             )
+        self.assertEqual(2, len(transfer_events))
+        gas_transfer_event, nep17_mint_event = transfer_events
+
         self.assertEqual(sender_script_hash, gas_transfer_event.source)
         self.assertEqual(self.contract_hash, gas_transfer_event.destination)
         self.assertEqual(gas_amount * 10 ** gas_decimals, gas_transfer_event.amount)
 
-        nep17_mint_event = boatestcase.Nep17TransferEvent.from_notification(transfer_events[1])
         self.assertIsNone(nep17_mint_event.source)
         self.assertEqual(sender_script_hash, nep17_mint_event.destination)
         self.assertEqual(mint_amount, nep17_mint_event.amount)

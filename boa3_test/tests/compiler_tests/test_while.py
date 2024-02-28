@@ -281,19 +281,20 @@ class TestWhile(boatestcase.BoaTestCase):
 
         await self.set_up_contract('WhileWithInteropCondition.py', compile_if_found=True)
 
-        result, notifications = await self.call('test_end_while_jump', [], return_type=bool)
+        result, events = await self.call('test_end_while_jump', [], return_type=bool)
         self.assertEqual(True, result)
 
         # test notifications inserted into the code for validating if the code flow is correct
+        notifications = self.filter_events(events, notification_type=NotifyTestEvent)
         self.assertEqual(2, len(notifications))
 
-        event = NotifyTestEvent.from_notification(notifications[0])
+        event = notifications[0]
         self.assertEqual(CONTRACT_HASHES.GAS_TOKEN, event.token)
         self.assertEqual(self.contract_hash, event.executing)
         self.assertEqual(types.UInt160.zero(), event.fee_receiver)
         self.assertEqual(10, event.fee_amount)
 
-        event = NotifyTestEvent.from_notification(notifications[1])
+        event = notifications[1]
         self.assertEqual(CONTRACT_HASHES.NEO_TOKEN, event.token)
         self.assertEqual(self.contract_hash, event.executing)
         self.assertEqual(types.UInt160.zero(), event.fee_receiver)
