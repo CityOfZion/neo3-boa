@@ -23,7 +23,7 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
 
         key = prefix + b'example1'
         value = 1
-        await self.call('store_data', [key, value], return_type=None)
+        await self.call('store_data', [key, value], return_type=None, signing_accounts=[self.genesis])
 
         contract_storage = cast(
             dict[bytes, int],
@@ -46,7 +46,7 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
         key = prefix + b'example1'
-        await self.call('store_data', [key, 1], return_type=None)
+        await self.call('store_data', [key, 1], return_type=None, signing_accounts=[self.genesis])
 
         contract_storage = cast(
             dict[bytes, int],
@@ -91,10 +91,10 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
         result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])
         self.assertEqual({}, result)
 
-        result, _ = await self.call('store', [prefix + b'1', 1], return_type=None)
+        result, _ = await self.call('store', [prefix + b'1', 1], return_type=None, signing_accounts=[self.genesis])
         self.assertIsNone(result)
 
-        result, _ = await self.call('store', [prefix + b'2', 2], return_type=None)
+        result, _ = await self.call('store', [prefix + b'2', 2], return_type=None, signing_accounts=[self.genesis])
         self.assertIsNone(result)
 
         result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])
@@ -108,10 +108,10 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
         result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])
         self.assertEqual({}, result)
 
-        result, _ = await self.call('store', [prefix + b'1', 1], return_type=None)
+        result, _ = await self.call('store', [prefix + b'1', 1], return_type=None, signing_accounts=[self.genesis])
         self.assertIsNone(result)
 
-        result, _ = await self.call('store', [prefix + b'2', 2], return_type=None)
+        result, _ = await self.call('store', [prefix + b'2', 2], return_type=None, signing_accounts=[self.genesis])
         self.assertIsNone(result)
 
         result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])

@@ -37,6 +37,7 @@ from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.exception.CompilerWarning import CompilerWarning
+from boa3_test.tests.annotation import JsonObject
 from boa3_test.tests.boa_test import (USE_UNIQUE_NAME,  # move theses to this module when refactoring is done
                                       _COMPILER_LOCK,
                                       _LOGGING_LOCK)
@@ -44,8 +45,6 @@ from boa3_test.tests.boa_test import (USE_UNIQUE_NAME,  # move theses to this mo
 # type annotations
 T = TypeVar("T")
 
-JsonToken = int | str | bool | None | list['JsonToken'] | dict[str, 'JsonToken']
-JsonObject = dict[str, JsonToken]
 ContractScript = bytes
 CompilerOutput = tuple[ContractScript, JsonObject]
 
@@ -907,6 +906,19 @@ class BoaTestCase(SmartContractTestCase):
         return debug_info
 
     def get_output(self, path: str, root_folder: str = None) -> CompilerOutput:
+        return self._get_compiler_output(
+            path=path,
+            root_folder=root_folder,
+            deserialize=True
+        )
+
+    def get_serialized_output(self, path: str) -> CompilerOutput:
+        return self._get_compiler_output(
+            path=path,
+            deserialize=False
+        )
+
+    def _get_compiler_output(self, path: str, deserialize: bool, root_folder: str = None):
         if path.endswith('.nef'):
             nef_output = path
             manifest_output = path.replace('.nef', '.manifest.json')
@@ -924,28 +936,10 @@ class BoaTestCase(SmartContractTestCase):
         else:
             with open(nef_output, mode='rb') as nef:
                 file = nef.read()
-                output = NefFile.deserialize(file).script
-
-        if not os.path.isfile(manifest_output):
-            manifest = {}
-        else:
-            with open(manifest_output) as manifest_output:
-                import json
-                manifest = json.loads(manifest_output.read())
-
-        return output, manifest
-
-    def get_serialized_output(self, path: str) -> CompilerOutput:
-        nef_output, manifest_output = self.get_deploy_file_paths_without_compiling(path)
-        with _COMPILER_LOCK:
-            if not os.path.isfile(nef_output):
-                return self.compile_and_save(path, get_raw_nef=True)
-
-        if not os.path.isfile(nef_output):
-            output = bytes()
-        else:
-            with open(nef_output, mode='rb') as nef:
-                output = nef.read()
+                if deserialize:
+                    output = NefFile.deserialize(file).script
+                else:
+                    output = file
 
         if not os.path.isfile(manifest_output):
             manifest = {}
