@@ -66,7 +66,7 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
     async def test_import_iterator(self):
         await self.set_up_contract('ImportIterator.py')
 
-        # neo-go in the current version of boa-test-constructor is not configured to return Iterators
+        # TODO: #86drqwhx0 neo-go in the current version of boa-test-constructor is not configured to return Iterators
         with self.assertRaises(ValueError) as context:
             result, _ = await self.call('return_iterator', [], return_type=list)
             self.assertEqual([], result)
@@ -76,7 +76,7 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
     async def test_import_interop_iterator(self):
         await self.set_up_contract('ImportInteropIterator.py')
 
-        # neo-go in the current version of boa-test-constructor is not configured to return Iterators
+        # TODO: #86drqwhx0 neo-go in the current version of boa-test-constructor is not configured to return Iterators
         with self.assertRaises(ValueError) as context:
             result, _ = await self.call('return_iterator', [], return_type=list)
             self.assertEqual([], result)
