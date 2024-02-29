@@ -27,6 +27,7 @@ from neo3.api import noderpc
 from neo3.api.wrappers import GenericContract
 from neo3.contracts import manifest
 from neo3.core import types, cryptography
+from neo3.network.payloads import block, transaction
 from neo3.network.payloads.verification import Signer
 from neo3.wallet import account
 
@@ -120,6 +121,7 @@ class BoaTestCase(SmartContractTestCase):
     genesis: account.Account
     deployed_contracts: dict[str, types.UInt160]
     _contract: GenericContract | None = None
+    called_tx: types.UInt256
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -141,6 +143,7 @@ class BoaTestCase(SmartContractTestCase):
 
         constants.COMPILER_VERSION = '_unit_tests_'  # to not change test contract script hashes in different versions
         cls.contract_hash = None
+        cls.called_tx = None
         cls.deployed_contracts = {}
 
         cls.setupTestCase()
@@ -459,6 +462,9 @@ class BoaTestCase(SmartContractTestCase):
         Must be called after set_up_contract to ensure a valid response.
         If called before, it may not be able to find a valid tx.
         """
+        if cls.called_tx is not None:
+            return cls.called_tx
+
         block_ = None
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
             best_block_hash = await rpc_client.get_best_block_hash()
@@ -476,11 +482,25 @@ class BoaTestCase(SmartContractTestCase):
             return block_.transactions[0].hash()
 
     @classmethod
+    async def get_last_tx(cls) -> transaction.Transaction:
+        if cls.called_tx:
+            async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
+                return await rpc_client.get_transaction(cls.called_tx)
+
+    @classmethod
+    async def get_latest_block(cls) -> block.Block:
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
+            best_block_hash = await rpc_client.get_best_block_hash()
+            return await rpc_client.get_block(best_block_hash)
+
+    @classmethod
     def _check_vmstate(cls, receipt):
         try:
             super()._check_vmstate(receipt)
         except ValueError as e:
             raise FaultException(receipt.exception)
+        if hasattr(receipt, 'tx_hash'):
+            cls.called_tx = receipt.tx_hash
 
     def get_all_symbols(self,
                         compiler: Compiler,
