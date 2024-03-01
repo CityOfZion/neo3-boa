@@ -23,6 +23,26 @@ Transaction = tuple[
     bytes,  # script
 ]
 
+Block = tuple[
+    types.UInt256,  # hash
+    int,    # version
+    types.UInt256,  # previous hash
+    types.UInt256,  # merkle root
+    int,  # timestamp
+    int,  # nonce
+    int,  # index
+    types.UInt160,  # next consensus
+    int,  # tx count
+]
+
+Signer = tuple[
+    types.UInt160,  # account
+    int,  # witness scope type
+    types.UInt160,  # allowed contracts
+    types.UInt160,  # allowed groups
+    list[tuple[int, tuple[int]]],  # rules
+]
+
 ContractParameterType = int
 ContractMethod = tuple[
     str,  # name

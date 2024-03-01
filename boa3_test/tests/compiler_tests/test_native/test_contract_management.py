@@ -9,7 +9,7 @@ from neo3.wallet import account
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests import annotation, boatestcase
+from boa3_test.tests import annotation, boatestcase, stackitem
 
 
 @dataclass
@@ -85,7 +85,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         call_hash = await self.compile_and_deploy(call_contract_path)
 
         nef, manifest = self.get_serialized_output(call_contract_path)
-        manifest = annotation.manifest_from_json(manifest)
+        manifest = stackitem.from_manifest(manifest)
         result, _ = await self.call('main', [bytes(20)], return_type=None)
         self.assertIsNone(result)
 
@@ -115,7 +115,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         nef_file, manifest = self.get_serialized_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
 
-        manifest = annotation.manifest_from_json(manifest)
+        manifest = stackitem.from_manifest(manifest)
         result, notifications = await self.call('Main',
                                                 [nef_file, arg_manifest, None],
                                                 return_type=annotation.Contract
@@ -139,7 +139,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.compile_and_save(call_contract_path)
         nef_file, manifest = self.get_serialized_output(call_contract_path)
         arg_manifest = String(json.dumps(manifest, separators=(',', ':'))).to_bytes()
-        manifest = annotation.manifest_from_json(manifest)
+        manifest = stackitem.from_manifest(manifest)
 
         data = 'some sort of data'
         result, notifications = await self.call('Main',
