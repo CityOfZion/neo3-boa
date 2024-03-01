@@ -1,179 +1,174 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.contracts.contract import CONTRACT_HASHES
+from neo3.core import types
+from neo3.network.payloads import verification
+from neo3.wallet import account
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive import neoxp
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestGasClass(BoaTest):
+class TestGasClass(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/native_test/gas'
-    GAS_CONTRACT_NAME = 'GasToken'
+    GAS_DECIMALS = 8
 
-    def test_get_hash(self):
-        path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    account1: account.Account
+    account2: account.Account
+    balance_test: account.Account
 
-        invokes = []
-        expected_results = []
+    @classmethod
+    def setupTestCase(cls):
+        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
+        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
+        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount', password='123')
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(constants.GAS_SCRIPT)
+        super().setupTestCase()
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        await super().asyncSetupClass()
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash, 10)
 
-    def test_symbol(self):
-        path, _ = self.get_deploy_file_paths('Symbol.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_hash(self):
+        await self.set_up_contract('GetHash.py')
 
-        invokes = []
-        expected_results = []
+        expected = types.UInt160(constants.GAS_SCRIPT)
+        result, _ = await self.call('main', [], return_type=types.UInt160)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append('GAS')
+    async def test_symbol(self):
+        await self.set_up_contract('Symbol.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('GAS', result)
 
     def test_symbol_too_many_parameters(self):
         path = self.get_contract_path('SymbolTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_decimals(self):
-        path, _ = self.get_deploy_file_paths('Decimals.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_decimals(self):
+        await self.set_up_contract('Decimals.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(8)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(self.GAS_DECIMALS, result)
 
     def test_decimals_too_many_parameters(self):
         path = self.get_contract_path('DecimalsTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_total_supply(self):
-        path, _ = self.get_deploy_file_paths('TotalSupply.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_total_supply(self):
+        await self.set_up_contract('TotalSupply.py')
 
-        contract_call = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsInstance(contract_call.result, int)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertGreater(result, 0)
 
     def test_total_supply_too_many_parameters(self):
         path = self.get_contract_path('TotalSupplyTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_balance_of(self):
-        path, _ = self.get_deploy_file_paths('BalanceOf.py')
-        test_account_1 = neoxp.utils.get_account_by_name('testAccount1').script_hash.to_array()
-        test_account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_balance_of(self):
+        await self.set_up_contract('BalanceOf.py')
 
-        invokes = []
-        expected_results = []
+        no_balance = types.UInt160.zero()
+        result, _ = await self.call('main', [no_balance], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', test_account_2))
-        expected_results.append(0)
-
-        runner.add_gas(test_account_1, 10)
-        invokes.append(runner.call_contract(path, 'main', test_account_1))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = 10 * 10 ** self.GAS_DECIMALS
+        result, _ = await self.call('main', [self.balance_test.script_hash], return_type=int)
+        self.assertEqual(expected, result)
 
     def test_balance_of_too_many_parameters(self):
         path = self.get_contract_path('BalanceOfTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_transfer(self):
-        path, _ = self.get_deploy_file_paths('Transfer.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_transfer(self):
+        await self.set_up_contract('Transfer.py')
 
-        invokes = []
-        expected_results = []
-
-        account = neoxp.utils.get_account_by_name('testAccount1')
-        account_1 = account.script_hash.to_array()
-        account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
+        no_balance = types.UInt160.zero()
+        account_1 = self.account1.script_hash
+        account_2 = self.account2.script_hash
         amount = 10000
+        data = ['value', 123, False]
 
-        runner.add_gas(account_1, amount)
-        invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount, ['value', 123, False]))
-        expected_results.append(False)
+        result, _ = await self.call('main', [no_balance, account_1, amount, data], return_type=bool)
+        self.assertEqual(False, result)
 
         # can't transfer if there is no signature, even with enough GAS
-        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount, ['value', 123, False]))
-        expected_results.append(False)
+        result, _ = await self.call('main', [account_1, account_2, amount, data], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        # signing_accounts doesn't modify WitnessScope
+        # it is not enough to pass check witness calling from test contract
+        result, _ = await self.call('main',
+                                    [account_1, account_2, amount, data],
+                                    return_type=bool,
+                                    signing_accounts=[self.account1]
+                                    )
+        self.assertEqual(False, result)
 
-        # TestRunner doesn't have WitnessScope modifier
-        # signing is not enough to pass check witness calling from test contract
-        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount, ['value', 123, False]))
-        expected_results.append(False)
+        signer = verification.Signer(
+            account_1,
+            verification.WitnessScope.GLOBAL
+        )
+        result, notifications = await self.call('main',
+                                                [account_1, account_2, amount, data],
+                                                return_type=bool,
+                                                signers=[signer]
+                                                )
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(self.GAS_CONTRACT_NAME, 'transfer',
-                                            account_1, account_2, amount, ['value', 123, False]))
-        expected_results.append(True)
+        transfers = self.filter_events(notifications,
+                                       origin=CONTRACT_HASHES.GAS_TOKEN,
+                                       event_name='Transfer',
+                                       notification_type=boatestcase.Nep17TransferEvent
+                                       )
+        self.assertEqual(1, len(transfers))
+        self.assertEqual(account_1, transfers[0].source)
+        self.assertEqual(account_2, transfers[0].destination)
+        self.assertEqual(amount, transfers[0].amount)
 
-        runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_transfer_data_default(self):
+        await self.set_up_contract('TransferDataDefault.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_transfer_data_default(self):
-        path, _ = self.get_deploy_file_paths('TransferDataDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        account = neoxp.utils.get_account_by_name('testAccount1')
-        account_1 = account.script_hash.to_array()
-        account_2 = neoxp.utils.get_account_by_name('testAccount2').script_hash.to_array()
+        no_balance = types.UInt160.zero()
+        account_1 = self.account1.script_hash
+        account_2 = self.account2.script_hash
         amount = 100
 
-        runner.add_gas(account_1, amount)
-        invokes.append(runner.call_contract(path, 'main', account_2, account_1, amount))
-        expected_results.append(False)
-        runner.update_contracts(export_checkpoint=True)
+        result, _ = await self.call('main', [no_balance, account_1, amount], return_type=bool)
+        self.assertEqual(False, result)
 
-        # TestRunner doesn't have WitnessScope modifier
-        # signing is not enough to pass check witness calling from test contract
-        invokes.append(runner.call_contract(path, 'main', account_1, account_2, amount))
-        expected_results.append(False)
+        # signing_accounts doesn't modify WitnessScope
+        # it is not enough to pass check witness calling from test contract
+        result, _ = await self.call('main',
+                                    [account_1, account_2, amount],
+                                    return_type=bool,
+                                    signing_accounts=[self.account1]
+                                    )
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(self.GAS_CONTRACT_NAME, 'transfer', account_1, account_2, amount, None))
-        expected_results.append(True)
+        signer = verification.Signer(
+            account_1,
+            verification.WitnessScope.GLOBAL
+        )
+        result, notifications = await self.call('main',
+                                                [account_1, account_2, amount],
+                                                return_type=bool,
+                                                signers=[signer]
+                                                )
+        self.assertEqual(True, result)
 
-        runner.execute(account=account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        transfers = self.filter_events(notifications,
+                                       origin=CONTRACT_HASHES.GAS_TOKEN,
+                                       event_name='Transfer',
+                                       notification_type=boatestcase.Nep17TransferEvent
+                                       )
+        self.assertEqual(1, len(transfers))
+        self.assertEqual(account_1, transfers[0].source)
+        self.assertEqual(account_2, transfers[0].destination)
+        self.assertEqual(amount, transfers[0].amount)
 
     def test_transfer_too_many_parameters(self):
         path = self.get_contract_path('TransferTooManyArguments.py')
@@ -183,18 +178,9 @@ class TestGasClass(BoaTest):
         path = self.get_contract_path('TransferTooFewArguments.py')
         self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
 
-    def test_import_with_alias(self):
-        path, _ = self.get_deploy_file_paths('ImportWithAlias.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_with_alias(self):
+        await self.set_up_contract('ImportWithAlias.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', bytes(20)))
-        expected_results.append(0)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        no_balance = types.UInt160.zero()
+        result, _ = await self.call('main', [no_balance], return_type=int)
+        self.assertEqual(0, result)
