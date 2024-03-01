@@ -254,9 +254,6 @@ class BoaTestCase(SmartContractTestCase):
         else:
             internal_return_type = return_type_class
 
-        if signing_accounts is None and signers is None:
-            signing_accounts = [cls.genesis]
-
         result, events = await super().call(method,
                                             args,
                                             return_type=internal_return_type,
