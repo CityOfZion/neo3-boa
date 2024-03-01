@@ -520,6 +520,11 @@ class BoaTestCase(SmartContractTestCase):
                 return await rpc_client.get_transaction(cls.called_tx)
 
     @classmethod
+    async def get_genesis_block(cls) -> block.Block:
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
+            return await rpc_client.get_block(0)
+
+    @classmethod
     async def get_latest_block(cls) -> block.Block:
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
             best_block_hash = await rpc_client.get_best_block_hash()
