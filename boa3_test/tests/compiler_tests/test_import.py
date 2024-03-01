@@ -1,9 +1,7 @@
-from neo3.core import types
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3_test.tests import boatestcase
+from boa3_test.tests import annotation, boatestcase
 
 
 class TestImport(boatestcase.BoaTestCase):
@@ -287,7 +285,7 @@ class TestImport(boatestcase.BoaTestCase):
     async def test_import_user_module_with_not_imported_symbols(self):
         await self.set_up_contract('ImportUserModuleWithNotImportedSymbols.py')
 
-        Notification = tuple[types.UInt160, str, list]
+        Notification = annotation.Notification[list[int]]
         script = self.contract_hash
         result, _ = await self.call('main', [[], script], return_type=list)
         self.assertEqual([], result)
@@ -299,11 +297,11 @@ class TestImport(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [arg, script], return_type=list[Notification])
         self.assertEqual(expected_result, result)
 
-        result, _ = await self.call('main', [arg,  b'\x01' * 20], return_type=list)
+        result, _ = await self.call('main', [arg,  b'\x01' * 20], return_type=list[Notification])
         self.assertEqual([], result)
 
         # 'with_param' is a public method, so it should be included in the manifest when imported
-        result, _ = await self.call('with_param', [arg,  b'\x01' * 20], return_type=list)
+        result, _ = await self.call('with_param', [arg,  b'\x01' * 20], return_type=list[Notification])
         self.assertEqual([], result)
 
         # 'without_param' is a public method, but it isn't imported, so it shouldn't be included in the manifest
