@@ -103,9 +103,9 @@ class TestSimpleNEP17Template(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
         # fire the transfer event when transferring to yourself
-        transfer_events = notifications
+        transfer_events = self.filter_events(notifications, notification_type=boatestcase.Nep17TransferEvent)
         self.assertEqual(1, len(transfer_events))
-        event = boatestcase.Nep17TransferEvent.from_notification(notifications[0])
+        event = transfer_events[0]
 
         self.assertEqual(from_script_hash, event.source)
         self.assertEqual(from_script_hash, event.destination)
@@ -121,9 +121,9 @@ class TestSimpleNEP17Template(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
         # fire the transfer event when transferring to yourself
-        transfer_events = notifications
+        transfer_events = self.filter_events(notifications, notification_type=boatestcase.Nep17TransferEvent)
         self.assertEqual(1, len(transfer_events))
-        event = boatestcase.Nep17TransferEvent.from_notification(notifications[0])
+        event = transfer_events[0]
 
         self.assertEqual(from_script_hash, event.source)
         self.assertEqual(to_script_hash, event.destination)
