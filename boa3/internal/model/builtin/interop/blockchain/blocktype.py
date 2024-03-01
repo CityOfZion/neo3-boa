@@ -31,7 +31,6 @@ class BlockType(ClassArrayType):
             'timestamp': Variable(Type.int),
             'nonce': Variable(Type.int),
             'index': Variable(Type.int),
-            'primary_index': Variable(Type.int),
             'next_consensus': Variable(UInt160Type.build()),
             'transaction_count': Variable(Type.int)
         }
@@ -98,7 +97,6 @@ class BlockMethod(IBuiltinMethod):
 
         code_generator.convert_literal(0)  # transaction_count
         code_generator.convert_literal(uint160_default)  # next_consensus
-        code_generator.convert_literal(0)  # primary_index
         code_generator.convert_literal(0)  # index
         code_generator.convert_literal(0)  # nonce
         code_generator.convert_literal(0)  # timestamp
@@ -106,7 +104,7 @@ class BlockMethod(IBuiltinMethod):
         code_generator.convert_literal(uint256_default)  # previous_hash
         code_generator.convert_literal(0)  # version
         code_generator.convert_literal(uint256_default)  # hash
-        code_generator.convert_new_array(length=10, array_type=self.type)
+        code_generator.convert_new_array(length=9, array_type=self.type)
 
     @property
     def _args_on_stack(self) -> int:
