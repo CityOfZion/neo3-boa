@@ -51,7 +51,7 @@ def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     b'test'
 
     >>> get(b'fake_key')
-    ''
+    b''
 
     :param key: value identifier in the store
     :type key: bytes
@@ -73,7 +73,7 @@ def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     5
 
     >>> get_int(b'fake_key')
-    ''
+    0
 
     :param key: value identifier in the store
     :type key: bytes
@@ -95,7 +95,7 @@ def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     True
 
     >>> get_bool(b'fake_key')
-    ''
+    False
 
     :param key: value identifier in the store
     :type key: bytes
@@ -139,7 +139,7 @@ def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     UInt160(0x4a49484746454443424139383736353433323130)
 
     >>> get_uint160(b'fake_key')
-    ''
+    UInt160(0x0000000000000000000000000000000000000000)
 
     :param key: value identifier in the store
     :type key: bytes
@@ -161,7 +161,7 @@ def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     UInt256(0x565554535251504f4e4d4c4b4a49484746454443424139383736353433323130)
 
     >>> get_uint160(b'fake_key')
-    ''
+    UInt256(0x0000000000000000000000000000000000000000000000000000000000000000)
 
     :param key: value identifier in the store
     :type key: bytes
@@ -183,7 +183,7 @@ def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     ECPoint(0x57565554535251504f4e4d4c4b4a49484746454443424139383736353433323130)
 
     >>> get_ecpoint(b'fake_key')
-    ''
+    ECPoint(0x000000000000000000000000000000000000000000000000000000000000000000)
 
     :param key: value identifier in the store
     :type key: bytes
