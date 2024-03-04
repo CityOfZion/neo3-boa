@@ -1,10 +1,10 @@
+from neo3.core import types
+
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
-from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestBytes(boatestcase.BoaTestCase):
@@ -42,7 +42,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytesGetValue.py')
         self.assertEqual(expected_output, output)
 
-    async def test_bytes_get_value(self):
+    async def test_bytes_get_value_run(self):
         await self.set_up_contract('BytesGetValue.py')
 
         result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
@@ -68,7 +68,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytesGetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-    async def test_bytes_get_value_negative_index(self):
+    async def test_bytes_get_value_negative_index_run(self):
         await self.set_up_contract('BytesGetValueNegativeIndex.py')
 
         result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
@@ -144,42 +144,20 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytesFromBytearray.py')
         self.assertEqual(expected_output, output)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_assign_with_slice(self):
-    #     await self.set_up_contract('AssignSlice.py')
-    #
-    #     result, _ = await self.call('main', [b'unittest'], return_type=bytes)
-    #     self.assertEqual(b'unittest'[1:2], result)
-    #
-    #     result, _ = await self.call('main', [b'123'], return_type=bytes)
-    #     self.assertEqual(b'123'[1:2], result)
-    #
-    #     result, _ = await self.call('main', [bytearray()], return_type=bytes)
-    #     self.assertEqual(bytearray()[1:2], result)
-    def test_assign_with_slice(self):
-        path, _ = self.get_deploy_file_paths('AssignSlice.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assign_with_slice(self):
+        await self.set_up_contract('AssignSlice.py')
 
-        invokes = []
-        expected_results = []
+        arg = b'unittest'
+        result, _ = await self.call('main', [arg], return_type=bytearray)
+        self.assertEqual(arg[1:2], result)
 
-        invokes.append(runner.call_contract(path, 'main', b'unittest',
-                                            expected_result_type=bytearray))
-        expected_results.append(b'unittest'[1:2])
+        arg = b'123'
+        result, _ = await self.call('main', [arg], return_type=bytearray)
+        self.assertEqual(arg[1:2], result)
 
-        invokes.append(runner.call_contract(path, 'main', b'123',
-                                            expected_result_type=bytearray))
-        expected_results.append(b'123'[1:2])
-
-        invokes.append(runner.call_contract(path, 'main', bytearray(),
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray()[1:2])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        arg = bytearray()
+        result, _ = await self.call('main', [arg], return_type=bytearray)
+        self.assertEqual(arg[1:2], result)
 
     async def test_slice_with_cast(self):
         await self.set_up_contract('SliceWithCast.py')
@@ -412,7 +390,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearrayGetValue.py')
         self.assertEqual(expected_output, output)
 
-    async def test_byte_array_get_value(self):
+    async def test_byte_array_get_value_run(self):
         await self.set_up_contract('BytearrayGetValue.py')
 
         result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
@@ -438,7 +416,7 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearrayGetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-    async def test_byte_array_get_value_negative_index(self):
+    async def test_byte_array_get_value_negative_index_run(self):
         await self.set_up_contract('BytearrayGetValueNegativeIndex.py')
 
         result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
@@ -474,34 +452,14 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearraySetValue.py')
         self.assertEqual(expected_output, output)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_set_value(self):
-    #     await self.set_up_contract('BytearraySetValue.py')
-    #
-    #     result, _ = await self.call('Main', [b'123'], return_type=bytes)
-    #     self.assertEqual(b'\x0123', result)
-    #
-    #     result, _ = await self.call('Main', [b'0'], return_type=bytes)
-    #     self.assertEqual(b'\x01', result)
-    def test_byte_array_set_value(self):
-        path, _ = self.get_deploy_file_paths('BytearraySetValue.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_set_value_run(self):
+        await self.set_up_contract('BytearraySetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [b'123'], return_type=bytes)
+        self.assertEqual(b'\x0123', result)
 
-        invokes.append(runner.call_contract(path, 'Main', b'123',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x0123')
-        invokes.append(runner.call_contract(path, 'Main', b'0',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [b'0'], return_type=bytes)
+        self.assertEqual(b'\x01', result)
 
     def test_byte_array_set_value_negative_index_compile(self):
         expected_output = (
@@ -530,34 +488,14 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearraySetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_set_value_negative_index(self):
-    #     await self.set_up_contract('BytearraySetValueNegativeIndex.py')
-    #
-    #     result, _ = await self.call('Main', [b'123'], return_type=bytes)
-    #     self.assertEqual(b'12\x01', result)
-    #
-    #     result, _ = await self.call('Main', [b'0'], return_type=bytes)
-    #     self.assertEqual(b'\x01', result)
-    def test_byte_array_set_value_negative_index(self):
-        path, _ = self.get_deploy_file_paths('BytearraySetValueNegativeIndex.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_set_value_negative_index_run(self):
+        await self.set_up_contract('BytearraySetValueNegativeIndex.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [b'123'], return_type=bytes)
+        self.assertEqual(b'12\x01', result)
 
-        invokes.append(runner.call_contract(path, 'Main', b'123',
-                                            expected_result_type=bytes))
-        expected_results.append(b'12\x01')
-        invokes.append(runner.call_contract(path, 'Main', b'0',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [b'0'], return_type=bytes)
+        self.assertEqual(b'\x01', result)
 
     def test_byte_array_literal_value(self):
         path = self.get_contract_path('BytearrayLiteral.py')
@@ -573,28 +511,11 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearrayDefault.py')
         self.assertEqual(expected_output, output)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_default(self):
-    #     await self.set_up_contract('BytearrayDefault.py')
-    #
-    #     result, _ = await self.call('create_bytearray', return_type=bytes)
-    #     self.assertEqual(bytearray(), result)
-    def test_byte_array_default(self):
-        path, _ = self.get_deploy_file_paths('BytearrayDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_default_run(self):
+        await self.set_up_contract('BytearrayDefault.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'create_bytearray',
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray())
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('create_bytearray', return_type=bytearray)
+        self.assertEqual(bytearray(), result)
 
     def test_byte_array_from_literal_bytes(self):
         data = b'\x01\x02\x03'
@@ -647,46 +568,18 @@ class TestBytes(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('BytearrayFromSize.py')
         self.assertEqual(expected_output, output)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_from_size(self):
-    #     await self.set_up_contract('BytearrayFromSize.py')
-    #
-    #     result, _ = await self.call('create_bytearray', [10], return_type=bytes)
-    #     self.assertEqual(bytearray(10), result)
-    #
-    #     result, _ = await self.call('create_bytearray', [0], return_type=bytes)
-    #     self.assertEqual(bytearray(0), result)
-    #
-    #     with self.assertRaises(Exception) as context:
-    #         await self.call('create_bytearray', [-10], return_type=bytes)
-    #     self.assertRegex(context.exception.__str__(), f'^MaxItemSize exceed')
-    def test_byte_array_from_size(self):
-        path, _ = self.get_deploy_file_paths('BytearrayFromSize.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_from_size_run(self):
+        await self.set_up_contract('BytearrayFromSize.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('create_bytearray', [10], return_type=bytearray)
+        self.assertEqual(bytearray(10), result)
 
-        invokes.append(runner.call_contract(path, 'create_bytearray', 10,
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray(10))
+        result, _ = await self.call('create_bytearray', [0], return_type=bytearray)
+        self.assertEqual(bytearray(0), result)
 
-        invokes.append(runner.call_contract(path, 'create_bytearray', 0,
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray(0))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        # cannot build with negative size
-        runner.call_contract(path, 'create_bytearray', -10,
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^MaxItemSize exceed')
+        with self.assertRaises(Exception) as context:
+            await self.call('create_bytearray', [-10], return_type=bytearray)
+        self.assertRegex(context.exception.__str__(), 'invalid size')
 
     def test_byte_array_from_list_of_int(self):
         path = self.get_contract_path('BytearrayFromListOfInt.py')
@@ -698,202 +591,78 @@ class TestBytes(boatestcase.BoaTestCase):
         expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({arg_type.identifier})')
         self.assertEqual(expected_error._error_message, compiler_error_message)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_string(self):
-    #     await self.set_up_contract('BytearrayFromString.py')
-    #
-    #     # Neo3-boa's bytearray only converts with utf-8 encoding
-    #     string = 'string value'
-    #     result, _ = await self.call('main', [string], return_type=bytes)
-    #     self.assertEqual(bytearray(string, 'utf-8'), result)
-    #
-    #     string = 'áãõ😀'
-    #     result, _ = await self.call('main', [string], return_type=bytes)
-    #     self.assertEqual(bytearray(string, 'utf-8'), result)
-    def test_byte_array_string(self):
-        path, _ = self.get_deploy_file_paths('BytearrayFromString.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_byte_array_string(self):
+        await self.set_up_contract('BytearrayFromString.py')
 
         # Neo3-boa's bytearray only converts with utf-8 encoding
         string = 'string value'
-        invokes.append(runner.call_contract(path, 'main', string, expected_result_type=bytearray))
-        expected_results.append(bytearray(string, 'utf-8'))
+        expected = bytearray(string, 'utf-8')
+        result, _ = await self.call('main', [string], return_type=bytearray)
+        self.assertEqual(expected, result)
 
         string = 'áãõ😀'
-        invokes.append(runner.call_contract(path, 'main', string, expected_result_type=bytearray))
-        expected_results.append(bytearray(string, 'utf-8'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = bytearray(string, 'utf-8')
+        result, _ = await self.call('main', [string], return_type=bytearray)
+        self.assertEqual(expected, result)
 
     def test_byte_array_string_with_encoding(self):
         path = self.get_contract_path('BytearrayFromStringWithEncoding.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_append(self):
-    #     await self.set_up_contract('BytearrayAppend.py')
-    #
-    #     result, _ = await self.call('Main', return_type=bytes)
-    #     self.assertEqual(b'\x01\x02\x03\x04', result)
-    def test_byte_array_append(self):
-        path, _ = self.get_deploy_file_paths('BytearrayAppend.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_append(self):
+        await self.set_up_contract('BytearrayAppend.py')
 
-        invokes = []
-        expected_results = []
+        expected = bytearray(b'\x01\x02\x03')
+        expected.append(4)
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
+    async def test_byte_array_append_with_builtin(self):
+        await self.set_up_contract('BytearrayAppendWithBuiltin.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected = bytearray(b'\x01\x02\x03')
+        expected.append(4)
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_byte_array_append_mutable_sequence_with_builtin(self):
+        await self.set_up_contract('BytearrayAppendWithMutableSequence.py')
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_append_with_builtin(self):
-    #     await self.set_up_contract('BytearrayAppendWithBuiltin.py')
-    #
-    #     result, _ = await self.call('Main', return_type=bytes)
-    #     self.assertEqual(b'\x01\x02\x03\x04', result)
-    def test_byte_array_append_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayAppendWithBuiltin.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        expected = bytearray(b'\x01\x02\x03')
+        expected.append(4)
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        invokes = []
-        expected_results = []
+    async def test_byte_array_clear(self):
+        await self.set_up_contract('BytearrayClear.py')
 
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
+        expected = bytearray()
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_byte_array_reverse(self):
+        await self.set_up_contract('BytearrayReverse.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = bytearray(b'\x01\x02\x03')
+        expected.reverse()
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-    # async def test_byte_array_append_mutable_sequence_with_builtin(self):
-    #     await self.set_up_contract('BytearrayAppendWithMutableSequence.py')
-    #
-    #     result, _ = await self.call('Main', return_type=bytes)
-    #     self.assertEqual(b'\x01\x02\x03\x04', result)
-    def test_byte_array_append_mutable_sequence_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayAppendWithMutableSequence.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_extend(self):
+        await self.set_up_contract('BytearrayExtend.py')
 
-        invokes = []
-        expected_results = []
+        expected = bytearray(b'\x01\x02\x03')
+        expected.extend(b'\x04\x05\x06')
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
+    async def test_byte_array_extend_with_builtin(self):
+        await self.set_up_contract('BytearrayExtendWithBuiltin.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    # async def test_byte_array_clear(self):
-    #     await self.set_up_contract('BytearrayClear.py')
-    #
-    #     result, _ = await self.call('Main', return_type=bytes)
-    #     self.assertEqual(b'', result)
-    def test_byte_array_clear(self):
-        path, _ = self.get_deploy_file_paths('BytearrayClear.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_reverse(self):
-    #     await self.set_up_contract('BytearrayReverse.py')
-    #
-    #     result, _ = await self.call('Main', return_type=bytes)
-    #     self.assertEqual(b'\x03\x02\x01', result)
-    def test_byte_array_reverse(self):
-        path, _ = self.get_deploy_file_paths('BytearrayReverse.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x03\x02\x01')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_extend(self):
-    #     await self.set_up_contract('BytearrayExtend.py')
-    #
-    #     result, _ = await self.call('Main', return_type=bytes)
-    #     self.assertEqual(b'\x01\x02\x03\x04\x05\x06', result)
-    def test_byte_array_extend(self):
-        path, _ = self.get_deploy_file_paths('BytearrayExtend.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04\x05\x06')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_byte_array_extend_with_builtin(self):
-    #     await self.set_up_contract('BytearrayExtendWithBuiltin.py')
-    #
-    #     result, _ = await self.call('Main', return_type=bytes)
-    #     self.assertEqual(b'\x01\x02\x03\x04\x05\x06', result)
-    def test_byte_array_extend_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayExtendWithBuiltin.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04\x05\x06')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = bytearray(b'\x01\x02\x03')
+        expected.extend(b'\x04\x05\x06')
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
     async def test_byte_array_to_int(self):
         await self.set_up_contract('BytearrayToInt.py')
@@ -925,28 +694,12 @@ class TestBytes(boatestcase.BoaTestCase):
         result, _ = await self.call('main', return_type=bytes)
         self.assertEqual(b'\x01\x02\xaa\xfe', result)
 
-    # TODO: Buffer type is not being unwrapped properly, will be fixed on neo-mamba. #86a1yghvg
-    # async def test_boa2_slice_test(self):
-    #     await self.set_up_contract('SliceBoa2Test.py')
-    #
-    #     result, _ = await self.call('main', return_type=bytes)
-    #     self.assertEqual(b'\x01\x02\x03\x04', result)
-    def test_boa2_slice_test(self):
-        path, _ = self.get_deploy_file_paths('SliceBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_slice_test(self):
+        await self.set_up_contract('SliceBoa2Test.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = bytearray(b'\x01\x02\x03\x04\x05\x06\x07\x08')[:4]
+        result, _ = await self.call('main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
     async def test_boa2_slice_test2(self):
         await self.set_up_contract('SliceBoa2Test2.py')
@@ -957,26 +710,30 @@ class TestBytes(boatestcase.BoaTestCase):
     async def test_uint160_bytes(self):
         await self.set_up_contract('UInt160Bytes.py')
 
-        result, _ = await self.call('main', return_type=bytes)
-        self.assertEqual(b'0123456789abcdefghij', result)
+        expected = types.UInt160(b'0123456789abcdefghij')
+        result, _ = await self.call('main', return_type=types.UInt160)
+        self.assertEqual(expected, result)
 
     async def test_uint160_int(self):
         await self.set_up_contract('UInt160Int.py')
 
-        result, _ = await self.call('main', return_type=bytes)
-        self.assertEqual((160).to_bytes(2, 'little') + bytes(18), result)
+        expected = types.UInt160((160).to_bytes(2, 'little') + bytes(18))
+        result, _ = await self.call('main', return_type=types.UInt160)
+        self.assertEqual(expected, result)
 
     async def test_uint256_bytes(self):
         await self.set_up_contract('UInt256Bytes.py')
 
-        result, _ = await self.call('main', return_type=bytes)
-        self.assertEqual(b'0123456789abcdefghijklmnopqrstuv', result)
+        expected = types.UInt256(b'0123456789abcdefghijklmnopqrstuv')
+        result, _ = await self.call('main', return_type=types.UInt256)
+        self.assertEqual(expected, result)
 
     async def test_uint256_int(self):
         await self.set_up_contract('UInt256Int.py')
 
-        result, _ = await self.call('main', return_type=bytes)
-        self.assertEqual((256).to_bytes(2, 'little') + bytes(30), result)
+        expected = types.UInt256((256).to_bytes(2, 'little') + bytes(30))
+        result, _ = await self.call('main', return_type=types.UInt256)
+        self.assertEqual(expected, result)
 
     async def test_bytes_upper(self):
         await self.set_up_contract('UpperBytesMethod.py')

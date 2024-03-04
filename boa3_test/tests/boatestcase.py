@@ -250,10 +250,12 @@ class BoaTestCase(SmartContractTestCase):
 
         if return_type_class is tuple:
             internal_return_type = list
+        elif return_type is bytearray:
+            internal_return_type = bytes
         else:
             internal_return_type = return_type_class
 
-        if signing_accounts is None:
+        if signing_accounts is None and signers is None:
             signing_accounts = [cls.genesis]
 
         result, events = await super().call(method,
@@ -268,6 +270,8 @@ class BoaTestCase(SmartContractTestCase):
             cls.unwrap_inner_values(result, *expected_values, expected_result=return_type_class)
         if return_type_class is tuple:
             result = tuple(result)
+        elif return_type_class is bytearray:
+            result = bytearray(result)
 
         return result, events
 
@@ -353,11 +357,11 @@ class BoaTestCase(SmartContractTestCase):
             value.clear()
             for key, item in aux.items():
 
-                if dict_key_type not in (None, bytes) and isinstance(key, bytes):
+                if dict_key_type not in (None, bytes, bytearray) and isinstance(key, bytes):
                     key = noderpc.StackItem(
                         noderpc.StackItemType.BYTE_STRING, key
                     )
-                if dict_value_type not in (None, bytes) and isinstance(item, bytes):
+                if dict_value_type not in (None, bytes, bytearray) and isinstance(item, bytes):
                     item = noderpc.StackItem(
                         noderpc.StackItemType.BYTE_STRING, item
                     )
@@ -387,6 +391,8 @@ class BoaTestCase(SmartContractTestCase):
                 result = stack_item.as_str()
             elif expected_type is bytes:
                 result = stack_item.as_bytes()
+            elif expected_type is bytearray:
+                result = bytearray(stack_item.as_bytes())
             elif expected_type is types.UInt160:
                 result = stack_item.as_uint160()
             elif expected_type is types.UInt256:
@@ -410,6 +416,8 @@ class BoaTestCase(SmartContractTestCase):
                 result = stack_item.as_str()
             elif expected_type is bytes:
                 result = stack_item.as_bytes()
+            elif expected_type is bytearray:
+                result = bytearray(stack_item.as_bytes())
             elif expected_type is types.UInt160:
                 result = stack_item.as_uint160()
             elif expected_type is types.UInt256:
