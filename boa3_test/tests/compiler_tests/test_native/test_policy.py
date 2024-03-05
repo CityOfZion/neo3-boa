@@ -1,84 +1,75 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.api import noderpc
+from neo3.api.wrappers import PolicyContract
+from neo3.core import types
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestPolicyContract(BoaTest):
+class TestPolicyContract(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/native_test/policy'
 
-    def test_get_hash(self):
-        path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    @classmethod
+    async def get_exec_fee_factor(cls) -> int:
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
+            return await cls.node.facade.test_invoke(PolicyContract().exec_fee_factor())
 
-        invokes = []
-        expected_results = []
+    @classmethod
+    async def get_fee_per_byte(cls) -> int:
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
+            return await cls.node.facade.test_invoke(PolicyContract().fee_per_byte())
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(constants.POLICY_SCRIPT)
+    @classmethod
+    async def get_storage_price(cls) -> int:
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
+            return await cls.node.facade.test_invoke(PolicyContract().storage_price())
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_get_hash(self):
+        await self.set_up_contract('GetHash.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = types.UInt160(constants.POLICY_SCRIPT)
+        result, _ = await self.call('main', [], return_type=types.UInt160)
+        self.assertEqual(expected, result)
 
-    def test_get_exec_fee_factor(self):
-        path, _ = self.get_deploy_file_paths('GetExecFeeFactor.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_exec_fee_factor(self):
+        await self.set_up_contract('GetExecFeeFactor.py')
 
-        invoke = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsInstance(invoke.result, int)
+        expected = await self.get_exec_fee_factor()
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(expected, result)
 
     def test_get_exec_fee_too_many_parameters(self):
         path = self.get_contract_path('GetExecFeeFactorTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_get_fee_per_byte(self):
-        path, _ = self.get_deploy_file_paths('GetFeePerByte.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_fee_per_byte(self):
+        await self.set_up_contract('GetFeePerByte.py')
 
-        invoke = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsInstance(invoke.result, int)
+        expected = await self.get_fee_per_byte()
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(expected, result)
 
     def test_get_fee_per_byte_too_many_parameters(self):
         path = self.get_contract_path('GetFeePerByteTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_get_storage_price(self):
-        path, _ = self.get_deploy_file_paths('GetStoragePrice.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_storage_price(self):
+        await self.set_up_contract('GetStoragePrice.py')
 
-        invoke = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertIsInstance(invoke.result, int)
+        expected = await self.get_storage_price()
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(expected, result)
 
     def test_get_storage_price_too_many_parameters(self):
         path = self.get_contract_path('GetStoragePriceTooManyArguments.py')
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
 
-    def test_is_blocked(self):
-        path, _ = self.get_deploy_file_paths('IsBlocked.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_is_blocked(self):
+        await self.set_up_contract('IsBlocked.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', bytes(20)))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [types.UInt160.zero()], return_type=bool)
+        self.assertEqual(False, result)
 
     def test_is_blocked_mismatched_type(self):
         path = self.get_contract_path('IsBlockedMismatchedTypeInt.py')
