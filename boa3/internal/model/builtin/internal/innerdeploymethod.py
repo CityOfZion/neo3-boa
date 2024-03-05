@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import ast
-from typing import Dict, Optional
 
 from boa3.internal import constants
 from boa3.internal.model import set_internal_call
@@ -21,7 +20,7 @@ class InnerDeployMethod(IInternalMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
         identifier = constants.DEPLOY_METHOD_ID
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'data': Variable(Type.any),
             'update': Variable(Type.bool)
         }
@@ -31,7 +30,7 @@ class InnerDeployMethod(IInternalMethod):
         self._origin_node = set_internal_call(ast.parse(self._body).body[0])
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         method_args = [f"{var_id}: {var_type.type.raw_identifier}"
                        for var_id, var_type in self.args.items()
                        ]

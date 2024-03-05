@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.nativecontract import StdLibMethod
@@ -15,7 +14,7 @@ class MemorySearchMethod(StdLibMethod):
         native_identifier = 'memorySearch'
         byte_string_type = Type.union.build([Type.bytes, Type.str])
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'mem': Variable(byte_string_type),
             'value': Variable(byte_string_type),
             'start': Variable(Type.int),

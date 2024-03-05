@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from collections.abc import Iterable
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -47,17 +48,17 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: Dict[str, ISymbol], log: bool = False, fail_fast: bool = True):
+    def __init__(self, analyser, symbol_table: dict[str, ISymbol], log: bool = False, fail_fast: bool = True):
         super().__init__(analyser.ast_tree, analyser.filename, analyser.root, log=log, fail_fast=fail_fast)
-        self.type_errors: List[Exception] = []
-        self.modules: Dict[str, Module] = {}
-        self.symbols: Dict[str, ISymbol] = symbol_table
+        self.type_errors: list[Exception] = []
+        self.modules: dict[str, Module] = {}
+        self.symbols: dict[str, ISymbol] = symbol_table
 
         self._current_class: UserClass = None
         self._current_method: Method = None
-        self._scope_stack: List[SymbolScope] = []
+        self._scope_stack: list[SymbolScope] = []
 
-        self._super_calls: List[IBuiltinMethod] = []
+        self._super_calls: list[IBuiltinMethod] = []
         self.analyse_visit(self._tree)
 
     def visit(self, node: ast.AST, get_literal_value: bool = False):
@@ -84,11 +85,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return list(self.symbols.keys())[index]
 
     @property
-    def _current_scope(self) -> Optional[SymbolScope]:
+    def _current_scope(self) -> SymbolScope | None:
         return self._scope_stack[-1] if len(self._scope_stack) > 0 else None
 
     @property
-    def _modules_symbols(self) -> Dict[str, ISymbol]:
+    def _modules_symbols(self) -> dict[str, ISymbol]:
         """
         Gets all the symbols in the modules scopes.
 
@@ -102,7 +103,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
                    check_raw_id: bool = False,
-                   origin_node: ast.AST = None) -> Optional[ISymbol]:
+                   origin_node: ast.AST = None) -> ISymbol | None:
         if symbol_id is None:
             return None
         if isinstance(symbol_id, ISymbol) and not isinstance(symbol_id, (IType, IExpression)):
@@ -144,7 +145,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return super().get_symbol(symbol_id, is_internal, check_raw_id, origin_node)
 
-    def new_local_scope(self, symbols: Dict[str, ISymbol] = None):
+    def new_local_scope(self, symbols: dict[str, ISymbol] = None):
         if symbols is None:
             symbols = self._current_scope.symbols if self._current_scope is not None else {}
 
@@ -486,7 +487,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return True
 
-    def _has_only_default_values(self, value: Any, target_type: Optional[IType] = None) -> bool:
+    def _has_only_default_values(self, value: Any, target_type: IType | None = None) -> bool:
         if not isinstance(target_type, IType):
             target_type = self.get_type(value)
 
@@ -614,7 +615,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 or not symbol_type.is_valid_key(upper)
                 or (step is not Type.none and not symbol_type.is_valid_key(step))
             ):
-            actual: Tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
+            actual: tuple[IType, ...] = (lower, upper) if step is Type.none else (lower, upper, step)
             self._log_error(
                 CompilerError.MismatchedTypes(
                     subscript.lineno, subscript.col_offset,
@@ -745,7 +746,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._include_symbols_to_scope(last_scope, is_instance_if, intersected_ids)
         self._include_symbols_to_scope(last_scope, is_instance_else, intersected_ids)
 
-    def _include_symbols_to_scope(self, scope: SymbolScope, other_scope: Dict[str, ISymbol], items_filter: Set[str]):
+    def _include_symbols_to_scope(self, scope: SymbolScope, other_scope: dict[str, ISymbol], items_filter: set[str]):
         for new_symbol_id in {key for key in other_scope if key not in items_filter}:
             new_symbol = other_scope[new_symbol_id]
             new_value_type = self.get_type(new_symbol)
@@ -784,7 +785,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return Type.get_generic_type(if_type, else_type)
 
-    def validate_if(self, if_node: ast.AST) -> Tuple[Dict[str, ISymbol], Dict[str, ISymbol]]:
+    def validate_if(self, if_node: ast.AST) -> tuple[dict[str, ISymbol], dict[str, ISymbol]]:
         """
         Verifies if the type of if test is valid
 
@@ -796,7 +797,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return self._get_is_instance_function_calls(if_node.test)
 
-    def _get_is_instance_function_calls(self, node: ast.AST) -> Tuple[Dict[str, ISymbol], Dict[str, ISymbol]]:
+    def _get_is_instance_function_calls(self, node: ast.AST) -> tuple[dict[str, ISymbol], dict[str, ISymbol]]:
         from boa3.internal.model.builtin.method.isinstancemethod import IsInstanceMethod
         is_instance_objs = [x for x, symbol in self.symbols.items()
                             if isinstance(symbol, IsInstanceMethod)]
@@ -879,7 +880,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 is_not_instance_symbols[key] = Variable(value)
         return is_instance_symbols, is_not_instance_symbols
 
-    def visit_BinOp(self, bin_op: ast.BinOp) -> Optional[IType]:
+    def visit_BinOp(self, bin_op: ast.BinOp) -> IType | None:
         """
         Verifies if the types of the operands are valid to the operation
 
@@ -894,7 +895,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             bin_op.op = operation
             return operation.result
 
-    def validate_binary_operation(self, node: ast.AST, left_op: ast.AST, right_op: ast.AST) -> Optional[IOperation]:
+    def validate_binary_operation(self, node: ast.AST, left_op: ast.AST, right_op: ast.AST) -> IOperation | None:
         """
         Validates a ast node that represents a binary operation
 
@@ -969,7 +970,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             expected_types = (expected_op.left_type.identifier, expected_op.right_type.identifier)
             raise CompilerError.MismatchedTypes(0, 0, expected_types, actual_types)
 
-    def visit_UnaryOp(self, un_op: ast.UnaryOp) -> Optional[IType]:
+    def visit_UnaryOp(self, un_op: ast.UnaryOp) -> IType | None:
         """
         Verifies if the type of the operand is valid to the operation
 
@@ -1055,7 +1056,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     )
                 )
 
-    def visit_Compare(self, compare: ast.Compare) -> Optional[IType]:
+    def visit_Compare(self, compare: ast.Compare) -> IType | None:
         """
         Verifies if the types of the operands are valid to the compare operations
 
@@ -1114,7 +1115,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # raises the exception with the line/col info
             self._log_error(raised_error)
 
-    def visit_BoolOp(self, bool_op: ast.BoolOp) -> Optional[IType]:
+    def visit_BoolOp(self, bool_op: ast.BoolOp) -> IType | None:
         """
         Verifies if the types of the operands are valid to the boolean operations
 
@@ -1162,7 +1163,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # raises the exception with the line/col info
             self._log_error(raised_error)
 
-    def get_operator(self, node: Union[ast.operator, Operator, IOperation]) -> Optional[Operator]:
+    def get_operator(self, node: ast.operator | Operator | IOperation) -> Operator | None:
         """
         Gets the :class:`Operator` equivalent to given Python ast operator
 
@@ -1268,7 +1269,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return self.get_type(callable_target)
 
-    def get_callable_and_update_args(self, call: ast.Call) -> Tuple[str, ISymbol]:
+    def get_callable_and_update_args(self, call: ast.Call) -> tuple[str, ISymbol]:
         attr: Attribute = self.visit(call.func)
         if not isinstance(attr, Attribute):
             attr_id = str(attr)
@@ -1370,7 +1371,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         return len(self.errors) == error_count
 
     def validate_builtin_callable(self, callable_id: str, callable_target: ISymbol,
-                                  call_args: List[ast.AST] = None) -> ISymbol:
+                                  call_args: list[ast.AST] = None) -> ISymbol:
         if call_args is None:
             call_args = []
 
@@ -1491,7 +1492,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 call.args.append(self.clone(default))
         return True
 
-    def validate_passed_arguments(self, call: ast.Call, args_types: List[IType], callable_id: str, callable: Callable):
+    def validate_passed_arguments(self, call: ast.Call, args_types: list[IType], callable_id: str, callable: Callable):
         if isinstance(callable, IBuiltinMethod):
             builtin_analyser = BuiltinFunctionCallAnalyser(self, call, callable_id, callable, self._log)
             if builtin_analyser.validate():
@@ -1522,7 +1523,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             param_type = self._validate_argument_type(param, arg_value.type)
             param_types.append(param_type)
 
-    def _validate_argument_type(self, param: ast.AST, arg_type: IType, use_metatype: bool = False) -> Optional[IType]:
+    def _validate_argument_type(self, param: ast.AST, arg_type: IType, use_metatype: bool = False) -> IType | None:
         param_type = self.get_type(param, use_metatype=use_metatype)
         if arg_type.is_type_of(param_type):
             return param_type
@@ -1588,7 +1589,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def validate_except_handlers(self, try_node: ast.Try):
         if len(try_node.handlers) > 1:
-            exception_handlers: List[ast.ExceptHandler] = try_node.handlers.copy()
+            exception_handlers: list[ast.ExceptHandler] = try_node.handlers.copy()
             general_exc_handler: ast.ExceptHandler = next(
                 (handler
                  for handler in exception_handlers
@@ -1671,7 +1672,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return result
 
-    def visit_Attribute(self, attribute: ast.Attribute) -> Union[str, Attribute]:
+    def visit_Attribute(self, attribute: ast.Attribute) -> str | Attribute:
         """
         Gets the attribute inside the ast node
 
@@ -1680,7 +1681,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                  Otherwise, returns None
         """
         is_internal = hasattr(attribute, 'is_internal_call') and attribute.is_internal_call
-        value: Optional[Union[str, ISymbol]] = self.get_symbol(attribute.value.id, is_internal) \
+        value: str | ISymbol | None = self.get_symbol(attribute.value.id, is_internal) \
             if isinstance(attribute.value, ast.Name) else self.visit(attribute.value)
 
         if value is None and isinstance(attribute.value, ast.Name):
@@ -1707,7 +1708,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         elif isinstance(symbol, Package) and attribute.attr in symbol.inner_packages:
             attr_symbol = symbol.inner_packages[attribute.attr]
         else:
-            attr_symbol: Optional[ISymbol] = self.get_symbol(attribute.attr)
+            attr_symbol: ISymbol | None = self.get_symbol(attribute.attr)
 
         origin = value
         module_symbols = origin.symbols if isinstance(origin, Package) else symbol.methods if isinstance(symbol, Import) else None
@@ -1845,7 +1846,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return item
 
-    def visit_Tuple(self, tup_node: ast.Tuple) -> Tuple[Any, ...]:
+    def visit_Tuple(self, tup_node: ast.Tuple) -> tuple[Any, ...]:
         """
         Visitor of literal tuple node
 
@@ -1859,7 +1860,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return tuple(result)
 
-    def visit_List(self, list_node: ast.List) -> List[Any]:
+    def visit_List(self, list_node: ast.List) -> list[Any]:
         """
         Visitor of literal list node
 
@@ -1873,7 +1874,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return result
 
-    def visit_Dict(self, dict_node: ast.Dict) -> Dict[Any, Any]:
+    def visit_Dict(self, dict_node: ast.Dict) -> dict[Any, Any]:
         """
         Visitor of literal dict node
 
@@ -1893,7 +1894,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 dictionary[key] = value
         return dictionary
 
-    def visit_Set(self, node: ast.Set) -> Set[Any]:
+    def visit_Set(self, node: ast.Set) -> set[Any]:
         """
         Visitor of literal set node. Currently, is not supported
         """
@@ -1941,11 +1942,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the object with the index value information
         """
         index = self.visit(index.value)
-        if isinstance(index, (Iterable, Tuple)):
+        if isinstance(index, (Iterable, tuple)):
             return tuple(index)
         return index
 
-    def visit_Slice(self, slice_node: ast.Slice) -> Tuple[Any, Any, Any]:
+    def visit_Slice(self, slice_node: ast.Slice) -> tuple[Any, Any, Any]:
         """
         Visitor of an slice node
 

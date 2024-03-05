@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from boa3.internal.neo import to_hex_str
 from boa3.internal.neo.utils import stack_item_from_json
@@ -14,7 +14,7 @@ class Notification:
     def __init__(self, event_name: str, script_hash: bytes, *value: Any):
         self._event_name: str = event_name
         self._script_hash: bytes = script_hash
-        self._value: Tuple[Any] = value
+        self._value: tuple = value
 
     @property
     def name(self) -> str:
@@ -29,7 +29,7 @@ class Notification:
         return self._value
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> Notification:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> Notification:
         """
         Creates a Notification object from a json.
 

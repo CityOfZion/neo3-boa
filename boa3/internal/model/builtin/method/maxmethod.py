@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -11,7 +11,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 class MaxMethod(IBuiltinMethod):
 
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
         identifier = 'max'
 
@@ -20,14 +20,14 @@ class MaxMethod(IBuiltinMethod):
         if not self._is_valid_type(arg_value):
             arg_value = default_type
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'args1': Variable(arg_value),
             'args2': Variable(arg_value)
         }
         vararg = ('values', Variable(arg_value))
         super().__init__(identifier, args, return_type=arg_value, vararg=vararg)
 
-    def _is_valid_type(self, arg_type: Optional[IType]) -> bool:
+    def _is_valid_type(self, arg_type: IType | None) -> bool:
         return (isinstance(arg_type, IType) and
                 any(allowed_type.is_type_of(arg_type) for allowed_type in self._allowed_types))
 
@@ -120,7 +120,7 @@ class MaxMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

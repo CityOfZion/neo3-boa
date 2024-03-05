@@ -1,6 +1,3 @@
-from typing import Union
-
-
 def to_script_hash(data_bytes: bytes) -> bytes:
     """
     Converts a data to a script hash.
@@ -24,7 +21,7 @@ def to_script_hash(data_bytes: bytes) -> bytes:
         return cryptography.hash160(data_bytes)
 
 
-def public_key_to_script_hash(public_key: Union[str, bytes]) -> bytes:
+def public_key_to_script_hash(public_key: str | bytes) -> bytes:
     """
     Converts a public key bytes sequence to a script hash.
 

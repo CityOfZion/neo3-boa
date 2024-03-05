@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import List
 
 
 class AbiType(str, Enum):
@@ -20,7 +19,7 @@ class AbiType(str, Enum):
     Void = 'Void'
 
     @staticmethod
-    def union(abi_types: List[AbiType]) -> AbiType:
+    def union(abi_types: list[AbiType]) -> AbiType:
         if len(abi_types) == 0:
             return AbiType.Any
 

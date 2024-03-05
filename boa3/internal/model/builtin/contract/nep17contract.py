@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from boa3.internal.model.builtin.interop.contract import ContractType
 from boa3.internal.model.method import Method
 
@@ -18,7 +16,7 @@ class Nep17ContractClass(ContractType):
             Nep17InterfaceTransferMethod,
         )
 
-        nep17_methods: List = [
+        nep17_methods: list = [
             Nep17InterfaceBalanceOfMethod,
             Nep17InterfaceDecimalsMethod,
             Nep17InterfaceSymbolMethod,
@@ -26,13 +24,13 @@ class Nep17ContractClass(ContractType):
             Nep17InterfaceTransferMethod,
         ]
 
-        instance_methods: Dict[str, Method] = {}
+        instance_methods: dict[str, Method] = {}
         for nep17_method in nep17_methods:
             nep17_method_obj = nep17_method(self)
             instance_methods[nep17_method_obj.identifier] = nep17_method_obj
 
-        self._instance_methods: Dict[str, Method] = instance_methods
+        self._instance_methods: dict[str, Method] = instance_methods
 
     @property
-    def instance_methods(self) -> Dict[str, Method]:
+    def instance_methods(self) -> dict[str, Method]:
         return self._instance_methods.copy()

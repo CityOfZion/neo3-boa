@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.math import *
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.symbol import ISymbol
@@ -12,7 +10,7 @@ class Math:
     Sqrt = SqrtMethod()
 
     @classmethod
-    def all_functions(cls) -> Dict[str, Callable]:
+    def all_functions(cls) -> dict[str, Callable]:
         from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 
         functions = [
@@ -23,11 +21,11 @@ class Math:
         return {method._identifier: method for method in functions if isinstance(method, IBuiltinCallable)}
 
     @classmethod
-    def get_methods_from_math_lib(cls) -> Dict[str, ISymbol]:
+    def get_methods_from_math_lib(cls) -> dict[str, ISymbol]:
         import math
         from inspect import getmembers, isbuiltin
 
-        method_symbols: Dict[str, ISymbol] = {}
+        method_symbols: dict[str, ISymbol] = {}
         all_functions = getmembers(math, isbuiltin)
 
         for m_id, method in all_functions:

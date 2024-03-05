@@ -1,4 +1,4 @@
-from typing import Any, Set
+from typing import Any
 
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
@@ -9,7 +9,7 @@ class GenericSequenceType(SequenceType):
     An class used to represent a generic Python sequence type
     """
 
-    def __init__(self, values_type: Set[IType] = None):
+    def __init__(self, values_type: set[IType] = None):
         identifier: str = 'sequence'
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
@@ -29,7 +29,7 @@ class GenericSequenceType(SequenceType):
     @classmethod
     def build(cls, value: Any) -> IType:
         if cls._is_type_of(value):
-            values_types: Set[IType] = cls.get_types(value)
+            values_types: set[IType] = cls.get_types(value)
             return cls(values_types)
 
     @classmethod

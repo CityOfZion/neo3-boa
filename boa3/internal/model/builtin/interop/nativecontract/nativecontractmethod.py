@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List, Optional
 
 from boa3.internal.compiler.compiledmetadata import CompiledMetadata
 from boa3.internal.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
@@ -11,7 +10,7 @@ from boa3.internal.model.variable import Variable
 class NativeContractMethod(InteropMethod):
 
     def __init__(self, native_contract_script_hash_method: ContractGetHashMethod, identifier: str, syscall: str,
-                 args: Dict[str, Variable] = None, defaults: List[ast.AST] = None, return_type: IType = None,
+                 args: dict[str, Variable] = None, defaults: list[ast.AST] = None, return_type: IType = None,
                  internal_call_args: int = None):
         super().__init__(identifier, syscall, args, defaults, return_type)
         self.script_hash_method = native_contract_script_hash_method
@@ -65,7 +64,7 @@ class NativeContractMethod(InteropMethod):
             if self.return_type is Type.none:
                 code_generator.remove_stack_top_item()
 
-    def _get_method_token_id(self, call_flag=None) -> Optional[int]:
+    def _get_method_token_id(self, call_flag=None) -> int | None:
         if self._method_token_id is None:
             from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 

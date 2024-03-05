@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Dict, Iterable, List, Sized
+from collections.abc import Iterable, Sized
+from typing import Any
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
@@ -23,7 +24,7 @@ class StorageFindMethod(InteropMethod):
         if prefix_type is None:
             prefix_type = Type.bytes
 
-        args: Dict[str, Variable] = {'prefix': Variable(prefix_type),
+        args: dict[str, Variable] = {'prefix': Variable(prefix_type),
                                      'context': Variable(context_type),
                                      'options': Variable(find_options_type)}
 
@@ -51,7 +52,7 @@ class StorageFindMethod(InteropMethod):
         if any(not isinstance(param, IExpression) for param in params):
             return False
 
-        args: List[IType] = [arg.type for arg in self.args.values()]
+        args: list[IType] = [arg.type for arg in self.args.values()]
         if len(params) > len(args):
             return False
         if len(params) < len(self.args_without_default):
@@ -60,7 +61,7 @@ class StorageFindMethod(InteropMethod):
         return self.prefix_arg.type.is_type_of(params[0].type)
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         """
         Gets the indexes order that need to be used during code generation.
         If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))
@@ -86,7 +87,7 @@ class StorageFindMethod(InteropMethod):
         return self.args['options']
 
     def build(self, value: Any) -> IBuiltinMethod:
-        exp: List[IExpression] = []
+        exp: list[IExpression] = []
         if isinstance(value, Sized):
             if len(value) > 1 or not isinstance(value, Iterable):
                 return self

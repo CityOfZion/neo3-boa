@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model.builtin.method.listmethod import ListMethod
 from boa3.internal.model.type.itype import IType
@@ -14,7 +13,7 @@ class ListGenericMethod(ListMethod):
         if value is None:
             value = Type.any
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'value': Variable(value),
         }
 

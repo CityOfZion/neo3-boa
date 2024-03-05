@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import StdLibMethod
 from boa3.internal.model.variable import Variable
 
@@ -10,5 +8,5 @@ class DeserializeMethod(StdLibMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'deserialize'
         native_identifier = 'deserialize'
-        args: Dict[str, Variable] = {'data': Variable(Type.bytes)}
+        args: dict[str, Variable] = {'data': Variable(Type.bytes)}
         super().__init__(identifier, native_identifier, args, return_type=Type.any)

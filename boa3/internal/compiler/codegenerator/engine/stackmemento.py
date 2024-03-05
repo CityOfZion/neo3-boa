@@ -5,9 +5,6 @@ __all__ = [
     'NeoStack'
 ]
 
-
-from typing import Dict, List, Tuple
-
 from boa3.internal.compiler.codegenerator.engine.istack import IStack
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.model.type.itype import IType
@@ -20,11 +17,11 @@ class StackMemento:
     """
 
     def __init__(self):
-        self._stacks: List[Tuple[VMCode, NeoStack]] = []
+        self._stacks: list[tuple[VMCode, NeoStack]] = []
         self._current_stack: NeoStack = NeoStack()
 
     @property
-    def stack_map(self) -> Dict[int, NeoStack]:
+    def stack_map(self) -> dict[int, NeoStack]:
         vm_code_mapping = VMCodeMapping.instance()
         return {vm_code_mapping.get_start_address(vmcode): stack for vmcode, stack in self._stacks}
 

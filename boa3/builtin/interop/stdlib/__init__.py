@@ -14,7 +14,7 @@ __all__ = [
 ]
 
 
-from typing import Any, Union
+from typing import Any
 
 
 def base58_encode(key: bytes) -> str:
@@ -215,7 +215,7 @@ def itoa(value: int, base: int = 10) -> str:
     pass
 
 
-def memory_search(mem: Union[bytes, str], value: Union[bytes, str], start: int = 0, backward: bool = False) -> int:
+def memory_search(mem: bytes | str, value: bytes | str, start: int = 0, backward: bool = False) -> int:
     """
     Searches for a given value in a given memory.
 
@@ -240,7 +240,7 @@ def memory_search(mem: Union[bytes, str], value: Union[bytes, str], start: int =
     pass
 
 
-def memory_compare(mem1: Union[bytes, str], mem2: Union[bytes, str]) -> int:
+def memory_compare(mem1: bytes | str, mem2: bytes | str) -> int:
     """
     Compares a memory with another one.
 

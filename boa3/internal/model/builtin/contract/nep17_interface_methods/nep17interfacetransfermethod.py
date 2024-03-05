@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model.builtin.contract.nep17_interface_methods.nep17interfacemethod import Nep17InterfaceMethod
 from boa3.internal.model.builtin.interop.contract import ContractType
@@ -12,7 +11,7 @@ class Nep17InterfaceTransferMethod(Nep17InterfaceMethod):
         from boa3.internal.model.type.type import Type
         from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(self_type),
             'from_address': Variable(UInt160Type.build()),
             'to_address': Variable(UInt160Type.build()),

@@ -2,8 +2,9 @@ import ast
 import logging
 import os
 from abc import ABC
+from collections.abc import Sequence
 from inspect import isclass
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.exception.CompilerError import CompilerError, InternalError, UnresolvedReference
@@ -29,10 +30,10 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
     def __init__(self, ast_tree: ast.AST, filename: str = None, root_folder: str = None,
                  log: bool = False, fail_fast: bool = True):
-        self.errors: List[CompilerError] = []
-        self.warnings: List[CompilerWarning] = []
+        self.errors: list[CompilerError] = []
+        self.warnings: list[CompilerWarning] = []
 
-        self.filename: Optional[str] = filename
+        self.filename: str | None = filename
         if not isinstance(root_folder, str) or not os.path.isdir(root_folder):
             root_folder = (os.path.dirname(os.path.abspath(filename))
                            if isinstance(filename, str) and os.path.isfile(filename)
@@ -42,7 +43,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         self._fail_fast: bool = fail_fast
 
         self._tree: ast.AST = ast_tree
-        self.symbols: Dict[str, ISymbol] = {}
+        self.symbols: dict[str, ISymbol] = {}
 
     @property
     def has_errors(self) -> bool:
@@ -150,7 +151,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
                    check_raw_id: bool = False,
-                   origin_node: ast.AST = None) -> Optional[ISymbol]:
+                   origin_node: ast.AST = None) -> ISymbol | None:
         """
         Tries to get the symbol by its id name
 
@@ -192,7 +193,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
         return found_symbol
 
-    def _search_by_raw_id(self, symbol_id: str, symbols: Sequence[ISymbol]) -> Optional[ISymbol]:
+    def _search_by_raw_id(self, symbol_id: str, symbols: Sequence[ISymbol]) -> ISymbol | None:
         for symbol in symbols:
             if isinstance(symbol, IdentifiedSymbol) and symbol.identifier == symbol_id:
                 return symbol
@@ -218,7 +219,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
         return not isinstance(symbol, PythonClass) or isinstance(symbol, InteropInterfaceType)
 
-    def parse_to_node(self, expression: str, origin: ast.AST = None) -> Union[ast.AST, Sequence[ast.AST]]:
+    def parse_to_node(self, expression: str, origin: ast.AST = None) -> ast.AST | Sequence[ast.AST]:
         """
         Parses an expression to an ast.
 

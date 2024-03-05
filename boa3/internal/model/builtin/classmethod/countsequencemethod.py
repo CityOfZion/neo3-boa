@@ -1,5 +1,3 @@
-from typing import Dict, List, Optional, Tuple
-
 from boa3.internal.model.builtin.classmethod.countmethod import CountMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
@@ -9,14 +7,14 @@ from boa3.internal.model.variable import Variable
 
 class CountSequenceMethod(CountMethod):
 
-    def __init__(self, sequence_type: Optional[SequenceType] = None, arg_value: Optional[IType] = None):
+    def __init__(self, sequence_type: SequenceType | None = None, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
         if not isinstance(sequence_type, SequenceType):
             sequence_type = Type.sequence
         if not isinstance(arg_value, IType):
             arg_value = Type.any
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(sequence_type),
             'value': Variable(arg_value)
         }
@@ -102,7 +100,7 @@ class CountSequenceMethod(CountMethod):
         code_generator.remove_stack_top_item()
         code_generator.remove_stack_top_item()
 
-    def _generic_verification(self, code_generator) -> Tuple[List[int], List[int]]:
+    def _generic_verification(self, code_generator) -> tuple[list[int], list[int]]:
         """
         Generate the Neo VM opcodes for the method.
 

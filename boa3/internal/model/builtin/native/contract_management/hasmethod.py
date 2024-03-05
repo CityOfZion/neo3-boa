@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import ContractManagementMethod
 from boa3.internal.model.variable import Variable
 
@@ -12,7 +10,7 @@ class HasMethod(ContractManagementMethod):
 
         identifier = 'has_method'
         syscall = 'hasMethod'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'hash': Variable(UInt160Type.build()),
             'method': Variable(Type.str),
             'parameter_count': Variable(Type.int)

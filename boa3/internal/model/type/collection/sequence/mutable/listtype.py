@@ -1,4 +1,4 @@
-from typing import Any, Set
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.model.type.collection.sequence.mutable.mutablesequencetype import MutableSequenceType
@@ -10,7 +10,7 @@ class ListType(MutableSequenceType):
     A class used to represent Python list type
     """
 
-    def __init__(self, values_type: Set[IType] = None):
+    def __init__(self, values_type: set[IType] = None):
         identifier = 'list'
         values_type = self.filter_types(values_type)
         super().__init__(identifier, values_type)
@@ -43,7 +43,7 @@ class ListType(MutableSequenceType):
 
     @classmethod
     def build(cls, value: Any) -> IType:
-        values_types: Set[IType] = cls.get_types(value)
+        values_types: set[IType] = cls.get_types(value)
         return cls(values_types)
 
     @classmethod

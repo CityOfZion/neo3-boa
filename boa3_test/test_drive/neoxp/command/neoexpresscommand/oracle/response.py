@@ -1,11 +1,9 @@
-from typing import Dict, Optional
-
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.oracle.ioraclecommand import IOracleCommand
 
 
 class OracleResponseCommand(IOracleCommand):
     def __init__(self, url: str, response_path: str,
-                 request_id: Optional[int] = None,
+                 request_id: int | None = None,
                  trace: bool = False,
                  neo_express_data_file: str = None):
 
@@ -21,7 +19,7 @@ class OracleResponseCommand(IOracleCommand):
 
         super().__init__(command_id, args)
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if self.request_id:

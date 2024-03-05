@@ -1,5 +1,3 @@
-from typing import Union
-
 from boa3.internal import constants as __boa_constants
 from boa3.internal.neo import to_hex_str
 
@@ -8,7 +6,7 @@ NEO_DECIMALS = __boa_constants.NEO_DECIMALS
 DEFAULT_ACCOUNT_VERSION = 53
 
 
-def stringify_asset_quantity(quantity: Union[int, float], decimals: int) -> str:
+def stringify_asset_quantity(quantity: int | float, decimals: int) -> str:
     if decimals < 0:
         decimals = 0
 

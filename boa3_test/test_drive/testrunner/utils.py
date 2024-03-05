@@ -1,4 +1,5 @@
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.internal.neo.vm.type.AbiType import AbiType
 

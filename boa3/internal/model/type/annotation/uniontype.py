@@ -1,4 +1,5 @@
-from typing import Any, Iterable, List, Set
+from collections.abc import Iterable
+from typing import Any
 
 from boa3.internal.model.type.itype import IType
 from boa3.internal.neo.vm.type.AbiType import AbiType
@@ -10,10 +11,10 @@ class UnionType(IType):
     An class used to represent Python Union annotation type
     """
 
-    def __init__(self, union_types: Set[IType] = None):
+    def __init__(self, union_types: set[IType] = None):
         identifier: str = 'Union'
         super().__init__(identifier)
-        self._union_types: Set[IType] = union_types if union_types is not None else set()
+        self._union_types: set[IType] = union_types if union_types is not None else set()
 
         # variables to not reevaluate everytime we need to access
         self._abi_type: AbiType = None
@@ -25,7 +26,7 @@ class UnionType(IType):
                                  ', '.join([t.identifier for t in self._union_types]))
 
     @property
-    def union_types(self) -> List[IType]:
+    def union_types(self) -> list[IType]:
         return list(self._union_types)
 
     @property

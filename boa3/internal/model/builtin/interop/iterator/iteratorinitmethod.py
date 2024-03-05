@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.builtin.interop.iterator.iteratortype import IteratorType
@@ -13,7 +14,7 @@ class IteratorMethod(InteropMethod):
         identifier = '-Iterator__init__'
         syscall = 'System.Iterator.Create'
         from boa3.internal.model.type.type import Type
-        args: Dict[str, Variable] = {'entry': Variable(Type.collection)}
+        args: dict[str, Variable] = {'entry': Variable(Type.collection)}
         super().__init__(identifier, syscall, args, return_type=return_type)
 
     def validate_parameters(self, *params: IExpression) -> bool:
@@ -24,7 +25,7 @@ class IteratorMethod(InteropMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def _entry_arg(self) -> Variable:

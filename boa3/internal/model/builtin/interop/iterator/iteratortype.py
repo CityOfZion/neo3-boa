@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional, Tuple
+from typing import Any
 
 from boa3.internal.model.builtin.interop.interopinterfacetype import InteropInterfaceType
 from boa3.internal.model.method import Method
@@ -34,7 +34,7 @@ class IteratorType(InteropInterfaceType, ICollectionType):
     def identifier(self) -> str:
         return '{0}[{1}, {2}]'.format(self._identifier, self.valid_key.identifier, self.item_type.identifier)
 
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self) -> Method | None:
         return self._constructor
 
     @property
@@ -69,7 +69,7 @@ class IteratorType(InteropInterfaceType, ICollectionType):
 
         self._properties['value'] = IteratorValueProperty(self)
 
-    def is_instance_opcodes(self) -> List[Tuple[Opcode, bytes]]:
+    def is_instance_opcodes(self) -> list[tuple[Opcode, bytes]]:
         from boa3.internal.model.type.classes.pythonclass import PythonClass
         return super(PythonClass, self).is_instance_opcodes()
 

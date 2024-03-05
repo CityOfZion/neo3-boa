@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.primitive.inttype import IntType
@@ -30,7 +30,7 @@ class WitnessRuleActionType(IntType):
         return isinstance(value, (WitnessRuleAction, WitnessRuleActionType))
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         """
         Gets the class symbols of this type
 

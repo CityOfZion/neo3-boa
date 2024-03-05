@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
 
@@ -9,7 +7,7 @@ class ToHexStrMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
         identifier = 'to_hex_str'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'data': Variable(Type.bytes)
         }
         super().__init__(identifier, args, return_type=Type.str)
@@ -111,5 +109,5 @@ class ToHexStrMethod(IBuiltinMethod):
         return 0
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None

@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List, Optional, Tuple
 
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.debuginstruction import DebugInstruction
@@ -20,30 +19,30 @@ class Method(Callable):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: Dict[str, Variable] = None,
-                 vararg: Optional[Tuple[str, Variable]] = None,
-                 kwargs: Optional[Dict[str, Variable]] = None,
-                 defaults: List[ast.AST] = None,
+    def __init__(self, args: dict[str, Variable] = None,
+                 vararg: tuple[str, Variable] | None = None,
+                 kwargs: dict[str, Variable] | None = None,
+                 defaults: list[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
-                 decorators: List[Callable] = None,
+                 decorators: list[Callable] = None,
                  is_init: bool = False,
                  external_name: str = None,
                  is_safe: bool = False,
-                 origin_node: Optional[ast.AST] = None):
+                 origin_node: ast.AST | None = None):
         super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, external_name, is_safe, origin_node)
 
         self.imported_symbols = {}
         self._symbols = {}
         self.defined_by_entry = True
         self.is_init = is_init
-        self.locals: Dict[str, Variable] = {}
+        self.locals: dict[str, Variable] = {}
 
         if is_init and self.has_cls_or_self:
             self.return_type = list(self.args.values())[0].type
 
-        self._debug_map: List[DebugInstruction] = []
-        self.origin_class: Optional[ClassType] = None
-        self.file_origin: Optional[str] = None
+        self._debug_map: list[DebugInstruction] = []
+        self.origin_class: ClassType | None = None
+        self.file_origin: str | None = None
 
     @property
     def shadowing_name(self) -> str:
@@ -64,7 +63,7 @@ class Method(Callable):
                 self.locals[var_id] = var
 
     @property
-    def symbols(self) -> Dict[str, Variable]:
+    def symbols(self) -> dict[str, Variable]:
         """
         Gets all the symbols in the method
 
@@ -99,7 +98,7 @@ class Method(Callable):
         """
         return self._origin_node
 
-    def debug_map(self) -> List[DebugInstruction]:
+    def debug_map(self) -> list[DebugInstruction]:
         """
         Returns a list with the debug information of each mapped Python instruction inside this method
         """
@@ -114,7 +113,7 @@ class Method(Callable):
         """
         if not any((info.start_line == instr_info.start_line and info.start_col == instr_info.start_col
                     for info in self._debug_map)):
-            existing_instr_info: Optional[DebugInstruction] = \
+            existing_instr_info: DebugInstruction | None = \
                 next((info for info in self._debug_map if info.code == instr_info.code), None)
             if existing_instr_info is not None:
                 self._debug_map.remove(existing_instr_info)
@@ -133,7 +132,7 @@ class Method(Callable):
         if instruction is not None:
             self._debug_map.remove(instruction)
 
-    def args_to_be_generated(self) -> List[int]:
+    def args_to_be_generated(self) -> list[int]:
         """
         Gets the indexes of the arguments that must be generated.
         If method has `self` arg, it must be in this list.

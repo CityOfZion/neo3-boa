@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.internal import constants
 from boa3.internal.neo import to_hex_str
 from boa3_test.test_drive.model.smart_contract.testcontract import TestContract
@@ -23,10 +21,10 @@ class ContractCollection:
     def __init__(self):
         natives = self._native_contracts.copy()
 
-        self._contract_names: List[str] = [native.name for native in natives]
-        self._contract_paths: List[str] = [native.path for native in natives]
-        self._internal_list: List[TestContract] = natives
-        self._waiting_deploy: List[TestContract] = []
+        self._contract_names: list[str] = [native.name for native in natives]
+        self._contract_paths: list[str] = [native.path for native in natives]
+        self._internal_list: list[TestContract] = natives
+        self._waiting_deploy: list[TestContract] = []
 
     def append(self, new_contract: TestContract):
         if not isinstance(new_contract, TestContract):
@@ -99,7 +97,7 @@ class ContractCollection:
     def __repr__(self):
         return self._internal_list.__repr__()
 
-    def replace(self, deployed_contracts: List[TestContract]):
+    def replace(self, deployed_contracts: list[TestContract]):
         already_existing_contracts = self._contract_names.copy()
         contract_indexes = list(range(len(already_existing_contracts)))
 

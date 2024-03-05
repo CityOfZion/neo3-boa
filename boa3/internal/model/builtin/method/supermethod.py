@@ -1,4 +1,5 @@
-from typing import Any, Optional, Sized
+from collections.abc import Sized
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.classes.classtype import ClassType
@@ -34,7 +35,7 @@ class SuperMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -9,7 +9,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class CopyMethod(IBuiltinMethod):
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
         identifier = 'copy'
 
@@ -18,10 +18,10 @@ class CopyMethod(IBuiltinMethod):
         if not self._is_valid_type(arg_value):
             arg_value = default_type
 
-        args: Dict[str, Variable] = {'self': Variable(arg_value)}
+        args: dict[str, Variable] = {'self': Variable(arg_value)}
         super().__init__(identifier, args, return_type=arg_value)
 
-    def _is_valid_type(self, arg_type: Optional[IType]) -> bool:
+    def _is_valid_type(self, arg_type: IType | None) -> bool:
         return (isinstance(arg_type, IType) and
                 any(allowed_type.is_type_of(arg_type) for allowed_type in self._allowed_types))
 
@@ -53,7 +53,7 @@ class CopyMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

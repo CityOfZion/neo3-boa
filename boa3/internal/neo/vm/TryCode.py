@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal.neo.vm.VMCode import VMCode
 from boa3.internal.neo.vm.type.Integer import Integer
 
@@ -12,13 +10,13 @@ class TryCode(VMCode):
     :ivar data: the data in bytes of the code. Empty byte array by default.
     """
 
-    def __init__(self, except_start_code: Optional[VMCode] = None, finally_start_code: Optional[VMCode] = None):
+    def __init__(self, except_start_code: VMCode | None = None, finally_start_code: VMCode | None = None):
         """
         :param except_start_code: the first code of the except body
         :type except_start_code: VMCode or None
         """
-        self._except_start_code: Optional[VMCode] = except_start_code
-        self._finally_start_code: Optional[VMCode] = finally_start_code
+        self._except_start_code: VMCode | None = except_start_code
+        self._finally_start_code: VMCode | None = finally_start_code
         from boa3.internal.neo.vm.opcode.OpcodeInfo import OpcodeInfo
         super().__init__(OpcodeInfo.TRY)
 

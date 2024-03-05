@@ -2,7 +2,6 @@ from typing import Any, Union
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.interop import storage, runtime
-from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.type import UInt160, helper as type_helper

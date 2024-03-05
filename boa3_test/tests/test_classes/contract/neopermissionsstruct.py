@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
@@ -11,7 +11,7 @@ class NeoPermissionsStruct(NeoStruct):
     _methods_fields = 'methods'
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> NeoPermissionsStruct:
+    def from_json(cls, json: dict[str, Any]) -> NeoPermissionsStruct:
         required_fields = [cls._contract_fields,
                            cls._methods_fields
                            ]
@@ -29,7 +29,7 @@ class NeoPermissionsStruct(NeoStruct):
         return value == '*'
 
     @classmethod
-    def get_contract(cls, value: Any) -> Optional[Union[UInt160, bytes]]:
+    def get_contract(cls, value: Any) -> UInt160 | bytes | None:
         if cls._is_wildcard(value):
             return None
 
@@ -39,7 +39,7 @@ class NeoPermissionsStruct(NeoStruct):
             return bytes.fromhex(value)
 
     @classmethod
-    def get_methods(cls, value: Any) -> Optional[list]:
+    def get_methods(cls, value: Any) -> list | None:
         if cls._is_wildcard(value):
             return None
         else:

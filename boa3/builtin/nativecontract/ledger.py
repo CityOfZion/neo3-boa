@@ -2,9 +2,6 @@ __all__ = [
     'Ledger',
 ]
 
-
-from typing import List, Optional, Union
-
 from boa3.builtin.interop.blockchain import Block, Signer, Transaction, VMState
 from boa3.builtin.type import UInt256, UInt160
 
@@ -20,7 +17,7 @@ class Ledger:
     hash: UInt160
 
     @classmethod
-    def get_block(cls, index_or_hash: Union[int, UInt256]) -> Optional[Block]:
+    def get_block(cls, index_or_hash: int | UInt256) -> Block | None:
         """
         Gets the block with the given index or hash.
 
@@ -85,7 +82,7 @@ class Ledger:
         pass
 
     @classmethod
-    def get_transaction(cls, hash_: UInt256) -> Optional[Transaction]:
+    def get_transaction(cls, hash_: UInt256) -> Transaction | None:
         """
         Gets a transaction with the given hash.
 
@@ -111,7 +108,7 @@ class Ledger:
         pass
 
     @classmethod
-    def get_transaction_from_block(cls, block_hash_or_height: Union[UInt256, int], tx_index: int) -> Optional[Transaction]:
+    def get_transaction_from_block(cls, block_hash_or_height: UInt256 | int, tx_index: int) -> Transaction | None:
         """
         Gets a transaction from a block.
 
@@ -174,7 +171,7 @@ class Ledger:
         pass
 
     @classmethod
-    def get_transaction_signers(cls, hash_: UInt256) -> List[Signer]:
+    def get_transaction_signers(cls, hash_: UInt256) -> list[Signer]:
         """
         Gets the VM state of a transaction.
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import base64
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
@@ -16,22 +16,22 @@ class TestRunnerStorage:
     _storage_key_key = 'key'
     _storage_item_key = 'value'
 
-    def __init__(self, contract: TestContract, values: Dict[StorageKey, StorageItem]):
+    def __init__(self, contract: TestContract, values: dict[StorageKey, StorageItem]):
         self._contract: TestContract = contract
-        self._values: Dict[StorageKey, StorageItem] = values
+        self._values: dict[StorageKey, StorageItem] = values
 
     @property
-    def contract(self) -> Optional[TestContract]:
+    def contract(self) -> TestContract | None:
         if isinstance(self._contract, TestContract):
             return self._contract
         return None
 
     @property
-    def values(self) -> Dict[StorageKey, StorageItem]:
+    def values(self) -> dict[StorageKey, StorageItem]:
         return self._values
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], contracts: ContractCollection = None) -> TestRunnerStorage:
+    def from_json(cls, json: dict[str, Any], contracts: ContractCollection = None) -> TestRunnerStorage:
         keys = set(json.keys())
         if not keys.issubset([cls._storage_contract_name_key,
                               cls._storage_contract_hash_key,

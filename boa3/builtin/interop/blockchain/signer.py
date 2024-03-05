@@ -7,8 +7,6 @@ __all__ = [
     "WitnessScope",
 ]
 
-from typing import List
-
 from boa3.builtin.type import UInt160
 from boa3.internal.neo3.network.payloads.verification import WitnessConditionType, WitnessRuleAction, WitnessScope
 
@@ -25,19 +23,19 @@ class Signer:
     :ivar scopes:
     :vartype scopes: WitnessScope
     :ivar allowed_contracts:
-    :vartype allowed_contracts: List[UInt160]
+    :vartype allowed_contracts: list[UInt160]
     :ivar allowed_groups:
-    :vartype allowed_groups: List[UInt160]
+    :vartype allowed_groups: list[UInt160]
     :ivar rules:
-    :vartype rules: List[WitnessRule]
+    :vartype rules: list[WitnessRule]
     """
 
     def __init__(self):
         self.account: UInt160 = UInt160()
         self.scopes: WitnessScope = WitnessScope.NONE
-        self.allowed_contracts: List[UInt160] = []
-        self.allowed_groups: List[UInt160] = []
-        self.rules: List[WitnessRule] = []
+        self.allowed_contracts: list[UInt160] = []
+        self.allowed_groups: list[UInt160] = []
+        self.rules: list[WitnessRule] = []
 
 
 class WitnessRule:

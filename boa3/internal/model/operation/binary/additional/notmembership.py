@@ -1,5 +1,3 @@
-from typing import List, Optional, Tuple
-
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.collection.icollection import ICollectionType
@@ -17,7 +15,7 @@ class CollectionNotMembership(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.collection]
+    _valid_types: list[IType] = [Type.collection]
 
     def __init__(self, left: IType = Type.any, right: IType = None):
         self.operator: Operator = Operator.NotIn
@@ -53,7 +51,7 @@ class CollectionNotMembership(BinaryOperation):
         return Type.bool
 
     def get_valid_operand_for_validation(self, left_operand: IType,
-                                         right_operand: IType = None) -> Tuple[Optional[IType], Optional[IType]]:
+                                         right_operand: IType = None) -> tuple[IType | None, IType | None]:
         if isinstance(right_operand, ICollectionType):
             left = right_operand.item_type if not isinstance(right_operand, MappingType) else right_operand.key_type
             return left, right_operand

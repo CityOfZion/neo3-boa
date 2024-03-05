@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Any, Dict
+from typing import Any
 
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.symbol import ISymbol
@@ -104,7 +104,7 @@ class IType(IdentifiedSymbol):
         code_generator.insert_type_check(self.stack_item)
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         """
         Gets the class symbols of this type
 

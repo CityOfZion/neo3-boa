@@ -1,19 +1,18 @@
 import abc
-from typing import List, Optional, Union
 
 from boa3.internal.model.event import Event
 from boa3.internal.model.method import Method
 
 
 class INeoStandard(abc.ABC):
-    def __init__(self, methods: List[Method], events: List[Event], optionals: Optional[List[Method]] = None):
+    def __init__(self, methods: list[Method], events: list[Event], optionals: list[Method] | None = None):
         if optionals is None:
             optionals = []
-        self.methods: List[Method] = methods.copy()
-        self.events: List[Event] = events.copy()
-        self.optionals: List[Method] = optionals.copy()
+        self.methods: list[Method] = methods.copy()
+        self.events: list[Event] = events.copy()
+        self.optionals: list[Method] = optionals.copy()
 
-    def match_definition(self, standard: Union[Method, Event], symbol: Union[Method, Event]) -> bool:
+    def match_definition(self, standard: Method | Event, symbol: Method | Event) -> bool:
         if not isinstance(standard, (Method, Event)) or not isinstance(symbol, (Method, Event)):
             return False
 
@@ -23,7 +22,7 @@ class INeoStandard(abc.ABC):
 
         return self._have_same_signature(standard, symbol)
 
-    def _have_same_signature(self, symbol: Union[Method, Event], other: Union[Method, Event]) -> bool:
+    def _have_same_signature(self, symbol: Method | Event, other: Method | Event) -> bool:
         if (isinstance(symbol, Method) and not isinstance(other, Method)
                 or isinstance(symbol, Event) and not isinstance(other, Event)):
             return False

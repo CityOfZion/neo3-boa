@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
 
@@ -14,7 +12,7 @@ class StorageContextCreateMapMethod(IBuiltinMethod):
         identifier = 'create_map'
         byte_string_type = Type.bytes
 
-        args: Dict[str, Variable] = {'self': Variable(_StorageContext),
+        args: dict[str, Variable] = {'self': Variable(_StorageContext),
                                      'prefix': Variable(byte_string_type)}
 
         super().__init__(identifier, args, return_type=_StorageMap)
@@ -24,7 +22,7 @@ class StorageContextCreateMapMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def generate_internal_opcodes(self, code_generator):

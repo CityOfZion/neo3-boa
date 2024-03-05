@@ -8,7 +8,7 @@ __all__ = [
     'to_script_hash',
 ]
 
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.contract.Nep17Contract import Nep17Contract
@@ -78,7 +78,7 @@ Check out the `proposal <https://github.com/neo-project/proposals/blob/master/ne
 """
 
 
-def abort(msg: Optional[str] = None):
+def abort(msg: str | None = None):
     """
     Aborts the execution of a smart contract. Using this will cancel the changes made on the blockchain by the
     transaction.

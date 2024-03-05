@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.symbol import ISymbol
@@ -98,7 +97,7 @@ class IOperation(ISymbol, ABC):
 
     @classmethod
     @abstractmethod
-    def build(cls, *operands: IType) -> Optional[IOperation]:
+    def build(cls, *operands: IType) -> IOperation | None:
         """
         Creates an operation with the given operands types
 

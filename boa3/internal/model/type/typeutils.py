@@ -1,5 +1,3 @@
-from typing import Dict, List
-
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.symbol import ISymbol
@@ -10,17 +8,17 @@ from boa3.internal.model.type.typingmethod.casttypemethod import CastTypeMethod
 
 class TypeUtils:
     @classmethod
-    def all_functions(cls) -> Dict[str, Callable]:
+    def all_functions(cls) -> dict[str, Callable]:
         from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
         return {tpe._identifier: tpe for tpe in vars(cls).values() if isinstance(tpe, IBuiltinCallable)}
 
     @classmethod
-    def get_types_from_typing_lib(cls) -> Dict[str, ISymbol]:
+    def get_types_from_typing_lib(cls) -> dict[str, ISymbol]:
         import typing
         from types import FunctionType
 
-        type_symbols: Dict[str, ISymbol] = {}
-        all_types: List[str] = typing.__all__
+        type_symbols: dict[str, ISymbol] = {}
+        all_types: list[str] = typing.__all__
 
         for t_id in all_types:
             attr = getattr(typing, t_id)
@@ -41,7 +39,7 @@ class TypeUtils:
     # Annotation function utils
     cast = CastTypeMethod()
 
-    _internal_validation_symbols: List[IdentifiedSymbol] = [type
+    _internal_validation_symbols: list[IdentifiedSymbol] = [type
                                                             ]
 
     symbols_for_internal_validation = {symbol.identifier: symbol

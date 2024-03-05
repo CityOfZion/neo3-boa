@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
 
@@ -9,7 +7,7 @@ class DecimalFloorMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
         identifier = 'floor'
-        args: Dict[str, Variable] = {'x': Variable(Type.int),
+        args: dict[str, Variable] = {'x': Variable(Type.int),
                                      'decimals': Variable(Type.int)}
         super().__init__(identifier, args, return_type=Type.int)
 
@@ -64,5 +62,5 @@ class DecimalFloorMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return

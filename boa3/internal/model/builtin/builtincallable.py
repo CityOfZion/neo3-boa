@@ -1,6 +1,5 @@
 import ast
 from abc import ABC
-from typing import Dict, List, Optional, Tuple
 
 from boa3.internal.model.builtin.builtinsymbol import IBuiltinSymbol
 from boa3.internal.model.callable import Callable
@@ -10,17 +9,17 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class IBuiltinCallable(Callable, IBuiltinSymbol, ABC):
-    def __init__(self, identifier: str, args: Dict[str, Variable] = None,
-                 vararg: Optional[Tuple[str, Variable]] = None,
-                 kwargs: Optional[Dict[str, Variable]] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None):
+    def __init__(self, identifier: str, args: dict[str, Variable] = None,
+                 vararg: tuple[str, Variable] | None = None,
+                 kwargs: dict[str, Variable] | None = None,
+                 defaults: list[ast.AST] = None, return_type: IType = None):
         super().__init__(args, vararg, kwargs, defaults, return_type)
         self._identifier = identifier
         self._generated_opcode = None
         self.defined_by_entry = False  # every builtin symbol must have this variable set as False
 
     @property
-    def opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def opcode(self) -> list[tuple[Opcode, bytes]]:
         """
         Gets the opcode for the method.
 
@@ -53,7 +52,7 @@ class IBuiltinCallable(Callable, IBuiltinSymbol, ABC):
         self.reset_calls()
 
     @property
-    def _opcode(self) -> List[Tuple[Opcode, bytes]]:
+    def _opcode(self) -> list[tuple[Opcode, bytes]]:
         return []
 
     @property

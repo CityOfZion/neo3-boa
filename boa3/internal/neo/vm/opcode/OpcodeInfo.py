@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal import constants
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.opcode.OpcodeInformation import OpcodeInformation
@@ -7,7 +5,7 @@ from boa3.internal.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 
 class OpcodeInfo:
     @classmethod
-    def get_info(cls, opcode: Opcode) -> Optional[OpcodeInformation]:
+    def get_info(cls, opcode: Opcode) -> OpcodeInformation | None:
         """
         Gets a binary operation given the operator.
 

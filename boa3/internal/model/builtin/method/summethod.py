@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
@@ -11,7 +10,7 @@ class SumMethod(IBuiltinMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
         identifier = 'sum'
-        args: Dict[str, Variable] = {'__iterable': Variable(Type.sequence.build_collection(Type.int)),
+        args: dict[str, Variable] = {'__iterable': Variable(Type.sequence.build_collection(Type.int)),
                                      '__start': Variable(Type.int)}
 
         start_default = ast.parse("{0}".format(Type.int.default_value)
@@ -55,5 +54,5 @@ class SumMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None

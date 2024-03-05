@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo3.contracts import CallFlags
@@ -9,10 +7,10 @@ from boa3.internal.neo3.core import types
 
 class MethodTokenCollection:
     def __init__(self):
-        self._method_tokens: List[MethodToken] = []
-        self._called_builtins: List[IBuiltinMethod] = []
+        self._method_tokens: list[MethodToken] = []
+        self._called_builtins: list[IBuiltinMethod] = []
 
-    def append(self, contract_method: IBuiltinMethod, call_flag: CallFlags = CallFlags.ALL) -> Optional[int]:
+    def append(self, contract_method: IBuiltinMethod, call_flag: CallFlags = CallFlags.ALL) -> int | None:
         method_token_id = self._try_get_index(contract_method, call_flag)
         if method_token_id is None and hasattr(contract_method, 'contract_script_hash'):
             method_token = MethodToken(hash=types.UInt160(contract_method.contract_script_hash),
@@ -45,7 +43,7 @@ class MethodTokenCollection:
         self._called_builtins.clear()
         return self._method_tokens.clear()
 
-    def _try_get_index(self, contract_method: IBuiltinMethod, call_flag: CallFlags = CallFlags.ALL) -> Optional[int]:
+    def _try_get_index(self, contract_method: IBuiltinMethod, call_flag: CallFlags = CallFlags.ALL) -> int | None:
         if not hasattr(contract_method, 'contract_script_hash'):
             return None
 
@@ -61,7 +59,7 @@ class MethodTokenCollection:
                                        and token.call_flags == call_flag)), None)
         return method_token_index
 
-    def to_list(self) -> List[MethodToken]:
+    def to_list(self) -> list[MethodToken]:
         return self._method_tokens.copy()
 
     def __getitem__(self, item):

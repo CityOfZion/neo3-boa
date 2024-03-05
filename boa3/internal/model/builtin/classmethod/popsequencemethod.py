@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, Optional
 
 from boa3.internal.model.builtin.classmethod.popmethod import PopMethod
 from boa3.internal.model.type.itype import IType
@@ -8,13 +7,13 @@ from boa3.internal.model.variable import Variable
 
 class PopSequenceMethod(PopMethod):
 
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
 
         if not Type.mutableSequence.is_type_of(arg_value):
             arg_value = Type.mutableSequence
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(arg_value),
             'index': Variable(arg_value.valid_key)
         }

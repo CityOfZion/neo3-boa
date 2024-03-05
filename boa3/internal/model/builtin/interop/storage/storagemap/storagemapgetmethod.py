@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.variable import Variable
 
@@ -11,7 +9,7 @@ class StorageMapGetMethod(IBuiltinMethod):
         from boa3.internal.model.type.type import Type
 
         identifier = 'get'
-        args: Dict[str, Variable] = {'self': Variable(_StorageMap),
+        args: dict[str, Variable] = {'self': Variable(_StorageMap),
                                      'key': Variable(Type.bytes)}
 
         super().__init__(identifier, args, return_type=Type.bytes)
@@ -28,7 +26,7 @@ class StorageMapGetMethod(IBuiltinMethod):
         return self.args['self'].type
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def generate_internal_opcodes(self, code_generator):

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -14,7 +14,7 @@ class ReverseMethod(IBuiltinMethod):
             sequence_type = Type.mutableSequence
 
         identifier = 'reverse'
-        args: Dict[str, Variable] = {'self': Variable(sequence_type)}
+        args: dict[str, Variable] = {'self': Variable(sequence_type)}
         super().__init__(identifier, args)
 
     @property
@@ -37,7 +37,7 @@ class ReverseMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

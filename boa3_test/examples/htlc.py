@@ -3,7 +3,6 @@ from typing import Any
 from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.contract import abort
 from boa3.builtin.interop import runtime, storage
-from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
 from boa3.builtin.interop.crypto import hash160
 from boa3.builtin.type import UInt160, helper as type_helper

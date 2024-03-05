@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, List, Dict, Any
+from typing import Any
 
 from boa3.internal.neo import from_hex_str
 from boa3.internal.neo3.core.types import UInt256
@@ -11,8 +11,8 @@ class TestBlock:
     def __init__(self):
         self._index: int = 0
         self._timestamp: int = 0
-        self._hash: Optional[UInt256] = None
-        self._transactions: List[TestTransaction] = []
+        self._hash: UInt256 | None = None
+        self._transactions: list[TestTransaction] = []
 
     @property
     def index(self) -> int:
@@ -22,7 +22,7 @@ class TestBlock:
     def timestamp(self) -> int:
         return self._timestamp
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         json_block = {
             'index': self._index,
             'timestamp': self._timestamp,
@@ -35,7 +35,7 @@ class TestBlock:
         return json_block
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestBlock:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> TestBlock:
         block = object.__new__(cls)
 
         if 'index' in json:

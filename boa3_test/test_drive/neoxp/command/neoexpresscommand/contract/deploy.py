@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any
 
 from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.test_drive.model.wallet.account import Account
@@ -30,7 +30,7 @@ class ContractDeployCommand(IContractCommand):
 
         super().__init__('deploy', [contract_nef, account.get_identifier()])
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if isinstance(self.witness_scope, WitnessScope):

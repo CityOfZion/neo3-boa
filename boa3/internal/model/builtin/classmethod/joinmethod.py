@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, Optional, Union
+from collections.abc import Iterable
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.collection.mapping.mutable.dicttype import DictType
@@ -9,7 +10,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class JoinMethod(IBuiltinMethod):
-    def __init__(self, self_type: IByteStringType = None, iterable_type: Union[SequenceType, DictType] = None):
+    def __init__(self, self_type: IByteStringType = None, iterable_type: SequenceType | DictType = None):
         from boa3.internal.model.type.type import Type
 
         if not isinstance(self_type, IByteStringType):
@@ -19,7 +20,7 @@ class JoinMethod(IBuiltinMethod):
             iterable_type = Type.sequence.build_collection([self_type])
 
         identifier = 'join'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(self_type),
             'iterable': Variable(iterable_type),
         }
@@ -119,7 +120,7 @@ class JoinMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

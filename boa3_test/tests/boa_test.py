@@ -1,7 +1,7 @@
 import logging
 import os
 import threading
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any
 from unittest import TestCase
 
 from boa3.internal import constants, env
@@ -73,12 +73,12 @@ class BoaTest(TestCase):
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._analyser
 
-    def get_all_imported_methods(self, compiler: Compiler) -> Dict[str, Method]:
+    def get_all_imported_methods(self, compiler: Compiler) -> dict[str, Method]:
         from boa3.internal.compiler.filegenerator.filegenerator import FileGenerator
         generator = FileGenerator(compiler.result, compiler._analyser, compiler._entry_smart_contract)
         return {constants.VARIABLE_NAME_SEPARATOR.join(name): value for name, value in generator._methods_with_imports.items()}
 
-    def assertCompilerLogs(self, expected_logged_exception, path) -> Union[bytes, str]:
+    def assertCompilerLogs(self, expected_logged_exception, path) -> bytes | str:
         output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, path)
         if not issubclass(expected_logged_exception, CompilerError):
             return output
@@ -123,7 +123,7 @@ class BoaTest(TestCase):
     def get_all_compile_log_data(self, path: str, *,
                                  get_errors: bool = True,
                                  get_warnings: bool = False,
-                                 fail_fast: bool = False) -> Tuple[list, list]:
+                                 fail_fast: bool = False) -> tuple[list, list]:
         from boa3.internal.exception.CompilerWarning import CompilerWarning
 
         instance_logs = []
@@ -218,7 +218,7 @@ class BoaTest(TestCase):
             path = os.path.abspath(path).replace(os.path.sep, constants.PATH_SEPARATOR)
         return path
 
-    def get_deploy_file_paths_without_compiling(self, contract_path: str, output_name: str = None) -> Tuple[str, str]:
+    def get_deploy_file_paths_without_compiling(self, contract_path: str, output_name: str = None) -> tuple[str, str]:
         if isinstance(output_name, str):
             output_path, output_file = os.path.split(output_name)
             if len(output_path) == 0:
@@ -238,7 +238,7 @@ class BoaTest(TestCase):
 
     def get_deploy_file_paths(self, *args: str, output_name: str = None,
                               compile_if_found: bool = False, change_manifest_name: bool = False,
-                              debug: bool = False) -> Tuple[str, str]:
+                              debug: bool = False) -> tuple[str, str]:
         contract_path = self.get_contract_path(*args)
         if isinstance(contract_path, str):
             nef_path, manifest_path = self.get_deploy_file_paths_without_compiling(contract_path, output_name)
@@ -268,7 +268,7 @@ class BoaTest(TestCase):
         return result
 
     def compile_and_save(self, path: str, root_folder: str = None, debug: bool = False, log: bool = True,
-                         output_name: str = None, env: str = None, **kwargs) -> Tuple[bytes, Dict[str, Any]]:
+                         output_name: str = None, env: str = None, **kwargs) -> tuple[bytes, dict[str, Any]]:
 
         if output_name is not None:
             output_dir, manifest_name = os.path.split(output_name)  # get name
@@ -323,7 +323,7 @@ class BoaTest(TestCase):
 
         return output, manifest
 
-    def get_debug_info(self, path: str) -> Optional[Dict[str, Any]]:
+    def get_debug_info(self, path: str) -> dict[str, Any] | None:
         if path.endswith('.nef'):
             nef_output = path
         else:
@@ -339,7 +339,7 @@ class BoaTest(TestCase):
             debug_info = json.loads(dbgnfo.read(os.path.basename(nef_output.replace('.nef', '.debug.json'))))
         return debug_info
 
-    def get_output(self, path: str, root_folder: str = None) -> Tuple[bytes, Dict[str, Any]]:
+    def get_output(self, path: str, root_folder: str = None) -> tuple[bytes, dict[str, Any]]:
         if path.endswith('.nef'):
             nef_output = path
             manifest_output = path.replace('.nef', '.manifest.json')
@@ -368,7 +368,7 @@ class BoaTest(TestCase):
 
         return output, manifest
 
-    def get_bytes_output(self, path: str) -> Tuple[bytes, Dict[str, Any]]:
+    def get_bytes_output(self, path: str) -> tuple[bytes, dict[str, Any]]:
         nef_output, manifest_output = self.get_deploy_file_paths_without_compiling(path)
         with _COMPILER_LOCK:
             if not os.path.isfile(nef_output):

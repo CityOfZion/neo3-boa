@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 from argparse import _SubParsersAction
-from typing import Optional
 
 from boa3.boa3 import Boa3
 from boa3.internal.cli_commands.icommand import ICommand
@@ -49,7 +48,7 @@ class CompileCommand(ICommand):
         project_path: str = args['project_path']
         debug: bool = args['debug']
         env: str = args['env']
-        output_path: Optional[str] = args['output_path']
+        output_path: str | None = args['output_path']
         fail_fast: bool = not args['no_failfast']
         log_level = args['log_level']
 

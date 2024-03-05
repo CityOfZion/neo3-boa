@@ -1,7 +1,7 @@
 # type: ignore
 
 from enum import Enum
-from typing import Iterable
+from collections.abc import Iterable
 
 from boa3.internal.neo3.core import Size, serialization
 

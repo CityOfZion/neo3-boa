@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.method.builtinevent import IBuiltinEvent
 from boa3.internal.model.variable import Variable
 
@@ -13,7 +11,7 @@ class Nep11TransferEvent(IBuiltinEvent):
         identifier = 'Nep11TransferEvent'
         type_token_id = Type.union.build([Type.str, Type.bytes])
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'from_addr': Variable(Type.union.build([Type.none, UInt160Type.build()])),
             'to_addr': Variable(Type.union.build([Type.none, UInt160Type.build()])),
             'amount': Variable(Type.int),
