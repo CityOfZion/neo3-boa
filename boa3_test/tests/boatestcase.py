@@ -523,9 +523,23 @@ class BoaTestCase(SmartContractTestCase):
 
     @classmethod
     async def get_latest_block(cls) -> block.Block:
+        """
+        Get the latest block emitted in the local chain
+        """
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
             best_block_hash = await rpc_client.get_best_block_hash()
             return await rpc_client.get_block(best_block_hash)
+
+    @classmethod
+    async def get_last_block(cls, tx_hash: types.UInt256) -> block.Block:
+        """
+        Returns the last block before the emission of a transaction if it exists
+        """
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host) as rpc_client:
+            block_index = await rpc_client.get_transaction_height(tx_hash)
+            if block_index > 0:
+                block_index -= 1
+            return await rpc_client.get_block(block_index)
 
     @classmethod
     def _check_vmstate(cls, receipt):

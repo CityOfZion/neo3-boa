@@ -354,15 +354,15 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
     async def test_current_hash(self):
         await self.set_up_contract('CurrentHash.py')
 
-        block_ = await self.get_latest_block()
+        result, _ = await self.call('main', [], return_type=types.UInt256, signing_accounts=[self.genesis])
+        block_ = await self.get_last_block(self.called_tx)
         expected = block_.hash()
-        result, _ = await self.call('main', [], return_type=types.UInt256)
         self.assertEqual(expected, result)
 
     async def test_current_index(self):
         await self.set_up_contract('CurrentIndex.py')
 
-        block_ = await self.get_latest_block()
+        result, _ = await self.call('main', [], return_type=int, signing_accounts=[self.genesis])
+        block_ = await self.get_last_block(self.called_tx)
         expected = block_.index
-        result, _ = await self.call('main', [], return_type=int)
         self.assertEqual(expected, result)
