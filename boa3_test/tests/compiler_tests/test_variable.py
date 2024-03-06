@@ -502,7 +502,7 @@ class TestVariable(boatestcase.BoaTestCase):
         result, _ = await self.call('get_c', [], return_type=int)
         self.assertEqual(15, result)
 
-        result, _ = await self.call('set_a', [100], return_type=None)
+        result, _ = await self.call('set_a', [100], return_type=None, signing_accounts=[self.genesis])
         self.assertEqual(None, result)
 
         result, _ = await self.call('get_a', [], return_type=int)
@@ -745,13 +745,13 @@ class TestVariable(boatestcase.BoaTestCase):
         result, _ = await self.call('get_b', [], return_type=int)
         self.assertEqual(0, result)
 
-        result, _ = await self.call('Main', [10], return_type=int)
+        result, _ = await self.call('Main', [10], return_type=int, signing_accounts=[self.genesis])
         self.assertEqual(10, result)
 
         result, _ = await self.call('get_b', [], return_type=int)
         self.assertEqual(10, result)
 
-        result, _ = await self.call('Main', [-140], return_type=int)
+        result, _ = await self.call('Main', [-140], return_type=int, signing_accounts=[self.genesis])
         self.assertEqual(-140, result)
 
         result, _ = await self.call('get_b', [], return_type=int)

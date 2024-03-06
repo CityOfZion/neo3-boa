@@ -489,7 +489,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
                                     return_type=int,
                                     signing_accounts=[self.genesis]
                                     )
-        last_block = await self.get_last_block(self.called_tx)
+        last_block = await self.get_latest_block()
         self.assertEqual(last_block.timestamp, result)
 
     def test_block_time_cant_assign(self):

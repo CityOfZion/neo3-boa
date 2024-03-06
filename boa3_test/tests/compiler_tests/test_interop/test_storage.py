@@ -262,7 +262,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [b'example'], return_type=list)
             self.assertEqual(expected_result, result)
 
-        self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
+        self.assertRegex(str(context.exception),
+                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
 
         contract_storage = await self.get_storage(prefix=b'example', key_post_processor=storage.as_str, values_post_processor=storage.as_str)
         self.assertEqual(example_storage, contract_storage)
@@ -440,7 +441,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [b'example'], return_type=list)
             self.assertEqual(expected_result, result)
 
-        self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
+        self.assertRegex(str(context.exception),
+                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
 
         contract_storage = await self.get_storage(prefix=b'example', key_post_processor=storage.as_str, values_post_processor=storage.as_str)
         self.assertEqual(example_storage, contract_storage)
@@ -474,7 +476,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [prefix], return_type=list)
             self.assertEqual(expected_result, result)
 
-        self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
+        self.assertRegex(str(context.exception),
+                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
 
         contract_storage = await self.get_storage(prefix=String(prefix).to_bytes(), remove_prefix=True, key_post_processor=storage.as_str, values_post_processor=storage.as_str)
         self.assertEqual(expected_storage, contract_storage)
@@ -611,7 +614,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [prefix], return_type=list)
             self.assertEqual([[key_str, Integer(value).to_byte_array()]], result)
 
-        self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
+        self.assertRegex(str(context.exception),
+                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
 
         contract_storage = await self.get_storage(prefix=prefix, key_post_processor=storage.as_str)
         self.assertEqual({key_str: Integer(value).to_byte_array()}, contract_storage)
@@ -667,7 +671,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [prefix], return_type=list)
             self.assertEqual([[key_str, Integer(value).to_byte_array()]], result)
 
-        self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
+        self.assertRegex(str(context.exception),
+                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
 
         contract_storage = await self.get_storage(prefix=prefix, key_post_processor=storage.as_str)
         self.assertEqual({key_str: Integer(value).to_byte_array()}, contract_storage)
