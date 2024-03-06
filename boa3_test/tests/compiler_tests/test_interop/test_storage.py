@@ -37,8 +37,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StorageGetBytesKey.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StorageGetBytesKey.py')
         self.assertEqual(expected_output, output)
 
     def test_storage_get_str_key(self):
@@ -57,13 +56,13 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         stored_value = b'\x01\x02\x03'
 
         result, _ = await self.call('Main', [storage_key_1], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         contract_storage = await self.get_storage()
 
@@ -90,8 +89,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StoragePutBytesKeyIntValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StoragePutBytesKeyIntValue.py')
         self.assertEqual(expected_output, output)
 
     async def test_storage_put_bytes_key_int_value(self):
@@ -102,13 +100,13 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         stored_value = 123
 
         result, _ = await self.call('Main', [storage_key_1], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         contract_storage = await self.get_storage(values_post_processor=storage.as_int)
 
@@ -139,8 +137,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StoragePutBytesKeyStrValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StoragePutBytesKeyStrValue.py')
         self.assertEqual(expected_output, output)
 
     async def test_storage_put_bytes_key_str_value(self):
@@ -151,13 +148,13 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         stored_value = '123'
 
         result, _ = await self.call('Main', [storage_key_1], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         contract_storage = await self.get_storage(values_post_processor=storage.as_str)
 
@@ -200,8 +197,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StorageDeleteBytesKey.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StorageDeleteBytesKey.py')
         self.assertStartsWith(output, expected_output)
 
     async def test_storage_delete_bytes_key(self):
@@ -217,10 +213,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
         result, _ = await self.call('Main', [not_existing_key], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('has_key', [storage_key], return_type=bool)
         self.assertEqual(False, result)
@@ -285,8 +281,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             + self.storage_get_context_hash
             + Opcode.RET
         )
-        path = self.get_contract_path('StorageGetContext.py')
-        output, manifest = self.compile_and_save(path)
+
+        output, _ = self.assertCompile('StorageGetContext.py')
         self.assertEqual(expected_output, output)
 
     async def test_storage_get_context(self):
@@ -306,8 +302,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             + Interop.StorageGetReadOnlyContext.interop_method_hash
             + Opcode.RET
         )
-        path = self.get_contract_path('StorageGetReadOnlyContext.py')
-        output, manifest = self.compile_and_save(path)
+
+        output, _ = self.assertCompile('StorageGetReadOnlyContext.py')
         self.assertEqual(expected_output, output)
 
     async def test_storage_get_read_only_context(self):
@@ -356,13 +352,13 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         stored_value = b'\x01\x02\x03'
 
         result, _ = await self.call('Main', [storage_key_1], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key_2], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         contract_storage = await self.get_storage()
 
@@ -387,8 +383,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StorageDeleteWithContext.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StorageDeleteWithContext.py')
         self.assertStartsWith(output, expected_output)
 
     async def test_storage_delete_with_context(self):
@@ -404,10 +399,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
         result, _ = await self.call('Main', [not_existing_key], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('Main', [storage_key], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('has_key', [storage_key], return_type=bool)
         self.assertEqual(False, result)
@@ -540,7 +535,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         value = 42
 
         result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_value', [key], return_type=int, target_contract=contract2)
         self.assertEqual(0, result)
@@ -566,7 +561,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(b'', result)
 
         result, _ = await self.call('insert_to_map', [storage_key, stored_value], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_from_map', [b'test1'], return_type=bytes)
         self.assertEqual(stored_value, result)
@@ -579,7 +574,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(stored_value, contract_storage[map_key + storage_key])
 
         result, _ = await self.call('delete_from_map', [b'test1'], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_from_map', [b'test1'], return_type=bytes)
         self.assertEqual(b'', result)
@@ -606,7 +601,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual({}, contract_storage)
 
         result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_value', [key], return_type=int)
         self.assertEqual(value, result)
@@ -625,7 +620,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         await self.call('get_value', [key], return_type=int)
 
         result, _ = await self.call('delete_value', [key], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_value', [key], return_type=int)
         self.assertEqual(0, result)
@@ -662,7 +657,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual({}, contract_storage)
 
         result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_value', [key], return_type=int)
         self.assertEqual(value, result)
@@ -681,7 +676,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         await self.call('get_value', [key], return_type=int)
 
         result, _ = await self.call('delete_value', [key], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_value', [key], return_type=int)
         self.assertEqual(0, result)
@@ -705,7 +700,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
 
         # Putting old value in the storage
         result, _ = await self.call('put_value_in_storage', [key, value_old], return_type=None, signing_accounts=[self.genesis])
-        self.assertEqual(None, result)
+        self.assertIsNone(result)
 
         result, _ = await self.call('get_value_in_storage_read_only', [key], return_type=str)
         self.assertEqual(value_old, result)
