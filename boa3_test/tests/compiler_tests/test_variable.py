@@ -493,48 +493,20 @@ class TestVariable(boatestcase.BoaTestCase):
         path = self.get_contract_path('GlobalAssignmentWithTuples.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
 
-    # TODO: Storage is not working properly, to be fixed by #86a1z5xy9
-    # async def test_global_chained_multiple_assignments(self):
-    #     await self.set_up_contract('GlobalMultipleAssignments.py', compile_if_found=True)
-    #
-    #     result, _ = await self.call('get_a', [], return_type=int)
-    #     self.assertEqual(10, result)
-    #
-    #     result, _ = await self.call('get_c', [], return_type=int)
-    #     self.assertEqual(15, result)
-    #
-    #     result, _ = await self.call('set_a', [100], return_type=None)
-    #     self.assertEqual(None, result)
-    #
-    #     result, _ = await self.call('get_a', [], return_type=int)
-    #     self.assertEqual(100, result)
-    def test_global_chained_multiple_assignments(self):
-        from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
-        from boa3.internal.neo3.vm import VMState
+    async def test_global_chained_multiple_assignments(self):
+        await self.set_up_contract('GlobalMultipleAssignments.py', compile_if_found=True)
 
-        path, _ = self.get_deploy_file_paths('GlobalMultipleAssignments.py', compile_if_found=True)
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('get_a', [], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('get_c', [], return_type=int)
+        self.assertEqual(15, result)
 
-        invokes.append(runner.call_contract(path, 'get_a'))
-        expected_results.append(10)
+        result, _ = await self.call('set_a', [100], return_type=None)
+        self.assertEqual(None, result)
 
-        invokes.append(runner.call_contract(path, 'get_c'))
-        expected_results.append(15)
-
-        invokes.append(runner.call_contract(path, 'set_a', 100))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'get_a'))
-        expected_results.append(100)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_a', [], return_type=int)
+        self.assertEqual(100, result)
 
     def test_many_global_assignments_compile(self):
         expected_output = (
@@ -767,54 +739,23 @@ class TestVariable(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [-140], return_type=int)
         self.assertEqual(-140, result)
 
-    # TODO: Storage is not working properly, to be fixed by #86a1z5xy9
-    # async def test_assign_global_in_function_with_global_keyword(self):
-    #     await self.set_up_contract('GlobalAssignmentInFunctionWithArgument.py', compile_if_found=True)
-    #
-    #     result, _ = await self.call('get_b', [], return_type=int)
-    #     self.assertEqual(0, result)
-    #
-    #     result, _ = await self.call('Main', [10], return_type=int)
-    #     self.assertEqual(10, result)
-    #
-    #     result, _ = await self.call('get_b', [], return_type=int)
-    #     self.assertEqual(10, result)
-    #
-    #     result, _ = await self.call('Main', [-140], return_type=int)
-    #     self.assertEqual(-140, result)
-    #
-    #     result, _ = await self.call('get_b', [], return_type=int)
-    #     self.assertEqual(-140, result)
-    def test_assign_global_in_function_with_global_keyword(self):
-        from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
-        from boa3.internal.neo3.vm import VMState
+    async def test_assign_global_in_function_with_global_keyword(self):
+        await self.set_up_contract('GlobalAssignmentInFunctionWithArgument.py')
 
-        path, _ = self.get_deploy_file_paths('GlobalAssignmentInFunctionWithArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('get_b', [], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'get_b'))
-        expected_results.append(0)
+        result, _ = await self.call('get_b', [], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
+        result, _ = await self.call('Main', [-140], return_type=int)
+        self.assertEqual(-140, result)
 
-        invokes.append(runner.call_contract(path, 'get_b'))
-        expected_results.append(10)
-
-        invokes.append(runner.call_contract(path, 'Main', -140))
-        expected_results.append(-140)
-
-        invokes.append(runner.call_contract(path, 'get_b'))
-        expected_results.append(-140)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_b', [], return_type=int)
+        self.assertEqual(-140, result)
 
     def test_assign_void_function_call_compile(self):
         output, _ = self.assertCompile('AssignVoidFunctionCall.py')
