@@ -272,7 +272,7 @@ class TestLedgerContract(boatestcase.BoaTestCase):
     async def test_get_current_index(self):
         await self.set_up_contract('GetCurrentIndex.py')
 
-        block_ = await self.get_latest_block()
+        result, _ = await self.call('main', [], return_type=int, signing_accounts=[self.genesis])
+        block_ = await self.get_last_block(self.called_tx)
         expected = block_.index
-        result, _ = await self.call('main', [], return_type=int)
         self.assertEqual(expected, result)
