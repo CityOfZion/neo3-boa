@@ -26,6 +26,7 @@ class NeoAccountStateType(ClassArrayType):
             'balance': Variable(Type.int),
             'height': Variable(Type.int),
             'vote_to': Variable(ECPointType.build()),
+            'last_gas_per_vote': Variable(Type.int),
         }
         self._constructor: Method | None = None
 
@@ -86,6 +87,7 @@ class NeoAccountStateMethod(IBuiltinMethod):
     def _opcode(self) -> list[tuple[Opcode, bytes]]:
         from boa3.internal.model.type.collection.sequence.ecpointtype import ECPointType
         return [
+            (Opcode.PUSH0, b''),  # last_gas_per_vote
             OpcodeHelper.get_pushdata_and_data(ECPointType.build().default_value),  # vote_to
             (Opcode.PUSH0, b''),  # height
             (Opcode.PUSH0, b''),  # balance

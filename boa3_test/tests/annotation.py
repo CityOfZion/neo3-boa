@@ -1,6 +1,7 @@
 from typing import TypeVar, cast
 
 from neo3.core import types
+from neo3.core.cryptography import ECPoint
 
 JsonToken = int | str | bool | None | list['JsonToken'] | dict[str, 'JsonToken']
 JsonObject = dict[str, JsonToken]
@@ -75,6 +76,13 @@ Contract = tuple[
     types.UInt160,  # contract hash
     bytes,  # contract nef
     ContractManifest  # contract manifest
+]
+
+NeoAccountState = tuple[
+    int,  # balance
+    int,  # height
+    ECPoint,  # vote to
+    int,  # last gas per vote
 ]
 
 
