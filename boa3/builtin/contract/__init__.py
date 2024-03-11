@@ -110,6 +110,7 @@ class NeoAccountState:
         self.balance: int = 0
         self.height: int = 0
         self.vote_to: ECPoint = ECPoint(bytes(constants.SIZE_OF_ECPOINT))
+        self.last_gas_per_vote: int = 0
 
 
 def to_script_hash(data_bytes: Any) -> bytes:
