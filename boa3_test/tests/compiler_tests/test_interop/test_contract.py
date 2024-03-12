@@ -109,6 +109,10 @@ class TestContractInterop(boatestcase.BoaTestCase):
         )
         self.assertEqual(0, result)
 
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [call_hash, 'put_value', [b'num', 10], CallFlags.NONE], return_type=None)
+        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.NONE:05b}')
+
         expected = 10
         result, _ = await self.call(
             'Main',
@@ -153,6 +157,10 @@ class TestContractInterop(boatestcase.BoaTestCase):
         )
         self.assertEqual(expected, result)
 
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [call_hash, 'get_value', [b'num'], CallFlags.NONE], return_type=int)
+        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.NONE:05b}')
+
         result, notifications = await self.call(
             'Main',
             [call_hash, 'notify_user', [], CallFlags.ALL],
@@ -168,6 +176,18 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(1, len(notify))
         self.assertEqual('Notify was called', notify[0].state)
 
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [call_hash, 'notify_user', [], CallFlags.READ_ONLY], return_type=None)
+        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.READ_ONLY:05b}')
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [call_hash, 'notify_user', [], CallFlags.STATES], return_type=None)
+        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.STATES:05b}')
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [call_hash, 'notify_user', [], CallFlags.NONE], return_type=None)
+        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.NONE:05b}')
+
         result, _ = await self.call(
             'Main',
             [call_hash, 'call_another_contract', [], CallFlags.ALL],
@@ -181,26 +201,6 @@ class TestContractInterop(boatestcase.BoaTestCase):
             return_type=int
         )
         self.assertEqual(0, result)
-
-        with self.assertRaises(boatestcase.FaultException) as context:
-            await self.call('Main', [call_hash, 'get_value', [b'num'], CallFlags.NONE], return_type=int)
-        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.NONE:05b}')
-
-        with self.assertRaises(boatestcase.FaultException) as context:
-            await self.call('Main', [call_hash, 'put_value', [b'num', 10], CallFlags.NONE], return_type=None)
-        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.NONE:05b}')
-
-        with self.assertRaises(boatestcase.FaultException) as context:
-            await self.call('Main', [call_hash, 'notify_user', [], CallFlags.READ_ONLY], return_type=None)
-        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.READ_ONLY:05b}')
-
-        with self.assertRaises(boatestcase.FaultException) as context:
-            await self.call('Main', [call_hash, 'notify_user', [], CallFlags.STATES], return_type=None)
-        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.STATES:05b}')
-
-        with self.assertRaises(boatestcase.FaultException) as context:
-            await self.call('Main', [call_hash, 'notify_user', [], CallFlags.NONE], return_type=None)
-        self.assertRegex(str(context.exception), f'missing call flags: {CallFlags.NONE:05b}')
 
         with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main', [call_hash, 'call_another_contract', [], CallFlags.STATES], return_type=int)
