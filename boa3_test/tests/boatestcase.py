@@ -113,6 +113,29 @@ class Nep17TransferEvent(_Nep17TransferEvent):
             return cls(source, destination, amount)
 
 
+@dataclass
+class Nep11TransferEvent(Nep17TransferEvent):
+    token_id: str
+
+    @classmethod
+    def from_notification(cls, n: noderpc.Notification):
+        stack = n.state.as_list()
+
+        try:
+            source = stack[0].as_uint160()
+        except ValueError:
+            source = stack[0].as_none()
+
+        try:
+            destination = stack[1].as_uint160()
+        except ValueError:
+            destination = stack[1].as_none()
+
+        amount = stack[2].as_int()
+        token_id = stack[3].as_str()
+        return cls(source, destination, amount, token_id)
+
+
 class BoaTestCase(SmartContractTestCase):
     dirname: str
     test_root_dir: str
