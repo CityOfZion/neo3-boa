@@ -1,7 +1,5 @@
 import json
-from dataclasses import dataclass
 
-from neo3.api import noderpc
 from neo3.contracts.contract import CONTRACT_HASHES
 from neo3.core import types
 from neo3.wallet import account
@@ -9,40 +7,7 @@ from neo3.wallet import account
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.String import String
-from boa3_test.tests import annotation, boatestcase, stackitem
-
-
-@dataclass
-class DeployEvent(boatestcase.BoaTestEvent):
-    deployed_contract: types.UInt160
-
-    @classmethod
-    def from_untyped_notification(cls, n: noderpc.Notification):
-        inner_args_types = tuple(cls.__annotations__.values())
-        e = super().from_notification(n, *inner_args_types)
-        return cls(e.contract, e.name, e.state, *e.state)
-
-
-@dataclass
-class UpdateEvent(boatestcase.BoaTestEvent):
-    updated_contract: types.UInt160
-
-    @classmethod
-    def from_untyped_notification(cls, n: noderpc.Notification):
-        inner_args_types = tuple(cls.__annotations__.values())
-        e = super().from_notification(n, *inner_args_types)
-        return cls(e.contract, e.name, e.state, *e.state)
-
-
-@dataclass
-class DestroyEvent(boatestcase.BoaTestEvent):
-    destroyed_contract: types.UInt160
-
-    @classmethod
-    def from_untyped_notification(cls, n: noderpc.Notification):
-        inner_args_types = tuple(cls.__annotations__.values())
-        e = super().from_notification(n, *inner_args_types)
-        return cls(e.contract, e.name, e.state, *e.state)
+from boa3_test.tests import annotation, boatestcase, event, stackitem
 
 
 class TestContractManagementContract(boatestcase.BoaTestCase):
@@ -123,7 +88,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
         deploy_events = self.filter_events(notifications,
                                            event_name='Deploy',
-                                           notification_type=DeployEvent
+                                           notification_type=event.DeployEvent
                                            )
         self.assertEqual(1, len(deploy_events))
 
@@ -153,7 +118,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
         deploy_events = self.filter_events(notifications,
                                            event_name='Deploy',
-                                           notification_type=DeployEvent
+                                           notification_type=event.DeployEvent
                                            )
         self.assertEqual(1, len(deploy_events))
 
@@ -195,7 +160,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertIsNone(result)
         update_events = self.filter_events(notifications,
                                            event_name='Update',
-                                           notification_type=UpdateEvent
+                                           notification_type=event.UpdateEvent
                                            )
         self.assertEqual(1, len(update_events))
         self.assertEqual(self.contract_hash, update_events[0].updated_contract)
@@ -222,7 +187,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertIsNone(result)
         update_events = self.filter_events(notifications,
                                            event_name='Update',
-                                           notification_type=UpdateEvent
+                                           notification_type=event.UpdateEvent
                                            )
         self.assertEqual(1, len(update_events))
         self.assertEqual(self.contract_hash, update_events[0].updated_contract)
@@ -251,7 +216,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertIsNone(result)
         destroy_events = self.filter_events(notifications,
                                             event_name='Destroy',
-                                            notification_type=DestroyEvent
+                                            notification_type=event.DestroyEvent
                                             )
         self.assertEqual(1, len(destroy_events))
         self.assertEqual(contract_hash, destroy_events[0].destroyed_contract)
