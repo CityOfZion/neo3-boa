@@ -32,7 +32,7 @@ def gm_manifest() -> NeoMetadata:
     meta.email = "hello@example.com"  # TODO_TEMPLATE
     meta.supported_standards = ["NEP-11"]
     meta.source = "https://github.com/"  # TODO_TEMPLATE
-    # meta.add_permission(contract='*', methods=['*'])
+    meta.add_permission(contract='*', methods=['onNEP11Payment'])
     return meta
 
 
@@ -638,8 +638,8 @@ def destroy():
     """
     verified: bool = verify()
     expect(verified, '`account` is not allowed for destroy')
-    destroy_contract()
     debug(['destroy called and done'])
+    destroy_contract()
 
 
 def internal_burn(tokenId: bytes) -> bool:
@@ -839,9 +839,9 @@ def set_locked_view_counter(tokenId: bytes):
 def expect(condition: bool, message: str):
     allow_notify = get_call_flags() & CallFlags.ALLOW_NOTIFY
     if allow_notify == CallFlags.ALLOW_NOTIFY:
-        assert condition
+        assert condition, message
     else:
-        assert condition
+        assert condition, message
 
 
 def validateAddress(address: UInt160) -> bool:
