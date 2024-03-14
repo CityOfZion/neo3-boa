@@ -1,20 +1,27 @@
 import json
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.api import StackItemType
+from neo3.contracts.contract import CONTRACT_HASHES
+from neo3.core import types
+from neo3.wallet import account
 
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive import neoxp
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase, event
 
 
-class TestNEP11Template(BoaTest):
+class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
     default_folder: str = 'examples'
 
-    OWNER = neoxp.utils.get_account_by_name('owner')
-    OTHER_ACCOUNT_1 = neoxp.utils.get_account_by_name('testAccount1')
-    OTHER_ACCOUNT_2 = neoxp.utils.get_account_by_name('testAccount2')
-    GAS_TO_DEPLOY = 100 * 10 ** 8
+    DECIMALS = 0
+    OWNER_BALANCE = 0
+    TOTAL_SUPPLY = 0
+
+    owner: account.Account
+    account1: account.Account
+    account2: account.Account
+
+    TOKEN_ID_TRANSFER_TEST: bytes
+    TEST_TOKEN_ID: bytes
 
     TOKEN_META = bytes(
         '{ "name": "NEP11", "description": "Some description", "image": "{some image URI}", "tokenURI": "{some URI}" }',
@@ -25,500 +32,547 @@ class TestNEP11Template(BoaTest):
         '{"address": "NiNmXL8FjEUEs1nfX9uHFBNaenxDHJtmuB", "value": 3000}]',
         'utf-8')
 
-    def test_nep11_compile(self):
+    ACCOUNT_PREFIX = b'ACC'
+
+    @classmethod
+    def setupTestCase(cls):
+        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
+        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
+        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
+
+        super().setupTestCase()
+
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        await super().asyncSetupClass()
+
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 100)
+
+        await cls.set_up_contract('nep11_non_divisible.py', signing_account=cls.owner)
+
+        mint_args = [cls.TOKEN_META, cls.TOKEN_LOCKED, cls.ROYALTIES]
+        mint_amount = 5
+        account_balance = 2
+        for _ in range(mint_amount):
+            await cls.call(
+                'mint',
+                [cls.owner.script_hash, *mint_args],
+                return_type=bytes,
+                signing_accounts=[cls.owner]
+            )
+
+        account_tokens: list[bytes] = []
+        for _ in range(account_balance):
+            result, _ = await cls.call(
+                'mint',
+                [cls.account1.script_hash, *mint_args],
+                return_type=bytes,
+                signing_accounts=[cls.account1]
+            )
+            account_tokens.append(result)
+
+        cls.TOKEN_ID_TRANSFER_TEST, cls.TEST_TOKEN_ID = account_tokens
+        cls.OWNER_BALANCE = mint_amount
+        cls.TOTAL_SUPPLY = mint_amount + account_balance
+
+    def test_compile(self):
         path = self.get_contract_path('nep11_non_divisible.py')
-        output, manifest = self.compile_and_save(path)
+        _, manifest = self.assertCompile(path, get_manifest=True)
 
         self.assertIn('supportedstandards', manifest)
         self.assertIsInstance(manifest['supportedstandards'], list)
         self.assertGreater(len(manifest['supportedstandards']), 0)
         self.assertIn('NEP-11', manifest['supportedstandards'])
 
-    def test_nep11_symbol(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_symbol(self):
+        expected = 'EXMP'
+        result, _ = await self.call('symbol', return_type=str)
+        self.assertEqual(expected, result)
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+    async def test_decimals(self):
+        expected = self.DECIMALS
+        result, _ = await self.call('decimals', return_type=int)
+        self.assertEqual(expected, result)
 
-        invoke = runner.call_contract(path, 'symbol')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_before_mint_total_supply(self):
+        total_supply = self.TOTAL_SUPPLY
+        result, _ = await self.call('totalSupply', return_type=int)
+        self.assertEqual(total_supply, result)
 
-        self.assertEqual('EXMP', invoke.result)
+    async def test_balance_of(self):
+        expected = self.OWNER_BALANCE
+        owner_account = self.owner.script_hash
+        result, _ = await self.call('balanceOf', [owner_account], return_type=int)
+        self.assertEqual(expected, result)
 
-    def test_nep11_decimals(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        bad_account = bytes(10)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call("balanceOf", [bad_account], return_type=int)
+        self.assertEqual(str(context.exception), 'Not a valid address')
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        bad_account = bytes(30)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call("balanceOf", [bad_account], return_type=int)
+        self.assertEqual(str(context.exception), 'Not a valid address')
 
-        invoke = runner.call_contract(path, 'decimals')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_tokens_of(self):
+        no_balance_account = types.UInt160.zero()
+        # TODO: #86drqwhx0 neo-go in the current version of boa-test-constructor is not configured to return Iterators
+        with self.assertRaises(ValueError) as context:
+            result, _ = await self.call('tokensOf', [no_balance_account], return_type=list)
+            self.assertEqual([], result)
 
-        self.assertEqual(0, invoke.result)
+        self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
 
-    def test_nep11_balance_of(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        tokens_of_storage = await self.get_storage(
+            self.ACCOUNT_PREFIX + no_balance_account.to_array(),
+            remove_prefix=True
+        )
+        self.assertEqual(0, len(tokens_of_storage))
 
-        invokes = []
-        expected_results = []
+        # TODO: #86drqwhx0 neo-go in the current version of boa-test-constructor is not configured to return Iterators
+        with self.assertRaises(ValueError) as context:
+            result, _ = await self.call('tokensOf', [self.owner.script_hash], return_type=list)
+            self.assertEqual(self.OWNER_BALANCE, len(result))
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        self.assertRegex(
+            str(context.exception),
+            fr"item is not of type 'StackItemType.\w+' but of type '{StackItemType.INTEROP_INTERFACE}'"
+        )
 
-        # add some gas for fees
-        add_amount = 10 * 10 ** 8
-        runner.add_gas(self.OTHER_ACCOUNT_1.address, add_amount)
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        tokens_of_storage = await self.get_storage(
+            self.ACCOUNT_PREFIX + self.owner.script_hash.to_array(),
+            remove_prefix=True
+        )
+        self.assertEqual(self.OWNER_BALANCE, len(tokens_of_storage))
 
-        # mint
-        token_1 = '\x01'
-        invokes.append(runner.call_contract(path, 'mint',
-                                            other_account_script_hash, self.TOKEN_META,
-                                            self.TOKEN_LOCKED, self.ROYALTIES))
-        expected_results.append(token_1)
+    async def test_transfer_success(self):
+        token = self.TOKEN_ID_TRANSFER_TEST
+        from_account = self.account1.script_hash
+        to_account = self.account2.script_hash
 
-        # balance should be one
-        invokes.append(runner.call_contract(path, 'balanceOf', other_account_script_hash))
-        expected_results.append(1)
-
-        # minting another token
-        token_2 = '\x02'
-        invokes.append(runner.call_contract(path, 'mint',
-                                            other_account_script_hash, self.TOKEN_META,
-                                            self.TOKEN_LOCKED, self.ROYALTIES))
-        expected_results.append(token_2)
-
-        # balance should increase again
-        invokes.append(runner.call_contract(path, 'balanceOf', other_account_script_hash))
-        expected_results.append(2)
-
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_nep11_tokens_of(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        # add some gas for fees
-        add_amount = 10 * 10 ** 8
-        runner.add_gas(self.OTHER_ACCOUNT_1.address, add_amount)
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-
-        tokens = []
-        expected_minted_token_1 = '\x01'
-        expected_minted_token_2 = '\x02'
-
-        # initial tokensOf is an empty iterator
-        invokes.append(runner.call_contract(path, 'tokensOf', other_account_script_hash))
-        expected_results.append(tokens.copy())
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        # mint
-        runner.run_contract(path, 'mint',
-                            other_account_script_hash, self.TOKEN_META,
-                            self.TOKEN_LOCKED, self.ROYALTIES, account=self.OTHER_ACCOUNT_1)
-        tokens.append(expected_minted_token_1)
-
-        # tokensOf should return ['\x01']
-        invokes.append(runner.call_contract(path, 'tokensOf', other_account_script_hash))
-        expected_results.append(tokens.copy())
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        # minting another token
-        runner.run_contract(path, 'mint',
-                            other_account_script_hash, self.TOKEN_META,
-                            self.TOKEN_LOCKED, self.ROYALTIES, account=self.OTHER_ACCOUNT_1)
-        tokens.append(expected_minted_token_2)
-
-        # tokens should increase again
-        invokes.append(runner.call_contract(path, 'tokensOf', other_account_script_hash))
-        expected_results.append(tokens)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_nep11_total_supply(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        # smart contract deploys with zero tokens minted
-        total_supply = 0
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        invoke = runner.call_contract(path, 'totalSupply')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(total_supply, invoke.result)
-
-    def test_nep11_transfer(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        # add some gas for fees
-        add_amount = 10 * 10 ** 8
-        runner.add_gas(self.OTHER_ACCOUNT_1.address, add_amount)
-        other_account_1_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-        other_account_2_script_hash = self.OTHER_ACCOUNT_2.script_hash.to_array()
-
-        # mint
-        token = '\x01'
-        invokes.append(runner.call_contract(path, 'mint',
-                                            other_account_1_script_hash, self.TOKEN_META,
-                                            self.TOKEN_LOCKED, self.ROYALTIES))
-        expected_results.append(token)
+        total_supply, _ = await self.call('totalSupply', [], return_type=int)
 
         # check owner before
-        invokes.append(runner.call_contract(path, 'ownerOf', token))
-        expected_results.append(other_account_1_script_hash)
+        result, _ = await self.call('ownerOf', [token], return_type=types.UInt160)
+        self.assertEqual(from_account, result)
 
         # transfer
-        invokes.append(runner.call_contract(path, 'transfer',
-                                            other_account_2_script_hash, token, None,
-                                            expected_result_type=bool))
-        expected_results.append(True)
+        result, notifications = await self.call(
+            'transfer',
+            [to_account, token, None],
+            return_type=bool,
+            signing_accounts=[self.account1]
+        )
+        self.assertEqual(True, result)
+        transfer_events = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(len(transfer_events), 1)
+        self.assertEqual(from_account, transfer_events[0].source)
+        self.assertEqual(to_account, transfer_events[0].destination)
+        self.assertEqual(1, transfer_events[0].amount)
+        self.assertEqual(token.decode('utf-8'), transfer_events[0].token_id)
 
         # check owner after
-        invokes.append(runner.call_contract(path, 'ownerOf', token))
-        expected_results.append(other_account_2_script_hash)
+        result, _ = await self.call('ownerOf', [token], return_type=types.UInt160)
+        self.assertEqual(self.account2.script_hash, result)
 
         # check balances after
-        invokes.append(runner.call_contract(path, 'balanceOf', other_account_1_script_hash))
-        expected_results.append(0)
-        invokes.append(runner.call_contract(path, 'totalSupply'))
-        expected_results.append(1)
+        result, _ = await self.call('balanceOf', [from_account], return_type=int)
+        self.assertEqual(1, result)
+        result, _ = await self.call('totalSupply', [], return_type=int)
+        self.assertEqual(total_supply, result)
 
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_transfer_fail_no_sign(self):
+        token = self.TEST_TOKEN_ID
+        from_account = self.account1.script_hash
+        to_account = self.account2.script_hash
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        # check owner before
+        result, _ = await self.call('ownerOf', [token], return_type=types.UInt160)
+        self.assertEqual(from_account, result)
 
-        runner.call_contract(path, 'transfer', other_account_2_script_hash, b'thisisanonexistingtoken', None)
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        # transfer
+        result, notifications = await self.call(
+            'transfer',
+            [to_account, token, None],
+            return_type=bool
+        )
+        self.assertEqual(False, result)
 
-    def test_nep11_onNEP11Payment(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        transfers = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(0, len(transfers))
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+    async def test_transfer_fail_wrong_token_owner(self):
+        token = self.TEST_TOKEN_ID
+        from_account = self.account2.script_hash
+        to_account = self.account1.script_hash
 
-        # add some gas for fees
-        add_amount = 10 * 10 ** 8
-        runner.add_gas(self.OTHER_ACCOUNT_1.address, add_amount)
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        # check if owner is incorrect
+        result, _ = await self.call('ownerOf', [token], return_type=types.UInt160)
+        self.assertNotEqual(from_account, result)
 
-        # mint
-        token = '\x01'
-        runner.run_contract(path, 'mint',
-                            other_account_script_hash, self.TOKEN_META,
-                            self.TOKEN_LOCKED, self.ROYALTIES,
-                            account=self.OTHER_ACCOUNT_1)
+        # transfer
+        result, notifications = await self.call(
+            'transfer',
+            [to_account, token, None],
+            return_type=bool,
+            signing_accounts=[self.account2]
+        )
+        self.assertEqual(False, result)
 
-        # the smart contract will abort if any address calls the NEP11 onPayment method
-        runner.call_contract(path, 'onNEP11Payment',
-                             other_account_script_hash, 1, token, None)
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
+        transfers = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(0, len(transfers))
 
-    def test_nep11_deploy(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_transfer_fail_non_existing_token(self):
+        token = b'thisisanonexistingtoken'
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        contract = runner.deploy_contract(path, account=self.OWNER)
-        runner.update_contracts(export_checkpoint=True)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call(
+                'transfer',
+                [self.account2.script_hash, token, None],
+                return_type=bool
+            )
+        self.assertIsNone(*context.exception.args)
 
-        tx_id = contract.tx_id
-        self.assertIsNotNone(tx_id)
+    async def test_transfer_fail_bad_account(self):
+        token = self.TEST_TOKEN_ID
+        to_account = bytes(10)
 
-        tx = runner.get_transaction_result(tx_id)
-        self.assertIsInstance(tx.executions, list)
-        self.assertEqual(1, len(tx.executions))
-        tx_result = tx.executions[0]
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call(
+                'transfer',
+                [to_account, token, None],
+                return_type=bool,
+                signing_accounts=[self.account1]
+            )
+        self.assertEqual(str(context.exception), 'Not a valid address')
 
-        # contract was deployed only once
-        self.assertEqual(1, len([notification for notification in tx_result.notifications if notification.name == "Deploy"]))
+    async def test_on_nep11_payment_call(self):
+        # trying to call onNEP11Payment() will result in an abort if the one calling it is not NEO or GAS contracts
+        with self.assertRaises(boatestcase.AbortException):
+            await self.call(
+                'onNEP11Payment',
+                [self.owner.script_hash, 1, self.TEST_TOKEN_ID, None],
+                return_type=None,
+                signing_accounts=[self.owner]
+            )
 
-    def test_nep11_update(self):
+    async def test_on_nep11_payment_receive_self(self):
+        token = self.TEST_TOKEN_ID
+        from_account = self.account1.script_hash
+        to_account = self.contract_hash
+
+        # check owner before
+        result, _ = await self.call('ownerOf', [token], return_type=types.UInt160)
+        self.assertEqual(from_account, result)
+
+        with self.assertRaises(boatestcase.AbortException):
+            await self.call(
+                'transfer',
+                [to_account, token, None],
+                return_type=bool,
+                signing_accounts=[self.account1]
+            )
+
+    async def test_update(self):
         path = self.get_contract_path('nep11_non_divisible.py')
-        new_nef, new_manifest = self.get_bytes_output(path)
+
+        new_nef, new_manifest = self.get_serialized_output(path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+        with self.assertRaises(boatestcase.AssertException) as context:
+            # missing signature
+            await self.call(
+                'update',
+                [new_nef, arg_manifest],
+                return_type=None
+            )
+        self.assertEqual(str(context.exception), '`account` is not allowed for update')
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        result, notifications = await self.call(
+            'update',
+            [new_nef, arg_manifest],
+            return_type=None,
+            signing_accounts=[self.owner]
+        )
+        self.assertIsNone(result)
 
-        # update contract
-        invoke = runner.call_contract(path, 'update',
-                                      new_nef, arg_manifest)
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        update_events = self.filter_events(
+            notifications,
+            event_name='Update',
+            notification_type=event.UpdateEvent
+        )
+        self.assertEqual(1, len(update_events))
+        self.assertEqual(self.contract_hash, update_events[0].updated_contract)
 
-        self.assertIsNone(invoke.result)
+    async def test_destroy(self):
+        owner_test_destroy = self.account2
 
-    def test_nep11_destroy(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        contract_hash = await self.compile_and_deploy(
+            'nep11_non_divisible.py',
+            signing_account=owner_test_destroy
+        )
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            # missing signature
+            await self.call(
+                'destroy', [],
+                return_type=None,
+                target_contract=contract_hash
+            )
+        self.assertEqual(str(context.exception), '`account` is not allowed for destroy')
 
-        # destroy contract
-        invoke = runner.call_contract(path, 'destroy')
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, notifications = await self.call(
+            'destroy', [],
+            return_type=None,
+            target_contract=contract_hash,
+            signing_accounts=[owner_test_destroy]
+        )
+        self.assertIsNone(result)
 
-        self.assertIsNone(invoke.result)
-
-        runner.run_contract(path, 'destroy', account=self.OWNER)
+        destroy_events = self.filter_events(
+            notifications,
+            event_name='Destroy',
+            notification_type=event.DestroyEvent
+        )
+        self.assertEqual(1, len(destroy_events))
+        self.assertEqual(contract_hash, destroy_events[0].destroyed_contract)
 
         # should not exist anymore
-        runner.call_contract(path, 'symbol')
-        runner.execute(account=self.OWNER)
-        self.assertNotEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.CONTRACT_NOT_FOUND_MSG_REGEX)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('symbol', [], return_type=str, target_contract=contract_hash)
+        self.assertRegex(str(context.exception), f'called contract {contract_hash} not found')
 
-    def test_nep11_verify(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_verify(self):
+        result, _ = await self.call('getAuthorizedAddress', [], return_type=list[types.UInt160])
+        self.assertEqual([self.owner.script_hash], result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('verify', [], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(True, result)
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        result, _ = await self.call('verify', [], return_type=bool, signing_accounts=[self.account1])
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'getAuthorizedAddress',
-                                            expected_result_type=list))
-        expected_results.append([self.OWNER.script_hash.to_array()])
+        result, _ = await self.call('verify', [], return_type=bool, signing_accounts=[self.account2])
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'verify',
-                                            expected_result_type=bool))
-        expected_results.append(True)
+    async def test_authorize(self):
+        from dataclasses import dataclass
+        from neo3.api import noderpc
 
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        @dataclass
+        class AuthorizedEvent(boatestcase.BoaTestEvent):
+            authorized: types.UInt160
+            type: int
+            add: bool
 
-        invokes.append(runner.call_contract(path, 'verify',
-                                            expected_result_type=bool))
-        expected_results.append(False)
+            @classmethod
+            def from_untyped_notification(cls, n: noderpc.Notification):
+                inner_args_types = tuple(cls.__annotations__.values())
+                e = super().from_notification(n, *inner_args_types)
+                return cls(e.contract, e.name, e.state, *e.state)
 
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        account = self.account1.script_hash
 
-        invokes.append(runner.call_contract(path, 'verify',
-                                            expected_result_type=bool))
-        expected_results.append(False)
+        result, notifications = await self.call(
+            'setAuthorizedAddress',
+            [account, True],
+            return_type=None,
+            signing_accounts=[self.owner]
+        )
+        self.assertIsNone(result)
 
-        runner.execute(account=self.OTHER_ACCOUNT_2)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_nep11_authorize(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        runner.call_contract(path, 'setAuthorizedAddress', other_account_script_hash, True)
+        authorized = self.filter_events(
+            notifications,
+            event_name='Authorized',
+            notification_type=AuthorizedEvent
+        )
+        self.assertEqual(1, len(authorized))
+        self.assertEqual(account, authorized[0].authorized)
+        self.assertEqual(0, authorized[0].type)
+        self.assertEqual(True, authorized[0].add)
 
         # now deauthorize the address
-        runner.call_contract(path, 'setAuthorizedAddress', other_account_script_hash, False)
+        result, notifications = await self.call(
+            'setAuthorizedAddress',
+            [account, False],
+            return_type=None,
+            signing_accounts=[self.owner]
+        )
+        self.assertIsNone(result)
 
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        authorized = self.filter_events(
+            notifications,
+            event_name='Authorized',
+            notification_type=AuthorizedEvent
+        )
+        self.assertEqual(1, len(authorized))
+        self.assertEqual(account, authorized[0].authorized)
+        self.assertEqual(0, authorized[0].type)
+        self.assertEqual(False, authorized[0].add)
 
-        auth_events = runner.get_events('Authorized')
-        self.assertEqual(2, len(auth_events))
+    async def test_pause(self):
+        # missing owner signing transaction
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('updatePause', [True], return_type=bool)
+        self.assertEqual(str(context.exception), '`account` is not allowed for updatePause')
 
-        authorize_event = auth_events[0]
-        deauthorize_event = auth_events[1]
-
-        # check if the event was triggered and the address was authorized
-        self.assertEqual(0, authorize_event.arguments[1])
-        self.assertEqual(1, authorize_event.arguments[2])
-
-        # check if the event was triggered and the address was authorized
-        self.assertEqual(0, deauthorize_event.arguments[1])
-        self.assertEqual(0, deauthorize_event.arguments[2])
-
-    def test_nep11_pause(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        # add some gas for fees
-        add_amount = 10 * 10 ** 8
-        runner.add_gas(self.OTHER_ACCOUNT_1.address, add_amount)
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-
+        test_account = self.account2.script_hash
         # pause contract
-        invokes.append(runner.call_contract(path, 'updatePause', True,
-                                            expected_result_type=bool))
-        expected_results.append(True)
-
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        runner.run_contract(path, 'updatePause', True, account=self.OWNER)
+        result, _ = await self.call('updatePause', [True], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(True, result)
 
         # should fail because contract is paused
-        runner.call_contract(path, 'mint',
-                             other_account_script_hash, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES)
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call(
+                'mint',
+                [test_account, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES],
+                return_type=str,
+                signing_accounts=[self.account2]
+            )
+        self.assertEqual(str(context.exception), 'Contract is currently paused')
 
         # unpause contract
-        invokes.append(runner.call_contract(path, 'updatePause', False,
-                                            expected_result_type=bool))
-        expected_results.append(False)
+        result, _ = await self.call('updatePause', [False], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(False, result)
 
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        runner.run_contract(path, 'updatePause', False, account=self.OWNER)
+        _, notifications = await self.call(
+            'mint',
+            [test_account, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES],
+            return_type=str,
+            signing_accounts=[self.account2]
+        )
 
-        # mint
-        invokes.append(runner.call_contract(path, 'mint',
-                                            other_account_script_hash, self.TOKEN_META,
-                                            self.TOKEN_LOCKED, self.ROYALTIES))
-        expected_results.append('\x01')
+        mint_events = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(len(mint_events), 1)
 
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_mint(self):
+        test_account = self.account2
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        balance, _ = await self.call('balanceOf', [test_account.script_hash], return_type=int)
+        total_supply, _ = await self.call('totalSupply', [], return_type=int)
 
-    def test_nep11_mint(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call(
+                'mint',
+                [test_account.script_hash, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES],
+                return_type=str
+            )
+        self.assertEqual(str(context.exception), 'Invalid witness')
 
-        invokes = []
-        expected_results = []
+        token, notifications = await self.call(
+            'mint',
+            [test_account.script_hash, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES],
+            return_type=str,
+            signing_accounts=[test_account]
+        )
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        mint_events = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(len(mint_events), 1)
+        self.assertEqual(None, mint_events[0].source)
+        self.assertEqual(test_account.script_hash, mint_events[0].destination)
+        self.assertEqual(1, mint_events[0].amount)
+        self.assertEqual(token, mint_events[0].token_id)
 
-        # add some gas for fees
-        add_amount = 10 * 10 ** 8
-        runner.add_gas(self.OTHER_ACCOUNT_1.address, add_amount)
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-
-        # should succeed now that account has enough fees
-        mint = runner.call_contract(path, 'mint',
-                                    other_account_script_hash, self.TOKEN_META,
-                                    self.TOKEN_LOCKED, self.ROYALTIES)
-
-        runner.execute(account=self.OTHER_ACCOUNT_1, add_invokes_to_batch=True)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        token = mint.result
-        invokes.append(runner.call_contract(path, 'properties', token, expected_result_type=dict))
+        result, _ = await self.call('properties', [token], return_type=dict[str, str])
         token_property = json.loads(self.TOKEN_META.decode('utf-8').replace("'", "\""))
-        expected_results.append(token_property)
+        self.assertEqual(token_property, result)
 
-        invokes.append(runner.call_contract(path, 'getRoyalties', token, expected_result_type=str))
-        expected_results.append(self.ROYALTIES.decode('utf-8'))
-
-        # check balances after
-        invokes.append(runner.call_contract(path, 'balanceOf', other_account_script_hash))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'totalSupply'))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'properties', b'thisisanonexistingtoken')
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_nep11_burn(self):
-        path, _ = self.get_deploy_file_paths('nep11_non_divisible.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        # add some gas for fees
-        add_amount = 10 * 10 ** 8
-        runner.add_gas(self.OTHER_ACCOUNT_1.address, add_amount)
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-
-        # mint
-        token = '\x01'
-        invokes.append(runner.call_contract(path, 'mint',
-                                            other_account_script_hash, self.TOKEN_META,
-                                            self.TOKEN_LOCKED, self.ROYALTIES))
-        expected_results.append(token)
-
-        # burn
-        invokes.append(runner.call_contract(path, 'burn', token,
-                                            expected_result_type=bool))
-        expected_results.append(True)
+        token_royalties = self.ROYALTIES.decode('utf-8')
+        result, _ = await self.call('getRoyalties', [token], return_type=str)
+        self.assertEqual(token_royalties, result)
 
         # check balances after
-        invokes.append(runner.call_contract(path, 'balanceOf', other_account_script_hash))
-        expected_results.append(0)
+        result, _ = await self.call('balanceOf', [test_account.script_hash], return_type=int)
+        self.assertEqual(balance + 1, result)
 
-        invokes.append(runner.call_contract(path, 'totalSupply'))
-        expected_results.append(0)
+        result, _ = await self.call('totalSupply', [], return_type=int)
+        self.assertEqual(total_supply + 1, result)
 
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_properties_success(self):
+        token = self.TEST_TOKEN_ID
+        expected = json.loads(self.TOKEN_META.decode('utf-8').replace("'", "\""))
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('properties', [token], return_type=dict[str, str])
+        self.assertEqual(expected, result)
+
+    async def test_properties_fail_non_existent_token(self):
+        token = b'thisisanonexistingtoken'
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('properties', [token], return_type=dict[str, str])
+        self.assertEqual(str(context.exception), 'No metadata available for token')
+
+    async def test_burn(self):
+        test_account = self.account2
+
+        token, _ = await self.call(
+            'mint',
+            [test_account.script_hash, self.TOKEN_META, self.TOKEN_LOCKED, self.ROYALTIES],
+            return_type=str,
+            signing_accounts=[test_account]
+        )
+
+        balance, _ = await self.call('balanceOf', [test_account.script_hash], return_type=int)
+        total_supply, _ = await self.call('totalSupply', [], return_type=int)
+
+        result, _ = await self.call(
+            'burn',
+            [token],
+            return_type=bool
+        )
+        self.assertEqual(False, result)
+
+        result, notifications = await self.call(
+            'burn',
+            [token],
+            return_type=bool,
+            signing_accounts=[test_account]
+        )
+        self.assertEqual(True, result)
+
+        burn_events = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(len(burn_events), 1)
+        self.assertEqual(test_account.script_hash, burn_events[0].source)
+        self.assertEqual(None, burn_events[0].destination)
+        self.assertEqual(1, burn_events[0].amount)
+        self.assertEqual(token, burn_events[0].token_id)
+
+        # check balances after
+        result, _ = await self.call('balanceOf', [test_account.script_hash], return_type=int)
+        self.assertEqual(balance - 1, result)
+
+        result, _ = await self.call('totalSupply', [], return_type=int)
+        self.assertEqual(total_supply - 1, result)

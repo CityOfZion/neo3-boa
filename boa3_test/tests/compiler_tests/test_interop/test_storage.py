@@ -1,4 +1,5 @@
 from boaconstructor import storage
+from neo3.api import StackItemType
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -262,10 +263,16 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [b'example'], return_type=list)
             self.assertEqual(expected_result, result)
 
-        self.assertRegex(str(context.exception),
-                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
+        self.assertRegex(
+            str(context.exception),
+            fr"item is not of type 'StackItemType.\w+' but of type '{StackItemType.INTEROP_INTERFACE}'"
+        )
 
-        contract_storage = await self.get_storage(prefix=b'example', key_post_processor=storage.as_str, values_post_processor=storage.as_str)
+        contract_storage = await self.get_storage(
+            prefix=b'example',
+            key_post_processor=storage.as_str,
+            values_post_processor=storage.as_str
+        )
         self.assertEqual(example_storage, contract_storage)
 
     def test_storage_find_str_prefix(self):
@@ -441,10 +448,16 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [b'example'], return_type=list)
             self.assertEqual(expected_result, result)
 
-        self.assertRegex(str(context.exception),
-                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
+        self.assertRegex(
+            str(context.exception),
+            fr"item is not of type 'StackItemType.\w+' but of type '{StackItemType.INTEROP_INTERFACE}'"
+        )
 
-        contract_storage = await self.get_storage(prefix=b'example', key_post_processor=storage.as_str, values_post_processor=storage.as_str)
+        contract_storage = await self.get_storage(
+            prefix=b'example',
+            key_post_processor=storage.as_str,
+            values_post_processor=storage.as_str
+        )
         self.assertEqual(example_storage, contract_storage)
 
     async def test_storage_find_with_options(self):
@@ -476,10 +489,17 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [prefix], return_type=list)
             self.assertEqual(expected_result, result)
 
-        self.assertRegex(str(context.exception),
-                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
+        self.assertRegex(
+            str(context.exception),
+            fr"item is not of type 'StackItemType.\w+' but of type '{StackItemType.INTEROP_INTERFACE}'"
+        )
 
-        contract_storage = await self.get_storage(prefix=String(prefix).to_bytes(), remove_prefix=True, key_post_processor=storage.as_str, values_post_processor=storage.as_str)
+        contract_storage = await self.get_storage(
+            prefix=String(prefix).to_bytes(),
+            remove_prefix=True,
+            key_post_processor=storage.as_str,
+            values_post_processor=storage.as_str
+        )
         self.assertEqual(expected_storage, contract_storage)
 
     async def test_boa2_storage_test(self):
@@ -614,8 +634,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [prefix], return_type=list)
             self.assertEqual([[key_str, Integer(value).to_byte_array()]], result)
 
-        self.assertRegex(str(context.exception),
-                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
+        self.assertRegex(
+            str(context.exception),
+            fr"item is not of type 'StackItemType.\w+' but of type '{StackItemType.INTEROP_INTERFACE}'"
+        )
 
         contract_storage = await self.get_storage(prefix=prefix, key_post_processor=storage.as_str)
         self.assertEqual({key_str: Integer(value).to_byte_array()}, contract_storage)
@@ -671,8 +693,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             result, _ = await self.call('find_by_prefix', [prefix], return_type=list)
             self.assertEqual([[key_str, Integer(value).to_byte_array()]], result)
 
-        self.assertRegex(str(context.exception),
-                         r"item is not of type 'StackItemType.\w+' but of type 'StackItemType.INTEROP_INTERFACE'")
+        self.assertRegex(
+            str(context.exception),
+            fr"item is not of type 'StackItemType.\w+' but of type '{StackItemType.INTEROP_INTERFACE}'"
+        )
 
         contract_storage = await self.get_storage(prefix=prefix, key_post_processor=storage.as_str)
         self.assertEqual({key_str: Integer(value).to_byte_array()}, contract_storage)
