@@ -77,14 +77,14 @@ class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
         cls.OWNER_BALANCE = mint_amount
         cls.TOTAL_SUPPLY = mint_amount + account_balance
 
-    # def test_compile(self):
-    #     path = self.get_contract_path('nep11_non_divisible.py')
-    #     _, manifest = self.assertCompile(path, get_manifest=True)
-    #
-    #     self.assertIn('supportedstandards', manifest)
-    #     self.assertIsInstance(manifest['supportedstandards'], list)
-    #     self.assertGreater(len(manifest['supportedstandards']), 0)
-    #     self.assertIn('NEP-11', manifest['supportedstandards'])
+    def test_compile(self):
+        path = self.get_contract_path('nep11_non_divisible.py')
+        _, manifest = self.assertCompile(path, get_manifest=True)
+
+        self.assertIn('supportedstandards', manifest)
+        self.assertIsInstance(manifest['supportedstandards'], list)
+        self.assertGreater(len(manifest['supportedstandards']), 0)
+        self.assertIn('NEP-11', manifest['supportedstandards'])
 
     async def test_symbol(self):
         expected = 'EXMP'
@@ -160,13 +160,24 @@ class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
         self.assertEqual(from_account, result)
 
         # transfer
-        result, _ = await self.call(
+        result, notifications = await self.call(
             'transfer',
             [to_account, token, None],
             return_type=bool,
             signing_accounts=[self.account1]
         )
         self.assertEqual(True, result)
+        transfer_events = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(len(transfer_events), 1)
+        self.assertEqual(from_account, transfer_events[0].source)
+        self.assertEqual(to_account, transfer_events[0].destination)
+        self.assertEqual(1, transfer_events[0].amount)
+        self.assertEqual(token.decode('utf-8'), transfer_events[0].token_id)
 
         # check owner after
         result, _ = await self.call('ownerOf', [token], return_type=types.UInt160)
@@ -188,12 +199,20 @@ class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
         self.assertEqual(from_account, result)
 
         # transfer
-        result, _ = await self.call(
+        result, notifications = await self.call(
             'transfer',
             [to_account, token, None],
             return_type=bool
         )
         self.assertEqual(False, result)
+
+        transfers = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(0, len(transfers))
 
     async def test_transfer_fail_wrong_token_owner(self):
         token = self.TEST_TOKEN_ID
@@ -205,13 +224,21 @@ class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
         self.assertNotEqual(from_account, result)
 
         # transfer
-        result, _ = await self.call(
+        result, notifications = await self.call(
             'transfer',
             [to_account, token, None],
             return_type=bool,
             signing_accounts=[self.account2]
         )
         self.assertEqual(False, result)
+
+        transfers = self.filter_events(
+            notifications,
+            origin=[self.contract_hash],
+            event_name='Transfer',
+            notification_type=boatestcase.Nep11TransferEvent
+        )
+        self.assertEqual(0, len(transfers))
 
     async def test_transfer_fail_non_existing_token(self):
         token = b'thisisanonexistingtoken'
@@ -402,7 +429,7 @@ class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
         self.assertEqual(False, authorized[0].add)
 
     async def test_pause(self):
-        # missing
+        # missing owner signing transaction
         with self.assertRaises(boatestcase.AssertException) as context:
             await self.call('updatePause', [True], return_type=bool)
         self.assertEqual(str(context.exception), '`account` is not allowed for updatePause')
