@@ -97,18 +97,10 @@ class Nep17TransferEvent(_Nep17TransferEvent):
         try:
             return super().from_notification(n)
         except ValueError:
+            from neo3.api import StackItemType
             stack = n.state.as_list()
-
-            try:
-                source = stack[0].as_uint160()
-            except ValueError:
-                source = stack[0].as_none()
-
-            try:
-                destination = stack[1].as_uint160()
-            except ValueError:
-                destination = stack[1].as_none()
-
+            source = stack[0].as_uint160() if stack[0].type != StackItemType.ANY else stack[0].as_none()
+            destination = stack[1].as_uint160() if stack[1].type != StackItemType.ANY else stack[1].as_none()
             amount = stack[2].as_int()
             return cls(source, destination, amount)
 
@@ -119,18 +111,10 @@ class Nep11TransferEvent(Nep17TransferEvent):
 
     @classmethod
     def from_notification(cls, n: noderpc.Notification):
+        from neo3.api import StackItemType
         stack = n.state.as_list()
-
-        try:
-            source = stack[0].as_uint160()
-        except ValueError:
-            source = stack[0].as_none()
-
-        try:
-            destination = stack[1].as_uint160()
-        except ValueError:
-            destination = stack[1].as_none()
-
+        source = stack[0].as_uint160() if stack[0].type != StackItemType.ANY else stack[0].as_none()
+        destination = stack[1].as_uint160() if stack[1].type != StackItemType.ANY else stack[1].as_none()
         amount = stack[2].as_int()
         token_id = stack[3].as_str()
         return cls(source, destination, amount, token_id)
