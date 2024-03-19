@@ -1,823 +1,788 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from dataclasses import dataclass
+
+from neo3.api import noderpc
+from neo3.contracts.contract import CONTRACT_HASHES
+from neo3.core import types
+from neo3.network.payloads import verification
 
 from boa3.internal import constants
-from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive import neoxp
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.test_drive.model.wallet.account import Account
+from boa3_test.tests import boatestcase
 
 
-class TestAMMTemplate(BoaTest):
+@dataclass
+class SyncEvent(boatestcase.BoaTestEvent):
+    reserve_token_a: int
+    reserve_token_b: int
+
+    @classmethod
+    def from_untyped_notification(cls, n: noderpc.Notification):
+        inner_args_types = tuple(cls.__annotations__.values())
+        e = super().from_notification(n, *inner_args_types)
+        return cls(e.contract, e.name, e.state, *e.state)
+
+
+@dataclass
+class BurnOrMintEvent(boatestcase.BoaTestEvent):
+    sender: types.UInt160
+    amount_token_a: int
+    amount_token_b: int
+
+    @classmethod
+    def from_untyped_notification(cls, n: noderpc.Notification):
+        inner_args_types = tuple(cls.__annotations__.values())
+        e = super().from_notification(n, *inner_args_types)
+        return cls(e.contract, e.name, e.state, *e.state)
+
+
+@dataclass
+class SwapEvent(boatestcase.BoaTestEvent):
+    sender: types.UInt160
+    amount_token_a_in: int
+    amount_token_b_in: int
+    amount_token_a_out: int
+    amount_token_b_out: int
+
+    @classmethod
+    def from_untyped_notification(cls, n: noderpc.Notification):
+        inner_args_types = tuple(cls.__annotations__.values())
+        e = super().from_notification(n, *inner_args_types)
+        return cls(e.contract, e.name, e.state, *e.state)
+
+
+class TestAMMTemplate(boatestcase.BoaTestCase):
     default_folder: str = 'examples'
 
-    OWNER = neoxp.utils.get_account_by_name('owner')
-    OTHER_ACCOUNT_1 = neoxp.utils.get_account_by_name('testAccount1')
-    OTHER_ACCOUNT_2 = neoxp.utils.get_account_by_name('testAccount2')
-    GAS_TO_DEPLOY = 1000 * 10 ** 8
+    owner: Account
+    account1: Account
+    account2: Account
+    balance_test: Account
 
-    def test_amm_compile(self):
+    z_neo: types.UInt160
+    z_gas: types.UInt160
+
+    @classmethod
+    def setupTestCase(cls):
+        cls.owner = cls.node.wallet.account_new(label='test0', password='123')
+        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
+        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
+        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount', password='123')
+
+        super().setupTestCase()
+
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        await super().asyncSetupClass()
+
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10_000)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10_000)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 10_000)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 10_000)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash, 10)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 3000)
+        cls.z_neo = await cls.compile_and_deploy('wrapped_neo.py', signing_account=cls.owner)
+        cls.z_gas = await cls.compile_and_deploy('wrapped_gas.py', signing_account=cls.owner)
+
+        await cls.set_up_contract('amm.py', signing_account=cls.owner)
+
+    @classmethod
+    async def set_address(cls):
+        signer = verification.Signer(cls.owner.script_hash)
+        can_set_address, _ = await cls.call('set_address',
+                                   [cls.z_neo, cls.z_gas],
+                                   signers=[signer],
+                                   return_type=bool)
+        if can_set_address:
+            is_set, _ = await cls.call('set_address',
+                                       [cls.z_neo, cls.z_gas],
+                                       signing_accounts=[cls.owner],
+                                       return_type=bool)
+            cls.assertEqual(cls(), True, is_set)
+
+    def test_compile(self):
         path = self.get_contract_path('amm.py')
-        self.compile(path)
+        self.assertCompile(path)
 
-    def test_amm_set_address(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-        zneo_contract = runner.deploy_contract(path_zneo)
-        zgas_contract = runner.deploy_contract(path_zgas)
-        runner.update_contracts(export_checkpoint=True)
-
-        zneo_address = zneo_contract.script_hash
-        zgas_address = zgas_contract.script_hash
-        self.assertIsNotNone(zneo_address)
-        self.assertIsNotNone(zgas_address)
-
+    async def test_set_address(self):
         # won't work because it needs the owner signature
-        invokes.append(runner.call_contract(path, 'set_address', zneo_address, zgas_address))
-        expected_results.append(False)
+        result, _ = await self.call('set_address', [self.z_neo, self.z_gas], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        # set_address is conflicting with other tests
+        await self.set_address()
 
-        # it will work now
-        invokes.append(runner.call_contract(path, 'set_address', zneo_address, zgas_address))
-        expected_results.append(True)
+        result, _ = await self.call('get_token_a', [], return_type=types.UInt160)
+        self.assertEqual(self.z_neo, result)
 
-        invokes.append(runner.call_contract(path, 'get_token_a', expected_result_type=bytes))
-        expected_results.append(zneo_address)
-
-        invokes.append(runner.call_contract(path, 'get_token_b', expected_result_type=bytes))
-        expected_results.append(zgas_address)
+        result, _ = await self.call('get_token_b', [], return_type=types.UInt160)
+        self.assertEqual(self.z_gas, result)
 
         # initialize will work once
-        invokes.append(runner.call_contract(path, 'set_address', zneo_address, zgas_address))
-        expected_results.append(False)
+        result, _ = await self.call('set_address',
+                                    [self.z_neo, self.z_gas],
+                                    signing_accounts=[self.owner],
+                                    return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_symbol(self):
+        result, _ = await self.call('symbol', [], return_type=str)
+        self.assertEqual('AMM', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_decimals(self):
+        result, _ = await self.call('decimals', [], return_type=int)
+        self.assertEqual(8, result)
 
-    def test_amm_symbol(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_0_total_supply(self):
+        result, _ = await self.call('totalSupply', [], return_type=int)
+        self.assertEqual(0, result)
 
-        invoke = runner.call_contract(path, 'symbol')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual('AMM', invoke.result)
-
-    def test_amm_decimals(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invoke = runner.call_contract(path, 'decimals')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(8, invoke.result)
-
-    def test_amm_total_supply(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invoke = runner.call_contract(path, 'totalSupply')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(0, invoke.result)
-
-    def test_amm_total_balance_of(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invoke = runner.call_contract(path, 'balanceOf', self.OWNER.script_hash.to_array())
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(0, invoke.result)
+    async def test_total_balance_of(self):
+        result, _ = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
+        self.assertEqual(0, result)
 
         # should fail when the script length is not 20
-        runner.call_contract(path, 'balanceOf', bytes(10))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('balanceOf', [bytes(10)], return_type=int)
 
-        runner.call_contract(path, 'balanceOf', bytes(30))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('balanceOf', [bytes(30)], return_type=int)
 
-    def test_amm_quote(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
+    async def test_quote(self):
         amount_zneo = 1
         reserve_zneo = 100
         reserve_zgas = 1100 * 10 ** 8
 
-        invoke = runner.call_contract(path, 'quote', amount_zneo, reserve_zneo, reserve_zgas)
+        result, _ = await self.call('quote', [amount_zneo, reserve_zneo, reserve_zgas], return_type=int)
         amount_zgas = amount_zneo * reserve_zgas // reserve_zneo
+        self.assertEqual(amount_zgas, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(amount_zgas, invoke.result)
-
-    def test_amm_on_nep17_payment(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
+    async def test_on_nep17_payment(self):
         transferred_amount = 10
 
-        test_account = self.OTHER_ACCOUNT_1
-        test_account_script_hash = test_account.script_hash.to_array()
+        account = self.account1.script_hash
+        amm = self.contract.hash
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.add_neo(test_account.address, transferred_amount)
-        runner.add_gas(test_account.address, 2 * 10 ** 8)  # gas to invoke
+        # set_address is conflicting with other tests
+        await self.set_address()
 
-        amm_contract = runner.deploy_contract(path, account=self.OWNER)
-        zneo_contract = runner.deploy_contract(path_zneo)
-        zgas_contract = runner.deploy_contract(path_zgas)
-        runner.update_contracts(export_checkpoint=True)
-
-        amm_address = amm_contract.script_hash
-        zneo_address = zneo_contract.script_hash
-        zgas_address = zgas_contract.script_hash
-        self.assertIsNotNone(amm_address)
-        self.assertIsNotNone(zneo_address)
-        self.assertIsNotNone(zgas_address)
-
-        runner.run_contract(path, 'set_address', zneo_address, zgas_address, account=self.OWNER)
-
-        # adding the transferred_amount into test_account
-        invokes.append(runner.call_contract(constants.NEO_SCRIPT, 'transfer',
-                                            test_account_script_hash, zneo_address, transferred_amount, None))
-        expected_results.append(True)
+        # adding the transferred_amount into account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_neo, transferred_amount, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=constants.NEO_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # the AMM will accept this transaction, but there is no reason to send tokens directly to the smart contract.
         # to send tokens to the AMM you should use the add_liquidity function
-        invokes.append(runner.call_contract(path_zneo, 'transfer',
-                                            test_account_script_hash, amm_address, transferred_amount, None))
-        expected_results.append(True)
-
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('transfer',
+                                    [account, amm, transferred_amount, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_neo,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # the smart contract will abort if some address other than zNEO or zGAS calls the onPayment method
-        runner.call_contract(path, 'onNEP17Payment', test_account_script_hash, transferred_amount, None)
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
+        with self.assertRaises(boatestcase.AbortException):
+            await self.call('onNEP17Payment',
+                            [account, transferred_amount, None],
+                            return_type=None)
 
-    def test_amm_add_liquidity(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        test_balance_zneo = 10_000_000
-        test_balance_zgas = 10_000_000 * 10 ** 8
+    async def test_add_liquidity(self):
+        test_balance_zneo = 1_000
+        test_balance_zgas = 1_000 * 10 ** 8
         transferred_amount_zneo = 10
         transferred_amount_zgas = 110 * 10 ** 8
 
-        test_account = self.OTHER_ACCOUNT_1
-        test_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        account = self.account1.script_hash
+        amm = self.contract.hash
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.add_gas(test_account.address, 2 * 10 ** 8)  # gas to invoke
+        # set_address is conflicting with other tests
+        await self.set_address()
 
-        amm_contract = runner.deploy_contract(path, account=self.OWNER)
-        zneo_contract = runner.deploy_contract(path_zneo)
-        zgas_contract = runner.deploy_contract(path_zgas)
-        runner.update_contracts(export_checkpoint=True)
+        # minting zNEO to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_neo, test_balance_zneo, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=constants.NEO_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        amm_address = amm_contract.script_hash
-        zneo_address = zneo_contract.script_hash
-        zgas_address = zgas_contract.script_hash
-        self.assertIsNotNone(amm_address)
-        self.assertIsNotNone(zneo_address)
-        self.assertIsNotNone(zgas_address)
-
-        runner.run_contract(path, 'set_address', zneo_address, zgas_address,
-                            account=self.OWNER)
-
-        runner.add_neo(test_account.address, test_balance_zneo)
-        runner.add_gas(test_account.address, test_balance_zgas)
-
-        # minting zNEO to test_account
-        runner.run_contract(constants.NEO_SCRIPT, 'transfer',
-                            test_account_script_hash, zneo_address, test_balance_zneo, None,
-                            account=test_account)
-
-        # minting zGAS to test_account
-        runner.run_contract(constants.GAS_SCRIPT, 'transfer',
-                            test_account_script_hash, zgas_address, test_balance_zgas, None,
-                            account=test_account)
+        # minting zGAS to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_gas, test_balance_zgas, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=constants.GAS_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # won't work, because the user did not allow the amm to transfer zNEO and zGAS
-        runner.call_contract(path, 'add_liquidity',
-                             transferred_amount_zneo, transferred_amount_zgas, 0, 0, test_account_script_hash)
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('add_liquidity',
+                            [transferred_amount_zneo, transferred_amount_zgas, 0, 0, account],
+                            signing_accounts=[self.account1],
+                            return_type=list[int])
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_account
-        invokes.append(runner.call_contract(path_zneo, 'approve',
-                                            test_account_script_hash, amm_address, test_balance_zneo))
-        expected_results.append(True)
+        # approving the AMM contract, so that it will be able to transfer zNEO from account
+        result, _ = await self.call('approve',
+                                    [account, amm, test_balance_zneo],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_neo,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_account
-        invokes.append(runner.call_contract(path_zgas, 'approve',
-                                            test_account_script_hash, amm_address, test_balance_zgas))
-        expected_results.append(True)
+        # approving the AMM contract, so that it will be able to transfer zGAS from account
+        result, _ = await self.call('approve',
+                                    [account, amm, test_balance_zgas],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_gas,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
-        total_supply_before = runner.call_contract(path, 'totalSupply')
-        balance_user_amm_before = runner.call_contract(path, 'balanceOf', test_account_script_hash)
-        reserves_before = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_before = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_before = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_before = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_before = runner.call_contract(path_zgas, 'balanceOf', amm_address)
-
-        import math
-        liquidity = int(math.sqrt(transferred_amount_zneo * transferred_amount_zgas))
+        total_supply_before, _ = await self.call('totalSupply', [], return_type=int)
+        balance_user_amm_before, _ = await self.call('balanceOf', [account], return_type=int)
+        reserves_before, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
         # adding liquidity to the pool will give you AMM tokens in return
-        invokes.append(runner.call_contract(path, 'add_liquidity',
-                                            transferred_amount_zneo, transferred_amount_zgas, 0, 0,
-                                            test_account_script_hash))
-        expected_results.append([transferred_amount_zneo, transferred_amount_zgas, liquidity])
+        liquidity, sent_amount_zneo, sent_amount_zgas = await self.calculate_add_liquidity(transferred_amount_zneo, transferred_amount_zgas)
+        result, notifications = await self.call('add_liquidity',
+                                                [transferred_amount_zneo, transferred_amount_zgas, 0, 0, account],
+                                                signing_accounts=[self.account1],
+                                                return_type=list[int])
+        self.assertEqual([sent_amount_zneo, sent_amount_zgas, liquidity], result)
 
         # data that will be compared with the previously saved data
-        total_supply_after = runner.call_contract(path, 'totalSupply')
-        balance_user_amm_after = runner.call_contract(path, 'balanceOf', test_account_script_hash)
-        reserves_after = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_after = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_after = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_after = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_after = runner.call_contract(path_zgas, 'balanceOf', amm_address)
+        total_supply_after, _ = await self.call('totalSupply', [], return_type=int)
+        balance_user_amm_after, _ = await self.call('balanceOf', [account], return_type=int)
+        reserves_after, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        transfer_events = runner.get_events('Transfer', origin=amm_address)
+        transfer_events = self.filter_events(notifications,
+                                             origin=amm,
+                                             event_name='Transfer',
+                                             notification_type=boatestcase.Nep17TransferEvent
+                                             )
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(None, transfer_events[0].source)
+        self.assertEqual(account, transfer_events[0].destination)
+        self.assertEqual(liquidity, transfer_events[0].amount)
 
-        sender, receiver, amount = transfer_events[0].arguments
-        self.assertEqual(None, sender)
-        self.assertEqual(test_account_script_hash, receiver)
-        self.assertEqual(liquidity, amount)
-
-        sync_events = runner.get_events('Sync', origin=amm_address)
+        sync_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Sync',
+                                         notification_type=SyncEvent
+                                         )
         self.assertEqual(1, len(sync_events))
-        self.assertEqual(2, len(sync_events[0].arguments))
+        self.assertEqual(sent_amount_zneo, sync_events[0].reserve_token_a)
+        self.assertEqual(sent_amount_zgas, sync_events[0].reserve_token_b)
 
-        balance_zneo, balance_zgas = sync_events[0].arguments
-        self.assertEqual(transferred_amount_zneo, balance_zneo)
-        self.assertEqual(transferred_amount_zgas, balance_zgas)
-
-        mint_events = runner.get_events('Mint', origin=amm_address)
+        mint_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Mint',
+                                         notification_type=BurnOrMintEvent
+                                         )
         self.assertEqual(1, len(mint_events))
-        self.assertEqual(3, len(mint_events[0].arguments))
+        self.assertEqual(account, mint_events[0].sender)
+        self.assertEqual(sent_amount_zneo, mint_events[0].amount_token_a)
+        self.assertEqual(sent_amount_zgas, mint_events[0].amount_token_b)
 
-        address, amount_zneo, amount_zgas = mint_events[0].arguments
-        self.assertEqual(test_account_script_hash, address)
-        self.assertEqual(transferred_amount_zneo, amount_zneo)
-        self.assertEqual(transferred_amount_zgas, amount_zgas)
-
-        self.assertEqual(total_supply_before.result + liquidity, total_supply_after.result)
-        self.assertEqual(balance_user_amm_before.result + liquidity, balance_user_amm_after.result)
-        self.assertEqual(reserves_before.result[0] + transferred_amount_zneo, reserves_after.result[0])
-        self.assertEqual(reserves_before.result[1] + transferred_amount_zgas, reserves_after.result[1])
-        self.assertEqual(balance_user_zneo_before.result - transferred_amount_zneo, balance_user_zneo_after.result)
-        self.assertEqual(balance_user_zgas_before.result - transferred_amount_zgas, balance_user_zgas_after.result)
-        self.assertEqual(reserves_before.result[0], balance_amm_zneo_before.result)
-        self.assertEqual(reserves_before.result[1], balance_amm_zgas_before.result)
-        self.assertEqual(reserves_after.result[0], balance_amm_zneo_after.result)
-        self.assertEqual(reserves_after.result[1], balance_amm_zgas_after.result)
-
-        runner.call_contract(path_zneo, 'approve',
-                             test_account_script_hash, amm_address, test_balance_zneo)
-        runner.call_contract(path_zgas, 'approve',
-                             test_account_script_hash, amm_address, test_balance_zgas)
-        runner.call_contract(path, 'add_liquidity',
-                             transferred_amount_zneo, transferred_amount_zgas, 0, 0,
-                             test_account_script_hash)
+        self.assertEqual(total_supply_before + liquidity, total_supply_after)
+        self.assertEqual(balance_user_amm_before + liquidity, balance_user_amm_after)
+        self.assertEqual(reserves_before[0] + sent_amount_zneo, reserves_after[0])
+        self.assertEqual(reserves_before[1] + sent_amount_zgas, reserves_after[1])
+        self.assertEqual(balance_user_zneo_before - sent_amount_zneo, balance_user_zneo_after)
+        self.assertEqual(balance_user_zgas_before - sent_amount_zgas, balance_user_zgas_after)
+        self.assertEqual(reserves_before[0], balance_amm_zneo_before)
+        self.assertEqual(reserves_before[1], balance_amm_zgas_before)
+        self.assertEqual(reserves_after[0], balance_amm_zneo_after)
+        self.assertEqual(reserves_after[1], balance_amm_zgas_after)
 
         transferred_amount_zneo = 2
         transferred_amount_zgas = 23 * 10 ** 8
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_account
-        invokes.append(runner.call_contract(path_zneo, 'approve',
-                                            test_account_script_hash, amm_address, transferred_amount_zneo))
-        expected_results.append(True)
+        # approving the AMM contract, so that it will be able to transfer zNEO from account
+        result, _ = await self.call('approve',
+                                    [account, amm, transferred_amount_zneo],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_neo,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_account
-        invokes.append(runner.call_contract(path_zgas, 'approve',
-                                            test_account_script_hash, amm_address, transferred_amount_zgas))
-        expected_results.append(True)
+        # approving the AMM contract, so that it will be able to transfer zGAS from account
+        result, _ = await self.call('approve',
+                                    [account, amm, transferred_amount_zgas],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_gas,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
-        total_supply_before = runner.call_contract(path, 'totalSupply')
-        reserves_before = runner.call_contract(path, 'get_reserves')
+        total_supply_before, _ = await self.call('totalSupply', [], return_type=int)
+        reserves_before, _ = await self.call('get_reserves', [], return_type=list[int])
 
         # adding liquidity to the pool will give you AMM tokens in return
-        invokes.append(runner.call_contract(path, 'add_liquidity',
-                                            transferred_amount_zneo, transferred_amount_zgas, 0, 0,
-                                            test_account_script_hash))
+        result, notifications = await self.call('add_liquidity',
+                                                [transferred_amount_zneo, transferred_amount_zgas, 0, 0, account],
+                                                signing_accounts=[self.account1],
+                                                return_type=list[int])
 
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        # since there are tokens in the pool already, liquidity will be calculated as follows
+        liquidity, sent_amount_zneo, sent_amount_zgas = await self.calculate_add_liquidity(transferred_amount_zneo, transferred_amount_zgas)
+        self.assertEqual([sent_amount_zneo, sent_amount_zgas, liquidity], result)
 
         # zGAS will be quoted to keep the same ratio between zNEO and zGAS, the current ratio is 1 NEO to 11 GAS,
         # therefore, if 2 NEO are being added to the AMM, 22 GAS will be added instead of 23
-        transferred_amount_zgas_quoted = transferred_amount_zneo * reserves_before.result[1] // reserves_before.result[0]
+        transferred_amount_zgas_quoted = transferred_amount_zneo * reserves_before[1] // reserves_before[0]
+        self.assertEqual(sent_amount_zgas, transferred_amount_zgas_quoted)
 
-        # since there are tokens in the pool already, liquidity will be calculated as follows
-        liquidity = min(transferred_amount_zneo * total_supply_before.result // reserves_before.result[0],
-                        transferred_amount_zgas_quoted * total_supply_before.result // reserves_before.result[1])
-        expected_results.append([transferred_amount_zneo, transferred_amount_zgas_quoted, liquidity])
+        transfer_events = self.filter_events(notifications,
+                                             origin=amm,
+                                             event_name='Transfer',
+                                             notification_type=boatestcase.Nep17TransferEvent
+                                             )
+        self.assertEqual(1, len(transfer_events))
+        self.assertEqual(None, transfer_events[0].source)
+        self.assertEqual(account, transfer_events[0].destination)
+        self.assertEqual(liquidity, transfer_events[0].amount)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        sync_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Sync',
+                                         notification_type=SyncEvent
+                                         )
+        self.assertEqual(1, len(sync_events))
+        self.assertEqual(reserves_before[0] + sent_amount_zneo, sync_events[0].reserve_token_a)
+        self.assertEqual(reserves_before[1] + sent_amount_zgas, sync_events[0].reserve_token_b)
 
-        transfer_events = runner.get_events('Transfer', origin=amm_address)
-        self.assertEqual(2, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[1].arguments))
+        mint_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Mint',
+                                         notification_type=BurnOrMintEvent
+                                         )
+        self.assertEqual(1, len(mint_events))
+        self.assertEqual(account, mint_events[0].sender)
+        self.assertEqual(sent_amount_zneo, mint_events[0].amount_token_a)
+        self.assertEqual(sent_amount_zgas, mint_events[0].amount_token_b)
 
-        sender, receiver, amount = transfer_events[1].arguments
-        self.assertEqual(None, sender)
-        self.assertEqual(test_account_script_hash, receiver)
-        self.assertEqual(liquidity, amount)
+    async def calculate_add_liquidity(self, amount_a: int, amount_b: int) -> tuple[int, int, int]:
+        import math
+        total_supply, _ = await self.call('totalSupply', [], return_type=int)
+        reserves, _ = await self.call('get_reserves', [], return_type=list[int])
 
-        sync_events = runner.get_events('Sync', origin=amm_address)
-        self.assertEqual(2, len(sync_events))
-        self.assertEqual(2, len(sync_events[1].arguments))
+        if total_supply == 0:
+            liquidity = int(math.sqrt(amount_a * amount_b))
+        else:
+            token_b_quoted, _ = await self.call('quote',
+                                                [amount_a, reserves[0], reserves[1]],
+                                                return_type=int)
+            if token_b_quoted <= amount_b:
+                amount_b = token_b_quoted
+            else:
+                token_a_quoted, _ = await self.call('quote',
+                                                    [amount_b, reserves[1], reserves[0]],
+                                                    return_type=int)
+                amount_a = token_a_quoted
+            liquidity = min(amount_a * total_supply // reserves[0], amount_b * total_supply // reserves[1])
 
-        balance_zneo, balance_zgas = sync_events[1].arguments
-        self.assertEqual(reserves_before.result[0] + transferred_amount_zneo, balance_zneo)
-        self.assertEqual(reserves_before.result[1] + transferred_amount_zgas_quoted, balance_zgas)
+        return liquidity, amount_a, amount_b
 
-        mint_events = runner.get_events('Mint', origin=amm_address)
-        self.assertEqual(2, len(mint_events))
-        self.assertEqual(3, len(mint_events[1].arguments))
+    async def calculate_remove_liquidity(self, liquidity: int) -> list[int]:
+        total_supply, _ = await self.call('totalSupply', [], return_type=int)
+        reserves, _ = await self.call('get_reserves', [], return_type=list[int])
 
-        address, amount_zneo, amount_zgas = mint_events[1].arguments
-        self.assertEqual(test_account_script_hash, address)
-        self.assertEqual(transferred_amount_zneo, amount_zneo)
-        self.assertEqual(transferred_amount_zgas_quoted, amount_zgas)
+        return [liquidity * reserves[0] // total_supply, liquidity * reserves[1] // total_supply]
 
-    def test_amm_remove_liquidity(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        test_balance_zneo = 10_000_000
-        test_balance_zgas = 10_000_000 * 10 ** 8
+    async def test_remove_liquidity(self):
+        test_balance_zneo = 1_000
+        test_balance_zgas = 1_000 * 10 ** 8
         transferred_amount_zneo = 10
         transferred_amount_zgas = 110 * 10 ** 8
 
-        test_account = self.OTHER_ACCOUNT_1
-        test_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        account = self.account2.script_hash
+        amm = self.contract.hash
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.add_gas(test_account.address, 7 * 10 ** 8)  # gas to invoke
-
-        amm_contract = runner.deploy_contract(path, account=self.OWNER)
-        zneo_contract = runner.deploy_contract(path_zneo)
-        zgas_contract = runner.deploy_contract(path_zgas)
-        runner.update_contracts(export_checkpoint=True)
-
-        amm_address = amm_contract.script_hash
-        zneo_address = zneo_contract.script_hash
-        zgas_address = zgas_contract.script_hash
-        self.assertIsNotNone(amm_address)
-        self.assertIsNotNone(zneo_address)
-        self.assertIsNotNone(zgas_address)
-
-        runner.run_contract(path, 'set_address', zneo_address, zgas_address,
-                            account=self.OWNER)
+        # set_address is conflicting with other tests
+        await self.set_address()
 
         # can't remove liquidity, because the user doesn't have any
-        runner.call_contract(path, 'remove_liquidity', 10000, 0, 0, test_account_script_hash)
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('remove_liquidity',
+                            [10000, 0, 0, account],
+                            signing_accounts=[self.account2],
+                            return_type=list[int])
 
-        runner.add_neo(test_account.address, test_balance_zneo)
-        runner.add_gas(test_account.address, test_balance_zgas)
+        # minting zNEO to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_neo, test_balance_zneo, None],
+                                    signing_accounts=[self.account2],
+                                    target_contract=constants.NEO_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # minting zNEO to test_account
-        runner.run_contract(constants.NEO_SCRIPT, 'transfer',
-                            test_account_script_hash, zneo_address, test_balance_zneo, None,
-                            account=test_account)
+        # minting zGAS to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_gas, test_balance_zgas, None],
+                                    signing_accounts=[self.account2],
+                                    target_contract=constants.GAS_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # minting zGAS to test_account
-        runner.run_contract(constants.GAS_SCRIPT, 'transfer',
-                            test_account_script_hash, zgas_address, test_balance_zgas, None,
-                            account=test_account)
+        # approving the AMM contract, so that it will be able to transfer zNEO from account
+        result, _ = await self.call('approve',
+                                    [account, amm, test_balance_zneo],
+                                    signing_accounts=[self.account2],
+                                    target_contract=self.z_neo,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_account
-        runner.run_contract(path_zneo, 'approve',
-                            test_account_script_hash, amm_address, transferred_amount_zneo,
-                            account=test_account)
+        # approving the AMM contract, so that it will be able to transfer zGAS from account
+        result, _ = await self.call('approve',
+                                    [account, amm, test_balance_zgas],
+                                    signing_accounts=[self.account2],
+                                    target_contract=self.z_gas,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_account
-        runner.run_contract(path_zgas, 'approve',
-                            test_account_script_hash, amm_address, transferred_amount_zgas,
-                            account=test_account)
+        total_supply_before, _ = await self.call('totalSupply', [], return_type=int)
+        reserves_before, _ = await self.call('get_reserves', [], return_type=list[int])
 
         # adding liquidity to the pool will give you AMM tokens in return
-        runner.run_contract(path, 'add_liquidity',
-                            transferred_amount_zneo, transferred_amount_zgas, 0, 0, test_account_script_hash,
-                            account=test_account)
-        import math
-        liquidity = int(math.sqrt(transferred_amount_zneo * transferred_amount_zgas))
+        liquidity, sent_amount_zneo, sent_amount_zgas = await self.calculate_add_liquidity(transferred_amount_zneo, transferred_amount_zgas)
+
+        result, notifications = await self.call('add_liquidity',
+                                                [transferred_amount_zneo, transferred_amount_zgas, 0, 0, account],
+                                                signing_accounts=[self.account2],
+                                                return_type=list[int])
+        self.assertEqual([sent_amount_zneo, sent_amount_zgas, liquidity], result)
 
         # saving data to demonstrate that the value will change later
-        total_supply_before = runner.call_contract(path, 'totalSupply')
-        balance_user_before = runner.call_contract(path, 'balanceOf', test_account_script_hash)
-        reserves_before = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_before = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_before = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_before = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_before = runner.call_contract(path_zgas, 'balanceOf', amm_address)
+        total_supply_before, _ = await self.call('totalSupply', [], return_type=int)
+        balance_user_before, _ = await self.call('balanceOf', [account], return_type=int)
+        reserves_before, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
         # removing liquidity from the pool will return the equivalent zNEO and zGAS that were used to fund the pool
-        invokes.append(runner.call_contract(path, 'remove_liquidity',
-                                            liquidity, 0, 0, test_account_script_hash))
-        expected_results.append([transferred_amount_zneo, transferred_amount_zgas])
+        zneo_received, zgas_received = await self.calculate_remove_liquidity(liquidity)
+        result, notifications = await self.call('remove_liquidity',
+                                    [liquidity, 0, 0, account],
+                                    signing_accounts=[self.account2],
+                                    return_type=list[int])
+        self.assertEqual([zneo_received, zgas_received], result)
 
         # data that will be compared with the previously saved data
-        total_supply_after = runner.call_contract(path, 'totalSupply')
-        balance_user_after = runner.call_contract(path, 'balanceOf', test_account_script_hash)
-        reserves_after = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_after = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_after = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_after = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_after = runner.call_contract(path_zgas, 'balanceOf', amm_address)
+        total_supply_after, _ = await self.call('totalSupply', [], return_type=int)
+        balance_user_after, _ = await self.call('balanceOf', [account], return_type=int)
+        reserves_after, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        transfer_events = runner.get_events('Transfer', origin=amm_address)
+        transfer_events = self.filter_events(notifications,
+                                             origin=amm,
+                                             event_name='Transfer',
+                                             notification_type=boatestcase.Nep17TransferEvent
+                                             )
         # add_liquidity sent a Transfer event and remove_liquidity sent another
         self.assertEqual(1, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
+        self.assertEqual(account, transfer_events[0].source)
+        self.assertEqual(None, transfer_events[0].destination)
+        self.assertEqual(liquidity, transfer_events[0].amount)
 
-        sender, receiver, amount = transfer_events[0].arguments
-        self.assertEqual(test_account_script_hash, sender)
-        self.assertEqual(None, receiver)
-        self.assertEqual(liquidity, amount)
-
-        sync_events = runner.get_events('Sync', origin=amm_address)
+        sync_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Sync',
+                                         notification_type=SyncEvent
+                                         )
         self.assertEqual(1, len(sync_events))
-        self.assertEqual(2, len(sync_events[0].arguments))
+        self.assertEqual(reserves_before[0] - zneo_received, sync_events[0].reserve_token_a)
+        self.assertEqual(reserves_before[1] - zgas_received, sync_events[0].reserve_token_b)
 
-        balance_zneo, balance_zgas = sync_events[0].arguments
-        self.assertEqual(reserves_before.result[0] - transferred_amount_zneo, balance_zneo)
-        self.assertEqual(reserves_before.result[1] - transferred_amount_zgas, balance_zgas)
-
-        burn_events = runner.get_events('Burn', origin=amm_address)
+        burn_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Burn',
+                                         notification_type=BurnOrMintEvent
+                                         )
         self.assertEqual(1, len(burn_events))
-        self.assertEqual(3, len(burn_events[0].arguments))
+        self.assertEqual(account, burn_events[0].sender)
+        self.assertEqual(zneo_received, burn_events[0].amount_token_a)
+        self.assertEqual(zgas_received, burn_events[0].amount_token_b)
 
-        address, amount_zneo, amount_zgas = burn_events[0].arguments
-        if isinstance(address, str):
-            address = String(address).to_bytes()
-        self.assertEqual(test_account_script_hash, address)
-        self.assertEqual(transferred_amount_zneo, amount_zneo)
-        self.assertEqual(transferred_amount_zgas, amount_zgas)
+        self.assertEqual(total_supply_before - liquidity, total_supply_after)
+        self.assertEqual(balance_user_before - liquidity, balance_user_after)
+        self.assertEqual(reserves_before[0] - zneo_received, reserves_after[0])
+        self.assertEqual(reserves_before[1] - zgas_received, reserves_after[1])
+        self.assertEqual(balance_user_zneo_before + zneo_received, balance_user_zneo_after)
+        self.assertEqual(balance_user_zgas_before + zgas_received, balance_user_zgas_after)
+        self.assertEqual(reserves_before[0], balance_amm_zneo_before)
+        self.assertEqual(reserves_before[1], balance_amm_zgas_before)
+        self.assertEqual(reserves_after[0], balance_amm_zneo_after)
+        self.assertEqual(reserves_after[1], balance_amm_zgas_after)
 
-        self.assertEqual(total_supply_before.result - liquidity, total_supply_after.result)
-        self.assertEqual(balance_user_before.result - liquidity, balance_user_after.result)
-        self.assertEqual(reserves_before.result[0] - transferred_amount_zneo, reserves_after.result[0])
-        self.assertEqual(reserves_before.result[1] - transferred_amount_zgas, reserves_after.result[1])
-        self.assertEqual(balance_user_zneo_before.result + transferred_amount_zneo, balance_user_zneo_after.result)
-        self.assertEqual(balance_user_zgas_before.result + transferred_amount_zgas, balance_user_zgas_after.result)
-        self.assertEqual(reserves_before.result[0], balance_amm_zneo_before.result)
-        self.assertEqual(reserves_before.result[1], balance_amm_zgas_before.result)
-        self.assertEqual(reserves_after.result[0], balance_amm_zneo_after.result)
-        self.assertEqual(reserves_after.result[1], balance_amm_zgas_after.result)
-
-    def test_amm_swap_zneo_to_zgas(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        test_balance_zneo = 10_000_000
-        test_balance_zgas = 10_000_000 * 10 ** 8
+    async def test_swap_zneo_to_zgas(self):
+        test_balance_zneo = 1_000
+        test_balance_zgas = 1_000 * 10 ** 8
         transferred_amount_zneo = 10
         transferred_amount_zgas = 110 * 10 ** 8
 
-        test_account = self.OTHER_ACCOUNT_1
-        test_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        account = self.account1.script_hash
+        amm = self.contract.hash
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.add_gas(test_account.address, 7 * 10 ** 8)  # gas to invoke
+        # set_address is conflicting with other tests
+        await self.set_address()
 
-        amm_contract = runner.deploy_contract(path, account=self.OWNER)
-        zneo_contract = runner.deploy_contract(path_zneo)
-        zgas_contract = runner.deploy_contract(path_zgas)
-        runner.update_contracts(export_checkpoint=True)
+        # minting zNEO to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_neo, test_balance_zneo, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=constants.NEO_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        amm_address = amm_contract.script_hash
-        zneo_address = zneo_contract.script_hash
-        zgas_address = zgas_contract.script_hash
-        self.assertIsNotNone(amm_address)
-        self.assertIsNotNone(zneo_address)
-        self.assertIsNotNone(zgas_address)
+        # minting zGAS to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_gas, test_balance_zgas, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=constants.GAS_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.run_contract(path, 'set_address', zneo_address, zgas_address,
-                            account=self.OWNER)
+        # approving the AMM contract, so that it will be able to transfer zNEO from account
+        result, _ = await self.call('approve',
+                                    [account, amm, transferred_amount_zneo],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_neo,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # can't remove liquidity, because the user doesn't have any
-        runner.call_contract(path, 'remove_liquidity', 10000, 0, 0, test_account_script_hash)
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.add_neo(test_account.address, test_balance_zneo)
-        runner.add_gas(test_account.address, test_balance_zgas)
-
-        # minting zNEO to test_account
-        runner.run_contract(constants.NEO_SCRIPT, 'transfer',
-                            test_account_script_hash, zneo_address, test_balance_zneo, None,
-                            account=test_account)
-
-        # minting zGAS to test_account
-        runner.run_contract(constants.GAS_SCRIPT, 'transfer',
-                            test_account_script_hash, zgas_address, test_balance_zgas, None,
-                            account=test_account)
-
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_account
-        runner.run_contract(path_zneo, 'approve',
-                            test_account_script_hash, amm_address, transferred_amount_zneo,
-                            account=test_account)
-
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_account
-        runner.run_contract(path_zgas, 'approve',
-                            test_account_script_hash, amm_address, transferred_amount_zgas,
-                            account=test_account)
+        # approving the AMM contract, so that it will be able to transfer zGAS from account
+        result, _ = await self.call('approve',
+                                    [account, amm, transferred_amount_zgas],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_gas,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
-        runner.run_contract(path, 'add_liquidity',
-                            transferred_amount_zneo, transferred_amount_zgas, 0, 0, test_account_script_hash,
-                            account=test_account)
+        liquidity, sent_amount_zneo, sent_amount_zgas = await self.calculate_add_liquidity(transferred_amount_zneo, transferred_amount_zgas)
+        result, notifications = await self.call('add_liquidity',
+                                                [transferred_amount_zneo, transferred_amount_zgas, 0, 0, account],
+                                                signing_accounts=[self.account1],
+                                                return_type=list[int])
+        self.assertEqual([sent_amount_zneo, sent_amount_zgas, liquidity], result)
 
         swapped_zneo = 1
 
         # won't work, because user did not have enough zNEO tokens
-        runner.call_contract(path, 'swap_tokens',
-                             swapped_zneo, 0, zneo_address, test_account_script_hash)
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('swap_tokens',
+                            [swapped_zneo, 0, self.z_neo, account],
+                            signing_accounts=[self.account1],
+                            return_type=int)
 
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_account
-        invokes.append(runner.call_contract(path_zneo, 'approve',
-                                            test_account_script_hash, amm_address, swapped_zneo))
-        expected_results.append(True)
+        # approving the AMM contract, so that it will be able to transfer zNEO from account
+        result, _ = await self.call('approve',
+                                    [account, amm, swapped_zneo],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_neo,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
-        total_supply_before = runner.call_contract(path, 'totalSupply')
-        reserves_before = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_before = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_before = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_before = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_before = runner.call_contract(path_zgas, 'balanceOf', amm_address)
+        total_supply_before, _ = await self.call('totalSupply', [], return_type=int)
+        reserves_before, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
         # swapping zneo for zgas
-        invokes.append(runner.call_contract(path, 'swap_tokens',
-                                            swapped_zneo, 0, zneo_address, test_account_script_hash))
-
-        # data that will be compared with the previously saved data
-        total_supply_after = runner.call_contract(path, 'totalSupply')
-        reserves_after = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_after = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_after = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_after = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_after = runner.call_contract(path_zgas, 'balanceOf', amm_address)
-
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
+        result, notifications = await self.call('swap_tokens',
+                                                [swapped_zneo, 0, self.z_neo, account],
+                                                signing_accounts=[self.account1],
+                                                return_type=int)
         # there is a 0.3% fee when doing a swap
         swapped_zneo_with_fee = swapped_zneo * (1000 - 3)
-        swapped_zgas = swapped_zneo_with_fee * reserves_before.result[1] // (reserves_before.result[0] * 1000 + swapped_zneo_with_fee)
-        expected_results.append(swapped_zgas)
+        swapped_zgas = swapped_zneo_with_fee * reserves_before[1] // (reserves_before[0] * 1000 + swapped_zneo_with_fee)
+        self.assertEqual(swapped_zgas, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        # data that will be compared with the previously saved data
+        total_supply_after, _ = await self.call('totalSupply', [], return_type=int)
+        reserves_after, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
-        # add_liquidity sent a Sync before
-        transfer_events = runner.get_events('Sync')
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(2, len(transfer_events[0].arguments))
+        sync_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Sync',
+                                         notification_type=SyncEvent
+                                         )
+        self.assertEqual(1, len(sync_events))
+        self.assertEqual(reserves_before[0] + swapped_zneo, sync_events[0].reserve_token_a)
+        self.assertEqual(reserves_before[1] - swapped_zgas, sync_events[0].reserve_token_b)
 
-        balance_zneo, balance_zgas = transfer_events[0].arguments
-        self.assertEqual(reserves_before.result[0] + swapped_zneo, balance_zneo)
-        self.assertEqual(reserves_before.result[1] - swapped_zgas, balance_zgas)
+        swap_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Swap',
+                                         notification_type=SwapEvent
+                                         )
+        self.assertEqual(1, len(swap_events))
+        self.assertEqual(account, swap_events[0].sender)
+        self.assertEqual(swapped_zneo, swap_events[0].amount_token_a_in)
+        self.assertEqual(0, swap_events[0].amount_token_b_in)
+        self.assertEqual(0, swap_events[0].amount_token_a_out)
+        self.assertEqual(swapped_zgas, swap_events[0].amount_token_b_out)
 
-        transfer_events = runner.get_events('Swap')
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(5, len(transfer_events[0].arguments))
+        self.assertEqual(total_supply_before, total_supply_after)
+        self.assertEqual(reserves_before[0] + swapped_zneo, reserves_after[0])
+        self.assertEqual(reserves_before[1] - swapped_zgas, reserves_after[1])
+        self.assertEqual(balance_user_zneo_before - swapped_zneo, balance_user_zneo_after)
+        self.assertEqual(balance_user_zgas_before + swapped_zgas, balance_user_zgas_after)
+        self.assertEqual(reserves_before[0], balance_amm_zneo_before)
+        self.assertEqual(reserves_before[1], balance_amm_zgas_before)
+        self.assertEqual(reserves_after[0], balance_amm_zneo_after)
+        self.assertEqual(reserves_after[1], balance_amm_zgas_after)
+        self.assertEqual(reserves_before[0] + swapped_zneo, reserves_after[0])
+        self.assertEqual(reserves_before[1] - swapped_zgas, reserves_after[1])
 
-        address, amount_zneo_in, amount_zgas_in, amount_zneo_out, amount_zgas_out = transfer_events[0].arguments
-        self.assertEqual(test_account_script_hash, address)
-        self.assertEqual(swapped_zneo, amount_zneo_in)
-        self.assertEqual(0, amount_zgas_in)
-        self.assertEqual(0, amount_zneo_out)
-        self.assertEqual(swapped_zgas, amount_zgas_out)
-
-        self.assertEqual(total_supply_before.result, total_supply_after.result)
-        self.assertEqual(reserves_before.result[0] + swapped_zneo, reserves_after.result[0])
-        self.assertEqual(reserves_before.result[1] - swapped_zgas, reserves_after.result[1])
-        self.assertEqual(balance_user_zneo_before.result - swapped_zneo, balance_user_zneo_after.result)
-        self.assertEqual(balance_user_zgas_before.result + swapped_zgas, balance_user_zgas_after.result)
-        self.assertEqual(reserves_before.result[0], balance_amm_zneo_before.result)
-        self.assertEqual(reserves_before.result[1], balance_amm_zgas_before.result)
-        self.assertEqual(reserves_after.result[0], balance_amm_zneo_after.result)
-        self.assertEqual(reserves_after.result[1], balance_amm_zgas_after.result)
-        self.assertEqual(reserves_before.result[0] + swapped_zneo, reserves_after.result[0])
-        self.assertEqual(reserves_before.result[1] - swapped_zgas, reserves_after.result[1])
-
-    def test_amm_swap_zgas_to_zneo(self):
-        path, _ = self.get_deploy_file_paths('amm.py')
-        path_zneo, _ = self.get_deploy_file_paths('wrapped_neo.py')
-        path_zgas, _ = self.get_deploy_file_paths('wrapped_gas.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        test_balance_zneo = 10_000_000
-        test_balance_zgas = 10_000_000 * 10 ** 8
+    async def test_swap_zgas_to_zneo(self):
+        test_balance_zneo = 1_000
+        test_balance_zgas = 1_000 * 10 ** 8
         transferred_amount_zneo = 100
         transferred_amount_zgas = 110 * 10 ** 8
 
-        test_account = self.OTHER_ACCOUNT_1
-        test_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
+        account = self.account1.script_hash
+        amm = self.contract.hash
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.add_gas(test_account.address, 7 * 10 ** 8)  # gas to invoke
+        # set_address is conflicting with other tests
+        await self.set_address()
 
-        amm_contract = runner.deploy_contract(path, account=self.OWNER)
-        zneo_contract = runner.deploy_contract(path_zneo)
-        zgas_contract = runner.deploy_contract(path_zgas)
-        runner.update_contracts(export_checkpoint=True)
+        # minting zNEO to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_neo, test_balance_zneo, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=constants.NEO_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        amm_address = amm_contract.script_hash
-        zneo_address = zneo_contract.script_hash
-        zgas_address = zgas_contract.script_hash
-        self.assertIsNotNone(amm_address)
-        self.assertIsNotNone(zneo_address)
-        self.assertIsNotNone(zgas_address)
+        # minting zGAS to account
+        result, _ = await self.call('transfer',
+                                    [account, self.z_gas, test_balance_zgas, None],
+                                    signing_accounts=[self.account1],
+                                    target_contract=constants.GAS_SCRIPT,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.run_contract(path, 'set_address', zneo_address, zgas_address,
-                            account=self.OWNER)
+        # approving the AMM contract, so that it will be able to transfer zNEO from account
+        result, _ = await self.call('approve',
+                                    [account, amm, test_balance_zneo],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_neo,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
-        # can't remove liquidity, because the user doesn't have any
-        runner.call_contract(path, 'remove_liquidity', 10000, 0, 0, test_account_script_hash)
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.add_neo(test_account.address, test_balance_zneo)
-        runner.add_gas(test_account.address, test_balance_zgas)
-
-        # minting zNEO to test_account
-        runner.run_contract(constants.NEO_SCRIPT, 'transfer',
-                            test_account_script_hash, zneo_address, test_balance_zneo, None,
-                            account=test_account)
-
-        # minting zGAS to test_account
-        runner.run_contract(constants.GAS_SCRIPT, 'transfer',
-                            test_account_script_hash, zgas_address, test_balance_zgas, None,
-                            account=test_account)
-
-        # approving the AMM contract, so that it will be able to transfer zNEO from test_account
-        runner.run_contract(path_zneo, 'approve',
-                            test_account_script_hash, amm_address, transferred_amount_zneo,
-                            account=test_account)
-
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_account
-        runner.run_contract(path_zgas, 'approve',
-                            test_account_script_hash, amm_address, transferred_amount_zgas,
-                            account=test_account)
+        # approving the AMM contract, so that it will be able to transfer zGAS from account
+        result, _ = await self.call('approve',
+                                    [account, amm, test_balance_zgas],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_gas,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # adding liquidity to the pool will give you AMM tokens in return
-        runner.run_contract(path, 'add_liquidity',
-                            transferred_amount_zneo, transferred_amount_zgas, 0, 0, test_account_script_hash,
-                            account=test_account)
+        liquidity, sent_amount_zneo, sent_amount_zgas = await self.calculate_add_liquidity(transferred_amount_zneo, transferred_amount_zgas)
+        result, notifications = await self.call('add_liquidity',
+                                                [transferred_amount_zneo, transferred_amount_zgas, 0, 0, account],
+                                                signing_accounts=[self.account1],
+                                                return_type=list[int])
+        self.assertEqual([sent_amount_zneo, sent_amount_zgas, liquidity], result)
 
         swapped_zgas = 11 * 10 ** 8
-        # won't work, because user did not enough zGAS tokens
-        runner.call_contract(path, 'swap_tokens',
-                             swapped_zgas, 0, zgas_address, test_account_script_hash)
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
 
-        # approving the AMM contract, so that it will be able to transfer zGAS from test_account
-        invokes.append(runner.call_contract(path_zgas, 'approve',
-                                            test_account_script_hash, amm_address, swapped_zgas))
-        expected_results.append(True)
+        # won't work, because user did not enough zGAS tokens
+        with self.assertRaises(boatestcase.AssertException):
+            await self.call('swap_tokens',
+                            [swapped_zgas, 0, self.z_neo, account],
+                            signing_accounts=[self.account1],
+                            return_type=int)
+
+        # approving the AMM contract, so that it will be able to transfer zGAS from account
+        result, _ = await self.call('approve',
+                                    [account, amm, swapped_zgas],
+                                    signing_accounts=[self.account1],
+                                    target_contract=self.z_gas,
+                                    return_type=bool)
+        self.assertEqual(True, result)
 
         # saving data to demonstrate that the value will change later
-        total_supply_before = runner.call_contract(path, 'totalSupply')
-        reserves_before = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_before = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_before = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_before = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_before = runner.call_contract(path_zgas, 'balanceOf', amm_address)
+        total_supply_before, _ = await self.call('totalSupply', [], return_type=int)
+        reserves_before, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_before, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_before, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
         # swapping zgas for zneo
-        invokes.append(runner.call_contract(path, 'swap_tokens',
-                                            swapped_zgas, 0, zgas_address, test_account_script_hash))
-
-        # data that will be compared with the previously saved data
-        total_supply_after = runner.call_contract(path, 'totalSupply')
-        reserves_after = runner.call_contract(path, 'get_reserves')
-        balance_user_zneo_after = runner.call_contract(path_zneo, 'balanceOf', test_account_script_hash)
-        balance_user_zgas_after = runner.call_contract(path_zgas, 'balanceOf', test_account_script_hash)
-        balance_amm_zneo_after = runner.call_contract(path_zneo, 'balanceOf', amm_address)
-        balance_amm_zgas_after = runner.call_contract(path_zgas, 'balanceOf', amm_address)
-
-        runner.execute(account=test_account)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
+        result, notifications = await self.call('swap_tokens',
+                                                [swapped_zgas, 0, self.z_gas, account],
+                                                signing_accounts=[self.account1],
+                                                return_type=int)
         # there is a 0.3% fee when doing a swap
         swapped_zgas_with_fee = swapped_zgas * (1000 - 3)
-        swapped_zneo = swapped_zgas_with_fee * reserves_before.result[0] // (reserves_before.result[1] * 1000 + swapped_zgas_with_fee)
-        expected_results.append(swapped_zneo)
+        swapped_zneo = swapped_zgas_with_fee * reserves_before[0] // (reserves_before[1] * 1000 + swapped_zgas_with_fee)
+        self.assertEqual(swapped_zneo, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        # data that will be compared with the previously saved data
+        total_supply_after, _ = await self.call('totalSupply', [], return_type=int)
+        reserves_after, _ = await self.call('get_reserves', [], return_type=list[int])
+        balance_user_zneo_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_neo)
+        balance_user_zgas_after, _ = await self.call('balanceOf', [account], return_type=int, target_contract=self.z_gas)
+        balance_amm_zneo_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_neo)
+        balance_amm_zgas_after, _ = await self.call('balanceOf', [amm], return_type=int, target_contract=self.z_gas)
 
         # add_liquidity sent a Sync before
-        transfer_events = runner.get_events('Sync')
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(2, len(transfer_events[0].arguments))
+        sync_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Sync',
+                                         notification_type=SyncEvent
+                                         )
+        self.assertEqual(1, len(sync_events))
+        self.assertEqual(reserves_before[0] - swapped_zneo, sync_events[0].reserve_token_a)
+        self.assertEqual(reserves_before[1] + swapped_zgas, sync_events[0].reserve_token_b)
 
-        balance_zneo, balance_zgas = transfer_events[0].arguments
-        self.assertEqual(reserves_before.result[0] - swapped_zneo, balance_zneo)
-        self.assertEqual(reserves_before.result[1] + swapped_zgas, balance_zgas)
+        swap_events = self.filter_events(notifications,
+                                         origin=amm,
+                                         event_name='Swap',
+                                         notification_type=SwapEvent
+                                         )
+        self.assertEqual(1, len(swap_events))
+        self.assertEqual(account, swap_events[0].sender)
+        self.assertEqual(0, swap_events[0].amount_token_a_in)
+        self.assertEqual(swapped_zgas, swap_events[0].amount_token_b_in)
+        self.assertEqual(swapped_zneo, swap_events[0].amount_token_a_out)
+        self.assertEqual(0, swap_events[0].amount_token_b_out)
 
-        transfer_events = runner.get_events('Swap')
-        self.assertEqual(1, len(transfer_events))
-        self.assertEqual(5, len(transfer_events[0].arguments))
-
-        address, amount_zneo_in, amount_zgas_in, amount_zneo_out, amount_zgas_out = transfer_events[0].arguments
-        self.assertEqual(test_account_script_hash, address)
-        self.assertEqual(0, amount_zneo_in)
-        self.assertEqual(swapped_zgas, amount_zgas_in)
-        self.assertEqual(swapped_zneo, amount_zneo_out)
-        self.assertEqual(0, amount_zgas_out)
-
-        self.assertEqual(total_supply_before.result, total_supply_after.result)
-        self.assertEqual(reserves_before.result[0] - swapped_zneo, reserves_after.result[0])
-        self.assertEqual(reserves_before.result[1] + swapped_zgas, reserves_after.result[1])
-        self.assertEqual(balance_user_zneo_before.result + swapped_zneo, balance_user_zneo_after.result)
-        self.assertEqual(balance_user_zgas_before.result - swapped_zgas, balance_user_zgas_after.result)
-        self.assertEqual(reserves_before.result[0], balance_amm_zneo_before.result)
-        self.assertEqual(reserves_before.result[1], balance_amm_zgas_before.result)
-        self.assertEqual(reserves_after.result[0], balance_amm_zneo_after.result)
-        self.assertEqual(reserves_after.result[1], balance_amm_zgas_after.result)
-        self.assertEqual(reserves_before.result[0] - swapped_zneo, reserves_after.result[0])
-        self.assertEqual(reserves_before.result[1] + swapped_zgas, reserves_after.result[1])
+        self.assertEqual(total_supply_before, total_supply_after)
+        self.assertEqual(reserves_before[0] - swapped_zneo, reserves_after[0])
+        self.assertEqual(reserves_before[1] + swapped_zgas, reserves_after[1])
+        self.assertEqual(balance_user_zneo_before + swapped_zneo, balance_user_zneo_after)
+        self.assertEqual(balance_user_zgas_before - swapped_zgas, balance_user_zgas_after)
+        self.assertEqual(reserves_before[0], balance_amm_zneo_before)
+        self.assertEqual(reserves_before[1], balance_amm_zgas_before)
+        self.assertEqual(reserves_after[0], balance_amm_zneo_after)
+        self.assertEqual(reserves_after[1], balance_amm_zgas_after)
+        self.assertEqual(reserves_before[0] - swapped_zneo, reserves_after[0])
+        self.assertEqual(reserves_before[1] + swapped_zgas, reserves_after[1])
