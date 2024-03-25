@@ -38,6 +38,9 @@ class TestHTLCTemplate(boatestcase.BoaTestCase):
 
         await cls.set_up_contract('htlc.py', signing_account=cls.owner)
 
+    async def wait_refund_time(self):
+        await asyncio.sleep(self.REFUND_WAIT_TIME)
+
     def test_htlc_compile(self):
         path = self.get_contract_path('htlc.py')
         self.assertCompile(path)
@@ -73,7 +76,7 @@ class TestHTLCTemplate(boatestcase.BoaTestCase):
                             return_type=bool,
                             target_contract=constants.GAS_SCRIPT)
 
-        await asyncio.sleep(self.REFUND_WAIT_TIME)
+        await self.wait_refund_time()
         # will be able to refund, because enough time has passed
         invoke_refund_success, notifications = await self.call('refund', [], return_type=bool, signing_accounts=[self.owner])
         self.assertEqual(True, invoke_refund_success)
@@ -126,7 +129,7 @@ class TestHTLCTemplate(boatestcase.BoaTestCase):
         balance_gas_receiver_after, _ = await self.call('balanceOf', [htlc], return_type=int, target_contract=constants.GAS_SCRIPT)
         self.assertEqual(balance_gas_receiver_before + transferred_amount_gas, balance_gas_receiver_after)
 
-        await asyncio.sleep(self.REFUND_WAIT_TIME)
+        await self.wait_refund_time()
         result, _ = await self.call('refund', [], return_type=bool, signing_accounts=[self.owner])
         self.assertEqual(True, result)
 
@@ -226,7 +229,7 @@ class TestHTLCTemplate(boatestcase.BoaTestCase):
         invoke_refund_fail, _ = await self.call('refund', [], return_type=bool, signing_accounts=[self.owner])
         self.assertEqual(False, invoke_refund_fail)
 
-        await asyncio.sleep(self.REFUND_WAIT_TIME)
+        await self.wait_refund_time()
         # will be able to refund, because enough time has passed
         invoke_refund_success, _ = await self.call('refund', [], return_type=bool, signing_accounts=[self.owner])
         self.assertEqual(True, invoke_refund_success)
@@ -254,7 +257,7 @@ class TestHTLCTemplate(boatestcase.BoaTestCase):
                                     target_contract=constants.NEO_SCRIPT)
         self.assertEqual(True, result)
 
-        await asyncio.sleep(self.REFUND_WAIT_TIME)
+        await self.wait_refund_time()
         # will be able to refund, because enough time has passed
         invoke_refund_success, notifications = await self.call('refund', [], return_type=bool, signing_accounts=[self.owner])
         self.assertEqual(True, invoke_refund_success)
@@ -300,7 +303,7 @@ class TestHTLCTemplate(boatestcase.BoaTestCase):
                                     target_contract=constants.GAS_SCRIPT)
         self.assertEqual(True, result)
 
-        await asyncio.sleep(self.REFUND_WAIT_TIME)
+        await self.wait_refund_time()
         # will be able to refund, because enough time has passed
         invoke_refund_success, notifications = await self.call('refund', [], return_type=bool, signing_accounts=[self.owner])
         self.assertEqual(True, invoke_refund_success)
@@ -313,12 +316,13 @@ class TestHTLCTemplate(boatestcase.BoaTestCase):
         )
         filtered_transfer_events = list(filter(lambda x: x.source is not None, transfer_events))
         self.assertEqual(2, len(filtered_transfer_events))
+        refund_a, refund_b = filtered_transfer_events
 
         # HTLC returning the tokens
-        self.assertEqual(htlc, filtered_transfer_events[0].source)
-        self.assertEqual(person_a, filtered_transfer_events[0].destination)
-        self.assertEqual(transferred_amount_neo, filtered_transfer_events[0].amount)
+        self.assertEqual(htlc, refund_a.source)
+        self.assertEqual(person_a, refund_a.destination)
+        self.assertEqual(transferred_amount_neo, refund_a.amount)
 
-        self.assertEqual(htlc, filtered_transfer_events[1].source)
-        self.assertEqual(person_b, filtered_transfer_events[1].destination)
-        self.assertEqual(transferred_amount_gas, filtered_transfer_events[1].amount)
+        self.assertEqual(htlc, refund_b.source)
+        self.assertEqual(person_b, refund_b.destination)
+        self.assertEqual(transferred_amount_gas, refund_b.amount)
