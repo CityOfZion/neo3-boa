@@ -127,7 +127,7 @@ def mint(amount: int) -> bool:
     :type amount: int
     :return: whether the mint was successful
     """
-    assert amount >= 0
+    assert amount >= 0, 'invalid amount'
     if not is_administrator():
         return False
 
@@ -157,8 +157,8 @@ def refund(address: UInt160, neo_amount: int, gas_amount: int) -> bool:
     :type gas_amount: int
     :return: whether the refund was successful
     """
-    assert len(address) == 20
-    assert neo_amount > 0 or gas_amount > 0
+    assert len(address) == 20, 'invalid account length'
+    assert neo_amount > 0 or gas_amount > 0, 'invalid amount'
 
     if not is_administrator():
         return False
@@ -168,11 +168,11 @@ def refund(address: UInt160, neo_amount: int, gas_amount: int) -> bool:
 
     if neo_amount > 0:
         result = NEO_TOKEN.transfer(runtime.executing_script_hash, address, neo_amount)
-        assert result
+        assert result, 'NEO transfer failed'
 
     if gas_amount > 0:
         result = GAS_TOKEN.transfer(runtime.executing_script_hash, address, gas_amount)
-        assert result
+        assert result, 'GAS transfer failed'
 
     return True
 
@@ -235,7 +235,7 @@ def balance_of(account: UInt160) -> int:
     :return: the token balance of the `account`
     :raise AssertionError: raised if `account` length is not 20.
     """
-    assert len(account) == 20
+    assert len(account) == 20, 'invalid account length'
     return storage.get_int(account)
 
 
@@ -380,9 +380,9 @@ def transfer_from(originator: UInt160, from_address: UInt160, to_address: UInt16
     :raise AssertionError: raised if `from_address` or `to_address` length is not 20 or if `amount` if less than zero.
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
-    assert len(originator) == 20 and len(from_address) == 20 and len(to_address) == 20
+    assert len(originator) == 20 and len(from_address) == 20 and len(to_address) == 20, 'invalid account length'
     # the parameter amount must be greater than or equal to 0. If not, this method should throw an exception.
-    assert amount >= 0
+    assert amount >= 0, 'invalid amount'
 
     # The function should check whether the from address equals the caller contract hash.
     # If so, the transfer should be processed;
@@ -440,8 +440,8 @@ def approve(originator: UInt160, to_address: UInt160, amount: int) -> bool:
     :return: whether the approval was successful
     :raise AssertionError: raised if `originator` or `to_address` length is not 20 or if `amount` if less than zero.
     """
-    assert len(originator) == 20 and len(to_address) == 20
-    assert amount >= 0
+    assert len(originator) == 20 and len(to_address) == 20, 'invalid account length'
+    assert amount >= 0, 'invalid amount'
 
     if not runtime.check_witness(originator):
         return False

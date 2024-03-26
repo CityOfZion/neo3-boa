@@ -1,537 +1,356 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.contracts.contract import CONTRACT_HASHES
+from neo3.wallet import account
 
 from boa3.internal import constants
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive import neoxp
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestICOTemplate(BoaTest):
+class TestICOTemplate(boatestcase.BoaTestCase):
     default_folder: str = 'examples'
+    ASSERT_RESULTED_FALSE_MSG = 'ASSERT is executed with false result.'
 
-    OWNER = neoxp.utils.get_account_by_name('owner')
-    OTHER_ACCOUNT_1 = neoxp.utils.get_account_by_name('testAccount1')
-    OTHER_ACCOUNT_2 = neoxp.utils.get_account_by_name('testAccount2')
-    GAS_TO_DEPLOY = int(10.5 * 10 ** 8)
+    owner: account.Account
+    account_for_balance_test: account.Account
+    account_for_verify_test: account.Account
+    account_not_admin_for_allowance: account.Account
+    account_not_admin_for_register: account.Account
+    account_not_admin_for_remove: account.Account
+    account_originator_for_approve_test: account.Account
+    account_receiver_for_approve_test: account.Account
+    account_for_refund_test: account.Account
+    account_originator_for_transfer_test: account.Account
+    account_sender_for_transfer_test: account.Account
+    account_receiver_for_transfer_test: account.Account
+
+    BALANCE_TO_TEST = 1000
+    NEO_TO_REFUND = 1
+    GAS_TO_REFUND = 100
+    AMOUNT_TO_APPROVE = 100 * 10 ** 8
+    AMOUNT_TO_TRANSFER = 100 * 10 ** 8
+    TOTAL_SUPPLY = 10_000_000 * 10 ** 8
 
     KYC_WHITELIST_PREFIX = b'KYCWhitelistApproved'
 
+    @classmethod
+    def setupTestCase(cls):
+        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
+        cls.account_for_balance_test = cls.node.wallet.account_new(label='accountBalanceOf', password='123')
+        cls.account_for_verify_test = cls.node.wallet.account_new(label='accountVerify', password='123')
+        cls.account_not_admin_for_allowance = cls.node.wallet.account_new(label='accountNotAdminAllowance', password='123')
+        cls.account_not_admin_for_register = cls.node.wallet.account_new(label='accountNotAdminRegister', password='123')
+        cls.account_not_admin_for_remove = cls.node.wallet.account_new(label='accountNotAdminRemove', password='123')
+        cls.account_originator_for_approve_test = cls.node.wallet.account_new(label='accountOriginatorApprove', password='123')
+        cls.account_receiver_for_approve_test = cls.node.wallet.account_new(label='accountReceiverApprove', password='123')
+        cls.account_for_refund_test = cls.node.wallet.account_new(label='accountRefund', password='123')
+        cls.account_originator_for_transfer_test = cls.node.wallet.account_new(label='accountOriginatorTransfer', password='123')
+        cls.account_sender_for_transfer_test = cls.node.wallet.account_new(label='accountSenderTransfer', password='123')
+        cls.account_receiver_for_transfer_test = cls.node.wallet.account_new(label='accountReceiverTransfer', password='123')
+
+        super().setupTestCase()
+
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        await super().asyncSetupClass()
+
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_balance_test.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_verify_test.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_not_admin_for_allowance.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_not_admin_for_register.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_not_admin_for_remove.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_originator_for_approve_test.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_receiver_for_approve_test.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_refund_test.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_sender_for_transfer_test.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_receiver_for_transfer_test.script_hash, 100)
+
+        await cls.set_up_contract('ico.py', signing_account=cls.owner)
+
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.contract_hash, 2 * cls.NEO_TO_REFUND)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.contract_hash, 2 * cls.GAS_TO_REFUND)
+
+        await cls.transfer(
+            cls.contract_hash,
+            cls.owner.script_hash,
+            cls.account_for_balance_test.script_hash,
+            cls.BALANCE_TO_TEST,
+            signing_account=cls.owner
+        )
+
+        await cls.transfer(
+            cls.contract_hash,
+            cls.owner.script_hash,
+            cls.account_originator_for_approve_test.script_hash,
+            cls.BALANCE_TO_TEST,
+            signing_account=cls.owner
+        )
+
     def test_ico_compile(self):
-        path = self.get_contract_path('ico.py')
-        self.compile(path)
+        self.assertCompile('ico.py')
 
-    def test_ico_symbol(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_ico_symbol(self):
+        result, _ = await self.call('symbol', [], return_type=str)
+        self.assertEqual('ICO', result)
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+    async def test_ico_decimals(self):
+        result, _ = await self.call('decimals', [], return_type=int)
+        self.assertEqual(8, result)
 
-        invoke = runner.call_contract(path, 'symbol')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual('ICO', invoke.result)
+    async def test_ico_balance_of(self):
+        result, _ = await self.call('balanceOf', [self.account_for_balance_test.script_hash], return_type=int)
+        self.assertEqual(self.BALANCE_TO_TEST * 10 ** 8, result)
 
-    def test_ico_decimals(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_ico_balance_of_bad_account(self):
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('balanceOf', [bytes(10)], return_type=int)
+        self.assertRegex(str(context.exception), 'invalid account length')
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('balanceOf', [bytes(30)], return_type=int)
+        self.assertRegex(str(context.exception), 'invalid account length')
 
-        invoke = runner.call_contract(path, 'decimals')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(8, invoke.result)
+    # This test is numbered because numbered tests *must* be run in order
+    # and the default order is alphanumerical
+    async def test_00_ico_total_supply(self):
+        result, _ = await self.call('totalSupply', [], return_type=int)
+        self.assertEqual(self.TOTAL_SUPPLY, result)
 
-    def test_ico_total_balance_of(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_ico_verify(self):
+        result, _ = await self.call('verify', [], return_type=bool, signing_accounts=[self.account_for_verify_test])
+        self.assertEqual(False, result)
 
-        total_supply = 10_000_000 * 10 ** 8
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        result, _ = await self.call('verify', [], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(True, result)
 
-        invoke = runner.call_contract(path, 'balanceOf', self.OWNER.script_hash.to_array())
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(total_supply, invoke.result)
-
-        # should fail when the script length is not 20
-        runner.call_contract(path, 'balanceOf', bytes(10))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.call_contract(path, 'balanceOf', bytes(30))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_ico_total_supply(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        total_supply = 10_000_000 * 10 ** 8
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        invoke = runner.call_contract(path, 'totalSupply')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(total_supply, invoke.result)
-
-    def test_ico_verify(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        invokes.append(runner.call_contract(path, 'verify'))
-        expected_results.append(False)
-
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        invokes.append(runner.call_contract(path, 'verify'))
-        expected_results.append(True)
-
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_ico_kyc_register(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        contract = runner.deploy_contract(path, account=self.OWNER)
-        owner_script_hash = self.OWNER.script_hash.to_array()
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-
+    async def test_ico_kyc_register(self):
         # don't include if not signed by the administrator
-        invokes.append(runner.call_contract(path, 'kyc_register',
-                                            [owner_script_hash, bytes(22)]))
-        expected_results.append(0)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('kyc_register', [[self.owner.script_hash, self.account_not_admin_for_register.script_hash]], return_type=int, signing_accounts=[self.account_not_admin_for_register])
+        self.assertEqual(0, result)
 
         # don't include script hashes with size different from 20
-        invokes.append(runner.call_contract(path, 'kyc_register',
-                                            [bytes(40), owner_script_hash, bytes(12)]))
-        expected_results.append(1)
+        result, _ = await self.call('kyc_register', [[bytes(40), self.owner.script_hash, bytes(12)]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(1, result)
 
         # script hashes already registered are returned as well
-        invokes.append(runner.call_contract(path, 'kyc_register',
-                                            [owner_script_hash, other_account_script_hash]))
-        expected_results.append(2)
+        result, _ = await self.call('kyc_register', [[self.owner.script_hash, self.account_not_admin_for_register.script_hash]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(2, result)
 
-        runner.execute(account=self.OWNER, get_storage_from=contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        contract_storage = await self.get_storage()
+        self.assertIn(self.KYC_WHITELIST_PREFIX + self.owner.script_hash.to_array(), contract_storage)
+        self.assertIsNotNone(contract_storage[self.KYC_WHITELIST_PREFIX + self.owner.script_hash.to_array()])
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertIn(self.KYC_WHITELIST_PREFIX + self.account_not_admin_for_register.script_hash.to_array(), contract_storage)
+        self.assertIsNotNone(contract_storage[self.KYC_WHITELIST_PREFIX + self.account_not_admin_for_register.script_hash.to_array()])
 
-        storage_value = runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + owner_script_hash)
-        self.assertIsNotNone(storage_value)
-
-        storage_value = runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + other_account_script_hash)
-        self.assertIsNotNone(storage_value)
-
-    def test_ico_kyc_remove(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        contract = runner.deploy_contract(path, account=self.OWNER)
-        runner.update_contracts(export_checkpoint=True)
-
-        owner_script_hash = self.OWNER.script_hash.to_array()
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-
+    async def test_ico_kyc_remove(self):
         # don't remove if not signed by the administrator
-        invokes.append(runner.call_contract(path, 'kyc_remove',
-                                            [owner_script_hash, bytes(22)]))
-        expected_results.append(0)
-
-        runner.execute(get_storage_from=contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('kyc_remove', [[self.owner.script_hash, bytes(22)]], return_type=int, signing_accounts=[self.account_not_admin_for_remove])
+        self.assertEqual(0, result)
 
         # script hashes that weren't registered are returned as well
-        self.assertIsNone(runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + other_account_script_hash))
+        contract_storage = await self.get_storage()
+        self.assertNotIn(self.KYC_WHITELIST_PREFIX + self.account_not_admin_for_remove.script_hash.to_array(), contract_storage)
 
-        invokes.append(runner.call_contract(path, 'kyc_remove',
-                                            [other_account_script_hash]))
-        expected_results.append(1)
+        result, _ = await self.call('kyc_remove', [[self.account_not_admin_for_remove.script_hash]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(1, result)
 
         # don't remove script hashes with size different from 20
-        invokes.append(runner.call_contract(path, 'kyc_remove',
-                                            [bytes(40), owner_script_hash, bytes(12)]))
-        expected_results.append(1)
+        result, _ = await self.call('kyc_remove', [[bytes(40), self.owner.script_hash, bytes(12)]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(1, result)
 
-        runner.execute(account=self.OWNER, get_storage_from=contract)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        contract_storage = await self.get_storage()
+        self.assertNotIn(self.KYC_WHITELIST_PREFIX + self.account_not_admin_for_remove.script_hash.to_array(), contract_storage)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        self.assertIsNone(runner.storages.get(contract, self.KYC_WHITELIST_PREFIX + other_account_script_hash))
-
-    def test_ico_approve(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        owner_script_hash = self.OWNER.script_hash.to_array()
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-        approved_amount = 100 * 10 ** 8
-
+    async def test_ico_approve(self):
         # should fail if the origin doesn't sign
-        invokes.append(runner.call_contract(path, 'approve',
-                                            owner_script_hash, other_account_script_hash, approved_amount))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('approve', [self.account_originator_for_approve_test.script_hash, self.account_receiver_for_approve_test.script_hash, self.AMOUNT_TO_APPROVE], return_type=bool)
+        self.assertEqual(False, result)
 
         # should fail if origin and target are the same
-        invokes.append(runner.call_contract(path, 'approve',
-                                            owner_script_hash, owner_script_hash, approved_amount))
-        expected_results.append(False)
+        result, _ = await self.call('approve', [self.account_originator_for_approve_test.script_hash, self.account_originator_for_approve_test.script_hash, self.AMOUNT_TO_APPROVE], return_type=bool, signing_accounts=[self.account_originator_for_approve_test])
+        self.assertEqual(False, result)
 
         # should fail if any of the addresses is not included in the kyc
-        invokes.append(runner.call_contract(path, 'approve',
-                                            owner_script_hash, other_account_script_hash, approved_amount))
-        expected_results.append(False)
+        result, _ = await self.call('approve', [self.account_originator_for_approve_test.script_hash, self.account_receiver_for_approve_test.script_hash, self.AMOUNT_TO_APPROVE], return_type=bool, signing_accounts=[self.account_originator_for_approve_test])
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'kyc_register',
-                                            [owner_script_hash, other_account_script_hash]))
-        expected_results.append(2)
+        result, _ = await self.call('kyc_register', [[self.account_originator_for_approve_test.script_hash, self.account_receiver_for_approve_test.script_hash]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'approve',
-                                            owner_script_hash, other_account_script_hash, approved_amount))
-        expected_results.append(True)
-
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('approve', [self.account_originator_for_approve_test.script_hash, self.account_receiver_for_approve_test.script_hash, self.AMOUNT_TO_APPROVE], return_type=bool, signing_accounts=[self.account_originator_for_approve_test])
+        self.assertEqual(True, result)
 
         # should fail when any of the scripts' length is not 20
-        runner.call_contract(path, 'approve',
-                             owner_script_hash, bytes(10), approved_amount)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('approve', [self.account_originator_for_approve_test.script_hash, bytes(10), self.AMOUNT_TO_APPROVE], return_type=bool, signing_accounts=[self.account_originator_for_approve_test])
+        self.assertRegex(str(context.exception), 'invalid account length')
 
-        runner.call_contract(path, 'approve',
-                             bytes(10), other_account_script_hash, approved_amount)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.call_contract(path, 'approve',
-                             other_account_script_hash, owner_script_hash, -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-    def test_ico_allowance(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-        owner_script_hash = self.OWNER.script_hash.to_array()
-        other_account_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-        approved_amount = 100 * 10 ** 8
-
-        invokes.append(runner.call_contract(path, 'allowance', owner_script_hash, other_account_script_hash))
-        expected_results.append(0)
-
-        invokes.append(runner.call_contract(path, 'kyc_register',
-                                            [owner_script_hash, other_account_script_hash]))
-        expected_results.append(2)
-
-        invokes.append(runner.call_contract(path, 'approve',
-                                            owner_script_hash, other_account_script_hash, approved_amount))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'allowance', owner_script_hash, other_account_script_hash))
-        expected_results.append(approved_amount)
-
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_ico_transfer_from(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
-
-        owner_script_hash = self.OWNER.script_hash.to_array()
-        other_account_1_script_hash = self.OTHER_ACCOUNT_1.script_hash.to_array()
-        other_account_2_script_hash = self.OTHER_ACCOUNT_2.script_hash.to_array()
-        transferred_amount = 100 * 10 ** 8
-
-        # should fail if the sender doesn't sign
-        invokes.append(runner.call_contract(path, 'transferFrom',
-                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        # should fail if the allowed amount is less than the given amount
-        invokes.append(runner.call_contract(path, 'transferFrom',
-                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(False)
-
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        invokes.append(runner.call_contract(path, 'kyc_register',
-                                            [owner_script_hash, other_account_1_script_hash]))
-        expected_results.append(2)
-
-        invokes.append(runner.call_contract(path, 'approve',
-                                            owner_script_hash, other_account_1_script_hash, transferred_amount * 2))
-        expected_results.append(True)
-
-        runner.execute(account=self.OWNER, add_invokes_to_batch=True)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        balance_before_1 = runner.call_contract(path, 'balanceOf', owner_script_hash)
-        invokes.append(runner.call_contract(path, 'transferFrom',
-                                            owner_script_hash, other_account_1_script_hash, owner_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(True)
-        balance_after_1 = runner.call_contract(path, 'balanceOf', owner_script_hash)
-
-        balance_before_2 = runner.call_contract(path, 'balanceOf', owner_script_hash)
-        invokes.append(runner.call_contract(path, 'transferFrom',
-                                            owner_script_hash, other_account_1_script_hash, other_account_1_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(True)
-        balance_after_2 = runner.call_contract(path, 'balanceOf', owner_script_hash)
-
-        invokes.append(runner.call_contract(path, 'transferFrom',
-                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
-                                            0, None))
-        expected_results.append(True)
-
-        balance_originator_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
-        balance_sender_before = runner.call_contract(path, 'balanceOf', other_account_1_script_hash)
-        balance_receiver_before = runner.call_contract(path, 'balanceOf', other_account_2_script_hash)
-
-        invokes.append(runner.call_contract(path, 'transferFrom',
-                                            owner_script_hash, other_account_1_script_hash, other_account_2_script_hash,
-                                            transferred_amount, None))
-        expected_results.append(False)
-
-        balance_originator_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
-        balance_sender_after = runner.call_contract(path, 'balanceOf', other_account_1_script_hash)
-        balance_receiver_after = runner.call_contract(path, 'balanceOf', other_account_2_script_hash)
-
-        runner.execute(account=self.OTHER_ACCOUNT_1)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        transfer_events = runner.get_events('Transfer')
-        self.assertEqual(3, len(transfer_events))
-        self.assertEqual(3, len(transfer_events[0].arguments))
-        self.assertEqual(3, len(transfer_events[1].arguments))
-        self.assertEqual(3, len(transfer_events[2].arguments))
-
-        # transfer event when the address that has the tokens is the same as the one receiving
-        sender, receiver, amount = transfer_events[0].arguments
-        self.assertEqual(other_account_1_script_hash, sender)
-        self.assertEqual(owner_script_hash, receiver)
-        self.assertEqual(transferred_amount, amount)
-
-        # transfer event when the address that is receiving is the same that is calling the transfer
-        sender, receiver, amount = transfer_events[1].arguments
-        self.assertEqual(other_account_1_script_hash, sender)
-        self.assertEqual(other_account_1_script_hash, receiver)
-        self.assertEqual(transferred_amount, amount)
-
-        # transfer event when the amount transferred is zero
-        sender, receiver, amount = transfer_events[2].arguments
-        self.assertEqual(other_account_1_script_hash, sender)
-        self.assertEqual(other_account_2_script_hash, receiver)
-        self.assertEqual(0, amount)
-
-        self.assertEqual(balance_after_1.result, balance_before_1.result)
-        self.assertEqual(balance_after_2.result, balance_before_2.result)
-        self.assertEqual(balance_originator_before.result, balance_originator_after.result)
-        self.assertEqual(balance_sender_before.result, balance_sender_after.result)
-        self.assertEqual(balance_receiver_before.result, balance_receiver_after.result)
-
-        # should fail when any of the scripts' length is not 20
-        runner.call_contract(path, 'transferFrom',
-                             owner_script_hash, bytes(10), other_account_1_script_hash, transferred_amount, None)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.call_contract(path, 'transferFrom',
-                             bytes(10), other_account_1_script_hash, other_account_2_script_hash, transferred_amount, None)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
-
-        runner.call_contract(path, 'transferFrom',
-                             owner_script_hash, other_account_1_script_hash, bytes(30), transferred_amount, None)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('approve', [bytes(10), self.account_receiver_for_approve_test.script_hash, self.AMOUNT_TO_APPROVE], return_type=bool, signing_accounts=[self.account_originator_for_approve_test])
+        self.assertRegex(str(context.exception), 'invalid account length')
 
         # should fail when the amount is less than 0
-        runner.call_contract(path, 'transferFrom',
-                             owner_script_hash, other_account_1_script_hash, other_account_2_script_hash, -10, None)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('approve', [self.account_originator_for_approve_test.script_hash, self.account_receiver_for_approve_test.script_hash, -10], return_type=bool, signing_accounts=[self.account_originator_for_approve_test])
+        self.assertRegex(str(context.exception), 'invalid amount')
 
-    def test_ico_mint(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_ico_allowance(self):
+        result, _ = await self.call('allowance', [self.owner.script_hash, self.account_not_admin_for_allowance.script_hash], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(0, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('kyc_register', [[self.owner.script_hash, self.account_not_admin_for_allowance.script_hash]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(2, result)
 
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        runner.deploy_contract(path, account=self.OWNER)
+        result, _ = await self.call('approve', [self.owner.script_hash, self.account_not_admin_for_allowance.script_hash, self.AMOUNT_TO_APPROVE], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(True, result)
 
-        owner_script_hash = self.OWNER.script_hash.to_array()
+        result, _ = await self.call('allowance', [self.owner.script_hash, self.account_not_admin_for_allowance.script_hash], return_type=int)
+        self.assertEqual(self.AMOUNT_TO_APPROVE, result)
+
+    async def test_ico_transfer_from(self):
+        # should fail when any of the scripts' length is not 20
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('transferFrom', [self.owner.script_hash, bytes(10), self.account_receiver_for_transfer_test.script_hash, self.AMOUNT_TO_TRANSFER, None], return_type=bool)
+        self.assertRegex(str(context.exception), 'invalid account length')
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('transferFrom', [bytes(10), self.account_sender_for_transfer_test.script_hash, self.account_receiver_for_transfer_test.script_hash, self.AMOUNT_TO_TRANSFER, None], return_type=bool)
+        self.assertRegex(str(context.exception), 'invalid account length')
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, bytes(30), self.AMOUNT_TO_TRANSFER, None], return_type=bool)
+        self.assertRegex(str(context.exception), 'invalid account length')
+
+        # should fail when the amount is less than 0
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.account_receiver_for_transfer_test.script_hash, -10, None], return_type=bool)
+        self.assertRegex(str(context.exception), 'invalid amount')
+
+        # should fail if the sender doesn't sign
+        result, _ = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.account_receiver_for_transfer_test.script_hash, self.AMOUNT_TO_TRANSFER, None], return_type=bool)
+        self.assertEqual(False, result)
+
+        # should fail if the allowed amount is less than the given amount
+        result, _ = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.account_receiver_for_transfer_test.script_hash, self.AMOUNT_TO_TRANSFER, None], return_type=bool, signing_accounts=[self.account_sender_for_transfer_test])
+        self.assertEqual(False, result)
+
+        result, _ = await self.call('kyc_register', [[self.owner.script_hash, self.account_sender_for_transfer_test.script_hash]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(2, result)
+
+        result, _ = await self.call('approve', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.AMOUNT_TO_TRANSFER * 2], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(True, result)
+
+        balance_before_1, _ = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
+        result, notifications = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.owner.script_hash, self.AMOUNT_TO_TRANSFER, None], return_type=bool, signing_accounts=[self.account_sender_for_transfer_test])
+        self.assertEqual(True, result)
+
+        # transfer event when the address that has the tokens is the same as the one receiving
+        transfer_events = self.filter_events(notifications, notification_type=boatestcase.Nep17TransferEvent)
+        self.assertEqual(1, len(transfer_events))
+        event = transfer_events[0]
+        self.assertEqual(self.account_sender_for_transfer_test.script_hash, event.source)
+        self.assertEqual(self.owner.script_hash, event.destination)
+        self.assertEqual(self.AMOUNT_TO_TRANSFER, event.amount)
+
+        balance_after_1, _ = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
+
+        balance_before_2 = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
+        result, notifications = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.account_sender_for_transfer_test.script_hash, self.AMOUNT_TO_TRANSFER, None], return_type=bool, signing_accounts=[self.account_sender_for_transfer_test])
+        self.assertEqual(True, result)
+
+        # transfer event when the address that is receiving is the same that is calling the transfer
+        transfer_events = self.filter_events(notifications, notification_type=boatestcase.Nep17TransferEvent)
+        self.assertEqual(1, len(transfer_events))
+        event = transfer_events[0]
+        self.assertEqual(self.account_sender_for_transfer_test.script_hash, event.source)
+        self.assertEqual(self.account_sender_for_transfer_test.script_hash, event.destination)
+        self.assertEqual(self.AMOUNT_TO_TRANSFER, event.amount)
+
+        balance_after_2 = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
+
+        result, notifications = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.account_receiver_for_transfer_test.script_hash, 0, None], return_type=bool, signing_accounts=[self.account_sender_for_transfer_test])
+        self.assertEqual(True, result)
+
+        # transfer event when the amount transferred is zero
+        transfer_events = self.filter_events(notifications, notification_type=boatestcase.Nep17TransferEvent)
+        self.assertEqual(1, len(transfer_events))
+        event = transfer_events[0]
+        self.assertEqual(self.account_sender_for_transfer_test.script_hash, event.source)
+        self.assertEqual(self.account_receiver_for_transfer_test.script_hash, event.destination)
+        self.assertEqual(0, event.amount)
+
+        balance_originator_before = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
+        balance_sender_before = await self.call('balanceOf', [self.account_sender_for_transfer_test.script_hash], return_type=int)
+        balance_receiver_before = await self.call('balanceOf', [self.account_receiver_for_transfer_test.script_hash], return_type=int)
+
+        result, _ = await self.call('transferFrom', [self.owner.script_hash, self.account_sender_for_transfer_test.script_hash, self.account_receiver_for_transfer_test.script_hash, self.AMOUNT_TO_TRANSFER, None], return_type=bool, signing_accounts=[self.account_sender_for_transfer_test])
+        self.assertEqual(False, result)
+
+        balance_originator_after = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
+        balance_sender_after = await self.call('balanceOf', [self.account_sender_for_transfer_test.script_hash], return_type=int)
+        balance_receiver_after = await self.call('balanceOf', [self.account_receiver_for_transfer_test.script_hash], return_type=int)
+
+        self.assertEqual(balance_after_1, balance_before_1)
+        self.assertEqual(balance_after_2, balance_before_2)
+        self.assertEqual(balance_originator_before, balance_originator_after)
+        self.assertEqual(balance_sender_before, balance_sender_after)
+        self.assertEqual(balance_receiver_before, balance_receiver_after)
+
+    # This test is numbered because numbered tests *must* be run in order
+    # and the default order is alphanumerical
+    async def test_01_ico_mint(self):
         minted_amount = 10_000 * 10 ** 8
 
         # should fail if amount is a negative number
-        runner.call_contract(path, 'mint', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('mint', [-10], return_type=bool)
+        self.assertRegex(str(context.exception), 'invalid amount')
 
         # should fail if not signed by the administrator
-        invokes.append(runner.call_contract(path, 'mint', minted_amount))
-        expected_results.append(False)
+        result, _ = await self.call('mint', [minted_amount], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        total_supply_before, _ = await self.call('totalSupply', [], return_type=int)
+        owner_balance_before, _ = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
 
-        total_supply_before = runner.call_contract(path, 'totalSupply')
-        owner_balance_before = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        result, _ = await self.call('mint', [minted_amount], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'mint', minted_amount))
-        expected_results.append(True)
+        total_supply_after, _ = await self.call('totalSupply', [], return_type=int)
+        owner_balance_after, _ = await self.call('balanceOf', [self.owner.script_hash], return_type=int)
 
-        total_supply_after = runner.call_contract(path, 'totalSupply')
-        owner_balance_after = runner.call_contract(path, 'balanceOf', owner_script_hash)
+        self.assertEqual(total_supply_before + minted_amount, total_supply_after)
+        self.assertEqual(owner_balance_before + minted_amount, owner_balance_after)
 
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        self.assertEqual(total_supply_before.result + minted_amount, total_supply_after.result)
-        self.assertEqual(owner_balance_before.result + minted_amount, owner_balance_after.result)
-
-    def test_ico_refund(self):
-        path, _ = self.get_deploy_file_paths('ico.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.add_gas(self.OWNER.address, self.GAS_TO_DEPLOY)
-        contract = runner.deploy_contract(path, account=self.OWNER)
-        runner.update_contracts(export_checkpoint=True)
-
-        transferred_neo_amount = 1
-        transferred_gas_amount = 10_000
-
-        owner_script_hash = self.OWNER.script_hash.to_array()
-        contract_script_hash = contract.script_hash
-
-        runner.add_neo(contract_script_hash, transferred_neo_amount * 2)
-        runner.add_gas(contract_script_hash, transferred_gas_amount * 2)
-
-        # should fail if not signed by the owner
-        invokes.append(runner.call_contract(path, 'refund',
-                                            owner_script_hash, transferred_neo_amount, transferred_gas_amount))
-        expected_results.append(False)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        # should fail if given address is not included in the kyc
-        invokes.append(runner.call_contract(path, 'refund',
-                                            owner_script_hash, transferred_neo_amount, transferred_gas_amount))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'kyc_register', [owner_script_hash]))
-        expected_results.append(1)
-
-        balance_neo_before = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', owner_script_hash)
-        balance_gas_before = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', owner_script_hash)
-
-        invokes.append(runner.call_contract(path, 'refund',
-                                            owner_script_hash, transferred_neo_amount, transferred_gas_amount))
-        expected_results.append(True)
-
-        balance_neo_after = runner.call_contract(constants.NEO_SCRIPT, 'balanceOf', owner_script_hash)
-        balance_gas_after = runner.call_contract(constants.GAS_SCRIPT, 'balanceOf', owner_script_hash)
-
-        runner.execute(account=self.OWNER)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        self.assertEqual(balance_neo_before.result + transferred_neo_amount, balance_neo_after.result)
-        self.assertEqual(balance_gas_before.result + transferred_gas_amount, balance_gas_after.result)
-
+    async def test_ico_refund(self):
         # should fail script hash length is not 20
-        runner.call_contract(path, 'refund', bytes(10), transferred_neo_amount, transferred_gas_amount)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('refund', [bytes(10), self.NEO_TO_REFUND, self.GAS_TO_REFUND], return_type=bool)
+        self.assertRegex(str(context.exception), 'invalid account length')
 
         # should fail no amount is a positive number
-        runner.call_contract(path, 'refund', owner_script_hash, 0, 0)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ASSERT_RESULTED_FALSE_MSG)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            result, _ = await self.call('refund', [self.account_for_refund_test.script_hash, 0, 0], return_type=bool)
+        self.assertRegex(str(context.exception), 'invalid amount')
+
+        # should fail if not signed by the owner
+        result, _ = await self.call('refund', [self.account_for_refund_test.script_hash, self.NEO_TO_REFUND, self.GAS_TO_REFUND], return_type=bool)
+        self.assertEqual(False, result)
+
+        # should fail if given address is not included in the kyc
+        result, _ = await self.call('refund', [self.account_for_refund_test.script_hash, self.NEO_TO_REFUND, self.GAS_TO_REFUND], return_type=bool, signing_accounts=[self.owner])
+        self.assertEqual(False, result)
+
+        result, _ = await self.call('kyc_register', [[self.account_for_refund_test.script_hash]], return_type=int, signing_accounts=[self.owner])
+        self.assertEqual(1, result)
+
+        balance_neo_before, _ = await self.call('balanceOf', [self.account_for_refund_test.script_hash], return_type=int, target_contract=constants.NEO_SCRIPT)
+        balance_gas_before, _ = await self.call('balanceOf', [self.account_for_refund_test.script_hash], return_type=int, target_contract=constants.GAS_SCRIPT)
+
+        result, _ = await self.call('refund', [self.account_for_refund_test.script_hash, self.NEO_TO_REFUND, self.GAS_TO_REFUND], return_type=bool, signing_accounts=[self.owner])
+
+        balance_neo_after, _ = await self.call('balanceOf', [self.account_for_refund_test.script_hash], return_type=int, target_contract=constants.NEO_SCRIPT)
+        balance_gas_after, _ = await self.call('balanceOf', [self.account_for_refund_test.script_hash], return_type=int, target_contract=constants.GAS_SCRIPT)
+
+        self.assertEqual(balance_neo_before + self.NEO_TO_REFUND, balance_neo_after)
+        self.assertEqual(balance_gas_before + self.GAS_TO_REFUND, balance_gas_after)
