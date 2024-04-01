@@ -7,7 +7,7 @@ from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.nativecontract.gas import GAS as GAS_TOKEN
 from boa3.builtin.nativecontract.neo import NEO as NEO_TOKEN
-from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.builtin.type import UInt160
 
 
 # -------------------------------------------
@@ -93,7 +93,7 @@ def is_valid_address(address: UInt160) -> bool:
 
     :return: whether the given address is validated by kyc
     """
-    return type_helper.to_int(storage.get(KYC_WHITELIST_PREFIX + address)) > 0
+    return storage.get_int(KYC_WHITELIST_PREFIX + address) > 0
 
 
 @public
@@ -106,16 +106,16 @@ def _deploy(data: Any, update: bool):
     if not update:
         container = runtime.script_container
         owner = container.sender
-        storage.put(TOKEN_OWNER_KEY, owner)
+        storage.put_uint160(TOKEN_OWNER_KEY, owner)
 
-        storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, TOKEN_INITIAL_SUPPLY)
-        storage.put(owner, TOKEN_INITIAL_SUPPLY)
+        storage.put_int(TOKEN_TOTAL_SUPPLY_PREFIX, TOKEN_INITIAL_SUPPLY)
+        storage.put_int(owner, TOKEN_INITIAL_SUPPLY)
 
         on_transfer(None, owner, TOKEN_INITIAL_SUPPLY)
 
 
 def get_owner() -> UInt160:
-    return UInt160(storage.get(TOKEN_OWNER_KEY))
+    return storage.get_uint160(TOKEN_OWNER_KEY)
 
 
 @public
@@ -136,8 +136,8 @@ def mint(amount: int) -> bool:
         current_total_supply = total_supply()
         owner_balance = balance_of(token_owner)
 
-        storage.put(TOKEN_TOTAL_SUPPLY_PREFIX, current_total_supply + amount)
-        storage.put(token_owner, owner_balance + amount)
+        storage.put_int(TOKEN_TOTAL_SUPPLY_PREFIX, current_total_supply + amount)
+        storage.put_int(token_owner, owner_balance + amount)
 
     on_transfer(None, token_owner, amount)
     post_transfer(None, token_owner, amount, None)
@@ -219,7 +219,7 @@ def total_supply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return type_helper.to_int(storage.get(TOKEN_TOTAL_SUPPLY_PREFIX))
+    return storage.get_int(TOKEN_TOTAL_SUPPLY_PREFIX)
 
 
 @public(name='balanceOf', safe=True)
@@ -236,7 +236,7 @@ def balance_of(account: UInt160) -> int:
     :raise AssertionError: raised if `account` length is not 20.
     """
     assert len(account) == 20
-    return type_helper.to_int(storage.get(account))
+    return storage.get_int(account)
 
 
 @public
@@ -265,7 +265,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = type_helper.to_int(storage.get(from_address))
+    from_balance = storage.get_int(from_address)
     if from_balance < amount:
         return False
 
@@ -281,10 +281,10 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         if from_balance == amount:
             storage.delete(from_address)
         else:
-            storage.put(from_address, from_balance - amount)
+            storage.put_int(from_address, from_balance - amount)
 
-        to_balance = type_helper.to_int(storage.get(to_address))
-        storage.put(to_address, to_balance + amount)
+        to_balance = storage.get_int(to_address)
+        storage.put_int(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -356,7 +356,7 @@ def allowance(from_address: UInt160, to_address: UInt160) -> int:
     """
     # the parameters from and to should be 20-byte addresses. If not, this method should throw an exception.
     assert len(from_address) == 20 and len(to_address) == 20
-    return type_helper.to_int(storage.get(TRANSFER_ALLOWANCE_PREFIX + from_address + to_address))
+    return storage.get_int(TRANSFER_ALLOWANCE_PREFIX + from_address + to_address)
 
 
 @public(name='transferFrom')
@@ -403,7 +403,7 @@ def transfer_from(originator: UInt160, from_address: UInt160, to_address: UInt16
     if approved_transfer_amount == amount:
         storage.delete(TRANSFER_ALLOWANCE_PREFIX + originator + from_address)
     else:
-        storage.put(TRANSFER_ALLOWANCE_PREFIX + originator + from_address, approved_transfer_amount - amount)
+        storage.put_int(TRANSFER_ALLOWANCE_PREFIX + originator + from_address, approved_transfer_amount - amount)
 
     # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
     if amount != 0 and from_address != to_address:
@@ -411,11 +411,11 @@ def transfer_from(originator: UInt160, from_address: UInt160, to_address: UInt16
         if originator_balance == amount:
             storage.delete(originator)
         else:
-            storage.put(originator, originator_balance - amount)
+            storage.put_int(originator, originator_balance - amount)
 
         # updates to's balance
-        to_balance = type_helper.to_int(storage.get(to_address))
-        storage.put(to_address, to_balance + amount)
+        to_balance = storage.get_int(to_address)
+        storage.put_int(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -456,7 +456,7 @@ def approve(originator: UInt160, to_address: UInt160, amount: int) -> bool:
     if balance_of(originator) < amount:
         return False
 
-    storage.put(TRANSFER_ALLOWANCE_PREFIX + originator + to_address, amount)
+    storage.put_int(TRANSFER_ALLOWANCE_PREFIX + originator + to_address, amount)
     return True
 
 
@@ -478,7 +478,7 @@ def kyc_register(addresses: List[UInt160]) -> int:
         for address in addresses:
             if len(address) == 20:
                 kyc_key = KYC_WHITELIST_PREFIX + address
-                storage.put(kyc_key, True)
+                storage.put_bool(kyc_key, True)
                 included_addresses += 1
 
     return included_addresses

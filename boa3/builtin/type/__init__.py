@@ -40,6 +40,7 @@ class UInt160(bytes):
     """
     Represents a 160-bit unsigned integer.
     """
+    zero: UInt160
 
     def __init__(self, arg: bytes | int = 0):
         super().__init__()
@@ -50,6 +51,7 @@ class UInt256(bytes):
     """
     Represents a 256-bit unsigned integer.
     """
+    zero: UInt256
 
     def __init__(self, arg: bytes | int = 0):
         super().__init__()
@@ -60,12 +62,13 @@ class ECPoint(bytes):
     """
     Represents a coordinate pair for elliptic curve cryptography (ECC) structures.
     """
+    zero: ECPoint
 
     def __init__(self, arg: bytes):
         super().__init__()
         pass
 
-    def to_script_hash(self) -> bytes:
+    def to_script_hash(self) -> UInt160:
         """
         Converts a data to a script hash.
 

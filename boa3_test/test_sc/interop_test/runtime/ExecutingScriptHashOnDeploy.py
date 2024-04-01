@@ -7,7 +7,7 @@ from boa3.builtin.interop import storage, runtime
 @public
 def _deploy(data: Any, update: bool):
     if not update:
-        storage.put(b'testKey', runtime.executing_script_hash)
+        storage.put_uint160(b'testKey', runtime.executing_script_hash)
 
 
 @public

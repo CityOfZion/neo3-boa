@@ -269,10 +269,13 @@ class CodeGenerator:
         return len(self._stack)
 
     def _stack_append(self, value_type: IType):
-        self._stack_states.append(value_type, self.last_code)
+        self._stack_states.append(self.last_code, value_type)
 
     def _stack_pop(self, index: int = -1) -> IType:
         return self._stack_states.pop(self.last_code, index)
+
+    def _stack_reverse(self, start: int = 0, end: int = None, *, rotate: bool = False) -> IType:
+        return self._stack_states.reverse(self.last_code, start, end, rotate=rotate)
 
     @property
     def last_code_start_address(self) -> int:
@@ -2408,7 +2411,7 @@ class CodeGenerator:
             if opcode is Opcode.REVERSEN and no_items > 0:
                 self._stack_pop()
             if no_items > 0:
-                self._stack.reverse(-no_items, rotate=rotate)
+                self._stack_reverse(-no_items, rotate=rotate)
 
     def convert_init_user_class(self, class_type: ClassType):
         if isinstance(class_type, UserClass):
