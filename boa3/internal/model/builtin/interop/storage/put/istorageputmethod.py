@@ -1,3 +1,4 @@
+import abc
 import ast
 from collections.abc import Iterable, Sized
 from typing import Any
@@ -10,29 +11,41 @@ from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
 
 
-class StoragePutMethod(InteropMethod):
+class IStoragePutMethod(InteropMethod, abc.ABC):
 
-    def __init__(self):
+    def __init__(self, identifier: str, value_type: IType):
         from boa3.internal.model.type.type import Type
         from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
 
-        identifier = 'put'
         syscall = 'System.Storage.Put'
         context_type = StorageContextType.build()
-        storage_value_type = Type.union.build([Type.bytes,
-                                               Type.int,
-                                               Type.str,
-                                               ])
 
         args: dict[str, Variable] = {'key': Variable(Type.bytes),
-                                     'value': Variable(storage_value_type),
+                                     'value': Variable(value_type),
                                      'context': Variable(context_type)}
 
         from boa3.internal.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
         default_id = StorageGetContextMethod(context_type).identifier
-        context_default = set_internal_call(ast.parse("{0}()".format(default_id)
+        context_default = set_internal_call(ast.parse(f"{default_id}()"
                                                       ).body[0].value)
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.none)
+
+    @abc.abstractmethod
+    def generate_serialize_value_opcodes(self, code_generator):
+        pass
+
+    def generate_internal_opcodes(self, code_generator):
+        start_address = code_generator.bytecode_size
+        code_generator.swap_reverse_stack_items(3)
+        self.generate_serialize_value_opcodes(code_generator)
+        end_address = code_generator.last_code_start_address
+
+        if end_address > start_address:
+            code_generator.swap_reverse_stack_items(3)
+        else:
+            code_generator._remove_inserted_opcodes_since(start_address)
+
+        super().generate_internal_opcodes(code_generator)
 
     @property
     def generation_order(self) -> list[int]:
@@ -76,7 +89,8 @@ class StoragePutMethod(InteropMethod):
         if self.key_arg.type.is_type_of(key_type) and self.value_arg.type.is_type_of(value_type):
             return self
 
-        method: InteropMethod = StoragePutMethod()
+        from boa3.internal.model.builtin.interop.storage.put.storageputintmethod import StoragePutBytesMethod
+        method: InteropMethod = StoragePutBytesMethod()
         method.args['key'] = Variable(key_type)
         method.args['value'] = Variable(value_type)
         return method

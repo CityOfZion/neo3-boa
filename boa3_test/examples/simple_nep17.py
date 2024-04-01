@@ -5,7 +5,7 @@ from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.builtin.type import UInt160
 
 
 # -------------------------------------------
@@ -108,7 +108,7 @@ def balance_of(account: UInt160) -> int:
     :type account: UInt160
     """
     assert len(account) == 20
-    return type_helper.to_int(storage.get(account))
+    return storage.get_int(account)
 
 
 @public
@@ -150,9 +150,9 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         if from_balance == amount:
             storage.delete(from_address)
         else:
-            storage.put(from_address, from_balance - amount)
+            storage.put_int(from_address, from_balance - amount)
 
-        storage.put(to_address, to_balance + amount)
+        storage.put_int(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -192,6 +192,6 @@ def _deploy(data: Any, update: bool):
     if not update:
         container = runtime.script_container
 
-        storage.put(container.sender, total_supply())
+        storage.put_int(container.sender, total_supply())
 
         on_transfer(None, container.sender, total_supply())

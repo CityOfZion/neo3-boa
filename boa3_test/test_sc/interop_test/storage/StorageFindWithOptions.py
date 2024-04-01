@@ -13,5 +13,5 @@ def find_by_prefix(prefix: bytes) -> Iterator:
 
 
 @public
-def put_on_storage(key: bytes, value: Union[bytes, int, str]):
+def put_on_storage(key: bytes, value: bytes):
     put(key, value)

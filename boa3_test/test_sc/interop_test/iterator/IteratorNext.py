@@ -9,4 +9,4 @@ def has_next(prefix: bytes) -> bool:
 
 @public
 def store_data(key: bytes, value: int):
-    storage.put(key, value)
+    storage.put_int(key, value)
