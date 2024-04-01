@@ -78,6 +78,6 @@ class NeoEngine:
     def _execute_instruction(self, current_opcode: VMCode):
         match current_opcode.opcode:
             case Opcode.INITSLOT | Opcode.INITSSLOT:
-                print()
+                return
             case Opcode.RET:
                 self._state_stack.pop()
