@@ -205,7 +205,7 @@ class OpcodeInfo:
     # The top three items on the stack are rotated to the left.
     ROT = OpcodeInformation(Opcode.ROT)
     # The item n back in the stack is moved to the top.
-    ROLL = OpcodeInformation(Opcode.ROLL)
+    ROLL = OpcodeInformation(Opcode.ROLL, stack_items=1)
     # Reverse the order of the top 3 items on the stack.
     REVERSE3 = OpcodeInformation(Opcode.REVERSE3)
     # Reverse the order of the top 4 items on the stack.

@@ -249,7 +249,7 @@ class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
                 [self.account2.script_hash, token, None],
                 return_type=bool
             )
-        self.assertIsNone(*context.exception.args)
+        self.assertEqual(str(context.exception), 'Token not found')
 
     async def test_transfer_fail_bad_account(self):
         token = self.TEST_TOKEN_ID

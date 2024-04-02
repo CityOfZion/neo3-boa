@@ -13,7 +13,7 @@ from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.json import json_deserialize
 from boa3.builtin.interop.runtime import check_witness, get_network, script_container
 from boa3.builtin.interop.stdlib import deserialize, serialize
-from boa3.builtin.interop.storage import delete, find, get, get_read_only_context, put
+from boa3.builtin.interop import storage
 from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.type import UInt160, helper as type_helper
 
@@ -170,8 +170,8 @@ def totalSupply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    debug(['totalSupply: ', type_helper.to_int(get(SUPPLY_PREFIX))])
-    return type_helper.to_int(get(SUPPLY_PREFIX, get_read_only_context()))
+    debug(['totalSupply: ', storage.get_int(SUPPLY_PREFIX)])
+    return storage.get_int(SUPPLY_PREFIX, storage.get_read_only_context())
 
 
 @public(safe=True)
@@ -187,8 +187,8 @@ def balanceOf(owner: UInt160) -> int:
     :raise AssertionError: raised if `owner` length is not 20.
     """
     expect(validateAddress(owner), "Not a valid address")
-    debug(['balanceOf: ', type_helper.to_int(get(mk_balance_key(owner), get_read_only_context()))])
-    return type_helper.to_int(get(mk_balance_key(owner), get_read_only_context()))
+    debug(['balanceOf: ', storage.get_int(mk_balance_key(owner), storage.get_read_only_context())])
+    return storage.get_int(mk_balance_key(owner), storage.get_read_only_context())
 
 
 @public(safe=True)
@@ -205,8 +205,8 @@ def tokensOf(owner: UInt160) -> Iterator:
     """
     expect(validateAddress(owner), "Not a valid address")
     flags = FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY
-    context = get_read_only_context()
-    return find(mk_account_key(owner), context, flags)
+    context = storage.get_read_only_context()
+    return storage.find(mk_account_key(owner), context, flags)
 
 
 @public
@@ -237,6 +237,7 @@ def transfer(to: UInt160, tokenId: bytes, data: Any) -> bool:
     expect(validateAddress(to), "Not a valid address")
     expect(not isPaused(), "Contract is currently paused")
     token_owner = get_owner_of(tokenId)
+    expect(token_owner != UInt160.zero, "Token not found")
 
     if not check_witness(token_owner):
         return False
@@ -299,8 +300,8 @@ def tokens() -> Iterator:
     :return: an iterator that contains all of the tokens minted by the contract.
     """
     flags = FindOptions.REMOVE_PREFIX | FindOptions.KEYS_ONLY
-    context = get_read_only_context()
-    return find(TOKEN_PREFIX, context, flags)
+    context = storage.get_read_only_context()
+    return storage.find(TOKEN_PREFIX, context, flags)
 
 
 @public(safe=True)
@@ -349,7 +350,7 @@ def _deploy(data: Any, upgrade: bool):
     if upgrade:
         return
 
-    if type_helper.to_bool(get(DEPLOYED, get_read_only_context())):
+    if storage.get_bool(DEPLOYED, storage.get_read_only_context()):
         return
 
     tx = script_container
@@ -373,14 +374,14 @@ def _deploy(data: Any, upgrade: bool):
 
 def internal_deploy(owner: UInt160):
     debug(["internal: ", owner])
-    put(DEPLOYED, True)
-    put(PAUSED, False)
-    put(TOKEN_COUNT, 0)
+    storage.put_bool(DEPLOYED, True)
+    storage.put_bool(PAUSED, False)
+    storage.put_int(TOKEN_COUNT, 0)
 
     auth: List[UInt160] = []
     auth.append(owner)
     serialized = serialize(auth)
-    put(AUTH_ADDRESSES, serialized)
+    storage.put(AUTH_ADDRESSES, serialized)
 
 
 @public(name='onNEP11Payment')
@@ -509,7 +510,7 @@ def getAuthorizedAddress() -> list[UInt160]:
     :return: whether the transaction signature is correct
     :raise AssertionError: raised if witness is not verified.
     """
-    serialized = get(AUTH_ADDRESSES, get_read_only_context())
+    serialized = storage.get(AUTH_ADDRESSES, storage.get_read_only_context())
     auth = cast(list[UInt160], deserialize(serialized))
 
     return auth
@@ -535,7 +536,7 @@ def setAuthorizedAddress(address: UInt160, authorized: bool):
     expect(verified, '`account` is not allowed for setAuthorizedAddress')
     expect(validateAddress(address), "Not a valid address")
     expect(isinstance(authorized, bool), "authorized has to be of type bool")
-    serialized = get(AUTH_ADDRESSES, get_read_only_context())
+    serialized = storage.get(AUTH_ADDRESSES, storage.get_read_only_context())
     auth = cast(list[UInt160], deserialize(serialized))
 
     if authorized:
@@ -548,11 +549,11 @@ def setAuthorizedAddress(address: UInt160, authorized: bool):
         if not found:
             auth.append(address)
 
-        put(AUTH_ADDRESSES, serialize(auth))
+        storage.put(AUTH_ADDRESSES, serialize(auth))
         on_auth(address, 0, True)
     else:
         auth.remove(address)
-        put(AUTH_ADDRESSES, serialize(auth))
+        storage.put(AUTH_ADDRESSES, serialize(auth))
         on_auth(address, 0, False)
 
 
@@ -569,9 +570,9 @@ def updatePause(status: bool) -> bool:
     verified: bool = verify()
     expect(verified, '`account` is not allowed for updatePause')
     expect(isinstance(status, bool), "status has to be of type bool")
-    put(PAUSED, status)
-    debug(['updatePause: ', type_helper.to_bool(get(PAUSED, get_read_only_context()))])
-    return type_helper.to_bool(get(PAUSED, get_read_only_context()))
+    storage.put_bool(PAUSED, status)
+    debug(['updatePause: ', storage.get_bool(PAUSED, storage.get_read_only_context())])
+    return storage.get_bool(PAUSED, storage.get_read_only_context())
 
 
 @public(safe=True)
@@ -583,8 +584,8 @@ def isPaused() -> bool:
 
     :return: whether the contract is paused
     """
-    debug(['isPaused: ', type_helper.to_bool(get(PAUSED))])
-    if type_helper.to_bool(get(PAUSED, get_read_only_context())):
+    debug(['isPaused: ', storage.get_bool(PAUSED)])
+    if storage.get_bool(PAUSED, storage.get_read_only_context()):
         return True
     return False
 
@@ -600,7 +601,7 @@ def verify() -> bool:
 
     :return: whether the transaction signature is correct
     """
-    serialized = get(AUTH_ADDRESSES, get_read_only_context())
+    serialized = storage.get(AUTH_ADDRESSES, storage.get_read_only_context())
     auth = cast(list[UInt160], deserialize(serialized))
     tx = script_container
     for addr in auth:
@@ -685,8 +686,8 @@ def internal_mint(account: UInt160, meta: str, lockedContent: str, royalties: st
     """
     expect(len(meta) != 0, '`meta` can not be empty')
 
-    tokenId = type_helper.to_int(get(TOKEN_COUNT, get_read_only_context())) + 1
-    put(TOKEN_COUNT, tokenId)
+    tokenId = storage.get_int(TOKEN_COUNT, storage.get_read_only_context()) + 1
+    storage.put_int(TOKEN_COUNT, tokenId)
     tokenIdBytes = type_helper.to_bytes(tokenId)
 
     set_owner_of(tokenIdBytes, account)
@@ -712,38 +713,38 @@ def internal_mint(account: UInt160, meta: str, lockedContent: str, royalties: st
 def remove_token_account(holder: UInt160, tokenId: bytes):
     key = mk_account_key(holder) + tokenId
     debug(['add_token_account: ', key, tokenId])
-    delete(key)
+    storage.delete(key)
 
 
 def add_token_account(holder: UInt160, tokenId: bytes):
     key = mk_account_key(holder) + tokenId
     debug(['add_token_account: ', key, tokenId])
-    put(key, tokenId)
+    storage.put(key, tokenId)
 
 
 def get_owner_of(tokenId: bytes) -> UInt160:
     key = mk_token_key(tokenId)
     debug(['get_owner_of: ', key, tokenId])
-    owner = get(key, get_read_only_context())
-    return UInt160(owner)
+    owner = storage.get_uint160(key, storage.get_read_only_context())
+    return owner
 
 
 def remove_owner_of(tokenId: bytes):
     key = mk_token_key(tokenId)
     debug(['remove_owner_of: ', key, tokenId])
-    delete(key)
+    storage.delete(key)
 
 
 def set_owner_of(tokenId: bytes, owner: UInt160):
     key = mk_token_key(tokenId)
     debug(['set_owner_of: ', key, tokenId])
-    put(key, owner)
+    storage.put_uint160(key, owner)
 
 
 def add_to_supply(amount: int):
     total = totalSupply() + amount
     debug(['add_to_supply: ', amount])
-    put(SUPPLY_PREFIX, total)
+    storage.put_int(SUPPLY_PREFIX, total)
 
 
 def set_balance(owner: UInt160, amount: int):
@@ -753,85 +754,85 @@ def set_balance(owner: UInt160, amount: int):
 
     key = mk_balance_key(owner)
     if (new > 0):
-        put(key, new)
+        storage.put_int(key, new)
     else:
-        delete(key)
+        storage.delete(key)
 
 
 def get_meta(tokenId: bytes) -> str:
     key = mk_meta_key(tokenId)
     debug(['get_meta: ', key, tokenId])
-    val = get(key, get_read_only_context())
-    return type_helper.to_str(val)
+    val = storage.get_str(key, storage.get_read_only_context())
+    return val
 
 
 def remove_meta(tokenId: bytes):
     key = mk_meta_key(tokenId)
     debug(['remove_meta: ', key, tokenId])
-    delete(key)
+    storage.delete(key)
 
 
 def add_meta(tokenId: bytes, meta: str):
     key = mk_meta_key(tokenId)
     debug(['add_meta: ', key, tokenId])
-    put(key, meta)
+    storage.put_str(key, meta)
 
 
 def get_locked_content(tokenId: bytes) -> str:
     key = mk_locked_key(tokenId)
     debug(['get_locked_content: ', key, tokenId])
-    val = type_helper.to_str(get(key, get_read_only_context()))
+    val = storage.get_str(key, storage.get_read_only_context())
     return val
 
 
 def remove_locked_content(tokenId: bytes):
     key = mk_locked_key(tokenId)
     debug(['remove_locked_content: ', key, tokenId])
-    delete(key)
+    storage.delete(key)
 
 
 def add_locked_content(tokenId: bytes, content: str):
     key = mk_locked_key(tokenId)
     debug(['add_locked_content: ', key, tokenId])
-    put(key, content)
+    storage.put_str(key, content)
 
 
 def get_royalties(tokenId: bytes) -> str:
     key = mk_royalties_key(tokenId)
     debug(['get_royalties: ', key, tokenId])
-    val = get(key, get_read_only_context())
-    return type_helper.to_str(val)
+    val = storage.get_str(key, storage.get_read_only_context())
+    return val
 
 
 def add_royalties(tokenId: bytes, royalties: str):
     key = mk_royalties_key(tokenId)
     debug(['add_royalties: ', key, tokenId])
-    put(key, royalties)
+    storage.put_str(key, royalties)
 
 
 def remove_royalties(tokenId: bytes):
     key = mk_royalties_key(tokenId)
     debug(['remove_royalties: ', key, tokenId])
-    delete(key)
+    storage.delete(key)
 
 
 def get_locked_view_counter(tokenId: bytes) -> int:
     key = mk_lv_key(tokenId)
     debug(['get_locked_view_counter: ', key, tokenId])
-    return type_helper.to_int(get(key, get_read_only_context()))
+    return storage.get_int(key, storage.get_read_only_context())
 
 
 def remove_locked_view_counter(tokenId: bytes):
     key = mk_lv_key(tokenId)
     debug(['remove_locked_view_counter: ', key, tokenId])
-    delete(key)
+    storage.delete(key)
 
 
 def set_locked_view_counter(tokenId: bytes):
     key = mk_lv_key(tokenId)
     debug(['set_locked_view_counter: ', key, tokenId])
-    count = type_helper.to_int(get(key, get_read_only_context())) + 1
-    put(key, count)
+    count = storage.get_int(key, storage.get_read_only_context()) + 1
+    storage.put_int(key, count)
 
 
 # helpers

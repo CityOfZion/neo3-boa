@@ -1,17 +1,16 @@
 from boa3.builtin import interop
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop.iterator import Iterator
-from boa3.builtin.type.helper import to_int
 
 
 @public
 def put_value(key: bytes, value: int):
-    interop.storage.put(key, value)
+    interop.storage.put_int(key, value)
 
 
 @public
 def get_value(key: bytes) -> int:
-    return to_int(interop.storage.get(key))
+    return interop.storage.get_int(key)
 
 
 @public

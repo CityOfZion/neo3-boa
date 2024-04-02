@@ -192,8 +192,20 @@ class Interop:
     StorageFind = StorageFindMethod(FindOptionsType)
     StorageGetContext = StorageGetContextMethod(StorageContextType)
     StorageGetReadOnlyContext = StorageGetReadOnlyContextMethod(StorageContextType)
-    StorageGet = StorageGetMethod()
-    StoragePut = StoragePutMethod()
+    StorageGet = StorageGetBytesMethod()
+    StorageGetInt = StorageGetIntMethod()
+    StorageGetBool = StorageGetBoolMethod()
+    StorageGetStr = StorageGetStrMethod()
+    StorageGetUInt160 = StorageGetUInt160Method()
+    StorageGetUInt256 = StorageGetUInt256Method()
+    StorageGetECPoint = StorageGetECPointMethod()
+    StoragePut = StoragePutBytesMethod()
+    StoragePutInt = StoragePutIntMethod()
+    StoragePutBool = StoragePutBoolMethod()
+    StoragePutStr = StoragePutStrMethod()
+    StoragePutUInt160 = StoragePutUInt160Method()
+    StoragePutUInt256 = StoragePutUInt256Method()
+    StoragePutECPoint = StoragePutECPointMethod()
 
     # endregion
 
@@ -427,9 +439,21 @@ class Interop:
                              methods=[StorageDelete,
                                       StorageFind,
                                       StorageGet,
+                                      StorageGetInt,
+                                      StorageGetBool,
+                                      StorageGetStr,
+                                      StorageGetUInt160,
+                                      StorageGetUInt256,
+                                      StorageGetECPoint,
                                       StorageGetContext,
                                       StorageGetReadOnlyContext,
-                                      StoragePut
+                                      StoragePut,
+                                      StoragePutInt,
+                                      StoragePutBool,
+                                      StoragePutStr,
+                                      StoragePutUInt160,
+                                      StoragePutUInt256,
+                                      StoragePutECPoint,
                                       ],
                              packages=[FindOptionsModule,
                                        StorageContextModule,

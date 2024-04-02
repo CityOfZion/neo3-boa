@@ -138,7 +138,7 @@ class TestNativeContracts(boatestcase.BoaTestCase):
         from boa3_test.tests.test_drive import neoxp
         from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
-        path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
+        path, _ = self.get_deploy_file_paths('OracleRequestCall.py', compile_if_found=True)
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []
@@ -159,7 +159,7 @@ class TestNativeContracts(boatestcase.BoaTestCase):
         expected_results.append(True)
 
         invokes.append(runner.call_contract(path, 'get_storage'))
-        expected_results.append(['', '', '', ''])
+        expected_results.append(['', '', 0, ''])
 
         runner.execute(account=OWNER, add_invokes_to_batch=True)
         self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
@@ -185,7 +185,7 @@ class TestNativeContracts(boatestcase.BoaTestCase):
         self.assertEqual(test_url, storage.result[0])
         self.assertEqual(f"{(StackItemType.ByteString + len(user_data).to_bytes(1,'little')).decode()}{user_data}",
                          storage.result[1])
-        self.assertEqual(OracleResponseCode.Success.to_bytes(1, 'little').decode(), storage.result[2])
+        self.assertEqual(OracleResponseCode.Success, storage.result[2])
         self.assertEqual(json_data, json.loads(storage.result[3]))
 
         self.assertEqual(1, len(response_tx_ids))

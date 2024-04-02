@@ -1,6 +1,6 @@
-from boa3.builtin.interop.storage import put
+from boa3.builtin.interop.storage import put_int
 
 
 def Main(key: str):
     value: int = 123
-    put(key, value)
+    put_int(key, value)

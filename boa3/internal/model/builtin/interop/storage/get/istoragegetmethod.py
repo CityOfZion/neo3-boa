@@ -1,3 +1,4 @@
+import abc
 import ast
 from collections.abc import Iterable, Sized
 from typing import Any
@@ -10,13 +11,12 @@ from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
 
 
-class StorageGetMethod(InteropMethod):
+class IStorageGetMethod(InteropMethod, abc.ABC):
 
-    def __init__(self):
+    def __init__(self, identifier: str, value_type: IType):
         from boa3.internal.model.type.type import Type
         from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
 
-        identifier = 'get'
         syscall = 'System.Storage.Get'
         context_type = StorageContextType.build()
 
@@ -25,9 +25,17 @@ class StorageGetMethod(InteropMethod):
 
         from boa3.internal.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
         default_id = StorageGetContextMethod(context_type).identifier
-        context_default = set_internal_call(ast.parse("{0}()".format(default_id)
+        context_default = set_internal_call(ast.parse(f"{default_id}()"
                                                       ).body[0].value)
-        super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.bytes)
+        super().__init__(identifier, syscall, args, defaults=[context_default], return_type=value_type)
+
+    @abc.abstractmethod
+    def generate_default_value_opcodes(self, code_generator):
+        pass
+
+    @abc.abstractmethod
+    def generate_deserialize_value_opcodes(self, code_generator):
+        pass
 
     def generate_internal_opcodes(self, code_generator):
         super().generate_internal_opcodes(code_generator)
@@ -36,9 +44,15 @@ class StorageGetMethod(InteropMethod):
         code_generator.insert_type_check(None)
         if_is_null = code_generator.convert_begin_if()
 
-        #   result = b''
+        #   result = default_value
         code_generator.remove_stack_top_item()
-        code_generator.convert_literal(b'')
+        self.generate_default_value_opcodes(code_generator)
+
+        else_is_null = code_generator.convert_begin_else(if_is_null, is_internal=True)
+        self.generate_deserialize_value_opcodes(code_generator)
+
+        if else_is_null < code_generator.last_code_start_address:
+            if_is_null = else_is_null
         code_generator.convert_end_if(if_is_null, is_internal=True)
 
     @property
@@ -81,7 +95,10 @@ class StorageGetMethod(InteropMethod):
 
         method = self
         key_type: IType = exp[0].type
-        if not method.key_arg.type.is_type_of(key_type):
-            method = StorageGetMethod()
+        if method.key_arg.type.is_type_of(key_type):
+            return self
+        else:
+            from boa3.internal.model.builtin.interop.storage.get.storagegetbytesmethod import StorageGetBytesMethod
+            method = StorageGetBytesMethod()
             method.args['key'] = Variable(key_type)
         return method

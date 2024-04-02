@@ -5,7 +5,7 @@ from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.builtin.type import UInt160
 
 
 # -------------------------------------------
@@ -100,7 +100,7 @@ def total_supply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return type_helper.to_int(storage.get(SUPPLY_KEY))
+    return storage.get_int(SUPPLY_KEY)
 
 
 @public(name='balanceOf', safe=True)
@@ -114,7 +114,7 @@ def balance_of(account: UInt160) -> int:
     :type account: UInt160
     """
     assert len(account) == 20
-    return type_helper.to_int(storage.get(account))
+    return storage.get_int(account)
 
 
 @public
@@ -143,7 +143,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = type_helper.to_int(storage.get(from_address))
+    from_balance = storage.get_int(from_address)
     if from_balance < amount:
         return False
 
@@ -159,10 +159,10 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         if from_balance == amount:
             storage.delete(from_address)
         else:
-            storage.put(from_address, from_balance - amount)
+            storage.put_int(from_address, from_balance - amount)
 
-        to_balance = type_helper.to_int(storage.get(to_address))
-        storage.put(to_address, to_balance + amount)
+        to_balance = storage.get_int(to_address)
+        storage.put_int(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -206,8 +206,8 @@ def mint(account: UInt160, amount: int):
         current_total_supply = total_supply()
         account_balance = balance_of(account)
 
-        storage.put(SUPPLY_KEY, current_total_supply + amount)
-        storage.put(account, account_balance + amount)
+        storage.put_int(SUPPLY_KEY, current_total_supply + amount)
+        storage.put_int(account, account_balance + amount)
 
         on_transfer(None, account, amount)
         post_transfer(None, account, amount, None)
@@ -233,9 +233,9 @@ def _deploy(data: Any, update: bool):
     if not update:
         container = runtime.script_container
 
-        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-        storage.put(OWNER_KEY, container.sender)
-        storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
+        storage.put_int(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+        storage.put_uint160(OWNER_KEY, container.sender)
+        storage.put_int(container.sender, TOKEN_TOTAL_SUPPLY)
 
         on_transfer(None, container.sender, TOKEN_TOTAL_SUPPLY)
 
@@ -277,4 +277,4 @@ def get_owner() -> UInt160:
     """
     Gets the script hash of the owner (the account that deployed this smart contract)
     """
-    return UInt160(storage.get(OWNER_KEY))
+    return storage.get_uint160(OWNER_KEY)

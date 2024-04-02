@@ -57,7 +57,7 @@ class StackMemento:
         if latest_stack is not None:
             self._current_stack = latest_stack
 
-    def append(self, value: IType, code: VMCode):
+    def append(self, code: VMCode, value: IType):
         states = self.stack_map
         index = VMCodeMapping.instance().get_start_address(code)
         if index in states:
@@ -89,6 +89,22 @@ class StackMemento:
 
         if len(stack) > 0:
             return stack.pop(index)
+
+    def reverse(self, code: VMCode, start: int = 0, end: int = None, *, rotate: bool = False):
+        states = self.stack_map
+        stack_index = VMCodeMapping.instance().get_start_address(code)
+        if stack_index in states:
+            stack = states[stack_index]
+        else:
+            if self._current_stack is not None:
+                stack = self._current_stack.copy()
+            else:
+                stack = NeoStack()
+
+            self._stacks.append((code, stack))
+            self._current_stack = stack
+
+        return stack.reverse(start, end, rotate=rotate)
 
 
 class NeoStack(IStack):

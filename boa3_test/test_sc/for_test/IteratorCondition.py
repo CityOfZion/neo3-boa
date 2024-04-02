@@ -19,9 +19,9 @@ def Main() -> int:
 @public
 def _deploy(data: Any, update: bool):
     prefix = b'example'
-    storage.put(prefix + b'\x01', 1)
-    storage.put(prefix + b'\x02', 2)
-    storage.put(prefix + b'\x03', 3)
+    storage.put_int(prefix + b'\x01', 1)
+    storage.put_int(prefix + b'\x02', 2)
+    storage.put_int(prefix + b'\x03', 3)
 
 
 def get_iterator() -> Iterator:

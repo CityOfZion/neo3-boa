@@ -14,4 +14,4 @@ def test_iterator(prefix: bytes) -> Union[tuple, None]:
 
 @public
 def store_data(key: bytes, value: int):
-    storage.put(key, value)
+    storage.put_int(key, value)

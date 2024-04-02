@@ -21,4 +21,4 @@ def has_key(key: bytes) -> bool:
 def _deploy(data: Any, update: bool):
     # test data to test in unit tests
     context = get_context()
-    storage.put(b'example', 23, context)
+    storage.put_int(b'example', 23, context)

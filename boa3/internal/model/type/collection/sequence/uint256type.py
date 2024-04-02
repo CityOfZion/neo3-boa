@@ -1,6 +1,8 @@
 from typing import Any
 
 from boa3.internal import constants
+from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
+from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.method import Method
 from boa3.internal.model.type.classes.classtype import ClassType
 from boa3.internal.model.type.itype import IType
@@ -44,6 +46,14 @@ class UInt256Type(BytesType, ClassType):
     def _is_type_of(cls, value: Any):
         return isinstance(value, UInt256Type)
 
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+        properties = [UInt256ZeroProperty()
+                      ]
+
+        for prop in properties:
+            self._properties[prop.identifier] = prop
+
     def is_instance_opcodes(self) -> list[tuple[Opcode, bytes]]:
         from boa3.internal.model.type.classes.pythonclass import PythonClass
         return super(PythonClass, self).is_instance_opcodes()
@@ -72,3 +82,29 @@ class UInt256Type(BytesType, ClassType):
 
 
 _UInt256 = UInt256Type()
+
+
+class GetUInt256ZeroMethod(IBuiltinMethod):
+    def __init__(self):
+        from boa3.internal.model.type.type import Type
+        identifier = '-uint160_get_zero'
+        args = {}
+        super().__init__(identifier, args, return_type=Type.int)
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.convert_literal(_UInt256.default_value)
+
+    @property
+    def _args_on_stack(self) -> int:
+        return len(self.args)
+
+    @property
+    def _body(self) -> str | None:
+        return
+
+
+class UInt256ZeroProperty(IBuiltinProperty):
+    def __init__(self):
+        identifier = 'zero'
+        getter = GetUInt256ZeroMethod()
+        super().__init__(identifier, getter)

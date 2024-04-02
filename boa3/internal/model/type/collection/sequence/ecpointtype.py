@@ -1,6 +1,8 @@
 from typing import Any
 
 from boa3.internal import constants
+from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
+from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.method import Method
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.primitive.bytestype import BytesType
@@ -48,11 +50,16 @@ class ECPointType(BytesType):
 
         from boa3.internal.model.builtin.builtin import Builtin
 
+        properties = [ECPointZeroProperty()
+                      ]
         instance_methods = [Builtin.ScriptHashMethod_,
                             ]
 
         for instance_method in instance_methods:
             self._instance_methods[instance_method.raw_identifier] = instance_method.build(self)
+
+        for prop in properties:
+            self._properties[prop.identifier] = prop
 
     def is_instance_opcodes(self) -> list[tuple[Opcode, bytes]]:
         from boa3.internal.model.type.classes.pythonclass import PythonClass
@@ -83,3 +90,29 @@ class ECPointType(BytesType):
 
 
 _ECPoint = ECPointType()
+
+
+class GetECPointZeroMethod(IBuiltinMethod):
+    def __init__(self):
+        from boa3.internal.model.type.type import Type
+        identifier = '-ecpoint_get_zero'
+        args = {}
+        super().__init__(identifier, args, return_type=Type.int)
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.convert_literal(_ECPoint.default_value)
+
+    @property
+    def _args_on_stack(self) -> int:
+        return len(self.args)
+
+    @property
+    def _body(self) -> str | None:
+        return
+
+
+class ECPointZeroProperty(IBuiltinProperty):
+    def __init__(self):
+        identifier = 'zero'
+        getter = GetECPointZeroMethod()
+        super().__init__(identifier, getter)

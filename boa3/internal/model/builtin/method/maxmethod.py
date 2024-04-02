@@ -73,7 +73,7 @@ class MaxMethod(IBuiltinMethod):
         code_generator.insert_opcode(Opcode.INC)
         code_generator.insert_opcode(Opcode.INC)
         code_generator.convert_end_if(else_stack_size_equals_3, is_internal=True)
-        code_generator.insert_opcode(Opcode.PACK)
+        code_generator.insert_opcode(Opcode.PACK, add_to_stack=[Type.list.build(self._arg_values.type)])
 
         # index = len(aux_list) - 1
         code_generator.duplicate_stack_top_item()
