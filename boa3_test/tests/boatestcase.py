@@ -950,7 +950,7 @@ class BoaTestCase(SmartContractTestCase):
 
         with _COMPILER_LOCK:
             if not os.path.isfile(nef_output):
-                return self.compile_and_save(path, root_folder=root_folder)
+                return self.compile_and_save(path, root_folder=root_folder, get_raw_nef=not deserialize)
 
         from boa3.internal.neo.contracts.neffile import NefFile
 
