@@ -5,4 +5,4 @@ from boa3.builtin.compile_time import public
 
 @public
 def Main():
-    a: Tuple[Any] = (True, 1, 'ok')
+    a: Tuple[Any, Any, Any] = (True, 1, 'ok')
