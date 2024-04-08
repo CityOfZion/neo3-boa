@@ -183,6 +183,11 @@ class TestTypes(boatestcase.BoaTestCase):
         tuple_any_type = Type.tuple
         self.assertFalse(tuple_type.is_type_of(tuple_any_type))
 
+    def test_typed_tuple_is_type_of_empty_tuple(self):
+        tuple_type = Type.tuple.build_any_length(Type.int)
+        empty_tuple = tuple()
+        self.assertTrue(tuple_type.is_type_of(empty_tuple))
+
     def test_list_any_is_type_of_sequence(self):
         list_type = Type.list
         sequence_type = Type.sequence

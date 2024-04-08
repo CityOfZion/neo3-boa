@@ -110,6 +110,9 @@ class TupleType(SequenceType):
                 any_length = False
 
             len_types_to_check = len(types_to_check)
+            if self._is_any_length and len_types_to_check == 0 and not any_length:
+                # tuples of any length are always type of empty tuple
+                return True
             if len_types_to_check < min_size:
                 return False
             if not self._is_any_length:

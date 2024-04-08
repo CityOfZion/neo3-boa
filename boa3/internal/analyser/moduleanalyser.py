@@ -209,7 +209,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     if isinstance(source_node, ast.Global):
                         var = outer_symbol
                     else:
-                        if isinstance(var_type, SequenceType):
+                        if isinstance(var_type, SequenceType) and not Type.tuple.is_type_of(var_type):
                             var_type = var_type.build_collection(var_enumerate_type)
                         var = Variable(var_type, origin_node=source_node)
 
