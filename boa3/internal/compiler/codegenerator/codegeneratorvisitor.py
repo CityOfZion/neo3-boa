@@ -518,7 +518,7 @@ class VisitorCodeGenerator(IAstAnalyser):
         if isinstance(subscript.ctx, ast.Load):
             # get item
             value_data = self.visit_to_generate(subscript.value)
-            slice = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+            slice = subscript.slice
             self.visit_to_generate(slice)
 
             index_is_constant_number = isinstance(slice, ast.Num) and isinstance(slice.n, int)
@@ -530,7 +530,7 @@ class VisitorCodeGenerator(IAstAnalyser):
             # set item
             var_data = self.visit(subscript.value)
 
-            index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
+            index = subscript.slice
             symbol_id = var_data.symbol_id
             value_type = var_data.type
 

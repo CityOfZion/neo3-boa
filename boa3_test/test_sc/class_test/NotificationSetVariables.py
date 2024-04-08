@@ -20,7 +20,7 @@ def event_name(event: str) -> str:
 
 
 @public
-def state(obj: Tuple[Any]) -> Any:
+def state(obj: Tuple[Any, ...]) -> Any:
     x = Notification()
     x.state = obj
     return x.state

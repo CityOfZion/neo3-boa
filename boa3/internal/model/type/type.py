@@ -1,5 +1,6 @@
 from typing import Any
 
+from boa3.internal.model.type.annotation.ellipsistype import ellipsisType
 from boa3.internal.model.type.annotation.optionaltype import OptionalType
 from boa3.internal.model.type.annotation.uniontype import UnionType
 from boa3.internal.model.type.anytype import anyType
@@ -122,4 +123,5 @@ class Type:
     # Annotation types
     union = UnionType()
     optional = OptionalType()
+    ellipsis = ellipsisType
     any = anyType

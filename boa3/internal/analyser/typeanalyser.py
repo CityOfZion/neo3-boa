@@ -583,7 +583,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                     type_id=symbol_type.identifier,
                     operation_id=Operator.Subscript)
             )
-        return symbol_type.item_type
+        return symbol_type.get_item_type(index)
 
     def validate_slice(self, subscript: ast.Subscript, slice_node: ast.Slice) -> IType:
         """
@@ -1932,7 +1932,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                               actual_type_id=value_type.identifier)
             )
 
-        return Type.tuple.build_collection(value_type.value_type)
+        return Type.tuple.build_any_length(value_type.value_type)
 
     def visit_Index(self, index: ast.Index) -> Any:
         """

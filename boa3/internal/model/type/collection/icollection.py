@@ -78,6 +78,9 @@ class ICollectionType(PythonClass, ABC):
         types: set[IType] = {val if isinstance(val, IType) else Type.get_type(val) for val in value}
         return cls.filter_types(types)
 
+    def get_item_type(self, index: tuple):
+        return self.item_type
+
     @classmethod
     def filter_types(cls, values_type) -> set[IType]:
         if values_type is None:
@@ -92,6 +95,11 @@ class ICollectionType(PythonClass, ABC):
             from boa3.internal.model.type.type import Type
             if any(t is Type.any or t is Type.none for t in values_type):
                 return {Type.any}
+
+            if Type.ellipsis in values_type:
+                values_type.remove(Type.ellipsis)
+                if len(values_type) == 1:
+                    return values_type
 
             actual_types = list(values_type)[:1]
             for value in list(values_type)[1:]:
