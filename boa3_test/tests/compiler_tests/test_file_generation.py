@@ -333,9 +333,9 @@ class TestFileGeneration(BoaTest):
         self.assertIn('parameters', event)
         self.assertEqual(3, len(event['parameters']))
         parameters = event['parameters']
-        self.assertEqual(('var4', 'Integer'), (parameters[0]['name'], parameters[0]['type']))
-        self.assertEqual(('var5', 'String'), (parameters[1]['name'], parameters[1]['type']))
-        self.assertEqual(('var6', 'ByteArray'), (parameters[2]['name'], parameters[2]['type']))
+        self.assertEqual(('var4', AbiType.Integer), (parameters[0]['name'], parameters[0]['type']))
+        self.assertEqual(('var5', AbiType.String), (parameters[1]['name'], parameters[1]['type']))
+        self.assertEqual(('var6', AbiType.ByteArray), (parameters[2]['name'], parameters[2]['type']))
 
     def test_metadata_abi_method_safe_mismatched_type(self):
         path = self.get_contract_path('MetadataMethodSafeMismatchedType.py')
@@ -848,10 +848,10 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Array, abi_method_main['returntype'])
         self.assertIn('returngeneric', abi_method_main)
         self.assertIn('type', abi_method_main['returngeneric'])
-        self.assertEqual('Array', abi_method_main['returngeneric']['type'])
+        self.assertEqual(AbiType.Array, abi_method_main['returngeneric']['type'])
         self.assertIn('generic', abi_method_main['returngeneric'])
         self.assertIn('type', abi_method_main['returngeneric']['generic'])
 
@@ -864,7 +864,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Map', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Map, abi_method_main['returntype'])
         self.assertIn('returngenerickey', abi_method_main)
         self.assertIn('type', abi_method_main['returngenerickey'])
         self.assertIn('returngenericitem', abi_method_main)
@@ -881,7 +881,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Any', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Any, abi_method_main['returntype'])
         self.assertIn('returnunion', abi_method_main)
         self.assertIsInstance(abi_method_main['returnunion'], list)
         for union_type in abi_method_main['returnunion']:
@@ -903,7 +903,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Integer', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Integer, abi_method_main['returntype'])
         self.assertIn('returnnullable', abi_method_main)
 
         abi_method_main_parameters = abi_method_main['parameters']
@@ -918,7 +918,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('InteropInterface', abi_method_main['returntype'])
+        self.assertEqual(AbiType.InteropInterface, abi_method_main['returntype'])
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'StorageContext')
 
@@ -927,7 +927,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('InteropInterface', abi_method_main['returntype'])
+        self.assertEqual(AbiType.InteropInterface, abi_method_main['returntype'])
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'Iterator')
 
@@ -941,7 +941,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, AddressType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'String')
+        self.assertEqual(abi_method_main['returntype'], AbiType.String)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'Address')
 
@@ -964,7 +964,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, BlockHashType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash256')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash256)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'BlockHash')
 
@@ -987,7 +987,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, PublicKeyType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'PublicKey')
+        self.assertEqual(abi_method_main['returntype'], AbiType.PublicKey)
         # 'PublicKey' already is a abi type, so there is no need to use a 'returnhint'
         self.assertNotIn('returnhint', abi_method_main)
 
@@ -1010,7 +1010,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, ScriptHashType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash160')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash160)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'ScriptHash')
 
@@ -1033,7 +1033,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, ScriptHashLittleEndianType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash160')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash160)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'ScriptHashLittleEndian')
 
@@ -1056,7 +1056,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, TransactionIdType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash256')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash256)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'TransactionId')
 
@@ -1074,7 +1074,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)  # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Any')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Any)
         # verifying if 'returnunion' was not wrongfully added to the manifest
         self.assertNotIn('returnunion', abi_method_main)
 
@@ -1086,25 +1086,25 @@ class TestFileGeneration(BoaTest):
         abi_method_main_parameter = abi_method_main['parameters'][0]
 
         # verifying arg type
-        self.assertEqual('Map', abi_method_main_parameter['type'])
+        self.assertEqual(AbiType.Map, abi_method_main_parameter['type'])
         self.assertIn('generickey', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['generickey'])
-        self.assertEqual('String', abi_method_main_parameter['generickey']['type'])
+        self.assertEqual(AbiType.String, abi_method_main_parameter['generickey']['type'])
         self.assertIn('genericitem', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['genericitem'])
-        self.assertEqual('Array', abi_method_main_parameter['genericitem']['type'])
+        self.assertEqual(AbiType.Array, abi_method_main_parameter['genericitem']['type'])
         self.assertIn('generic', abi_method_main_parameter['genericitem'])
         self.assertIn('type', abi_method_main_parameter['genericitem']['generic'])
 
         # verifying return type
-        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Array, abi_method_main['returntype'])
         self.assertIn('returngeneric', abi_method_main)
         self.assertIn('type', abi_method_main['returngeneric'])
-        self.assertEqual('Any', abi_method_main['returngeneric']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main['returngeneric']['type'])
         self.assertIn('union', abi_method_main['returngeneric'])
         self.assertEqual(3, len(abi_method_main['returngeneric']['union']))
         self.assertTrue(any(
-            union_type['type'] == 'Map' and 'generickey' in union_type and 'genericitem' in union_type
+            union_type['type'] == AbiType.Map and 'generickey' in union_type and 'genericitem' in union_type
             for union_type in abi_method_main['returngeneric']['union']
         ))
 
@@ -1116,19 +1116,19 @@ class TestFileGeneration(BoaTest):
         abi_method_main_parameter = abi_method_main['parameters'][0]
 
         # verifying arg type
-        self.assertEqual('Map', abi_method_main_parameter['type'])
+        self.assertEqual(AbiType.Map, abi_method_main_parameter['type'])
         self.assertIn('generickey', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['generickey'])
-        self.assertEqual('Any', abi_method_main_parameter['generickey']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main_parameter['generickey']['type'])
         self.assertIn('genericitem', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['genericitem'])
-        self.assertEqual('Any', abi_method_main_parameter['genericitem']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main_parameter['genericitem']['type'])
 
         # verifying return type
-        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Array, abi_method_main['returntype'])
         self.assertIn('returngeneric', abi_method_main)
         self.assertIn('type', abi_method_main['returngeneric'])
-        self.assertEqual('Any', abi_method_main['returngeneric']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main['returngeneric']['type'])
 
     def verify_parameters_and_return_manifest(self, path: str) -> Tuple[dict, list]:
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
@@ -1183,5 +1183,8 @@ class TestFileGeneration(BoaTest):
             compiler.compile_and_save(path, nef_output)
             _, manifest = self.get_output(nef_output)
 
-        self.assertEqual(manifest['abi']['events'][0]['parameters'][0]['type'], 'String')
-        self.assertEqual(manifest['abi']['events'][0]['parameters'][1]['type'], 'Integer')
+        events_parameters = manifest['abi']['events'][0]['parameters']
+        self.assertEqual(3, len(events_parameters))
+        self.assertEqual(events_parameters[0]['type'], AbiType.String)
+        self.assertEqual(events_parameters[1]['type'], AbiType.Integer)
+        self.assertEqual(events_parameters[2]['type'], AbiType.Boolean)

@@ -8,7 +8,7 @@ __all__ = [
     'to_script_hash',
 ]
 
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.contract.Nep17Contract import Nep17Contract
@@ -16,10 +16,10 @@ from boa3.builtin.type import ECPoint, UInt160, Event
 
 Nep11TransferEvent: Event = CreateNewEvent(
     [
-        ('from', Union[UInt160, None]),
-        ('to', Union[UInt160, None]),
+        ('from', UInt160 | None),
+        ('to', UInt160 | None),
         ('amount', int),
-        ('tokenId', Union[str, bytes])
+        ('tokenId', str | bytes)
     ],
     'Transfer'
 )
@@ -49,8 +49,8 @@ Check out the `proposal <https://github.com/neo-project/proposals/blob/master/ne
 
 Nep17TransferEvent: Event = CreateNewEvent(
     [
-        ('from', Union[UInt160, None]),
-        ('to', Union[UInt160, None]),
+        ('from', UInt160 | None),
+        ('to', UInt160 | None),
         ('amount', int)
     ],
     'Transfer'

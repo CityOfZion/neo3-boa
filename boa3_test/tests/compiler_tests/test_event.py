@@ -247,9 +247,9 @@ class TestEvent(BoaTest):
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(('1', '2', 10, 'someToken'), event_notifications[0].arguments)
 
-    def test_event_with_return(self):
+    def test_event_without_types(self):
         path = self.get_contract_path('EventWithoutTypes.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_event_with_duplicated_name(self):
         path, _ = self.get_deploy_file_paths('EventWithDuplicatedName.py')
