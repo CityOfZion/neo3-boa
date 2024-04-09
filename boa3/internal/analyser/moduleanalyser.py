@@ -1259,6 +1259,25 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return types
 
+    def visit_BinOp(self, bin_op: ast.BinOp) -> IType | None:
+        left = self.visit(bin_op.left)
+        if isinstance(left, str):
+            left = self.get_symbol(left)
+        elif isinstance(bin_op.left, ast.Constant) and left is None:
+            left = self.get_type(left)
+
+        right = self.visit(bin_op.right)
+        if isinstance(right, str):
+            right = self.get_symbol(right)
+        elif isinstance(bin_op.right, ast.Constant) and right is None:
+            right = self.get_type(right)
+
+        # only validate type1 | type2, other binary operations are evaluated on TypeAnalyser
+        if isinstance(bin_op.op, ast.BitOr) and isinstance(left, IType) and isinstance(right, IType):
+            return left.union_type(right)
+
+        return self.generic_visit(bin_op)
+
     def visit_Call(self, call: ast.Call) -> IType | None:
         """
         Visitor of a function call node
@@ -1319,25 +1338,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
         elif len(event_args) > 0:
             args_type = self.get_type(event_args[0])
+            expected_type = Builtin.NewEvent.arguments_type
             if not Type.list.is_type_of(args_type):
                 self._log_error(
                     CompilerError.MismatchedTypes(line=event_args[0].lineno,
                                                   col=event_args[0].col_offset,
-                                                  expected_type_id=Type.list.identifier,
+                                                  expected_type_id=expected_type.identifier,
                                                   actual_type_id=args_type.identifier)
                 )
             else:
+                expected_type = expected_type.value_type
                 for value in event_args[0].elts:
-                    if not isinstance(value, ast.Tuple):
-                        CompilerError.MismatchedTypes(line=value.lineno,
-                                                      col=value.col_offset,
-                                                      expected_type_id=Type.tuple.identifier,
-                                                      actual_type_id=self.get_type(value).identifier)
-                    elif len(value.elts) < 2:
+                    if not isinstance(value, ast.Tuple) or len(value.elts) < 2:
+                        actual_type = self.get_type(value)
                         self._log_error(
-                            CompilerError.UnfilledArgument(line=value.lineno,
-                                                           col=value.col_offset,
-                                                           param=list(Builtin.NewEvent.args)[0])
+                            CompilerError.MismatchedTypes(line=value.lineno,
+                                                          col=value.col_offset,
+                                                          expected_type_id=expected_type.identifier,
+                                                          actual_type_id=actual_type.identifier)
                         )
                     else:
                         event_arg_name, event_arg_type = value.elts
@@ -1365,7 +1383,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                             self._log_error(
                                 CompilerError.MismatchedTypes(line=value.lineno,
                                                               col=value.col_offset,
-                                                              expected_type_id=Type.tuple.identifier,
+                                                              expected_type_id=expected_type.identifier,
                                                               actual_type_id=self.get_type(value).identifier)
                             )
                         else:

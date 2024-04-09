@@ -1,12 +1,10 @@
-from typing import Union
-
 from boa3.builtin.compile_time import public, CreateNewEvent
 from boa3.builtin.type import UInt160
 
 transfer = CreateNewEvent(
     [
-        ('from', Union[UInt160, None]),
-        ('to', Union[UInt160, None]),
+        ('from', UInt160 | None),
+        ('to', UInt160 | None),
         ('amount', int)
     ],
     'Transfer'
