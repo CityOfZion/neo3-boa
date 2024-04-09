@@ -209,7 +209,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     if isinstance(source_node, ast.Global):
                         var = outer_symbol
                     else:
-                        if isinstance(var_type, SequenceType):
+                        if isinstance(var_type, SequenceType) and not Type.tuple.is_type_of(var_type):
                             var_type = var_type.build_collection(var_enumerate_type)
                         var = Variable(var_type, origin_node=source_node)
 
@@ -1208,8 +1208,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if (isinstance(symbol, (Collection, MetaType))
                     and isinstance(subscript.value, (ast.Name, ast.NameConstant, ast.Attribute))):
                 # for evaluating names like list[str], dict[int, bool], etc
-                value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
-                values_type: Iterable[IType] = self.get_values_type(value)
+                values_type: Iterable[IType] = self.get_values_type(subscript.slice)
                 if isinstance(symbol, Collection):
                     return symbol.build_collection(*values_type)
                 else:
@@ -1222,11 +1221,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(symbol, UnionType) or isinstance(symbol_type, UnionType):
                 if not isinstance(symbol_type, UnionType):
                     symbol_type = symbol
-                index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
-                if isinstance(index, ast.Tuple):
-                    union_types = [self.get_type(value) for value in index.elts]
+                if isinstance(subscript.slice, ast.Tuple):
+                    union_types = [self.get_type(value) for value in subscript.slice.elts]
                 else:
-                    union_types = self.get_type(index)
+                    union_types = self.get_type(subscript.slice)
                 return symbol_type.build(union_types)
 
             if isinstance(symbol_type, Collection):

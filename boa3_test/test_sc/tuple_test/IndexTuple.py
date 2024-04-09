@@ -1,8 +1,8 @@
-from typing import Any, Tuple
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def main(a: Tuple[Any], value: Any, start: int, end: int) -> int:
+def main(a: tuple, value: Any, start: int, end: int) -> int:
     return a.index(value, start, end)

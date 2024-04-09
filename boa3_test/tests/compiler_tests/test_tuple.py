@@ -148,6 +148,34 @@ class TestTuple(boatestcase.BoaTestCase):
         path = self.get_contract_path('SetValueMismatchedType.py')
         self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
 
+    def test_tuple_get_value_typed_tuple_compile(self):
+        ok = String('ok').to_bytes()
+        expected_output = (
+            Opcode.INITSLOT     # function signature
+            + b'\x01'
+            + b'\x00'
+            + Opcode.PUSHDATA1  # x = [True, 1, 'ok']
+            + Integer(len(ok)).to_byte_array() + ok
+            + Opcode.PUSH1
+            + Opcode.PUSHT
+            + Opcode.PUSH3
+            + Opcode.PACK
+            + Opcode.STLOC0
+            + Opcode.LDLOC0     # x[1]
+            + Opcode.PUSH1
+            + Opcode.PICKITEM
+            + Opcode.RET        # return
+        )
+
+        output, _ = self.assertCompile('TupleGetValueTypedTuple.py')
+        self.assertEqual(expected_output, output)
+
+    async def test_tuple_get_value_typed_tuple_run(self):
+        await self.set_up_contract('TupleGetValueTypedTuple.py')
+
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(1, result)
+
     def test_tuple_index_mismatched_type(self):
         path = self.get_contract_path('TupleIndexMismatchedType.py')
         self.assertCompilerLogs(CompilerError.MismatchedTypes, path)

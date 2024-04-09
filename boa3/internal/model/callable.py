@@ -53,7 +53,7 @@ class Callable(IExpression, ABC):
 
             default_value = set_internal_call(ast.parse(default_code).body[0].value)
 
-            self.args[vararg_id] = Variable(Type.tuple.build_collection([vararg_var.type]))
+            self.args[vararg_id] = Variable(Type.tuple.build_any_length(vararg_var.type))
             self.defaults.append(default_value)
             self._vararg = vararg
 
