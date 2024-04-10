@@ -212,8 +212,7 @@ class TestException(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.UNHANDLED_ERROR_MESSAGE.format(self.default_message))
 
     def test_raise_mismatched_type(self):
-        path = self.get_contract_path('RaiseMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'RaiseMismatchedType.py')
 
     def test_try_except_without_exception_compile(self):
         expected_output = (
@@ -302,8 +301,7 @@ class TestException(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TryExceptSpecificException.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.UsingSpecificException, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.UsingSpecificException, 'TryExceptSpecificException.py')
         self.assertEqual(expected_output, output)
 
     async def test_try_except_specific_exception_run(self):
@@ -316,8 +314,7 @@ class TestException(boatestcase.BoaTestCase):
         self.assertEqual(-110, result)
 
     def test_try_except_with_name(self):
-        path = self.get_contract_path('TryExceptWithName.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'TryExceptWithName.py')
 
     def test_try_except_finally_compile(self):
         expected_output = (

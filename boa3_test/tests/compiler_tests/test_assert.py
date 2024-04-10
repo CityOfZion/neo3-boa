@@ -123,16 +123,13 @@ class TestAssert(boatestcase.BoaTestCase):
         self.assertRegex(String(str(context.exception)).to_bytes(), assert_msg)
 
     def test_assert_with_int_message(self):
-        path = self.get_contract_path('AssertWithIntMessage.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'AssertWithIntMessage.py')
 
     def test_assert_with_bool_message(self):
-        path = self.get_contract_path('AssertWithBoolMessage.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'AssertWithBoolMessage.py')
 
     def test_assert_with_list_message(self):
-        path = self.get_contract_path('AssertWithListMessage.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'AssertWithListMessage.py')
 
     def test_assert_with_str_var_message_compile(self):
         assert_msg = String('a must be greater than zero').to_bytes()

@@ -17,8 +17,7 @@ class TestRelational(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.VALUES_ONLY > FindOptions.DESERIALIZE_VALUES, result)
 
     def test_mixed_greater_than_operation(self):
-        path = self.get_contract_path('MixedGreaterThan.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MixedGreaterThan.py')
 
     def test_number_greater_than_operation_compile(self):
         expected_output = (
@@ -85,8 +84,7 @@ class TestRelational(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.VALUES_ONLY >= FindOptions.VALUES_ONLY, result)
 
     def test_mixed_greater_or_equal_than_operation(self):
-        path = self.get_contract_path('MixedGreaterOrEqual.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MixedGreaterOrEqual.py')
 
     def test_number_greater_or_equal_than_operation_compile(self):
         expected_output = (
@@ -262,8 +260,7 @@ class TestRelational(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.VALUES_ONLY < FindOptions.VALUES_ONLY, result)
 
     def test_mixed_less_than_operation(self):
-        path = self.get_contract_path('MixedLessThan.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MixedLessThan.py')
 
     def test_number_less_than_operation_compile(self):
         expected_output = (
@@ -330,8 +327,7 @@ class TestRelational(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.VALUES_ONLY <= FindOptions.VALUES_ONLY, result)
 
     def test_mixed_less_or_equal_than_operation(self):
-        path = self.get_contract_path('MixedLessOrEqual.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MixedLessOrEqual.py')
 
     def test_number_less_or_equal_than_operation_compile(self):
         expected_output = (

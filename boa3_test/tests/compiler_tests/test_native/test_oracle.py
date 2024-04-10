@@ -331,20 +331,16 @@ class TestNativeContracts(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), 'some of the arguments are invalid')
 
     def test_oracle_request_url_mismatched_type(self):
-        path = self.get_contract_path('OracleRequestUrlMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'OracleRequestUrlMismatchedType.py')
 
     def test_oracle_request_filter_mismatched_type(self):
-        path = self.get_contract_path('OracleRequestFilterMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'OracleRequestFilterMismatchedType.py')
 
     def test_oracle_request_callback_mismatched_type(self):
-        path = self.get_contract_path('OracleRequestCallCallbackMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'OracleRequestCallCallbackMismatchedType.py')
 
     def test_oracle_request_gas_mismatched_type(self):
-        path = self.get_contract_path('OracleRequestGasMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'OracleRequestGasMismatchedType.py')
 
     async def test_import_interop_oracle(self):
         await self.set_up_contract('ImportOracle.py')

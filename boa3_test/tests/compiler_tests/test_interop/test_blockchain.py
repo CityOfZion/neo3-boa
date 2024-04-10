@@ -93,8 +93,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_block_mismatched_types(self):
-        path = self.get_contract_path('GetBlockMismatchedTypes.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetBlockMismatchedTypes.py')
 
     async def test_transaction_init(self):
         await self.set_up_contract('Transaction.py')
@@ -141,8 +140,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_transaction_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionMismatchedType.py')
 
     def test_get_transaction_from_block_int_compile(self):
         expected_output = (
@@ -215,8 +213,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_transaction_from_block_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionFromBlockMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionFromBlockMismatchedType.py')
 
     def test_get_transaction_height_compile(self):
         expected_output = (
@@ -241,8 +238,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_transaction_height_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionHeightMismatchedType.py')
 
     def test_get_transaction_signers_compile(self):
         expected_output = (
@@ -279,8 +275,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_transaction_signers_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionSignersMismatchedType.py')
 
     def test_get_transaction_vm_state_compile(self):
         expected_output = (
@@ -312,8 +307,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertEqual(native_result, contract_invoke)
 
     def test_get_transaction_vm_state_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionVMStateMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionVMStateMismatchedType.py')
 
     async def test_import_blockchain(self):
         await self.set_up_contract('ImportBlockchain.py')

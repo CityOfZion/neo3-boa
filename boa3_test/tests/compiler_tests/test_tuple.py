@@ -137,16 +137,13 @@ class TestTuple(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.VALUE_OUT_OF_RANGE_ERROR)
 
     def test_non_sequence_get_value(self):
-        path = self.get_contract_path('TupleGetValueMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'TupleGetValueMismatchedType.py')
 
     def test_tuple_set_value(self):
-        path = self.get_contract_path('TupleSetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'TupleSetValue.py')
 
     def test_non_sequence_set_value(self):
-        path = self.get_contract_path('SetValueMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'SetValueMismatchedType.py')
 
     def test_tuple_get_value_typed_tuple_compile(self):
         ok = String('ok').to_bytes()
@@ -177,8 +174,7 @@ class TestTuple(boatestcase.BoaTestCase):
         self.assertEqual(1, result)
 
     def test_tuple_index_mismatched_type(self):
-        path = self.get_contract_path('TupleIndexMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'TupleIndexMismatchedType.py')
 
     def test_tuple_of_tuple_compile(self):
         expected_output = (

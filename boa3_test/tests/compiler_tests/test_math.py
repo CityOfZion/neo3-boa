@@ -7,8 +7,7 @@ class TestMath(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/math_test'
 
     def test_no_import(self):
-        path = self.get_contract_path('NoImport.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NoImport.py')
 
     # region pow test
 

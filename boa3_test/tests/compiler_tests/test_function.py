@@ -92,8 +92,7 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual([2, 4, 6, 8, 10], result)
 
     def test_arg_without_type_hint(self):
-        path = self.get_contract_path('ArgWithoutTypeHintFunction.py')
-        self.assertCompilerLogs(CompilerError.TypeHintMissing, path)
+        self.assertCompilerLogs(CompilerError.TypeHintMissing, 'ArgWithoutTypeHintFunction.py')
 
     def test_no_return_hint_function_with_empty_return_statement_compile(self):
         expected_output = (
@@ -149,20 +148,16 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
     def test_return_type_hint_function_with_empty_return(self):
-        path = self.get_contract_path('ExpectingReturnFunction.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ExpectingReturnFunction.py')
 
     def test_multiple_return_function(self):
-        path = self.get_contract_path('MultipleReturnFunction.py')
-        self.assertCompilerLogs(CompilerError.TooManyReturns, path)
+        self.assertCompilerLogs(CompilerError.TooManyReturns, 'MultipleReturnFunction.py')
 
     def test_tuple_function(self):
-        path = self.get_contract_path('TupleFunction.py')
-        self.assertCompilerLogs(CompilerError.TooManyReturns, path)
+        self.assertCompilerLogs(CompilerError.TooManyReturns, 'TupleFunction.py')
 
     def test_default_return(self):
-        path = self.get_contract_path('DefaultReturn.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'DefaultReturn.py')
 
     def test_empty_list_return_compile(self):
         expected_output = (
@@ -179,12 +174,10 @@ class TestFunction(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [], return_type=list)
 
     def test_mismatched_return_type(self):
-        path = self.get_contract_path('MismatchedReturnType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedReturnType.py')
 
     def test_mismatched_return_type_with_if(self):
-        path = self.get_contract_path('MismatchedReturnTypeWithIf.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedReturnTypeWithIf.py')
 
     def test_call_void_function_without_args_compile(self):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
@@ -508,8 +501,7 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
     def test_return_void_function_mismatched_type(self):
-        path = self.get_contract_path('ReturnVoidFunctionMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReturnVoidFunctionMismatchedType.py')
 
     async def test_return_inside_if(self):
         await self.set_up_contract('ReturnIf.py')
@@ -524,16 +516,13 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual(6, result)
 
     def test_missing_return_inside_if(self):
-        path = self.get_contract_path('ReturnIfMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnIfMissing.py')
 
     def test_missing_return_inside_elif(self):
-        path = self.get_contract_path('ReturnElifMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnElifMissing.py')
 
     def test_missing_return_inside_else(self):
-        path = self.get_contract_path('ReturnElseMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnElseMissing.py')
 
     async def test_return_inside_multiple_inner_if(self):
         await self.set_up_contract('ReturnMultipleInnerIf.py')
@@ -545,8 +534,7 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual(9, result)
 
     def test_missing_return_inside_multiple_inner_if(self):
-        path = self.get_contract_path('ReturnMultipleInnerIfMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnMultipleInnerIfMissing.py')
 
     def test_return_if_expression_compiler(self):
         expected_output = (
@@ -576,8 +564,7 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual(10, result)
 
     def test_return_if_expression_mismatched_type(self):
-        path = self.get_contract_path('ReturnIfExpressionMismatched.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReturnIfExpressionMismatched.py')
 
     def test_return_inside_for_compile(self):
         expected_output = (
@@ -692,8 +679,7 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual(0, result)
 
     def test_missing_return_inside_for_else(self):
-        path = self.get_contract_path('ReturnForElseMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnForElseMissing.py')
 
     def test_return_inside_while_compile(self):
         expected_output = (
@@ -780,8 +766,7 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual(100, result)
 
     def test_missing_return_inside_while_without_else(self):
-        path = self.get_contract_path('ReturnWhileWithoutElse.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnWhileWithoutElse.py')
 
     async def test_multiple_function_large_call(self):
         await self.set_up_contract('MultipleFunctionLargeCall.py')
@@ -955,30 +940,24 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual(204, result)
 
     def test_call_function_with_kwargs_only(self):
-        path = self.get_contract_path('CallFunctionWithKwargsOnly.py')
         # TODO: change the test when creating a function that only accepts keywords is implemented #2ewewtz
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CallFunctionWithKwargsOnly.py')
 
     def test_call_function_with_kwargs_self(self):
-        path = self.get_contract_path('CallFunctionWithKwargsSelf.py')
         # TODO: change the test when calling a function using the class is implemented #2ewewtz #2ewexau
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CallFunctionWithKwargsSelf.py')
 
     def test_call_function_with_kwargs_wrong_type(self):
-        path = self.get_contract_path('CallFunctionWithKwargsWrongType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'CallFunctionWithKwargsWrongType.py')
 
     def test_call_function_with_kwargs_too_few_parameters(self):
-        path = self.get_contract_path('CallFunctionWithKwargsTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'CallFunctionWithKwargsTooFewArguments.py')
 
     def test_call_function_with_kwargs_too_many_parameters(self):
-        path = self.get_contract_path('CallFunctionWithKwargsTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CallFunctionWithKwargsTooManyArguments.py')
 
     def test_call_function_with_kwargs_too_many_kw_parameters(self):
-        path = self.get_contract_path('CallFunctionWithKwargsTooManyKwArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CallFunctionWithKwargsTooManyKwArguments.py')
 
     async def test_boa2_fibonacci_test(self):
         await self.set_up_contract('FibonacciBoa2Test.py')
@@ -1089,12 +1068,10 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertEqual([10, 20], result)
 
     def test_function_with_dictionary_unpacking_operator(self):
-        path = self.get_contract_path('FunctionWithDictionaryUnpackingOperator.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'FunctionWithDictionaryUnpackingOperator.py')
 
     def test_functions_with_duplicated_name(self):
-        path = self.get_contract_path('FunctionsWithDuplicatedName.py')
-        self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, path)
+        self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, 'FunctionsWithDuplicatedName.py')
 
     async def test_function_as_arg(self):
         await self.set_up_contract('FunctionAsArg.py')
@@ -1128,17 +1105,13 @@ class TestFunction(boatestcase.BoaTestCase):
         self.assertIsNone(result)
 
     def test_inner_function(self):
-        path = self.get_contract_path('InnerFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'InnerFunction.py')
 
     def test_lambda_function(self):
-        path = self.get_contract_path('LambdaFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'LambdaFunction.py')
 
     def test_function_custom_decorator_with_global_function(self):
-        path = self.get_contract_path('CustomDecoratorWithGlobalFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CustomDecoratorWithGlobalFunction.py')
 
     def test_function_builtin_function_decorators_with_class(self):
-        path = self.get_contract_path('BuiltinContractDecoratorWithFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'BuiltinContractDecoratorWithFunction.py')

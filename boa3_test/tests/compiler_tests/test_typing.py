@@ -19,8 +19,7 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToInt.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToInt.py')
         self.assertEqual(expected_output, output)
 
     def test_cast_to_str(self):
@@ -34,8 +33,7 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToStr.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToStr.py')
         self.assertEqual(expected_output, output)
 
     def test_cast_to_list(self):
@@ -49,8 +47,7 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToList.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToList.py')
         self.assertEqual(expected_output, output)
 
     def test_cast_to_typed_list(self):
@@ -66,8 +63,7 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToTypedList.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToTypedList.py')
         self.assertEqual(expected_output, output)
 
     def test_cast_to_dict(self):
@@ -81,8 +77,7 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToDict.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToDict.py')
         self.assertEqual(expected_output, output)
 
     def test_cast_to_typed_dict(self):
@@ -101,13 +96,11 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToTypedDict.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToTypedDict.py')
         self.assertEqual(expected_output, output)
 
     def test_cast_mismatched_type(self):
-        path = self.get_contract_path('CastMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'CastMismatchedType.py')
 
     def test_cast_to_uint160_compile(self):
         expected_output = (
@@ -120,8 +113,7 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToUInt160.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToUInt160.py')
         self.assertEqual(expected_output, output)
 
     async def test_cast_to_uint160_run(self):
@@ -142,8 +134,7 @@ class TestTyping(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CastToTransaction.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastToTransaction.py')
         self.assertEqual(expected_output, output)
 
     async def test_cast_inside_if(self):

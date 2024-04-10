@@ -35,8 +35,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result, result)
 
     def test_base64_encode_mismatched_type(self):
-        path = self.get_contract_path('Base64EncodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base64EncodeMismatchedType.py')
 
     async def test_base64_decode(self):
         import base64
@@ -63,8 +62,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(String(long_string).to_bytes(), result)
 
     def test_base64_decode_mismatched_type(self):
-        path = self.get_contract_path('Base64DecodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base64DecodeMismatchedType.py')
 
     async def test_base58_encode(self):
         import base58
@@ -91,8 +89,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result, result)
 
     def test_base58_encode_mismatched_type(self):
-        path = self.get_contract_path('Base58EncodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58EncodeMismatchedType.py')
 
     async def test_base58_decode(self):
         import base58
@@ -121,8 +118,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(long_string, result)
 
     def test_base58_decode_mismatched_type(self):
-        path = self.get_contract_path('Base58DecodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58DecodeMismatchedType.py')
 
     async def test_base58_check_decode(self):
         import base58
@@ -151,8 +147,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(long_string, result)
 
     def test_base58_check_decode_mismatched_type(self):
-        path = self.get_contract_path('Base58CheckDecodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58CheckDecodeMismatchedType.py')
 
     async def test_base58_check_encode(self):
         import base58
@@ -179,8 +174,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result, result)
 
     def test_base58_check_encode_mismatched_type(self):
-        path = self.get_contract_path('Base58CheckEncodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58CheckEncodeMismatchedType.py')
 
     async def test_serialize_int(self):
         await self.set_up_contract('SerializeInt.py')
@@ -257,8 +251,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result, result)
 
     def test_deserialize_mismatched_type(self):
-        path = self.get_contract_path('DeserializeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'DeserializeMismatchedType.py')
 
     async def test_boa2_serialization_test1(self):
         await self.set_up_contract('SerializationBoa2Test.py')
@@ -361,16 +354,13 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.INVALID_FORMAT_MSG)
 
     def test_atoi_too_few_parameters(self):
-        path = self.get_contract_path('AtoiTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'AtoiTooFewArguments.py')
 
     def test_atoi_too_many_parameters(self):
-        path = self.get_contract_path('AtoiTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'AtoiTooManyArguments.py')
 
     def test_atoi_mismatched_type(self):
-        path = self.get_contract_path('AtoiMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'AtoiMismatchedType.py')
 
     async def test_itoa(self):
         await self.set_up_contract('Itoa')
@@ -405,16 +395,13 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual('-1', result)
 
     def test_itoa_too_few_arguments(self):
-        path = self.get_contract_path('ItoaTooFewArguments')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ItoaTooFewArguments')
 
     def test_itoa_too_many_arguments(self):
-        path = self.get_contract_path('ItoaTooManyArguments')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ItoaTooManyArguments')
 
     def test_itoa_mismatched_type(self):
-        path = self.get_contract_path('ItoaMismatchedType')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ItoaMismatchedType')
 
     async def test_import_stdlib(self):
         await self.set_up_contract('ImportStdlib')
@@ -567,16 +554,13 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(-1, result)
 
     def test_memory_search_mismatched_type(self):
-        path = self.get_contract_path('MemorySearchMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MemorySearchMismatchedType.py')
 
     def test_memory_search_too_few_parameters(self):
-        path = self.get_contract_path('MemorySearchTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'MemorySearchTooFewArguments.py')
 
     def test_memory_search_too_many_parameters(self):
-        path = self.get_contract_path('MemorySearchTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'MemorySearchTooManyArguments.py')
 
     async def test_memory_compare(self):
         await self.set_up_contract('MemoryCompare')
@@ -600,13 +584,10 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(-1, result)
 
     def test_memory_compare_too_few_parameters(self):
-        path = self.get_contract_path('MemoryCompareTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'MemoryCompareTooFewArguments.py')
 
     def test_memory_compare_too_many_parameters(self):
-        path = self.get_contract_path('MemoryCompareTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'MemoryCompareTooManyArguments.py')
 
     def test_memory_compare_mismatched_type(self):
-        path = self.get_contract_path('MemoryCompareMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MemoryCompareMismatchedType.py')

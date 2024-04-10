@@ -34,8 +34,7 @@ class TestAny(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_variable_assignment_with_any(self):
-        path = self.get_contract_path('VariableAssignmentWithAny.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VariableAssignmentWithAny.py')
 
     def test_any_list(self):
         ok = String('ok').to_bytes()
@@ -76,8 +75,7 @@ class TestAny(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_any_operation(self):
-        path = self.get_contract_path('OperationWithAny.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'OperationWithAny.py')
 
     def test_function_any_param(self):
         ok = String('ok').to_bytes()
@@ -346,6 +344,5 @@ class TestAny(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('SequenceOfAnyIntSequence.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'SequenceOfAnyIntSequence.py')
         self.assertEqual(expected_output, output)

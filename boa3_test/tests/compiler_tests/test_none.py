@@ -88,12 +88,10 @@ class TestNone(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
     def test_none_equality(self):
-        path = self.get_contract_path('NoneEquality.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'NoneEquality.py')
 
     def test_mismatched_type_int_operation(self):
-        path = self.get_contract_path('MismatchedTypesInOperation.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypesInOperation.py')
 
     def test_reassign_variable_with_none_compile(self):
         expected_output = (
@@ -141,5 +139,4 @@ class TestNone(boatestcase.BoaTestCase):
         self.assertEqual(None, result)
 
     def test_boa2_none_test(self):
-        path = self.get_contract_path('NoneBoa2Test.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'NoneBoa2Test.py')

@@ -42,12 +42,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_storage_get_str_key(self):
-        path = self.get_contract_path('StorageGetStrKey.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageGetStrKey.py')
 
     def test_storage_get_mismatched_type(self):
-        path = self.get_contract_path('StorageGetMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageGetMismatchedType.py')
 
     async def test_storage_put_bytes_key_bytes_value(self):
         await self.set_up_contract('StoragePutBytesKeyBytesValue.py')
@@ -166,24 +164,19 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(stored_value, contract_storage[storage_key_2])
 
     def test_storage_put_str_key_bytes_value(self):
-        path = self.get_contract_path('StoragePutStrKeyBytesValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StoragePutStrKeyBytesValue.py')
 
     def test_storage_put_str_key_int_value(self):
-        path = self.get_contract_path('StoragePutStrKeyIntValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StoragePutStrKeyIntValue.py')
 
     def test_storage_put_str_key_str_value(self):
-        path = self.get_contract_path('StoragePutStrKeyStrValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StoragePutStrKeyStrValue.py')
 
     def test_storage_put_mismatched_type_key(self):
-        path = self.get_contract_path('StoragePutMismatchedTypeKey.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StoragePutMismatchedTypeKey.py')
 
     def test_storage_put_mismatched_type_value(self):
-        path = self.get_contract_path('StoragePutMismatchedTypeValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StoragePutMismatchedTypeValue.py')
 
     def test_storage_delete_bytes_key_compile(self):
         expected_output = (
@@ -228,12 +221,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertNotIn(storage_key, contract_storage)
 
     def test_storage_delete_str_key(self):
-        path = self.get_contract_path('StorageDeleteStrKey.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageDeleteStrKey.py')
 
     def test_storage_delete_mismatched_type(self):
-        path = self.get_contract_path('StorageDeleteMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageDeleteMismatchedType.py')
 
     async def test_storage_find_bytes_prefix(self):
         await self.set_up_contract('StorageFindBytesPrefix.py')
@@ -276,12 +267,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(example_storage, contract_storage)
 
     def test_storage_find_str_prefix(self):
-        path = self.get_contract_path('StorageFindStrPrefix.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageFindStrPrefix.py')
 
     def test_storage_find_mismatched_type(self):
-        path = self.get_contract_path('StorageFindMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageFindMismatchedType.py')
 
     def test_storage_get_context_compile(self):
         expected_output = (
@@ -777,5 +766,4 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.BACKWARDS, result)
 
     def test_find_options_mismatched_type(self):
-        path = self.get_contract_path('FindOptionsMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'FindOptionsMismatchedType.py')
