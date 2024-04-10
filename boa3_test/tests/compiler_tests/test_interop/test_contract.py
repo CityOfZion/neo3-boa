@@ -215,12 +215,10 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), 'method not found: {0}/{1}'.format('Main', 2))
 
     def test_call_contract_too_many_parameters(self):
-        path = self.get_contract_path('CallScriptHashTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CallScriptHashTooManyArguments.py')
 
     def test_call_contract_too_few_parameters(self):
-        path = self.get_contract_path('CallScriptHashTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'CallScriptHashTooFewArguments.py')
 
     async def test_create_contract(self):
         await self.set_up_contract('CreateContract.py')
@@ -283,12 +281,10 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(data, notifies[1].state[0])
 
     def test_create_contract_too_many_parameters(self):
-        path = self.get_contract_path('CreateContractTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CreateContractTooManyArguments.py')
 
     def test_create_contract_too_few_parameters(self):
-        path = self.get_contract_path('CreateContractTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'CreateContractTooFewArguments.py')
 
     async def test_update_contract(self):
         await self.set_up_contract('UpdateContract.py')
@@ -353,12 +349,10 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(data, notifies[1].state[0])
 
     def test_update_contract_too_many_parameters(self):
-        path = self.get_contract_path('UpdateContractTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'UpdateContractTooManyArguments.py')
 
     def test_update_contract_too_few_parameters(self):
-        path = self.get_contract_path('UpdateContractTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'UpdateContractTooFewArguments.py')
 
     async def test_destroy_contract(self):
         await self.set_up_contract('DestroyContract.py')
@@ -384,8 +378,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), f'called contract {contract_hash} not found')
 
     def test_destroy_contract_too_many_parameters(self):
-        path = self.get_contract_path('DestroyContractTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'DestroyContractTooManyArguments.py')
 
     def test_get_neo_native_script_hash_compile(self):
         from boa3.internal.neo.vm.type.Integer import Integer
@@ -418,8 +411,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NeoScriptHashCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'NeoScriptHashCantAssign.py')
         self.assertEqual(expected_output, output)
 
     def test_get_gas_native_script_hash_compile(self):
@@ -453,8 +445,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GasScriptHashCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'GasScriptHashCantAssign.py')
         self.assertEqual(expected_output, output)
 
     async def test_call_flags_type(self):
@@ -580,12 +571,10 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_create_standard_account_too_few_parameters(self):
-        path = self.get_contract_path('CreateStandardAccountTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'CreateStandardAccountTooFewArguments.py')
 
     def test_create_standard_account_too_many_parameters(self):
-        path = self.get_contract_path('CreateStandardAccountTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CreateStandardAccountTooManyArguments.py')
 
     async def test_get_minimum_deployment_fee(self):
         await self.set_up_contract('GetMinimumDeploymentFee.py')
@@ -595,8 +584,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(minimum_cost, result)
 
     def test_get_minimum_deployment_fee_too_many_parameters(self):
-        path = self.get_contract_path('GetMinimumDeploymentFeeTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetMinimumDeploymentFeeTooManyArguments.py')
 
     def test_create_multisig_account_compile(self):
         from boa3.internal.model.builtin.interop.interop import Interop
@@ -634,9 +622,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_create_multisig_account_too_few_parameters(self):
-        path = self.get_contract_path('CreateMultisigAccountTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'CreateMultisigAccountTooFewArguments.py')
 
     def test_create_multisig_account_too_many_parameters(self):
-        path = self.get_contract_path('CreateMultisigAccountTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CreateMultisigAccountTooManyArguments.py')

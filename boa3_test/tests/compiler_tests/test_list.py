@@ -111,8 +111,7 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_non_sequence_get_value(self):
-        path = self.get_contract_path('MismatchedTypeListGetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'MismatchedTypeListGetValue.py')
 
     def test_list_get_value_compile(self):
         expected_output = (
@@ -243,8 +242,7 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_list_set_into_list_slice(self):
-        path = self.get_contract_path('SetListIntoListSlice.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'SetListIntoListSlice.py')
 
     def test_list_set_value_compile(self):
         path = self.get_contract_path('ListSetValue.py')
@@ -281,12 +279,10 @@ class TestList(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
 
     def test_non_sequence_set_value(self):
-        path = self.get_contract_path('MismatchedTypeListSetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'MismatchedTypeListSetValue.py')
 
     def test_list_index_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeListIndex.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeListIndex.py')
 
     async def test_array_boa2_test1(self):
         await self.set_up_contract('ArrayBoa2Test1.py')
@@ -913,8 +909,7 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual([1, 2, 3, '4'], result)
 
     def test_list_append_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeListAppendValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeListAppendValue.py')
 
     def test_list_append_with_builtin_compile(self):
         expected_output = (
@@ -955,8 +950,7 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual([1, 2, 3, 4], result)
 
     def test_list_append_with_builtin_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeListAppendWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeListAppendWithBuiltin.py')
 
     async def test_boa2_list_append_test(self):
         await self.set_up_contract('ListAppendBoa2Test.py')
@@ -1052,12 +1046,10 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual([1, 2, 3, '4', 5, 1], result)
 
     def test_list_extend_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeListExtendValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeListExtendValue.py')
 
     def test_list_extend_mismatched_iterable_value_type(self):
-        path = self.get_contract_path('MismatchedTypeListExtendTupleValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeListExtendTupleValue.py')
 
     async def test_list_extend_with_builtin(self):
         await self.set_up_contract('ListExtendWithBuiltin.py')
@@ -1066,8 +1058,7 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual([1, 2, 3, 4, 5, 6], result)
 
     def test_list_extend_with_builtin_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeListExtendWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeListExtendWithBuiltin.py')
 
     # endregion
 
@@ -1335,8 +1326,7 @@ class TestList(boatestcase.BoaTestCase):
         self.assertRaises(IndexError, list_.pop, index)
 
     def test_list_pop_mismatched_type_argument(self):
-        path = self.get_contract_path('PopListMismatchedTypeArgument.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'PopListMismatchedTypeArgument.py')
 
     def test_list_pop_mismatched_type_result_compile(self):
         expected_output = (
@@ -1371,8 +1361,7 @@ class TestList(boatestcase.BoaTestCase):
             + Opcode.LDLOC1     # return b
             + Opcode.RET
         )
-        path = self.get_contract_path('PopListMismatchedTypeResult.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'PopListMismatchedTypeResult.py')
         self.assertEqual(expected_output, output)
 
     async def test_list_pop_mismatched_type_result(self):
@@ -1382,8 +1371,7 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual(3, result)
 
     def test_list_pop_too_many_arguments(self):
-        path = self.get_contract_path('PopListTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'PopListTooManyArguments.py')
 
     async def test_boa2_list_remove_test(self):
         await self.set_up_contract('ListRemoveBoa2Test.py')
@@ -1650,8 +1638,7 @@ class TestList(boatestcase.BoaTestCase):
 
     def test_list_sort_with_args(self):
         # list.sort arguments must be used as kwargs
-        path = self.get_contract_path('SortArgsList.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'SortArgsList.py')
 
     async def test_list_sort_reverse_true(self):
         await self.set_up_contract('SortReverseTrueList.py')
@@ -1670,31 +1657,26 @@ class TestList(boatestcase.BoaTestCase):
         self.assertEqual(sorted_list, result)
 
     def test_list_sort_key(self):
-        path = self.get_contract_path('SortKeyList.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'SortKeyList.py')
 
     def test_list_any_sort(self):
-        path = self.get_contract_path('SortListAny.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'SortListAny.py')
 
     def test_list_of_list_sort(self):
-        path = self.get_contract_path('SortListOfList.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'SortListOfList.py')
 
     # endregion
 
     # region TestComprehension
 
     def test_list_comprehension_str(self):
-        path = self.get_contract_path('ListComprehensionStr.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'ListComprehensionStr.py')
 
     # endregion
 
     # region TestDel
 
     def test_del_list_item(self):
-        path = self.get_contract_path('ListDelItem.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'ListDelItem.py')
 
     # endregion

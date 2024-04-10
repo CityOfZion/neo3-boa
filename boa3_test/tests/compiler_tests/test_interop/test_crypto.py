@@ -59,12 +59,10 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result.digest(), result)
 
     def test_ripemd160_too_many_parameters(self):
-        path = self.get_contract_path('Ripemd160TooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'Ripemd160TooManyArguments.py')
 
     def test_ripemd160_too_few_parameters(self):
-        path = self.get_contract_path('Ripemd160TooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'Ripemd160TooFewArguments.py')
 
     async def test_hash160_str(self):
         await self.set_up_contract('Hash160Str.py')
@@ -127,12 +125,10 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result.digest(), result)
 
     def test_sha256_too_many_parameters(self):
-        path = self.get_contract_path('Sha256TooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'Sha256TooManyArguments.py')
 
     def test_sha256_too_few_parameters(self):
-        path = self.get_contract_path('Sha256TooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'Sha256TooFewArguments.py')
 
     async def test_hash256_str(self):
         await self.set_up_contract('Hash256Str.py')
@@ -252,36 +248,28 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.compile(path)
 
     def test_verify_with_ecdsa_secp256r1_str(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1Str.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Str.py')
 
     def test_verify_with_ecdsa_secp256r1_bool(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1Bool.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Bool.py')
 
     def test_verify_with_ecdsa_secp256r1_int(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1Int.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Int.py')
 
     def test_verify_with_ecdsa_secp256r1_bytes(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1Bool.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Bool.py')
 
     def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1MismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1MismatchedType.py')
 
     def test_verify_with_ecdsa_secp256k1_str(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1Str.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Str.py')
 
     def test_verify_with_ecdsa_secp256k1_bool(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1Bool.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Bool.py')
 
     def test_verify_with_ecdsa_secp256k1_int(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1Int.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Int.py')
 
     def test_verify_with_ecdsa_secp256k1_bytes(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -310,8 +298,7 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1MismatchedType.py')
 
     async def test_import_crypto(self):
         await self.set_up_contract('ImportCrypto.py')

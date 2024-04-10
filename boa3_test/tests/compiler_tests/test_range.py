@@ -193,8 +193,7 @@ class TestRange(boatestcase.BoaTestCase):
         self.assertEqual(list(range(-2, 10, 3)), result)
 
     def test_range_parameter_mismatched_type(self):
-        path = self.get_contract_path('RangeParameterMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'RangeParameterMismatchedType.py')
 
     def test_range_as_sequence_compile(self):
         expected_output = (
@@ -257,16 +256,13 @@ class TestRange(boatestcase.BoaTestCase):
         self.assertEqual(list(range(-10, 0)), result)
 
     def test_range_mismatched_type(self):
-        path = self.get_contract_path('RangeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'RangeMismatchedType.py')
 
     def test_range_too_few_parameters(self):
-        path = self.get_contract_path('RangeTooFewParameters.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'RangeTooFewParameters.py')
 
     def test_range_too_many_parameters(self):
-        path = self.get_contract_path('RangeTooManyParameters.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'RangeTooManyParameters.py')
 
     def test_range_get_value_compile(self):
         expected_output = (
@@ -296,8 +292,7 @@ class TestRange(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), r'The value \d+ is out of range.')
 
     def test_range_set_value(self):
-        path = self.get_contract_path('RangeSetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'RangeSetValue.py')
 
     async def test_range_slicing(self):
         await self.set_up_contract('RangeSlicingLiteralValues.py')
@@ -561,6 +556,5 @@ class TestRange(boatestcase.BoaTestCase):
         self.assertEqual(list(range(100, 120)), result)
 
     def test_range_index(self):
-        path = self.get_contract_path('IndexRange.py')
         # TODO: change when index() with only one argument is implemented for range #2kq1y13
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'IndexRange.py')

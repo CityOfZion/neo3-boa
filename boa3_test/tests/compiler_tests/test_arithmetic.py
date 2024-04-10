@@ -318,12 +318,10 @@ class TestArithmetic(boatestcase.BoaTestCase):
     # region Division
 
     def test_division_operation(self):
-        path = self.get_contract_path('Division.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'Division.py')
 
     def test_division_augmented_assignment(self):
-        path = self.get_contract_path('DivisionAugmentedAssignment.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'DivisionAugmentedAssignment.py')
 
     async def test_division_builtin_type(self):
         await self.set_up_contract('DivisionBuiltinType.py')
@@ -404,12 +402,10 @@ class TestArithmetic(boatestcase.BoaTestCase):
     # region Mismatched
 
     def test_mismatched_type_binary_operation(self):
-        path = self.get_contract_path('MismatchedOperandBinary.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedOperandBinary.py')
 
     def test_mismatched_type_unary_operation(self):
-        path = self.get_contract_path('MismatchedOperandUnary.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedOperandUnary.py')
 
     # endregion
 

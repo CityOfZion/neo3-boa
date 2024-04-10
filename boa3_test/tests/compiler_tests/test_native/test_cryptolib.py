@@ -66,12 +66,10 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_result.digest(), result)
 
     def test_ripemd160_too_many_parameters(self):
-        path = self.get_contract_path('Ripemd160TooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'Ripemd160TooManyArguments.py')
 
     def test_ripemd160_too_few_parameters(self):
-        path = self.get_contract_path('Ripemd160TooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'Ripemd160TooFewArguments.py')
 
     async def test_sha256_str(self):
         await self.set_up_contract('Sha256Str.py')
@@ -106,28 +104,23 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_result.digest(), result)
 
     def test_sha256_too_many_parameters(self):
-        path = self.get_contract_path('Sha256TooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'Sha256TooManyArguments.py')
 
     def test_sha256_too_few_parameters(self):
-        path = self.get_contract_path('Sha256TooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'Sha256TooFewArguments.py')
 
     def test_verify_with_ecdsa(self):
         path = self.get_contract_path('VerifyWithECDsa.py')
         self.compile(path)
 
     def test_verify_with_ecdsa_secp256r1_str(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1Str.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Str.py')
 
     def test_verify_with_ecdsa_secp256r1_bool(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1Bool.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Bool.py')
 
     def test_verify_with_ecdsa_secp256r1_int(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1Int.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Int.py')
 
     def test_verify_with_ecdsa_secp256r1_bytes(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -156,20 +149,16 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256r1MismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1MismatchedType.py')
 
     def test_verify_with_ecdsa_secp256k1_str(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1Str.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Str.py')
 
     def test_verify_with_ecdsa_secp256k1_bool(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1Bool.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Bool.py')
 
     def test_verify_with_ecdsa_secp256k1_int(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1Int.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Int.py')
 
     def test_verify_with_ecdsa_secp256k1_bytes(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -198,8 +187,7 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
-        path = self.get_contract_path('VerifyWithECDsaSecp256k1MismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1MismatchedType.py')
 
     def test_murmur32(self):
         expected_output = (
@@ -230,8 +218,7 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_bls12_381_add_mismatched_type(self):
-        path = self.get_contract_path('Bls12381AddMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Bls12381AddMismatchedType.py')
 
     def test_bls12_381_deserialize(self):
         expected_output = (
@@ -261,8 +248,7 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_bls12_381_equal_mismatched_type(self):
-        path = self.get_contract_path('Bls12381EqualMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Bls12381EqualMismatchedType.py')
 
     def test_bls12_381_mul(self):
         expected_output = (
@@ -280,8 +266,7 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_bls12_381_mul_mismatched_type(self):
-        path = self.get_contract_path('Bls12381MulMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Bls12381MulMismatchedType.py')
 
     def test_bls12_381_pairing(self):
         expected_output = (
@@ -298,8 +283,7 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_bls12_381_pairing_mismatched_type(self):
-        path = self.get_contract_path('Bls12381PairingMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Bls12381PairingMismatchedType.py')
 
     def test_bls12_381_serialize(self):
         expected_output = (
@@ -315,5 +299,4 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_bls12_381_serialize_mismatched_type(self):
-        path = self.get_contract_path('Bls12381SerializeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Bls12381SerializeMismatchedType.py')

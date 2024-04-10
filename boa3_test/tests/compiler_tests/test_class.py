@@ -88,8 +88,7 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertEqual(42, result)
 
     def test_user_class_with_static_method_from_object(self):
-        path = self.get_contract_path('UserClassWithStaticMethodFromObject.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithStaticMethodFromObject.py')
 
     async def test_user_class_with_static_method_with_args(self):
         await self.set_up_contract('UserClassWithStaticMethodWithArgs.py')
@@ -195,12 +194,10 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertEqual(2, result)
 
     def test_user_class_update_class_variable(self):
-        path = self.get_contract_path('UserClassUpdateClassVariable.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassUpdateClassVariable.py')
 
     def test_user_class_update_instance_variable_on_init(self):
-        path = self.get_contract_path('UserClassUpdateClassVariableOnInit.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassUpdateClassVariableOnInit.py')
 
     async def test_user_class_with_class_variable_and_class_method(self):
         await self.set_up_contract('UserClassWithClassVariableAndClassMethod.py')
@@ -238,12 +235,10 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertEqual(42, result)
 
     def test_user_class_with_instance_method_from_class(self):
-        path = self.get_contract_path('UserClassWithInstanceMethodFromClass.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithInstanceMethodFromClass.py')
 
     def test_user_class_with_instance_variable_from_class(self):
-        path = self.get_contract_path('UserClassWithInstanceVariableFromClass.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithInstanceVariableFromClass.py')
 
     async def test_user_class_with_instance_variable_from_object(self):
         await self.set_up_contract('UserClassWithInstanceVariableFromObject.py')
@@ -293,8 +288,7 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertEqual(4, result)
 
     def test_user_class_with_base(self):
-        path = self.get_contract_path('UserClassWithBuiltinBase.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithBuiltinBase.py')
 
     async def test_user_class_with_created_base(self):
         await self.set_up_contract('UserClassWithCreatedBase.py')
@@ -382,20 +376,16 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertObjectEqual(expected_result, result)
 
     def test_user_class_with_created_base_with_more_variables_without_super_init(self):
-        path = self.get_contract_path('UserClassWithCreatedBaseWithMoreVariablesWithoutSuperInit.py')
-        self.assertCompilerLogs(CompilerError.MissingInitCall, path)
+        self.assertCompilerLogs(CompilerError.MissingInitCall, 'UserClassWithCreatedBaseWithMoreVariablesWithoutSuperInit.py')
 
     def test_user_class_with_multiple_bases(self):
-        path = self.get_contract_path('UserClassWithMultipleBases.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithMultipleBases.py')
 
     def test_user_class_with_keyword_base(self):
-        path = self.get_contract_path('UserClassWithKeywordBase.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithKeywordBase.py')
 
     def test_user_class_with_decorator(self):
-        path = self.get_contract_path('UserClassWithDecorator.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithDecorator.py')
 
     async def test_user_class_with_property_from_object(self):
         await self.set_up_contract('UserClassWithPropertyFromObject.py')
@@ -422,20 +412,16 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertEqual(47, result)
 
     def test_user_class_with_property_from_class(self):
-        path = self.get_contract_path('UserClassWithPropertyFromClass.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithPropertyFromClass.py')
 
     def test_user_class_with_property_using_arguments(self):
-        path = self.get_contract_path('UserClassWithPropertyUsingArguments.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithPropertyUsingArguments.py')
 
     def test_user_class_with_property_mismatched_type(self):
-        path = self.get_contract_path('UserClassWithPropertyMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'UserClassWithPropertyMismatchedType.py')
 
     def test_user_class_with_property_without_self(self):
-        path = self.get_contract_path('UserClassWithPropertyWithoutSelf.py')
-        self.assertCompilerLogs(CompilerError.SelfArgumentError, path)
+        self.assertCompilerLogs(CompilerError.SelfArgumentError, 'UserClassWithPropertyWithoutSelf.py')
 
     async def test_user_class_with_augmented_assignment_operator_with_variable(self):
         await self.set_up_contract('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
@@ -466,8 +452,7 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertObjectEqual(Example(), result)
 
     def test_del_class(self):
-        path = self.get_contract_path('DelClass.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'DelClass.py')
 
     async def test_class_property_and_parameter_with_same_name(self):
         await self.set_up_contract('ClassPropertyAndParameterWithSameName.py')

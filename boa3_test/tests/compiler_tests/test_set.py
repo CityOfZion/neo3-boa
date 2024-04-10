@@ -6,13 +6,10 @@ class TestSet(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/set_test'
 
     def test_set_from_typing(self):
-        path = self.get_contract_path('SetTyping.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'SetTyping.py')
 
     def test_set_literal(self):
-        path = self.get_contract_path('SetLiteral.py')
-        self.assertCompilerLogs(CompilerError.InvalidType, path)
+        self.assertCompilerLogs(CompilerError.InvalidType, 'SetLiteral.py')
 
     def test_set_from_constructor(self):
-        path = self.get_contract_path('SetConstructor.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'SetConstructor.py')

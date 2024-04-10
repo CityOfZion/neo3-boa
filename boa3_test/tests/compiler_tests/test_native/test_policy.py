@@ -40,8 +40,7 @@ class TestPolicyContract(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_exec_fee_too_many_parameters(self):
-        path = self.get_contract_path('GetExecFeeFactorTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetExecFeeFactorTooManyArguments.py')
 
     async def test_get_fee_per_byte(self):
         await self.set_up_contract('GetFeePerByte.py')
@@ -51,8 +50,7 @@ class TestPolicyContract(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_fee_per_byte_too_many_parameters(self):
-        path = self.get_contract_path('GetFeePerByteTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetFeePerByteTooManyArguments.py')
 
     async def test_get_storage_price(self):
         await self.set_up_contract('GetStoragePrice.py')
@@ -62,8 +60,7 @@ class TestPolicyContract(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_get_storage_price_too_many_parameters(self):
-        path = self.get_contract_path('GetStoragePriceTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetStoragePriceTooManyArguments.py')
 
     async def test_is_blocked(self):
         await self.set_up_contract('IsBlocked.py')
@@ -72,19 +69,14 @@ class TestPolicyContract(boatestcase.BoaTestCase):
         self.assertEqual(False, result)
 
     def test_is_blocked_mismatched_type(self):
-        path = self.get_contract_path('IsBlockedMismatchedTypeInt.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IsBlockedMismatchedTypeInt.py')
 
-        path = self.get_contract_path('IsBlockedMismatchedTypeStr.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IsBlockedMismatchedTypeStr.py')
 
-        path = self.get_contract_path('IsBlockedMismatchedTypeBool.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IsBlockedMismatchedTypeBool.py')
 
     def test_is_blocked_too_many_parameters(self):
-        path = self.get_contract_path('IsBlockedTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'IsBlockedTooManyArguments.py')
 
     def test_is_blocked_too_few_parameters(self):
-        path = self.get_contract_path('IsBlockedTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'IsBlockedTooFewArguments.py')

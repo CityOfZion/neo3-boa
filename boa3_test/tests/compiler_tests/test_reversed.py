@@ -87,5 +87,4 @@ class TestReversed(boatestcase.BoaTestCase):
         self.assertEqual(reversed_list, result)
 
     def test_mismatched_type(self):
-        path = self.get_contract_path('ReversedParameterMismatchedType')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReversedParameterMismatchedType')

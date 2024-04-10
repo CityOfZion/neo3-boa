@@ -139,8 +139,7 @@ class TestImport(boatestcase.BoaTestCase):
         self.assertEqual('bar', result)
 
     def test_typing_python_library(self):
-        path = self.get_contract_path('ImportPythonLib.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportPythonLib.py')
 
     def test_from_typing_import(self):
         expected_output = (
@@ -165,8 +164,7 @@ class TestImport(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_from_typing_import_not_supported_type(self):
-        path = self.get_contract_path('FromImportTypingNotImplementedType.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'FromImportTypingNotImplementedType.py')
 
     def test_from_import_all_compile(self):
         expected_output = (
@@ -266,8 +264,7 @@ class TestImport(boatestcase.BoaTestCase):
         self.assertEqual([], result)
 
     def test_import_non_existent_package(self):
-        path = self.get_contract_path('ImportNonExistentPackage.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportNonExistentPackage.py')
 
     async def test_import_interop_with_alias(self):
         await self.set_up_contract('ImportInteropWithAlias.py')
@@ -275,12 +272,10 @@ class TestImport(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [], return_type=None)
         self.assertIsNone(result)
     def test_import_user_module_recursive_import(self):
-        path = self.get_contract_path('ImportUserModuleRecursiveImport.py')
-        self.assertCompilerLogs(CompilerError.CircularImport, path)
+        self.assertCompilerLogs(CompilerError.CircularImport, 'ImportUserModuleRecursiveImport.py')
 
     def test_from_import_user_module_recursive_import(self):
-        path = self.get_contract_path('FromImportUserModuleRecursiveImport.py')
-        self.assertCompilerLogs(CompilerError.CircularImport, path)
+        self.assertCompilerLogs(CompilerError.CircularImport, 'FromImportUserModuleRecursiveImport.py')
 
     async def test_import_user_module_with_not_imported_symbols(self):
         await self.set_up_contract('ImportUserModuleWithNotImportedSymbols.py')
@@ -353,21 +348,16 @@ class TestImport(boatestcase.BoaTestCase):
         self.assertEqual(5, result)
 
     def test_not_imported_builtin_public(self):
-        path = self.get_contract_path('NotImportedBuiltinPublic.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinPublic.py')
 
     def test_not_imported_builtin_from_typing(self):
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInReturn.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInReturn.py')
 
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInArgs.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInArgs.py')
 
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInSubscript.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInSubscript.py')
 
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInVariable.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInVariable.py')
 
     async def test_incorrect_circular_import(self):
         await self.set_up_contract('incorrect_circular_import', 'IncorrectCircularImportDetection.py')
@@ -408,13 +398,10 @@ class TestImport(boatestcase.BoaTestCase):
         self.assertEqual(expected_result.var_str, result)
 
     def test_from_import_not_existing_method(self):
-        path = self.get_contract_path('FromImportNotExistingMethod.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'FromImportNotExistingMethod.py')
 
     def test_import_not_existing_method(self):
-        path = self.get_contract_path('ImportNotExistingMethod.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportNotExistingMethod.py')
 
     def test_import_boa_invalid_package(self):
-        path = self.get_contract_path('ImportBoaInvalidPackage.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportBoaInvalidPackage.py')

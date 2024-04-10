@@ -47,8 +47,7 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertTrue(test_variable_id in method_symbol_table)
 
     def test_declaration_without_type(self):
-        path = self.get_contract_path('DeclarationWithoutType.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'DeclarationWithoutType.py')
 
     def test_assignment_with_type(self):
         input = 'unit_test'
@@ -205,8 +204,7 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_tuple_multiple_assignments(self):
-        path = self.get_contract_path('AssignmentWithTuples.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'AssignmentWithTuples.py')
 
     def test_many_assignments(self):
         expected_output = (
@@ -301,12 +299,10 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertEqual(-140, result)
 
     def test_using_undeclared_variable(self):
-        path = self.get_contract_path('UsingUndeclaredVariable.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UsingUndeclaredVariable.py')
 
     def test_return_undeclared_variable(self):
-        path = self.get_contract_path('ReturnUndeclaredVariable.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ReturnUndeclaredVariable.py')
 
     def test_assign_value_mismatched_type(self):
         string_value = '1'
@@ -323,8 +319,7 @@ class TestVariable(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MismatchedTypeAssignValue.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeAssignValue.py')
         self.assertEqual(expected_output, output)
 
     def test_assign_binary_operation_mismatched_type(self):
@@ -337,8 +332,7 @@ class TestVariable(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MismatchedTypeAssignBinOp.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeAssignBinOp.py')
         self.assertEqual(expected_output, output)
 
     def test_assign_unary_operation_mismatched_type(self):
@@ -352,8 +346,7 @@ class TestVariable(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MismatchedTypeAssignUnOp.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeAssignUnOp.py')
         self.assertEqual(expected_output, output)
 
     def test_assign_mixed_operations_mismatched_type(self):
@@ -376,8 +369,7 @@ class TestVariable(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MismatchedTypeAssignMixedOp.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeAssignMixedOp.py')
         self.assertEqual(expected_output, output)
 
     def test_assign_sequence_get_mismatched_type(self):
@@ -392,21 +384,17 @@ class TestVariable(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MismatchedTypeAssignSequenceGet.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeAssignSequenceGet.py')
         self.assertEqual(expected_output, output)
 
     def test_assign_sequence_set_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeAssignSequenceSet.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeAssignSequenceSet.py')
 
     def test_aug_assign_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeAugAssign.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeAugAssign.py')
 
     def test_invalid_type_format_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeInvalidTypeFormat.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeInvalidTypeFormat.py')
 
     def test_global_declaration_with_assignment_compile(self):
         expected_output = (
@@ -428,8 +416,7 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertEqual(10, result)
 
     def test_global_declaration_without_assignment(self):
-        path = self.get_contract_path('GlobalDeclarationWithoutAssignment.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'GlobalDeclarationWithoutAssignment.py')
 
     def test_global_assignment_with_type_compile(self):
         expected_output = (
@@ -490,8 +477,7 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertEqual(10, result)
 
     def test_global_tuple_multiple_assignments(self):
-        path = self.get_contract_path('GlobalAssignmentWithTuples.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'GlobalAssignmentWithTuples.py')
 
     async def test_global_chained_multiple_assignments(self):
         await self.set_up_contract('GlobalMultipleAssignments.py', compile_if_found=True)
@@ -708,8 +694,7 @@ class TestVariable(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AssignLocalWithArgumentShadowingGlobal.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'AssignLocalWithArgumentShadowingGlobal.py')
         self.assertEqual(expected_output, output)
 
     def test_assign_local_shadowing_global_with_arg_value_compile_no_optimization(self):
@@ -774,8 +759,7 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertEqual(400, result)
 
     def test_assign_starred_variable(self):
-        path = self.get_contract_path('AssignStarredVariable.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'AssignStarredVariable.py')
 
     async def test_variables_in_different_scope_with_same_name(self):
         await self.set_up_contract('DifferentScopesWithSameName.py')
@@ -818,12 +802,10 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertEqual(expected_return, result)
 
     def test_del_variable(self):
-        path = self.get_contract_path('DelVariable.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'DelVariable.py')
 
     def test_assign_function(self):
-        path = self.get_contract_path('AssignFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'AssignFunction.py')
 
     async def test_elvis_operator_any_param(self):
         await self.set_up_contract('ElvisOperatorAnyParam.py')

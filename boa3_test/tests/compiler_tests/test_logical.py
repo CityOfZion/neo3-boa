@@ -39,8 +39,7 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(False, result)
 
     def test_mismatched_type_binary_operation(self):
-        path = self.get_contract_path('LogicMismatchedOperandAnd.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandAnd.py')
 
     # endregion
 
@@ -69,8 +68,7 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
     async def test_mismatched_type_unary_operation(self):
-        path = self.get_contract_path('LogicMismatchedOperandNot.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandNot.py')
 
     # endregion
 
@@ -173,8 +171,7 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.NONE << FindOptions.DESERIALIZE_VALUES, result)
 
     async def test_mismatched_type_logic_left_shift(self):
-        path = self.get_contract_path('LogicMismatchedOperandLogicLeftShift.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandLogicLeftShift.py')
 
     # endregion
 
@@ -240,8 +237,7 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.NONE & FindOptions.DESERIALIZE_VALUES, result)
 
     async def test_mismatched_type_logic_and(self):
-        path = self.get_contract_path('LogicMismatchedOperandLogicAnd.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandLogicAnd.py')
 
     # endregion
 
@@ -301,8 +297,7 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(3, result)
 
     async def test_mismatched_type_logic_not(self):
-        path = self.get_contract_path('LogicMismatchedOperandLogicNot.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandLogicNot.py')
 
     # endregion
 
@@ -380,8 +375,7 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(123456789, result)
 
     async def test_mismatched_type_logic_or(self):
-        path = self.get_contract_path('LogicMismatchedOperandLogicOr.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandLogicOr.py')
 
     # endregion
 
@@ -446,8 +440,7 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.NONE ^ FindOptions.DESERIALIZE_VALUES, result)
 
     async def test_mismatched_type_logic_xor(self):
-        path = self.get_contract_path('LogicMismatchedOperandLogicXor.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandLogicXor.py')
 
     # endregion
 
@@ -597,7 +590,6 @@ class TestLogical(boatestcase.BoaTestCase):
         self.assertEqual(FindOptions.NONE >> FindOptions.DESERIALIZE_VALUES, result)
 
     async def test_mismatched_type_logic_right_shift(self):
-        path = self.get_contract_path('LogicMismatchedOperandLogicRightShift.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogicMismatchedOperandLogicRightShift.py')
 
     # endregion

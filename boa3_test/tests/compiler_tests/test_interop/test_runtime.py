@@ -82,8 +82,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
     def test_check_witness_mismatched_type(self):
-        path = self.get_contract_path('CheckWitnessMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'CheckWitnessMismatchedType.py')
 
     def test_notify_str_compile(self):
         from boa3.internal.model.builtin.interop.interop import Interop
@@ -295,8 +294,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         self.assertEqual((10,), event_notifications[0].state)
 
     def test_log_mismatched_type(self):
-        path = self.get_contract_path('LogMismatchedValueInt.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'LogMismatchedValueInt.py')
 
     def test_log_str_commpile(self):
         from boa3.internal.model.builtin.interop.interop import Interop
@@ -427,8 +425,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CallingScriptHashCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'CallingScriptHashCantAssign.py')
         self.assertEqual(expected_output, output)
 
     def test_get_executing_script_hash_compile(self):
@@ -459,8 +456,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ExecutingScriptHashCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'ExecutingScriptHashCantAssign.py')
         self.assertEqual(expected_output, output)
 
     async def test_get_executing_script_hash_on_deploy(self):
@@ -502,8 +498,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BlockTimeCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'BlockTimeCantAssign.py')
         self.assertEqual(expected_output, output)
 
     def test_get_gas_left_compile(self):
@@ -534,8 +529,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('GasLeftCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'GasLeftCantAssign.py')
         self.assertEqual(expected_output, output)
 
     def test_get_invocation_counter_compile(self):
@@ -567,8 +561,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('InvocationCounterCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'InvocationCounterCantAssign.py')
         self.assertEqual(expected_output, output)
 
     async def test_get_notifications(self):
@@ -683,8 +676,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('EntryScriptHashCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'EntryScriptHashCantAssign.py')
         self.assertEqual(expected_output, output)
 
     def test_platform_compile(self):
@@ -715,8 +707,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('PlatformCantAssign.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.NameShadowing, 'PlatformCantAssign.py')
         self.assertEqual(expected_output, output)
 
     async def test_burn_gas(self):
@@ -845,8 +836,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         self.assertEqual(network_protocol.network, result)
 
     def test_get_network_too_many_parameters(self):
-        path = self.get_contract_path('GetNetworkTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetNetworkTooManyArguments.py')
 
     async def test_import_runtime(self):
         await self.set_up_contract('ImportRuntime.py')
@@ -867,8 +857,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         self.assertGreater(result, 0)
 
     def test_get_random_too_many_parameters(self):
-        path = self.get_contract_path('GetRandomTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetRandomTooManyArguments.py')
 
     async def test_address_version(self):
         await self.set_up_contract('AddressVersion.py')
@@ -881,8 +870,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         self.assertEqual(network_protocol.address_version, result)
 
     def test_address_version_cant_assign(self):
-        path = self.get_contract_path('AddressVersionCantAssign.py')
-        self.assertCompilerLogs(CompilerWarning.NameShadowing, path)
+        self.assertCompilerLogs(CompilerWarning.NameShadowing, 'AddressVersionCantAssign.py')
 
     async def test_load_script(self):
         await self.set_up_contract('LoadScriptDynamicCall.py')

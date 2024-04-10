@@ -138,8 +138,7 @@ class TestString(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.INVALID_OFFSET_MSG)
 
     def test_string_set_value(self):
-        path = self.get_contract_path('StringSetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'StringSetValue.py')
 
     async def test_string_slicing(self):
         await self.set_up_contract('StringSlicingLiteralValues.py')
@@ -1047,8 +1046,7 @@ class TestString(boatestcase.BoaTestCase):
         self.assertEqual(string.index(substring), result)
 
     def test_string_index_mismatched_type(self):
-        path = self.get_contract_path('IndexStringMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IndexStringMismatchedType.py')
 
     async def test_string_property_slicing(self):
         await self.set_up_contract('StringPropertySlicing.py')
@@ -1171,12 +1169,10 @@ class TestString(boatestcase.BoaTestCase):
         self.assertEqual('F-string: {"string":"unit test","number":123}', result)
 
     def test_f_string_any_var(self):
-        path = self.get_contract_path('FStringAnyVar.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'FStringAnyVar.py')
 
     def test_f_string_union_var(self):
-        path = self.get_contract_path('FStringUnionVar.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'FStringUnionVar.py')
 
     async def test_string_replace(self):
         await self.set_up_contract('ReplaceStringMethod.py')
@@ -1228,13 +1224,10 @@ class TestString(boatestcase.BoaTestCase):
         self.assertEqual(string.replace(old, new), result)
 
     def test_string_replace_mismatched_type(self):
-        path = self.get_contract_path('ReplaceStringMethodMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReplaceStringMethodMismatchedType.py')
 
     def test_string_replace_too_many_arguments(self):
-        path = self.get_contract_path('ReplaceStringMethodTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ReplaceStringMethodTooManyArguments.py')
 
     def test_string_replace_too_few_arguments(self):
-        path = self.get_contract_path('ReplaceStringMethodTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ReplaceStringMethodTooFewArguments.py')
