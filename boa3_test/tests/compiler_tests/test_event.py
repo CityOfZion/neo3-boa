@@ -222,9 +222,9 @@ class TestEvent(boatestcase.BoaTestCase):
         event = boatestcase.BoaTestEvent.from_notification(events[0], bytes, bytes, int, bytes)
         self.assertEqual(transfer_args, event.state)
 
-    def test_event_with_return(self):
+    def test_event_without_types(self):
         path = self.get_contract_path('EventWithoutTypes.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     async def test_event_with_duplicated_name(self):
         await self.set_up_contract('EventWithDuplicatedName.py')

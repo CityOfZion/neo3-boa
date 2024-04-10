@@ -7,13 +7,13 @@ from typing import Any, Dict, List, Union, cast
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.contract import abort
+from boa3.builtin.interop import storage
 from boa3.builtin.interop.blockchain import get_contract
 from boa3.builtin.interop.contract import CallFlags, call_contract, destroy_contract, get_call_flags, update_contract
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.json import json_deserialize
 from boa3.builtin.interop.runtime import check_witness, get_network, script_container
 from boa3.builtin.interop.stdlib import deserialize, serialize
-from boa3.builtin.interop import storage
 from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.type import UInt160, helper as type_helper
 
@@ -80,8 +80,8 @@ AUTH_ADDRESSES = b'AUTH_ADDRESSES'
 on_transfer = CreateNewEvent(
     # trigger when tokens are transferred, including zero value transfers.
     [
-        ('from_addr', Union[UInt160, None]),
-        ('to_addr', Union[UInt160, None]),
+        ('from_addr', UInt160 | None),
+        ('to_addr', UInt160 | None),
         ('amount', int),
         ('tokenId', bytes)
     ],

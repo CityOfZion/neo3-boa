@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.interop import storage, runtime
@@ -46,8 +46,8 @@ def manifest_metadata() -> NeoMetadata:
 
 on_transfer = CreateNewEvent(
     [
-        ('from_addr', Union[UInt160, None]),
-        ('to_addr', Union[UInt160, None]),
+        ('from_addr', UInt160 | None),
+        ('to_addr', UInt160 | None),
         ('amount', int)
     ],
     'Transfer'

@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.interop.iterator import Iterator
@@ -7,8 +7,8 @@ from boa3.builtin.type import UInt160
 on_transfer = CreateNewEvent(
     # trigger when tokens are transferred, including zero value transfers.
     [
-        ('from_addr', Union[UInt160, None]),
-        ('to_addr', Union[UInt160, None]),
+        ('from_addr', UInt160 | None),
+        ('to_addr', UInt160 | None),
         ('amount', int),
         ('tokenId', str)
     ],
