@@ -45,8 +45,7 @@ class TestGasClass(boatestcase.BoaTestCase):
         self.assertEqual('GAS', result)
 
     def test_symbol_too_many_parameters(self):
-        path = self.get_contract_path('SymbolTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'SymbolTooManyArguments.py')
 
     async def test_decimals(self):
         await self.set_up_contract('Decimals.py')
@@ -55,8 +54,7 @@ class TestGasClass(boatestcase.BoaTestCase):
         self.assertEqual(self.GAS_DECIMALS, result)
 
     def test_decimals_too_many_parameters(self):
-        path = self.get_contract_path('DecimalsTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'DecimalsTooManyArguments.py')
 
     async def test_total_supply(self):
         await self.set_up_contract('TotalSupply.py')
@@ -65,8 +63,7 @@ class TestGasClass(boatestcase.BoaTestCase):
         self.assertGreater(result, 0)
 
     def test_total_supply_too_many_parameters(self):
-        path = self.get_contract_path('TotalSupplyTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'TotalSupplyTooManyArguments.py')
 
     async def test_balance_of(self):
         await self.set_up_contract('BalanceOf.py')
@@ -80,8 +77,7 @@ class TestGasClass(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_balance_of_too_many_parameters(self):
-        path = self.get_contract_path('BalanceOfTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'BalanceOfTooManyArguments.py')
 
     async def test_transfer(self):
         await self.set_up_contract('Transfer.py')
@@ -171,12 +167,10 @@ class TestGasClass(boatestcase.BoaTestCase):
         self.assertEqual(amount, transfers[0].amount)
 
     def test_transfer_too_many_parameters(self):
-        path = self.get_contract_path('TransferTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'TransferTooManyArguments.py')
 
     def test_transfer_too_few__parameters(self):
-        path = self.get_contract_path('TransferTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'TransferTooFewArguments.py')
 
     async def test_import_with_alias(self):
         await self.set_up_contract('ImportWithAlias.py')

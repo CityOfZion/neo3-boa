@@ -20,12 +20,10 @@ class TestRoleInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_output, output)
 
     def test_get_designated_by_role_too_many_parameters(self):
-        path = self.get_contract_path('GetDesignatedByRoleTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetDesignatedByRoleTooManyArguments.py')
 
     def test_get_designated_by_role_too_few_parameters(self):
-        path = self.get_contract_path('GetDesignatedByRoleTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'GetDesignatedByRoleTooFewArguments.py')
 
     def test_import_role(self):
         expected_output = (

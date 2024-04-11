@@ -22,32 +22,25 @@ class TestContractInterface(boatestcase.BoaTestCase):
         self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_decorator_invalid_hash(self):
-        path = self.get_contract_path('ContractInterfaceInvalidHash.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceInvalidHash.py')
 
     def test_contract_interface_decorator_variable_hash(self):
-        path = self.get_contract_path('ContractInterfaceVariableArgument.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceVariableArgument.py')
 
     def test_contract_interface_decorator_too_few_arguments(self):
-        path = self.get_contract_path('ContractInterfaceTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceTooFewArguments.py')
 
     def test_contract_interface_decorator_too_many_arguments(self):
-        path = self.get_contract_path('ContractInterfaceTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ContractInterfaceTooManyArguments.py')
 
     def test_contract_interface_decorator_without_call(self):
-        path = self.get_contract_path('ContractInterfaceWithoutCall.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceWithoutCall.py')
 
     def test_contract_interface_with_instance_method(self):
-        path = self.get_contract_path('ContractInterfaceInstanceMethod.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceInstanceMethod.py')
 
     def test_contract_interface_with_class_method(self):
-        path = self.get_contract_path('ContractInterfaceClassMethod.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceClassMethod.py')
 
     async def test_contract_interface_nep17(self):
         await self.set_up_contract('Nep17Interface.py')
@@ -67,20 +60,16 @@ class TestContractInterface(boatestcase.BoaTestCase):
         self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_display_name_variable_name(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameVariableArgument.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceDisplayNameVariableArgument.py')
 
     def test_contract_interface_display_name_too_few_arguments(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceDisplayNameTooFewArguments.py')
 
     def test_contract_interface_display_name_without_call(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameWithoutCall.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceDisplayNameWithoutCall.py')
 
     def test_contract_interface_display_name_too_many_arguments(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ContractInterfaceDisplayNameTooManyArguments.py')
 
     async def test_contract_interface_nep17_with_display_name(self):
         await self.set_up_contract('Nep17InterfaceWithDisplayName.py')

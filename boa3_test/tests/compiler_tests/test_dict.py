@@ -244,8 +244,7 @@ class TestDict(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.MAP_KEY_NOT_FOUND_ERROR_MSG)
 
     def test_dict_get_value_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeDictGetValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeDictGetValue.py')
 
     def test_dict_set_value_compile(self):
         ok = String('ok').to_bytes()
@@ -277,8 +276,7 @@ class TestDict(boatestcase.BoaTestCase):
         self.assertEqual({0: 'ok', 1: 'one'}, result)
 
     def test_dict_set_value_mismatched_type(self):
-        path = self.get_contract_path('MismatchedTypeDictSetValue.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeDictSetValue.py')
 
     def test_dict_keys_compile(self):
         one = String('one').to_bytes()
@@ -361,8 +359,7 @@ class TestDict(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MismatchedTypeKeysDict.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeKeysDict.py')
         self.assertEqual(expected_output, output)
 
     async def test_dict_keys_mismatched_type(self):
@@ -452,8 +449,7 @@ class TestDict(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MismatchedTypeValuesDict.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeValuesDict.py')
         self.assertEqual(expected_output, output)
 
     async def test_dict_values_mismatched_type(self):
@@ -595,5 +591,4 @@ class TestDict(boatestcase.BoaTestCase):
         self.assertEqual(({True: 1, False: 0}, {True: 99, False: 0}), result)
 
     def test_del_dict_pair(self):
-        path = self.get_contract_path('DelPair.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'DelPair.py')

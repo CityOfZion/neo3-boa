@@ -617,13 +617,13 @@ class BoaTestCase(SmartContractTestCase):
 
     def assertCompilerLogs(self,
                            expected_logged_exception,
-                           path
+                           *path: str
                            ) -> CompilerOutput | str:
+        py_abs_path = self.get_contract_path(*path)
+        output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, py_abs_path)
 
-        output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, path)
-        manifest = {}
         if not issubclass(expected_logged_exception, CompilerError):
-            return output, manifest
+            return self.compile_and_save(py_abs_path)
         else:
             # filter to get only the error message, without location information
             import re

@@ -229,8 +229,7 @@ class TestFileGeneration(boatestcase.BoaTestCase):
         self.assertEqual('Add', method0['name'])
 
     def test_metadata_abi_method_name_mismatched_type(self):
-        path = self.get_contract_path('MetadataMethodNameMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MetadataMethodNameMismatchedType.py')
 
     def test_metadata_abi_method_with_duplicated_name_but_different_args(self):
         path = self.get_contract_path('MetadataMethodDuplicatedNameDifferentArgs.py')
@@ -259,8 +258,7 @@ class TestFileGeneration(boatestcase.BoaTestCase):
         self.assertEqual(2, len(method1['parameters']))
 
     def test_metadata_abi_method_with_duplicated_name_and_args(self):
-        path = self.get_contract_path('MetadataMethodDuplicatedNameAndArgs.py')
-        self.assertCompilerLogs(CompilerError.DuplicatedManifestIdentifier, path)
+        self.assertCompilerLogs(CompilerError.DuplicatedManifestIdentifier, 'MetadataMethodDuplicatedNameAndArgs.py')
 
     def test_generate_manifest_file_with_public_safe_decorator_kwarg(self):
         path = self.get_contract_path('MetadataMethodSafe.py')
@@ -325,8 +323,7 @@ class TestFileGeneration(boatestcase.BoaTestCase):
         self.assertEqual(('var6', AbiType.ByteArray), (parameters[2]['name'], parameters[2]['type']))
 
     def test_metadata_abi_method_safe_mismatched_type(self):
-        path = self.get_contract_path('MetadataMethodSafeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MetadataMethodSafeMismatchedType.py')
 
     def test_generate_nefdbgnfo_file(self):
         from boa3.internal.model.type.itype import IType

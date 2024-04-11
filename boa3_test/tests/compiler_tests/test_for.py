@@ -125,8 +125,7 @@ class TestFor(boatestcase.BoaTestCase):
         self.assertEqual(6, result)
 
     def test_for_mismatched_type_condition(self):
-        path = self.get_contract_path('MismatchedTypeCondition.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeCondition.py')
 
     def test_for_no_condition(self):
         path = self.get_contract_path('NoCondition.py')
@@ -305,8 +304,7 @@ class TestFor(boatestcase.BoaTestCase):
         self.assertEqual(6, result)
 
     def test_for_iterate_dict(self):
-        path = self.get_contract_path('ForIterateDict.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ForIterateDict.py')
 
     async def test_boa2_iteration_test(self):
         await self.set_up_contract('IterBoa2Test.py')
@@ -327,8 +325,7 @@ class TestFor(boatestcase.BoaTestCase):
         self.assertEqual(7, result)
 
     def test_boa2_iteration_test4(self):
-        path = self.get_contract_path('IterBoa2Test4.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IterBoa2Test4.py')
 
     async def test_boa2_iteration_test5(self):
         await self.set_up_contract('IterBoa2Test5.py')

@@ -89,8 +89,7 @@ class TestNeoClass(boatestcase.BoaTestCase):
         self.assertEqual('NEO', result)
 
     def test_symbol_too_many_parameters(self):
-        path = self.get_contract_path('SymbolTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'SymbolTooManyArguments.py')
 
     async def test_decimals(self):
         await self.set_up_contract('Decimals.py')
@@ -99,8 +98,7 @@ class TestNeoClass(boatestcase.BoaTestCase):
         self.assertEqual(0, result)
 
     def test_decimals_too_many_parameters(self):
-        path = self.get_contract_path('DecimalsTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'DecimalsTooManyArguments.py')
 
     async def test_total_supply(self):
         await self.set_up_contract('TotalSupply.py')
@@ -109,8 +107,7 @@ class TestNeoClass(boatestcase.BoaTestCase):
         self.assertEqual(100_000_000, result)
 
     def test_total_supply_too_many_parameters(self):
-        path = self.get_contract_path('TotalSupplyTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'TotalSupplyTooManyArguments.py')
 
     async def test_balance_of(self):
         await self.set_up_contract('BalanceOf.py')
@@ -123,8 +120,7 @@ class TestNeoClass(boatestcase.BoaTestCase):
         self.assertEqual(self.balance_test_amount, result)
 
     def test_balance_of_too_many_parameters(self):
-        path = self.get_contract_path('BalanceOfTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'BalanceOfTooManyArguments.py')
 
     async def test_transfer(self):
         await self.set_up_contract('Transfer.py')
@@ -218,12 +214,10 @@ class TestNeoClass(boatestcase.BoaTestCase):
         self.assertEqual(amount, transfers[0].amount)
 
     def test_transfer_too_many_parameters(self):
-        path = self.get_contract_path('TransferTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'TransferTooManyArguments.py')
 
     def test_transfer_too_few__parameters(self):
-        path = self.get_contract_path('TransferTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'TransferTooFewArguments.py')
 
     async def test_get_gas_per_block(self):
         await self.set_up_contract('GetGasPerBlock.py')
@@ -443,12 +437,10 @@ class TestNeoClass(boatestcase.BoaTestCase):
         self.assertIn((candidate_pubkey, 0), result)
 
     def test_un_vote_too_many_parameters(self):
-        path = self.get_contract_path('UnVoteTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'UnVoteTooManyArguments.py')
 
     def test_un_vote_too_few_parameters(self):
-        path = self.get_contract_path('UnVoteTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'UnVoteTooFewArguments.py')
 
     async def test_get_all_candidates(self):
         await self.set_up_contract('GetAllCandidates.py')

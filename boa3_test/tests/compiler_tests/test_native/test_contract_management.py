@@ -40,8 +40,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertEqual(minimum_cost, result)
 
     def test_get_minimum_deployment_fee_too_many_parameters(self):
-        path = self.get_contract_path('GetMinimumDeploymentFeeTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'GetMinimumDeploymentFeeTooManyArguments.py')
 
     async def test_get_contract(self):
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
@@ -131,12 +130,10 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertEqual(data, notifies[1].state[0])  # data
 
     def test_deploy_contract_too_many_parameters(self):
-        path = self.get_contract_path('DeployContractTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'DeployContractTooManyArguments.py')
 
     def test_deploy_contract_too_few_parameters(self):
-        path = self.get_contract_path('DeployContractTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'DeployContractTooFewArguments.py')
 
     async def test_update_contract(self):
         await self.set_up_contract('UpdateContract.py')
@@ -201,12 +198,10 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertEqual(data, notifies[1].state[0])
 
     def test_update_contract_too_many_parameters(self):
-        path = self.get_contract_path('UpdateContractTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'UpdateContractTooManyArguments.py')
 
     def test_update_contract_too_few_parameters(self):
-        path = self.get_contract_path('UpdateContractTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'UpdateContractTooFewArguments.py')
 
     async def test_destroy_contract(self):
         await self.set_up_contract('DestroyContract.py')
@@ -232,5 +227,4 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), f'called contract {contract_hash} not found')
 
     def test_destroy_contract_too_many_parameters(self):
-        path = self.get_contract_path('DestroyContractTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'DestroyContractTooManyArguments.py')

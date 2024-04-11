@@ -92,8 +92,7 @@ class TestWhile(boatestcase.BoaTestCase):
         self.assertEqual(16, result)
 
     def test_while_mismatched_type_condition(self):
-        path = self.get_contract_path('WhileMismatchedTypeCondition.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'WhileMismatchedTypeCondition.py')
 
     def test_while_no_condition(self):
         path = self.get_contract_path('WhileNoCondition.py')

@@ -78,16 +78,13 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(48, result)
 
     def test_bytes_set_value(self):
-        path = self.get_contract_path('BytesSetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'BytesSetValue.py')
 
     def test_bytes_clear(self):
-        path = self.get_contract_path('BytesClear.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytesClear.py')
 
     def test_bytes_reverse(self):
-        path = self.get_contract_path('BytesReverse.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytesReverse.py')
 
     async def test_bytes_to_int(self):
         await self.set_up_contract('BytesToInt.py')
@@ -96,8 +93,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(513, result)
 
     def test_bytes_to_int_with_builtin(self):
-        path = self.get_contract_path('BytesToIntWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToIntWithBuiltin.py')
 
     async def test_bytes_to_bool(self):
         await self.set_up_contract('BytesToBool.py')
@@ -112,8 +108,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(True, result)
 
     def test_bytes_to_bool_with_builtin(self):
-        path = self.get_contract_path('BytesToBoolWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToBoolWithBuiltin.py')
 
     async def test_bytes_to_str(self):
         await self.set_up_contract('BytesToStr.py')
@@ -122,8 +117,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual('abc', result)
 
     def test_bytes_to_str_with_builtin(self):
-        path = self.get_contract_path('BytesToStrWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToStrWithBuiltin.py')
 
     def test_bytes_from_byte_array(self):
         data = b'\x01\x02\x03'
@@ -510,8 +504,7 @@ class TestBytes(boatestcase.BoaTestCase):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayLiteral.py')
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'BytearrayLiteral.py')
         self.assertEqual(expected_output, output)
 
     def test_byte_array_default_compile(self):
@@ -595,8 +588,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertRegex(context.exception.__str__(), 'invalid size')
 
     def test_byte_array_from_list_of_int(self):
-        path = self.get_contract_path('BytearrayFromListOfInt.py')
-        compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'BytearrayFromListOfInt.py')
 
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.type.type import Type
@@ -619,8 +611,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(expected, result)
 
     def test_byte_array_string_with_encoding(self):
-        path = self.get_contract_path('BytearrayFromStringWithEncoding.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'BytearrayFromStringWithEncoding.py')
 
     async def test_byte_array_append(self):
         await self.set_up_contract('BytearrayAppend.py')
@@ -684,12 +675,10 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(513, result)
 
     def test_byte_array_to_int_with_builtin(self):
-        path = self.get_contract_path('BytearrayToIntWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytearrayToIntWithBuiltin.py')
 
     def test_byte_array_to_int_with_bytes_builtin(self):
-        path = self.get_contract_path('BytearrayToIntWithBytesBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytearrayToIntWithBytesBuiltin.py')
 
     async def test_boa2_byte_array_test(self):
         await self.set_up_contract('BytearrayBoa2Test.py')
@@ -698,8 +687,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(b'\t\x01\x02', result)
 
     def test_boa2_byte_array_test2(self):
-        path = self.get_contract_path('BytearrayBoa2Test2.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytearrayBoa2Test2.py')
 
     async def test_boa2_byte_array_test3(self):
         await self.set_up_contract('BytearrayBoa2Test3.py')
@@ -1104,8 +1092,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(bytes_.index(bytes_sequence), result)
 
     def test_bytes_index_mismatched_type(self):
-        path = self.get_contract_path('IndexBytesMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IndexBytesMismatchedType.py')
 
     async def test_bytes_property_slicing(self):
         await self.set_up_contract('BytesPropertySlicing.py')
@@ -1214,13 +1201,10 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(string.replace(old, new), result)
 
     def test_bytes_replace_mismatched_type(self):
-        path = self.get_contract_path('ReplaceBytesMethodMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReplaceBytesMethodMismatchedType.py')
 
     def test_bytes_replace_too_many_arguments(self):
-        path = self.get_contract_path('ReplaceBytesMethodTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ReplaceBytesMethodTooManyArguments.py')
 
     def test_bytes_replace_too_few_arguments(self):
-        path = self.get_contract_path('ReplaceBytesMethodTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ReplaceBytesMethodTooFewArguments.py')

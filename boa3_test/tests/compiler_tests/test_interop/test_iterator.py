@@ -11,8 +11,7 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/interop_test/iterator'
 
     def test_iterator_create(self):
-        path = self.get_contract_path('IteratorCreate.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'IteratorCreate.py')
 
     async def test_iterator_next(self):
         await self.set_up_contract('IteratorNext.py')
@@ -60,8 +59,7 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
         self.assertEqual((key, contract_storage[key]), result)
 
     def test_iterator_value_dict_mismatched_type(self):
-        path = self.get_contract_path('IteratorValueMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IteratorValueMismatchedType.py')
 
     async def test_import_iterator(self):
         await self.set_up_contract('ImportIterator.py')

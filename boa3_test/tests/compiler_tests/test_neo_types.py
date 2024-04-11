@@ -79,8 +79,7 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         self.assertEqual(value.to_array() + b'123', result)
 
     def test_uint160_mismatched_type(self):
-        path = self.get_contract_path('uint160', 'UInt160CallMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'uint160', 'UInt160CallMismatchedType.py')
 
     # endregion
 
@@ -155,8 +154,7 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         self.assertEqual(value.to_array() + b'123', result)
 
     def test_uint256_mismatched_type(self):
-        path = self.get_contract_path('uint256', 'UInt256CallMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'uint256', 'UInt256CallMismatchedType.py')
 
     # endregion
 
@@ -188,8 +186,7 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), 'unhandled exception')
 
     def test_ecpoint_call_without_args(self):
-        path = self.get_contract_path('ecpoint', 'ECPointCallWithoutArgs.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ecpoint', 'ECPointCallWithoutArgs.py')
 
     async def test_ecpoint_return_bytes(self):
         await self.set_up_contract('ecpoint', 'ECPointReturnBytes.py')
@@ -226,8 +223,7 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         self.assertEqual(self.ecpoint_to_array(value) + b'123', result)
 
     def test_ecpoint_mismatched_type(self):
-        path = self.get_contract_path('ecpoint', 'ECPointCallMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ecpoint', 'ECPointCallMismatchedType.py')
 
     async def test_ecpoint_script_hash(self):
         await self.set_up_contract('ecpoint', 'ECPointScriptHash.py')
@@ -303,8 +299,7 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         self.assertEqual(concat_bytes + arg, result)
 
     def test_opcode_concat_mismatched_type(self):
-        path = self.get_contract_path('opcode', 'ConcatMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'opcode', 'ConcatMismatchedType.py')
 
     async def test_opcode_multiplication(self):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -361,16 +356,13 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         # self.assertEqual(True, result)
 
     def test_transaction_cast_and_get_hash(self):
-        path = self.get_contract_path('CastTransactionGetHash.py')
-        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastTransactionGetHash.py')
 
     def test_transaction_implicit_cast_and_get_hash(self):
-        path = self.get_contract_path('ImplicitCastTransactionGetHash.py')
-        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, 'ImplicitCastTransactionGetHash.py')
 
     def test_transaction_cast_and_assign_hash_to_variable(self):
-        path = self.get_contract_path('CastTransactionGetHashToVariable.py')
-        self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
+        self.assertCompilerLogs(CompilerWarning.TypeCasting, 'CastTransactionGetHashToVariable.py')
 
     async def test_isinstance_transaction(self):
         await self.set_up_contract('IsInstanceTransaction.py')

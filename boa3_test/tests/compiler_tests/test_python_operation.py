@@ -21,8 +21,7 @@ class TestPythonOperation(boatestcase.BoaTestCase):
         self.assertEqual(b'34' in b'1234', result)
 
     def test_bytes_membership_mismatched_type(self):
-        path = self.get_contract_path('BytesMembershipMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytesMembershipMismatchedType.py')
 
     async def test_int_in_bytes(self):
         await self.set_up_contract('BytesMembershipWithInt.py')
@@ -49,8 +48,7 @@ class TestPythonOperation(boatestcase.BoaTestCase):
         self.assertEqual('4' in {1: '2', '4': 8}, result)
 
     def test_dict_membership_mismatched_type(self):
-        path = self.get_contract_path('DictMembershipMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'DictMembershipMismatchedType.py')
 
     async def test_in_list(self):
         await self.set_up_contract('ListIn.py')
@@ -65,8 +63,7 @@ class TestPythonOperation(boatestcase.BoaTestCase):
         self.assertEqual('4' in [1, 2, '3', '4'], result)
 
     def test_list_membership_mismatched_type(self):
-        path = self.get_contract_path('ListMembershipMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ListMembershipMismatchedType.py')
 
     async def test_in_str(self):
         await self.set_up_contract('StringIn.py')
@@ -78,8 +75,7 @@ class TestPythonOperation(boatestcase.BoaTestCase):
         self.assertEqual('42' in '1234', result)
 
     def test_str_membership_mismatched_type(self):
-        path = self.get_contract_path('StringMembershipMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StringMembershipMismatchedType.py')
 
     async def test_in_tuple(self):
         await self.set_up_contract('TupleIn.py')
@@ -94,8 +90,7 @@ class TestPythonOperation(boatestcase.BoaTestCase):
         self.assertEqual('4' in (1, 2, '3', '4'), result)
 
     def test_tuple_membership_mismatched_type(self):
-        path = self.get_contract_path('TupleMembershipMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'TupleMembershipMismatchedType.py')
 
     async def test_in_typed_dict_builtin_type(self):
         await self.set_up_contract('TypedDictBuiltinTypeIn.py')
