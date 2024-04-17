@@ -1,8 +1,3 @@
-from boa3_test.tests.boa_test import (BoaTest,  # needs to be the first import to avoid circular imports
-                                      _COMPILER_LOCK as LOCK,
-                                      _LOGGING_LOCK as LOG_LOCK
-                                      )
-
 __all__ = [
     'BoaCliTest',
 ]
@@ -12,10 +7,14 @@ import io
 from contextlib import redirect_stdout, redirect_stderr
 
 from boa3.cli import main
+from boa3_test.tests import boatestcase
+from boa3_test.tests.boatestcase import (_COMPILER_LOCK as LOCK,
+                                         _LOGGING_LOCK as LOG_LOCK
+                                         )
 from boa3_test.tests.cli_tests import utils
 
 
-class BoaCliTest(BoaTest, abc.ABC):
+class BoaCliTest(boatestcase.BoaTestCase, abc.ABC):
     default_folder = 'test_cli'
 
     EXIT_CODE_SUCCESS = 0
