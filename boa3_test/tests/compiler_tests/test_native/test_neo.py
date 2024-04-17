@@ -11,7 +11,6 @@ from neo3.wallet import account
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3_test.tests import annotation, boatestcase
-from boa3_test.tests.boatestcase import FaultException
 
 
 @dataclass

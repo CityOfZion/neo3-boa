@@ -5,7 +5,6 @@ from neo3.network.payloads import block, transaction, verification
 
 from boa3_test.tests import annotation
 
-
 StackItem = TypeVar(
     'StackItem',
     int,
