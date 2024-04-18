@@ -1,164 +1,104 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestMatchCase(BoaTest):
+class TestMatchCase(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/match_case_test'
 
-    def test_any_type_match_case(self):
-        path, _ = self.get_deploy_file_paths('AnyTypeMatchCase.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_any_type_match_case(self):
+        await self.set_up_contract('AnyTypeMatchCase.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [True], return_type=str)
+        self.assertEqual("True", result)
 
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append("True")
+        result, _ = await self.call('main', [1], return_type=str)
+        self.assertEqual("one", result)
 
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append("one")
+        result, _ = await self.call('main', ["2"], return_type=str)
+        self.assertEqual("2 string", result)
 
-        invokes.append(runner.call_contract(path, 'main', "2"))
-        expected_results.append("2 string")
+        result, _ = await self.call('main', ['other value'], return_type=str)
+        self.assertEqual("other", result)
 
-        invokes.append(runner.call_contract(path, 'main', 'other value'))
-        expected_results.append("other")
+    async def test_bool_type_match_case(self):
+        await self.set_up_contract('BoolTypeMatchCase.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [True], return_type=str)
+        self.assertEqual("True", result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [False], return_type=str)
+        self.assertEqual("False", result)
 
-    def test_bool_type_match_case(self):
-        path, _ = self.get_deploy_file_paths('BoolTypeMatchCase.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_int_type_match_case(self):
+        await self.set_up_contract('IntTypeMatchCase.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [10], return_type=str)
+        self.assertEqual("ten", result)
 
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append("True")
+        result, _ = await self.call('main', [-10], return_type=str)
+        self.assertEqual("minus ten", result)
 
-        invokes.append(runner.call_contract(path, 'main', False))
-        expected_results.append("False")
+        result, _ = await self.call('main', [0], return_type=str)
+        self.assertEqual("zero", result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [123], return_type=str)
+        self.assertEqual("other", result)
+        result, _ = await self.call('main', [-999], return_type=str)
+        self.assertEqual("other", result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_str_type_match_case(self):
+        await self.set_up_contract('StrTypeMatchCase.py')
 
-    def test_int_type_match_case(self):
-        path, _ = self.get_deploy_file_paths('IntTypeMatchCase.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', ['first'], return_type=str)
+        self.assertEqual("1", result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['second'], return_type=str)
+        self.assertEqual("2", result)
 
-        invokes.append(runner.call_contract(path, 'main', 10))
-        expected_results.append("ten")
+        result, _ = await self.call('main', ['third'], return_type=str)
+        self.assertEqual("3", result)
 
-        invokes.append(runner.call_contract(path, 'main', -10))
-        expected_results.append("minus ten")
+        result, _ = await self.call('main', ['another value'], return_type=str)
+        self.assertEqual("other", result)
 
-        invokes.append(runner.call_contract(path, 'main', 0))
-        expected_results.append("zero")
+        result, _ = await self.call('main', ['unit test'], return_type=str)
+        self.assertEqual("other", result)
 
-        invokes.append(runner.call_contract(path, 'main', 123))
-        expected_results.append("other")
-        invokes.append(runner.call_contract(path, 'main', -999))
-        expected_results.append("other")
+    async def test_outer_var_inside_match(self):
+        await self.set_up_contract('OuterVariableInsideMatch.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [True], return_type=str)
+        self.assertEqual("String is: True", result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [10], return_type=str)
+        self.assertEqual("String is: 10", result)
 
-    def test_str_type_match_case(self):
-        path, _ = self.get_deploy_file_paths('StrTypeMatchCase.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', ["2"], return_type=str)
+        self.assertEqual("String is: 2 string", result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['another value'], return_type=str)
+        self.assertEqual("String is: other", result)
 
-        invokes.append(runner.call_contract(path, 'main', 'first'))
-        expected_results.append("1")
+        result, _ = await self.call('main', ['unit test'], return_type=str)
+        self.assertEqual("String is: other", result)
 
-        invokes.append(runner.call_contract(path, 'main', 'second'))
-        expected_results.append("2")
+    async def test_var_existing_in_all_cases(self):
+        await self.set_up_contract('VarExistingInAllCases.py')
 
-        invokes.append(runner.call_contract(path, 'main', 'third'))
-        expected_results.append("3")
+        result, _ = await self.call('main', [True], return_type=str)
+        self.assertEqual("True", result)
 
-        invokes.append(runner.call_contract(path, 'main', 'another value'))
-        expected_results.append("other")
-        invokes.append(runner.call_contract(path, 'main', 'unit test'))
-        expected_results.append("other")
+        result, _ = await self.call('main', [10], return_type=str)
+        self.assertEqual("10", result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', ["2"], return_type=str)
+        self.assertEqual("2 string", result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['another value'], return_type=str)
+        self.assertEqual("other", result)
 
-    def test_outer_var_inside_match(self):
-        path, _ = self.get_deploy_file_paths('OuterVariableInsideMatch.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append("String is: True")
-
-        invokes.append(runner.call_contract(path, 'main', 10))
-        expected_results.append("String is: 10")
-
-        invokes.append(runner.call_contract(path, 'main', "2"))
-        expected_results.append("String is: 2 string")
-
-        invokes.append(runner.call_contract(path, 'main', 'another value'))
-        expected_results.append("String is: other")
-        invokes.append(runner.call_contract(path, 'main', 'unit test'))
-        expected_results.append("String is: other")
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_var_existing_in_all_cases(self):
-        path, _ = self.get_deploy_file_paths('VarExistingInAllCases.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append("True")
-
-        invokes.append(runner.call_contract(path, 'main', 10))
-        expected_results.append("10")
-
-        invokes.append(runner.call_contract(path, 'main', "2"))
-        expected_results.append("2 string")
-
-        invokes.append(runner.call_contract(path, 'main', 'another value'))
-        expected_results.append("other")
-        invokes.append(runner.call_contract(path, 'main', 'unit test'))
-        expected_results.append("other")
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['unit test'], return_type=str)
+        self.assertEqual("other", result)
 
     def test_unsupported_case(self):
         path = self.get_contract_path('UnsupportedCase.py')
