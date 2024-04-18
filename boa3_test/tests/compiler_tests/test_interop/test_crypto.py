@@ -1,6 +1,5 @@
 import hashlib
 
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode

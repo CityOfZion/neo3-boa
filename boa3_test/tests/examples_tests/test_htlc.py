@@ -5,8 +5,6 @@ from neo3.wallet import account
 
 from boa3.internal import constants
 from boa3.internal.neo.cryptography import hash160
-
-
 from boa3_test.tests import boatestcase
 
 

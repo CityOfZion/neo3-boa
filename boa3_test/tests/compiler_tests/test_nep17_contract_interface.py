@@ -1,62 +1,48 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestContractInterface(BoaTest):
+class TestContractInterface(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/nep17_contract_interface_test'
 
-    def test_balance_of(self):
-        path, _ = self.get_deploy_file_paths('Nep17BalanceOf.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_balance_of(self):
+        await self.set_up_contract('Nep17BalanceOf.py')
 
-        from boa3_test.tests.test_drive import neoxp
-        genesis = neoxp.utils.get_account_by_name('genesis')
+        genesis = self.genesis.script_hash
 
-        invoke_balance_of = runner.call_contract(path, 'main', genesis.script_hash.to_array())
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(10 ** 8, invoke_balance_of.result)
+        expected_result = 10 ** 8
+        balance_of_result, _ = await self.call('main', [genesis], return_type=int)
+        self.assertEqual(expected_result, balance_of_result)
 
-    def test_decimals(self):
-        path, _ = self.get_deploy_file_paths('Nep17Decimals.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_decimals(self):
+        await self.set_up_contract('Nep17Decimals.py')
 
-        invoke_decimals = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(0, invoke_decimals.result)
+        expected_result = 0
+        decimals_result, _ = await self.call('main', return_type=int)
+        self.assertEqual(expected_result, decimals_result)
 
-    def test_symbol(self):
-        path, _ = self.get_deploy_file_paths('Nep17Symbol.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_symbol(self):
+        await self.set_up_contract('Nep17Symbol.py')
 
-        invoke_symbol = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual('NEO', invoke_symbol.result)
+        expected_result = 'NEO'
+        symbol_result, _ = await self.call('main', return_type=str)
+        self.assertEqual(expected_result, symbol_result)
 
-    def test_total_supply(self):
-        path, _ = self.get_deploy_file_paths('Nep17TotalSupply.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_total_supply(self):
+        await self.set_up_contract('Nep17TotalSupply.py')
 
-        invoke_total_supply = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(10 ** 8, invoke_total_supply.result)
+        expected_result = 10 ** 8
+        total_supply_result, _ = await self.call('main', return_type=int)
+        self.assertEqual(expected_result, total_supply_result)
 
-    def test_transfer(self):
-        path, _ = self.get_deploy_file_paths('Nep17Transfer.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_transfer(self):
+        await self.set_up_contract('Nep17Transfer.py')
 
-        from boa3_test.tests.test_drive import neoxp
-        genesis = neoxp.utils.get_account_by_name('genesis')
+        genesis = self.genesis.script_hash
 
-        # TODO: Methods and contract hash are not being added to the contract permissions yet #86a1678cf
-        with self.assertRaises(AssertionError):
-            invoke_test_transfer = runner.call_contract(path, 'main',
-                                                        genesis.script_hash.to_array(), genesis.script_hash.to_array(), -1)
-            runner.execute()
-            self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-            self.assertEqual(False, invoke_test_transfer.result)
+        # TODO: Methods and contract hash are not being added to the contract permissions yet #86drpncxa
+        with self.assertRaises(boatestcase.FaultException) as context:
+            expected_result = False
+            transfer_result, _ = await self.call('main', [genesis, genesis, -1], return_type=bool)
+            self.assertEqual(expected_result, transfer_result)
+
+        self.assertRegex(str(context.exception), 'disallowed method call')
