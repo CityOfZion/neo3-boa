@@ -174,7 +174,6 @@ class Builtin:
     # boa builtin decorator
     ContractInterface = ContractDecorator()
     ContractMethodDisplayName = DisplayNameDecorator()
-    Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
     # boa builtin type
@@ -286,7 +285,6 @@ class Builtin:
                         ],
         BoaPackage.CompileTime: [ContractInterface,
                                  ContractMethodDisplayName,
-                                 Metadata,
                                  NeoMetadataType,
                                  Public,
                                  NewEvent
