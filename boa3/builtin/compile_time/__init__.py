@@ -1,7 +1,6 @@
 __all__ = [
     'CreateNewEvent',
     'public',
-    'metadata',
     'contract',
     'display_name',
     'NeoMetadata',
@@ -84,22 +83,6 @@ def public(name: str = None, safe: bool = True, *args, **kwargs):
     def decorator_wrapper(*args, **kwargs):
         pass
     return decorator_wrapper
-
-
-def metadata(*args):
-    """
-    This decorator identifies the function that returns the metadata object of the smart contract.
-    This can be used to only one function. Using this decorator in multiple functions will raise a compiler error.
-
-    Deprecated in 1.1.1. Will be removed in 1.2.0
-
-    >>> @metadata   # this indicates that this function will have information about the smart contract
-    ... def neo_metadata() -> NeoMetadata:      # needs to return a NeoMetadata
-    ...     meta = NeoMetadata()
-    ...     meta.name = 'NewContractName'
-    ...     return meta
-    """
-    pass
 
 
 def contract(script_hash: str | bytes):
