@@ -1,11 +1,9 @@
-from typing import Dict
-
 from boa3.builtin.compile_time import public
 
 
 @public
 def Main():
-    a: Dict[int, Dict[int, bool]] = {
+    a: dict[int, dict[int, bool]] = {
         1: {
             14: False,
             12: True,

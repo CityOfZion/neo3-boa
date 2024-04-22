@@ -1,9 +1,7 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
 @public
-def Main(a: List[int], value: int) -> List[int]:
+def Main(a: list[int], value: int) -> list[int]:
     a.remove(value)
     return a

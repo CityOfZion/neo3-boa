@@ -1,4 +1,4 @@
-from typing import List, cast
+from typing import cast
 
 from boa3.builtin.compile_time import public
 
@@ -18,7 +18,7 @@ def main() -> int:
     }
 
     j4: int = d['mcalll']
-    return j4 + cast(List[int], d['z'])[3]
+    return j4 + cast(list[int], d['z'])[3]
 
 
 def mymethod(a: int, b: int) -> int:

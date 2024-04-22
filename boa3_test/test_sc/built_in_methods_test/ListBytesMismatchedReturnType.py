@@ -1,5 +1,2 @@
-from typing import List
-
-
-def main() -> List[bytes]:
+def main() -> list[bytes]:
     return list(b'123')

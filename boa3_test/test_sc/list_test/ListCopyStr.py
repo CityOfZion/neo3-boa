@@ -1,10 +1,8 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
 @public
-def copy_str_list(_list: List[str], value: str) -> List[List[str]]:
+def copy_str_list(_list: list[str], value: str) -> list[list[str]]:
     list_copy = _list.copy()
 
     list_copy.append(value)

@@ -1,5 +1,2 @@
-from typing import List
-
-
-def main(x: List[int], start: int) -> int:
+def main(x: list[int], start: int) -> int:
     return sum(x, start, 10)

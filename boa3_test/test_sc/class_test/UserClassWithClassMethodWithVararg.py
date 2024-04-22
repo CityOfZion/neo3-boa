@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
@@ -12,5 +10,5 @@ class Example:
 
 
 @public
-def call_by_class_name(arg: List[int]) -> int:
+def call_by_class_name(arg: list[int]) -> int:
     return Example.some_method(*arg)

@@ -1,12 +1,10 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
 @public
-def main(x: bytes) -> List[int]:
+def main(x: bytes) -> list[int]:
     return list(x)
 
 
-def verify_return() -> List[int]:
+def verify_return() -> list[int]:
     return list(b'123')

@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop import storage
@@ -23,7 +23,7 @@ def callback_method(requested_url: str, user_data: bytes, code: OracleResponseCo
 
 
 @public
-def get_storage() -> List[Any]:
+def get_storage() -> list[Any]:
     a = storage.get_str(b'pUrl')
     b = storage.get(b'pUser')
     c = storage.get_int(b'pCode')

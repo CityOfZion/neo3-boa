@@ -1,8 +1,6 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
 @public
-def main(value: int, some_list: List[int]) -> bool:
+def main(value: int, some_list: list[int]) -> bool:
     return value in some_list

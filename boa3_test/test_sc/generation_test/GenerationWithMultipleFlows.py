@@ -1,10 +1,8 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
 @public
-def Main(operation: str, args: List[int]) -> int:
+def Main(operation: str, args: list[int]) -> int:
     if len(args) < 2:
         return 0
     a: int = args[0]

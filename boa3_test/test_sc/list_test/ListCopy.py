@@ -1,10 +1,10 @@
-from typing import Any, List
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def copy_list(_list: List[Any], value: Any) -> List[List[Any]]:
+def copy_list(_list: list[Any], value: Any) -> list[list[Any]]:
     list_copy = _list.copy()
 
     list_copy.append(value)
@@ -14,7 +14,7 @@ def copy_list(_list: List[Any], value: Any) -> List[List[Any]]:
 
 
 @public
-def attribution(_list: List[Any], value: Any) -> bool:
+def attribution(_list: list[Any], value: Any) -> bool:
     list_not_copy = _list
 
     list_not_copy.append(value)

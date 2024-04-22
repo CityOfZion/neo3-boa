@@ -1,5 +1,2 @@
-from typing import Dict
-
-
-def Main(a: Dict[Any, Any]):  # Any is not imported
+def Main(a: dict[Any, Any]):  # Any is not imported
     b = a
