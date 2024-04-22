@@ -1,5 +1,2 @@
-from typing import List
-
-
-def main() -> List[int]:
+def main() -> list[int]:
     return list('123')

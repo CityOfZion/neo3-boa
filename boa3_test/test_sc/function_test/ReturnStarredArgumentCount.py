@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
@@ -9,5 +7,5 @@ def fun_with_starred(*args: int) -> int:
 
 
 @public
-def main(list_with_args: List[int]) -> int:
+def main(list_with_args: list[int]) -> int:
     return fun_with_starred(*list_with_args)

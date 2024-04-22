@@ -5,7 +5,7 @@ from boa3_test.test_sc.import_test.sample_package.package import another_module,
 
 @public
 def call_imported_method() -> dict:
-    a: another_module.Dict[another_module.Any, another_module.Any] = another_module.EmptyDict()
+    a: dict[another_module.Any, another_module.Any] = another_module.EmptyDict()
     return a
 
 

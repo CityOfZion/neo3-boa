@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 a = 0
@@ -13,5 +11,5 @@ h = 7
 
 
 @public
-def Main() -> List[int]:
+def Main() -> list[int]:
     return [a, b, c, d, e, f, g, h]

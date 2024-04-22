@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
 
 from boa3.internal.compiler.compiler import Compiler
@@ -34,7 +32,7 @@ class TestVariable(BoaTest):
         from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK
         with LOCK:
             compiler_output = compiler.compile(path)
-            main_symbol_table: Dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
+            main_symbol_table: dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
 
         self.assertEqual(expected_compiler_output, compiler_output)
 
@@ -45,7 +43,7 @@ class TestVariable(BoaTest):
         self.assertIsInstance(main_symbol_table[test_method_id], Method)
         method: Method = main_symbol_table[test_method_id]
 
-        method_symbol_table: Dict[str, Variable] = method.symbols
+        method_symbol_table: dict[str, Variable] = method.symbols
         # the variable is local to this method, so it should be in the method symbol table
         self.assertTrue(test_variable_id in method_symbol_table)
 

@@ -5,7 +5,7 @@ from boa3_test.test_sc.import_test.package_with_import import Module
 
 @public
 def call_imported_method() -> list:
-    a: Module.List[Module.Any] = Module.EmptyList()
+    a: list[Module.Any] = Module.EmptyList()
     return a
 
 

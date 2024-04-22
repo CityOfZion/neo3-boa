@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 
@@ -25,5 +23,5 @@ def add(a: int, b: int, c: int, d: int, e: int) -> int:
     return result
 
 
-def get_first_item(array_item: List[int]) -> int:
+def get_first_item(array_item: list[int]) -> int:
     return array_item[0]

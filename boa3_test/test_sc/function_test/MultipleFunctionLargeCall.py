@@ -1,12 +1,12 @@
-from typing import Any, List
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def main(operation: str, arg: List[int]) -> Any:
+def main(operation: str, arg: list[int]) -> Any:
     if operation == 'calculate' and len(arg) >= 2:
-        operands: List[int] = []
+        operands: list[int] = []
         i = 1
         while i < len(arg):
             operands.append(arg[i])
@@ -17,7 +17,7 @@ def main(operation: str, arg: List[int]) -> Any:
 
 
 @public
-def calculate(op_id: int, operands: List[int]) -> Any:
+def calculate(op_id: int, operands: list[int]) -> Any:
     op = get_operation(op_id)
     result: Any
     if len(operands) <= 0:

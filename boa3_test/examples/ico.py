@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, Union
 
 from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
@@ -466,7 +466,7 @@ def approve(originator: UInt160, to_address: UInt160, amount: int) -> bool:
 
 
 @public
-def kyc_register(addresses: List[UInt160]) -> int:
+def kyc_register(addresses: list[UInt160]) -> int:
     """
     Includes the given addresses to the kyc whitelist
 
@@ -485,7 +485,7 @@ def kyc_register(addresses: List[UInt160]) -> int:
 
 
 @public
-def kyc_remove(addresses: List[UInt160]) -> int:
+def kyc_remove(addresses: list[UInt160]) -> int:
     """
     Removes the given addresses from the kyc whitelist
 

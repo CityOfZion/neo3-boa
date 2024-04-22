@@ -1,11 +1,11 @@
-from typing import Any, Dict
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def main() -> Dict[Any, int]:
-    d: Dict[Any, int] = {}
+def main() -> dict[Any, int]:
+    d: dict[Any, int] = {}
     d['a'] = 4
     d[13] = 3
 
