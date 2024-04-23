@@ -303,22 +303,7 @@ class TestVariable(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ReturnUndeclaredVariable.py')
 
     def test_assign_value_mismatched_type(self):
-        string_value = '1'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = '1'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC0
-            + Opcode.RET
-        )
-
-        output, _ = self.assertCompilerLogs(CompilerWarning.TypeCasting, 'MismatchedTypeAssignValue.py')
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeAssignValue.py')
 
     def test_assign_binary_operation_mismatched_type(self):
         expected_output = (
