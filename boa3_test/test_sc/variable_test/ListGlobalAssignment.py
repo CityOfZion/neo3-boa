@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.builtin.compile_time import public
 
 a = [1, 2, 3, 4]
@@ -7,7 +5,7 @@ a = [1, 2, 3, 4]
 
 class Test:
     @classmethod
-    def get_global(cls) -> List[int]:
+    def get_global(cls) -> list[int]:
         return a
 
 
@@ -17,16 +15,16 @@ def append_to_global(value: int):
 
 
 @public
-def get_from_global() -> List[int]:
+def get_from_global() -> list[int]:
     return a
 
 
 @public
-def get_from_class() -> List[int]:
+def get_from_class() -> list[int]:
     return Test.get_global()
 
 
 @public
-def get_from_class_without_assigning() -> List[int]:
+def get_from_class_without_assigning() -> list[int]:
     Test.get_global()
     return []

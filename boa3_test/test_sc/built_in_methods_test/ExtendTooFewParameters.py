@@ -1,7 +1,7 @@
-from typing import Any, List
+from typing import Any
 
 
-def Main(op: str, args: list) -> List[Any]:
+def Main(op: str, args: list) -> list[Any]:
     a = [1, 2, 3]
     list.extend((4, 5, 6))
     return a

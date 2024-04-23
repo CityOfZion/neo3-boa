@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, Union
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
@@ -298,7 +298,7 @@ def get_token_b() -> UInt160:
 
 
 @public
-def get_reserves() -> List[int]:
+def get_reserves() -> list[int]:
     """
     Returns how many token_a and token_b tokens are in the pool.
 
@@ -309,7 +309,7 @@ def get_reserves() -> List[int]:
 
 
 @public
-def add_liquidity(amount_token_a_desired: int, amount_token_b_desired: int, amount_token_a_min: int, amount_token_b_min: int, user_address: UInt160) -> List[int]:
+def add_liquidity(amount_token_a_desired: int, amount_token_b_desired: int, amount_token_a_min: int, amount_token_b_min: int, user_address: UInt160) -> list[int]:
     """
     Adds liquidity to the pool, minting AMM tokens in the process.
 
@@ -453,7 +453,7 @@ def quote(amount_token1: int, reserve_token1: int, reserve_token2: int) -> int:
 
 
 @public
-def remove_liquidity(liquidity: int, amount_token_a_min: int, amount_token_b_min: int, user_address: UInt160) -> List[int]:
+def remove_liquidity(liquidity: int, amount_token_a_min: int, amount_token_b_min: int, user_address: UInt160) -> list[int]:
     """
     Remove liquidity from the pool, burning the AMM token in the process and giving token_a and token_b back to the user.
 
@@ -481,7 +481,7 @@ def remove_liquidity(liquidity: int, amount_token_a_min: int, amount_token_b_min
     return amount
 
 
-def burn(liquidity: int, user_address: UInt160) -> List[int]:
+def burn(liquidity: int, user_address: UInt160) -> list[int]:
     """
     Burns AMM tokens, this function will be called by `remove_liquidity()`.
 

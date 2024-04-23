@@ -5,7 +5,7 @@ from boa3_test.test_sc.import_test.FromImportTyping import *
 
 @public
 def call_imported_method() -> list:
-    a: List[Any] = EmptyList()
+    a: list[Any] = EmptyList()
     return a
 
 

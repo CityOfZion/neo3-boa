@@ -1,7 +1,7 @@
-from typing import Any, List
+from typing import Any
 
 
-def EmptyList() -> List[Any]:
+def EmptyList() -> list[Any]:
     return []
 
 

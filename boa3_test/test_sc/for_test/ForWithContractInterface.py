@@ -1,11 +1,9 @@
-from typing import List
-
 from boa3.builtin.compile_time import public, contract
 
 
 @public
-def main(number: int) -> List[int]:
-    result_list: List[int] = []
+def main(number: int) -> list[int]:
+    result_list: list[int] = []
     for x in range(number):
         idx: int = AnotherContract.return_zero()
         result_list.append(idx)

@@ -1,6 +1,3 @@
-from typing import Dict
-
-
-def Main(a: Dict[int, str]) -> Dict[int, str]:
+def Main(a: dict[int, str]) -> dict[int, str]:
     a[0] = True
     return a

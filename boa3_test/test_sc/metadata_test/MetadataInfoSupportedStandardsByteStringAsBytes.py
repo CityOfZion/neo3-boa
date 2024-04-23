@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.interop.iterator import Iterator
@@ -64,5 +64,5 @@ def tokens() -> Iterator:
 
 
 @public(safe=True)
-def properties(tokenId: bytes) -> Dict[Any, Any]:
+def properties(tokenId: bytes) -> dict[Any, Any]:
     pass

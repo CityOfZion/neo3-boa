@@ -1,23 +1,23 @@
-from typing import Any, List
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def add_any(a: List[Any], b: List[Any]) -> List[Any]:
+def add_any(a: list[Any], b: list[Any]) -> list[Any]:
     return a + b
 
 
 @public
-def add_int(a: List[int], b: List[int]) -> List[int]:
+def add_int(a: list[int], b: list[int]) -> list[int]:
     return a + b
 
 
 @public
-def add_bool(a: List[bool], b: List[bool]) -> List[bool]:
+def add_bool(a: list[bool], b: list[bool]) -> list[bool]:
     return a + b
 
 
 @public
-def add_str(a: List[str], b: List[str]) -> List[str]:
+def add_str(a: list[str], b: list[str]) -> list[str]:
     return a + b

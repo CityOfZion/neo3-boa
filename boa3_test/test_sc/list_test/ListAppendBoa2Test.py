@@ -1,11 +1,11 @@
-from typing import Any, List
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
 def main() -> Any:
-    m: List[Any] = [1, 2, 2]
+    m: list[Any] = [1, 2, 2]
     m.append(7)
     q = [6, 7]
     l = 'howdy'

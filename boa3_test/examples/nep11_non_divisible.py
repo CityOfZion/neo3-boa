@@ -3,7 +3,7 @@
 # with further instructions on how to modify and use it.
 # ------------------------------------------------------------------------------------------------------------------------
 
-from typing import Any, Dict, List, Union, cast
+from typing import Any, Union, cast
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.contract import abort
@@ -305,7 +305,7 @@ def tokens() -> Iterator:
 
 
 @public(safe=True)
-def properties(tokenId: bytes) -> Dict[Any, Any]:
+def properties(tokenId: bytes) -> dict[Any, Any]:
     """
     Get the properties of a token.
 
@@ -318,7 +318,7 @@ def properties(tokenId: bytes) -> Dict[Any, Any]:
     """
     metaBytes = cast(str, get_meta(tokenId))
     expect(len(metaBytes) != 0, 'No metadata available for token')
-    metaObject = cast(Dict[str, str], json_deserialize(metaBytes))
+    metaObject = cast(dict[str, str], json_deserialize(metaBytes))
 
     return metaObject
 
@@ -378,7 +378,7 @@ def internal_deploy(owner: UInt160):
     storage.put_bool(PAUSED, False)
     storage.put_int(TOKEN_COUNT, 0)
 
-    auth: List[UInt160] = []
+    auth: list[UInt160] = []
     auth.append(owner)
     serialized = serialize(auth)
     storage.put(AUTH_ADDRESSES, serialized)

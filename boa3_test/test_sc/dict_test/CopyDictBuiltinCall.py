@@ -1,11 +1,11 @@
-from typing import Any, Dict, Tuple
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def copy_dict(dict_: Dict[Any, Any], key: Any, value: Any) -> Tuple[Dict[Any, Any], Dict[Any, Any]]:
-    dict_copy = Dict.copy(dict_)
+def copy_dict(dict_: dict[Any, Any], key: Any, value: Any) -> tuple[dict[Any, Any], dict[Any, Any]]:
+    dict_copy = dict.copy(dict_)
 
     dict_copy[key] = value
 

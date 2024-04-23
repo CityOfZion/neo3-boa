@@ -1,7 +1,4 @@
-from typing import List
-
-
-def Main(iterator: List[int]) -> int:
+def Main(iterator: list[int]) -> int:
     for value in iterator:
         return value
     else:
