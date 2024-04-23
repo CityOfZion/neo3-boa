@@ -289,7 +289,8 @@ class NeoMetadata:
         if new_group not in self._permissions:
             self._groups.append(new_group)
 
-    def add_permission(self, *, contract: str = IMPORT_WILDCARD, methods: list[str, str] = IMPORT_WILDCARD):
+    def add_permission(self, *, contract: str = IMPORT_WILDCARD,
+                       methods: list[str] | str | tuple[str, ...] = IMPORT_WILDCARD):
         """
         Adds a valid contract and a valid methods to the permissions in the manifest.
 
@@ -315,7 +316,7 @@ class NeoMetadata:
         if not isinstance(contract, str):
             return
 
-        if not isinstance(methods, (str, list)):
+        if not isinstance(methods, (str, list, tuple)):
             return
 
         from boa3.internal.constants import IMPORT_WILDCARD
@@ -326,8 +327,7 @@ class NeoMetadata:
             return
 
         # verifies if methods is a valid value
-        elif ((isinstance(methods, str) and methods != IMPORT_WILDCARD) or
-              (isinstance(methods, list) and any(not isinstance(method, str) for method in methods))):
+        elif isinstance(methods, (tuple, list)) and (any(not isinstance(method, str) for method in methods) or len(methods) == 0):
             return
 
         from boa3.internal import constants
@@ -335,6 +335,17 @@ class NeoMetadata:
             'contract': constants.IMPORT_WILDCARD,
             'methods': constants.IMPORT_WILDCARD,
         }
+
+        # verifies if method contains wildcard
+        if isinstance(methods, (tuple, list)):
+            # if any of the elements in the tuple is the wildcard
+            if constants.IMPORT_WILDCARD in methods:
+                methods = constants.IMPORT_WILDCARD
+            else:
+                methods = list(methods)
+        # if it's a single str and not wildcard, add to a list
+        elif isinstance(methods, str) and methods != constants.IMPORT_WILDCARD:
+            methods = [methods]
 
         if wildcard_permission not in self._permissions:
             new_permission = {
