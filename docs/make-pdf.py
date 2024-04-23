@@ -10,6 +10,15 @@ latex_build_dir = os.sep.join([docs_dir, 'build', 'latex'])
 if os.path.isdir(latex_build_dir):
     shutil.rmtree(latex_build_dir)
 
+print('\nChecking for MikTex updates...')
+checkMiktexCmd = "miktex packages check-update"
+os.system(checkMiktexCmd)
+
+print('\nChecking for MikTex packages integrity...')
+verifyMiktexCmd = "miktex packages verify"
+os.system(verifyMiktexCmd)
+print()
+
 ext = '.bat' if sys.platform.startswith('win') else ''
 os.system(f'{docs_dir}{os.sep}make{ext} latex')
 
