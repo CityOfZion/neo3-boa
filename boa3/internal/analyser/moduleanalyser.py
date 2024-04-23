@@ -361,7 +361,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._log_warning(
                 CompilerWarning.RedeclaredSymbol(
                     line=function.lineno, col=function.col_offset,
-                    symbol_id=Builtin.Metadata.identifier
+                    symbol_id="metadata"
                 )
             )
         # this function must have a return and no arguments
@@ -633,7 +633,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         for stmt in function_stmts:
             result = self.visit(stmt)
             # don't evaluate the metadata function in the following analysers
-            if result is Builtin.Metadata:
+            if result is MetadataTypeSingleton:
                 module.body.remove(stmt)
 
         self.modules['main'] = mod
@@ -735,15 +735,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param function:
         """
         fun_decorators: list[Method] = self._get_decorators(function)
-        if Builtin.Metadata in fun_decorators:
-            self._log_warning(
-                CompilerWarning.DeprecatedSymbol(
-                    function.lineno, function.col_offset,
-                    symbol_id=Builtin.Metadata.identifier
-                )
-            )
-            self._read_metadata_object(function)
-            return Builtin.Metadata
 
         if any(decorator is None for decorator in fun_decorators):
             self._log_error(
@@ -847,7 +838,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
             if symbol is MetadataTypeSingleton:
                 self._read_metadata_object(function)
-                return Builtin.Metadata
+                return symbol
 
             fun_rtype_symbol = self.get_type(symbol)
 
