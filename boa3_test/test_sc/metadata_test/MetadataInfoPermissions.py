@@ -10,7 +10,7 @@ def permissions_manifest() -> NeoMetadata:
     meta = NeoMetadata()
 
     # the contract needs permission to call this method from any contract
-    meta.add_permission(methods=['onNEP17Payment'])
+    meta.add_permission(methods='onNEP17Payment')
 
     # the contract needs permission to call this method from a specific contract
     meta.add_permission(contract='0x3846a4aa420d9831044396dd3a56011514cd10e3', methods=['get_object'])
