@@ -691,21 +691,8 @@ class TestBytes(BoaTest):
             self.assertEqual(expected_results[x], invokes[x].result)
 
     def test_byte_array_literal_value(self):
-        data = b'\x01\x02\x03'
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
-            + Integer(len(data)).to_byte_array(min_length=1)
-            + data
-            + Opcode.STLOC0
-            + Opcode.RET        # return
-        )
-
         path = self.get_contract_path('BytearrayLiteral.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_byte_array_default(self):
         expected_output = (

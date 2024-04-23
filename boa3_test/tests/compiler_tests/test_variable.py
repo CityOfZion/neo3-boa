@@ -348,23 +348,8 @@ class TestVariable(BoaTest):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
 
     def test_assign_value_mismatched_type(self):
-        string_value = '1'
-        byte_input = String(string_value).to_bytes()
-
-        expected_output = (
-            Opcode.INITSLOT
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = '1'
-            + Integer(len(byte_input)).to_byte_array()
-            + byte_input
-            + Opcode.STLOC0
-            + Opcode.RET
-        )
-
         path = self.get_contract_path('MismatchedTypeAssignValue.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
-        self.assertEqual(expected_output, output)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
 
     def test_assign_binary_operation_mismatched_type(self):
         expected_output = (
