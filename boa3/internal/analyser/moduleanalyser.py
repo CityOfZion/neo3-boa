@@ -1115,7 +1115,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._check_annotation_type(ann_assign.annotation, ann_assign)
 
-        # TODO: check if the annotated type and the value type are the same #86a1ctmwy
+        if isinstance(ann_assign.value, ast.Constant):
+            annotation_type = self.get_type(ann_assign.value)
+            if not var_type.is_type_of(annotation_type):
+                self._log_error(
+                    CompilerError.MismatchedTypes(line=ann_assign.value.lineno,
+                                                  col=ann_assign.value.col_offset,
+                                                  expected_type_id=var_type.identifier,
+                                                  actual_type_id=annotation_type.identifier)
+                )
+
         return self.assign_value(var_id, var_type,
                                  source_node=ann_assign,
                                  assignment=ann_assign.value is not None,
