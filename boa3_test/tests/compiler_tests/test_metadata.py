@@ -438,6 +438,23 @@ class TestMetadata(boatestcase.BoaTestCase):
         self.assertIsInstance(manifest['permissions'], list)
         self.assertEqual(len(manifest['permissions']), 0)
 
+    def test_metadata_info_permissions_empty_list(self):
+        path = self.get_contract_path('MetadataInfoPermissionsEmptyList.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 0)
+
+    def test_metadata_info_permissions_tuple(self):
+        path = self.get_contract_path('MetadataInfoPermissionsTuple.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": ['total_supply', 'onNEP17Payment']}, manifest['permissions'])
+
     async def test_metadata_info_permissions_wildcard(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcard.py')
         output, manifest = self.compile_and_save(path)
@@ -451,6 +468,33 @@ class TestMetadata(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', [], return_type=int)
         self.assertEqual(result, 100_000_000)    # NEO total supply
+
+    async def test_metadata_info_permissions_wildcard_list_single_element(self):
+        path = self.get_contract_path('MetadataInfoPermissionsWildcardListSingleElement.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    async def test_metadata_info_permissions_wildcard_list(self):
+        path = self.get_contract_path('MetadataInfoPermissionsWildcardList.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
+
+    async def test_metadata_info_permissions_wildcard_tuple(self):
+        path = self.get_contract_path('MetadataInfoPermissionsWildcardTuple.py')
+        output, manifest = self.compile_and_save(path)
+
+        self.assertIn('permissions', manifest)
+        self.assertIsInstance(manifest['permissions'], list)
+        self.assertEqual(len(manifest['permissions']), 1)
+        self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
 
     def test_metadata_info_permissions_native_contract(self):
         path = self.get_contract_path('MetadataInfoPermissionsNativeContract.py')
