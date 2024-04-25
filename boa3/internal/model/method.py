@@ -19,7 +19,8 @@ class Method(Callable):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: dict[str, Variable] = None,
+    def __init__(self,
+                 args: dict[str, Variable] = None,
                  vararg: tuple[str, Variable] | None = None,
                  kwargs: dict[str, Variable] | None = None,
                  defaults: list[ast.AST] = None,
@@ -28,8 +29,22 @@ class Method(Callable):
                  is_init: bool = False,
                  external_name: str = None,
                  is_safe: bool = False,
-                 origin_node: ast.AST | None = None):
-        super().__init__(args, vararg, kwargs, defaults, return_type, is_public, decorators, external_name, is_safe, origin_node)
+                 origin_node: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(
+            args=args,
+            vararg=vararg,
+            kwargs=kwargs,
+            defaults=defaults,
+            return_type=return_type,
+            is_public=is_public,
+            decorators=decorators,
+            external_name=external_name,
+            is_safe=is_safe,
+            origin_node=origin_node,
+            deprecated=deprecated
+        )
 
         self.imported_symbols = {}
         self._symbols = {}

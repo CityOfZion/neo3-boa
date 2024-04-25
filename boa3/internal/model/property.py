@@ -12,8 +12,13 @@ class Property(IExpression):
     :ivar var_type: the type of the variable.
     """
 
-    def __init__(self, getter: Method, setter: Method = None, origin_node: ast.AST | None = None):
-        super().__init__(origin_node)
+    def __init__(self,
+                 getter: Method,
+                 setter: Method = None,
+                 origin_node: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(origin_node, deprecated)
         self._getter: Method = getter
         self._setter: Method | None = setter
 

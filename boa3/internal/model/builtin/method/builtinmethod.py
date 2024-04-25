@@ -11,11 +11,16 @@ from boa3.internal.model.variable import Variable
 
 
 class IBuiltinMethod(IBuiltinCallable, Method, ABC):
-    def __init__(self, identifier: str, args: dict[str, Variable] = None,
-                 defaults: list[ast.AST] = None, return_type: IType = None,
+    def __init__(self,
+                 identifier: str,
+                 args: dict[str, Variable] = None,
+                 defaults: list[ast.AST] = None,
+                 return_type: IType = None,
                  vararg: tuple[str, Variable] | None = None,
-                 kwargs: dict[str, Variable] | None = None):
-        super().__init__(identifier, args, vararg, kwargs, defaults, return_type)
+                 kwargs: dict[str, Variable] | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(identifier, args, vararg, kwargs, defaults, return_type, deprecated)
 
     @property
     def is_supported(self) -> bool:

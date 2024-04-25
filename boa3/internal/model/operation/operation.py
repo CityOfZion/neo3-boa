@@ -15,9 +15,10 @@ class IOperation(ISymbol, ABC):
     :ivar result: the result type of the operation
     """
 
-    def __init__(self, operator: Operator, result_type: IType):
+    def __init__(self, operator: Operator, result_type: IType, deprecated: bool = False):
         self.operator: Operator = operator
         self.result: IType = result_type
+        self._deprecated: bool = deprecated
 
     def generate_opcodes(self, code_generator):
         """
@@ -43,6 +44,13 @@ class IOperation(ISymbol, ABC):
         :return: the resulting type when the expression is evaluated
         """
         return self.operator.value
+
+    @property
+    def is_deprecated(self) -> bool:
+        return self._deprecated
+
+    def deprecate(self):
+        self._deprecated = True
 
     @property
     @abstractmethod

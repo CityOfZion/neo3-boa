@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Self
 
 
 class ISymbol(ABC):
@@ -13,3 +14,24 @@ class ISymbol(ABC):
         :return: the resulting type when the expression is evaluated
         """
         pass
+
+    @property
+    @abstractmethod
+    def is_deprecated(self) -> bool:
+        """
+        Whether the symbol is deprecated.
+        """
+        return False
+
+    @abstractmethod
+    def deprecate(self):
+        """
+        Deprecate this symbol
+        """
+        pass
+
+    def clone(self) -> Self:
+        obj = object.__new__(type(self))
+        for key, value in self.__dict__.items():
+            obj.__dict__[key] = value
+        return obj

@@ -171,7 +171,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
 
         if is_internal:
             from boa3.internal.model import imports
-            found_symbol = imports.builtin.get_internal_symbol(symbol_id)
+            found_symbol = imports.compilerbuiltin.get_internal_symbol(symbol_id)
             if isinstance(found_symbol, ISymbol):
                 return found_symbol
 

@@ -1,1 +1,1 @@
-import boa3.internal.model.imports.builtin
+import boa3.internal.model.imports.compilerbuiltin
