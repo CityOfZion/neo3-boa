@@ -33,14 +33,18 @@ class DeprecatedSymbol(CompilerWarning):
     A warning raised when a deprecated symbol is used.
     """
 
-    def __init__(self, line: int, col: int, symbol_id: str):
+    def __init__(self, line: int, col: int, symbol_id: str, alternative_id: str = None):
         self.symbol_id: str = symbol_id
+        self.alternative_symbol: str | None = alternative_id
         super().__init__(line, col)
 
     @property
     def _warning_message(self) -> str | None:
         if self.symbol_id is not None:
-            return f'Using deprecated feature: {self.symbol_id}'
+            msg = f"Using deprecated symbol: '{self.symbol_id}'."
+            if self.alternative_symbol is not None:
+                msg += f" Use '{self.alternative_symbol}' instead."
+            return msg
 
 
 class InvalidArgument(CompilerWarning):

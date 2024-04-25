@@ -9,10 +9,16 @@ from boa3.internal.model.variable import Variable
 
 class InteropMethod(IBuiltinMethod, ABC):
 
-    def __init__(self, identifier: str, sys_call: str, args: dict[str, Variable] = None,
-                 defaults: list[ast.AST] = None, return_type: IType = None):
+    def __init__(self,
+                 identifier: str,
+                 sys_call: str,
+                 args: dict[str, Variable] = None,
+                 defaults: list[ast.AST] = None,
+                 return_type: IType = None,
+                 deprecated: bool = False
+                 ):
         self._sys_call: str = sys_call
-        super().__init__(identifier, args, defaults, return_type)
+        super().__init__(identifier, args, defaults, return_type, deprecated=deprecated)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):

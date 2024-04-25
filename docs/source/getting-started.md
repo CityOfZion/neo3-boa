@@ -46,7 +46,7 @@ so let's import both the `public` decorator and the `storage` package.
 ```python
 # hello_world.py
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop import storage
+from boa3.sc import storage
 
 
 @public     # the public decorator will make this method callable
@@ -93,7 +93,7 @@ another method to save a given string you could do the following:
 from typing import Any
 
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop import storage
+from boa3.sc import storage
 
 
 @public

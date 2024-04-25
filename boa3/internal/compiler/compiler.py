@@ -68,7 +68,7 @@ class Compiler:
         self._entry_smart_contract = os.path.splitext(filename)[0]
 
         from boa3.internal.compiler.compiledmetadata import CompiledMetadata
-        from boa3.internal.model.imports.builtin import CompilerBuiltin
+        from boa3.internal.model.imports.compilerbuiltin import CompilerBuiltin
         CompilerBuiltin.reset()
         CompiledMetadata.reset()
 

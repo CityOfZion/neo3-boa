@@ -1,4 +1,4 @@
-from boa3.builtin.interop.storage import delete
+from boa3.sc.storage import delete
 
 
 def Main(key: str):

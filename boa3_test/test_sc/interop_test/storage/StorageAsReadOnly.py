@@ -1,5 +1,5 @@
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop.storage import get_str, get_context, put_str
+from boa3.sc.storage import get_str, get_context, put_str
 
 
 @public

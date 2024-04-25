@@ -16,8 +16,8 @@ class IType(IdentifiedSymbol):
     :ivar identifier: the name identifier of the type
     """
 
-    def __init__(self, identifier: str):
-        super().__init__(identifier)
+    def __init__(self, identifier: str, deprecated: bool = False):
+        super().__init__(identifier, deprecated)
 
     @property
     def shadowing_name(self) -> str:

@@ -1,4 +1,4 @@
-from boa3.builtin.interop.storage import put
+from boa3.sc.storage import put
 
 
 def Main(key: bytes):

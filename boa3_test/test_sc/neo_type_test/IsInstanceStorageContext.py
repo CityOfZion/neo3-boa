@@ -1,7 +1,7 @@
 from typing import Any
 
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop.storage import StorageContext, get_context
+from boa3.sc.storage import StorageContext, get_context
 
 
 @public

@@ -84,7 +84,7 @@ class Analyser:
         CompiledMetadata.set_current_metadata(analyser.metadata)
 
         if compiler_entry:
-            from boa3.internal.model.imports.builtin import CompilerBuiltin
+            from boa3.internal.model.imports.compilerbuiltin import CompilerBuiltin
             CompilerBuiltin.update_with_analyser(analyser)
 
         # fill symbol table

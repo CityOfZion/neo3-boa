@@ -1,7 +1,7 @@
 from typing import Any
 
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop.storage import delete, get, get_context, put_str
+from boa3.sc.storage import delete, get, get_context, put_str
 
 
 @public

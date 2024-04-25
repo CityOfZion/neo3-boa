@@ -1,4 +1,4 @@
-from boa3.builtin.interop.storage import put_int
+from boa3.sc.storage import put_int
 
 
 def Main(key: str):

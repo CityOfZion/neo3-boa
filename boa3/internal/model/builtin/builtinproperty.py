@@ -6,8 +6,13 @@ from boa3.internal.model.property import Property
 
 
 class IBuiltinProperty(Property, IBuiltinSymbol, ABC):
-    def __init__(self, identifier: str, getter: Method, setter: Method = None):
-        super().__init__(getter, setter)
+    def __init__(self,
+                 identifier: str,
+                 getter: Method,
+                 setter: Method = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(getter, setter, deprecated=deprecated)
         self._identifier = identifier
 
     def update_with_analyser(self, analyser):

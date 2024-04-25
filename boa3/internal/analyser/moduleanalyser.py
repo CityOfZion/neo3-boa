@@ -586,6 +586,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     self._log_unresolved_import(origin_node, target)
 
             else:
+                if analyser.is_import_deprecated:
+                    location_tip = analyser._package.new_location if analyser._package is not None else None
+                    self._log_warning(
+                        CompilerWarning.DeprecatedSymbol(
+                            origin_node.lineno,
+                            origin_node.col_offset,
+                            analyser._import_identifier,
+                            location_tip
+                        )
+                    )
                 analyser.update_external_analysed_files(self._analysed_files)
                 return analyser
 

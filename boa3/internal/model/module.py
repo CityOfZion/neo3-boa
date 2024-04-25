@@ -16,7 +16,11 @@ class Module(ISymbol):
     :ivar imported_symbols: a dictionary that maps each imported symbol with its name. Empty by default.
     """
 
-    def __init__(self, variables: dict[str, Variable] = None, methods: dict[str, Method] = None):
+    def __init__(self,
+                 variables: dict[str, Variable] = None,
+                 methods: dict[str, Method] = None,
+                 deprecated: bool = False
+                 ):
         if variables is None:
             variables = {}
         self.variables = variables
@@ -28,12 +32,20 @@ class Module(ISymbol):
         self.classes: dict[str, ClassType] = {}
 
         self.defined_by_entry = True
+        self._deprecated = deprecated
         self.imported_symbols = {}
         self.assigned_variables = []
 
     @property
     def shadowing_name(self) -> str:
         return 'module'
+
+    @property
+    def is_deprecated(self) -> bool:
+        return self._deprecated
+
+    def deprecate(self):
+        self._deprecated = True
 
     def include_variable(self, var_id: str, var: Variable):
         """

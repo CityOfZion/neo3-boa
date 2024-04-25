@@ -19,7 +19,8 @@ class Callable(IExpression, ABC):
     :ivar return_type: the return type of the method. None by default.
     """
 
-    def __init__(self, args: dict[str, Variable] = None,
+    def __init__(self,
+                 args: dict[str, Variable] = None,
                  vararg: tuple[str, Variable] | None = None,
                  kwargs: dict[str, Variable] | None = None,
                  defaults: list[ast.AST] = None,
@@ -27,7 +28,9 @@ class Callable(IExpression, ABC):
                  decorators: list[Callable] = None,
                  external_name: str = None,
                  is_safe: bool = False,
-                 origin_node: ast.AST | None = None):
+                 origin_node: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
 
         if args is None:
             args = {}
@@ -86,7 +89,7 @@ class Callable(IExpression, ABC):
 
         self._self_calls: set[ast.AST] = set()
 
-        super().__init__(origin_node)
+        super().__init__(origin_node, deprecated)
 
         self.init_address: int | None = None
         self.init_bytecode: VMCode | None = None

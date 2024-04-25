@@ -1,10 +1,11 @@
 from typing import Any
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
-from boa3.builtin.interop import storage, runtime
+from boa3.builtin.interop import runtime
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.type import UInt160
+from boa3.sc import storage
 
 # -------------------------------------------
 # TOKEN SETTINGS

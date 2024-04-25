@@ -17,8 +17,12 @@ class Import(ISymbol):
     :ivar types: a dictionary that maps each type with its name. Empty by default.
     """
 
-    def __init__(self, origin: str, syntax_tree: ast.AST, import_analyser: ImportAnalyser,
-                 imported_symbols: dict[str, ISymbol] = None):
+    def __init__(self,
+                 origin: str,
+                 syntax_tree: ast.AST,
+                 import_analyser: ImportAnalyser,
+                 imported_symbols: dict[str, ISymbol] = None
+                 ):
         if imported_symbols is None:
             symbols = import_analyser.symbols
         else:
@@ -62,6 +66,13 @@ class Import(ISymbol):
         symbol = self.symbols.copy()
         symbol.update(self._symbols_not_imported)
         return symbol
+
+    @property
+    def is_deprecated(self) -> bool:
+        return False
+
+    def deprecate(self):
+        return
 
 
 class BuiltinImport(Import):

@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+__all__ = [
+    'get_package',
+    'get_internal_symbol',
+    'CompilerBuiltin'
+]
+
 from boa3.internal import constants
 from boa3.internal.model.builtin.builtin import Builtin, BoaPackage
 from boa3.internal.model.builtin.interop.interop import Interop
@@ -7,14 +13,10 @@ from boa3.internal.model.builtin.native.nativecontract import NativeContract
 from boa3.internal.model.event import Event
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.imports.package import Package
+from boa3.internal.model.sc import ContractImports, BoaSCPackage
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.math import Math
 from boa3.internal.model.type.typeutils import TypeUtils
-
-__all__ = ['get_package',
-           'get_internal_symbol',
-           'CompilerBuiltin'
-           ]
 
 
 def get_package(package_full_path: str) -> Package | None:
@@ -40,6 +42,11 @@ class CompilerBuiltin:
 
         self._generate_builtin_package('typing', TypeUtils.get_types_from_typing_lib())
         self._generate_builtin_package('math', Math.get_methods_from_math_lib())
+
+        self._generate_builtin_package('boa3.sc.types', ContractImports.package_symbols(BoaSCPackage.Types))
+        self._generate_builtin_package('boa3.sc.storage', ContractImports.package_symbols(BoaSCPackage.Storage))
+
+        # TODO: deprecate boa3.builtin packages
         self._generate_builtin_package('boa3.builtin', Builtin.boa_builtins)
         self._set_events(Builtin.builtin_events())
         self._generate_builtin_package('boa3.builtin.contract', Builtin.package_symbols(BoaPackage.Contract))
@@ -65,12 +72,20 @@ class CompilerBuiltin:
     def _set_events(self, events: list[Event]):
         self._events.extend(events)
 
-    def _generate_builtin_package(self, package_full_path: str,
-                                  symbols: dict[str | ISymbol, list[IdentifiedSymbol]] = None):
-        if isinstance(symbols, list):
-            symbols = {symbol.identifier: symbol for symbol in symbols}
-        if not isinstance(symbols, dict):
+    def _generate_builtin_package(self,
+                                  package_full_path: str,
+                                  symbols: dict[str | ISymbol] | list[IdentifiedSymbol] | Package = None,
+                                  deprecate: bool = False
+                                  ):
+        if isinstance(symbols, Package):
+            arg_pkg = symbols
             symbols = {}
+        else:
+            arg_pkg = None
+            if isinstance(symbols, list):
+                symbols = {symbol.identifier: symbol for symbol in symbols}
+            if not isinstance(symbols, dict):
+                symbols = {}
 
         package_ids = package_full_path.split(constants.ATTRIBUTE_NAME_SEPARATOR)
         cur_package: Package = None
@@ -87,7 +102,8 @@ class CompilerBuiltin:
                                None)
 
             if not isinstance(package, Package):
-                package = Package(identifier=package_id)
+                need_new_pkg = package_id != package_ids[-1] or arg_pkg is None
+                package = Package(identifier=package_id) if need_new_pkg else arg_pkg
                 if isinstance(cur_package, Package):
                     cur_package.include_symbol(package_id, package)
                 else:
@@ -98,6 +114,9 @@ class CompilerBuiltin:
         if isinstance(cur_package, Package):
             for symbol_id, symbol in symbols.items():
                 cur_package.include_symbol(symbol_id, symbol)
+
+            if deprecate:
+                cur_package.deprecate()
 
     def get_package(self, package_full_path: str) -> Package | None:
         package_ids = package_full_path.split(constants.ATTRIBUTE_NAME_SEPARATOR)

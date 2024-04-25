@@ -1,6 +1,9 @@
 __all__ = ['StorageMap']
 
+from deprecation import deprecated
 
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 class StorageMap:
     """
     The key-value storage for the specific prefix in the given storage context.
