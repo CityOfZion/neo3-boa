@@ -1201,7 +1201,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
-        if callable_target.is_deprecated and not is_internal_call:
+        if callable_target is not None and callable_target.is_deprecated and not is_internal_call:
             self._log_warning(
                 CompilerWarning.DeprecatedSymbol(
                     call.lineno,
