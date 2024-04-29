@@ -18,7 +18,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
     storage_put_hash = Interop.StoragePut.interop_method_hash
     storage_delete_hash = Interop.StorageDelete.interop_method_hash
 
-    def test_storage_get_bytes_key(self):
+    def test_storage_get_bytes_key_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -44,11 +44,41 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'StorageGetDeprecated.py')
         self.assertEqual(expected_output, output)
 
+    async def test_storage_get_bytes_key_run(self):
+        await self.set_up_contract('StorageGetBytesKey.py')
+
+        result, _ = await self.call('Main', [b'123'], return_type=bytes)
+        self.assertEqual(b'', result)
+
     def test_storage_get_str_key(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageGetStrKey.py')
 
     def test_storage_get_mismatched_type(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageGetMismatchedType.py')
+
+    async def test_storage_get_check(self):
+        await self.set_up_contract('StorageGetCheck.py', compile_if_found=True)
+
+        key = b'example_key'
+        value = 42
+
+        expected = (0, False)
+        result, _ = await self.call('get_value', [key], return_type=tuple[int, bool])
+        self.assertEqual(expected, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertNotIn(key, contract_storage)
+
+        result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        expected = (value, True)
+        result, _ = await self.call('get_value', [key], return_type=tuple[int, bool])
+        self.assertEqual(expected, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertIn(key, contract_storage)
+        self.assertEqual(value, contract_storage[key])
 
     async def test_storage_put_bytes_key_bytes_value(self):
         await self.set_up_contract('StoragePutBytesKeyBytesValue.py')

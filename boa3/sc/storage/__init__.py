@@ -8,6 +8,13 @@ __all__ = [
     'get_uint160',
     'get_uint256',
     'get_ecpoint',
+    'try_get',
+    'try_get_int',
+    'try_get_bool',
+    'try_get_str',
+    'try_get_uint160',
+    'try_get_uint256',
+    'try_get_ecpoint',
     'get_context',
     'get_read_only_context',
     'put',
@@ -50,7 +57,7 @@ def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     b'test'
 
     >>> get(b'fake_key')
-    ''
+    b''
 
     :param key: value identifier in the store
     :type key: bytes
@@ -58,6 +65,27 @@ def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: bytes
+    """
+    pass
+
+
+def try_get(key: bytes, context: StorageContext = get_context()) -> tuple[bytes, bool]:
+    """
+    Gets a value from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put(b'unit', 'test')
+    ... try_get(b'unit')
+    (b'test', True)
+
+    >>> try_get(b'fake_key')
+    (b'', False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[bytes, bool]
     """
     pass
 
@@ -72,7 +100,7 @@ def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     5
 
     >>> get_int(b'fake_key')
-    ''
+    0
 
     :param key: value identifier in the store
     :type key: bytes
@@ -80,6 +108,27 @@ def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: int
+    """
+    pass
+
+
+def try_get_int(key: bytes, context: StorageContext = get_context()) -> tuple[int, bool]:
+    """
+    Gets a value as integer from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_int(b'unit', 5)
+    ... try_get_int(b'unit')
+    (5, True)
+
+    >>> try_get_int(b'fake_key')
+    (0, False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[int, bool]
     """
     pass
 
@@ -94,7 +143,7 @@ def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     True
 
     >>> get_bool(b'fake_key')
-    ''
+    False
 
     :param key: value identifier in the store
     :type key: bytes
@@ -102,6 +151,27 @@ def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: bool
+    """
+    pass
+
+
+def try_get_bool(key: bytes, context: StorageContext = get_context()) -> tuple[bool, bool]:
+    """
+    Gets a value as boolean from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_bool(b'unit', False)
+    ... try_get_bool(b'unit')
+    (False, True)
+
+    >>> try_get_bool(b'fake_key')
+    (False, False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[bool, bool]
     """
     pass
 
@@ -128,6 +198,27 @@ def get_str(key: bytes, context: StorageContext = get_context()) -> str:
     pass
 
 
+def try_get_str(key: bytes, context: StorageContext = get_context()) -> tuple[str, bool]:
+    """
+    Gets a value as string from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_str(b'unit', 'test')
+    ... try_get_str(b'unit')
+    ('test', True)
+
+    >>> try_get_str(b'fake_key')
+    ('', False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[str, bool]
+    """
+    pass
+
+
 def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     """
     Gets a value as UInt160 from the persistent store based on the given key.
@@ -138,7 +229,7 @@ def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     UInt160(0x4a49484746454443424139383736353433323130)
 
     >>> get_uint160(b'fake_key')
-    ''
+    UInt160(0x0000000000000000000000000000000000000000)
 
     :param key: value identifier in the store
     :type key: bytes
@@ -146,6 +237,27 @@ def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: UInt160
+    """
+    pass
+
+
+def try_get_uint160(key: bytes, context: StorageContext = get_context()) -> tuple[UInt160, bool]:
+    """
+    Gets a value as UInt160 from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_uint160(b'unit', UInt160(b'0123456789ABCDEFGHIJ'))
+    ... try_get_uint160(b'unit')
+    (UInt160(0x4a49484746454443424139383736353433323130), True)
+
+    >>> get_uint160(b'fake_key')
+    (UInt160(0x0000000000000000000000000000000000000000), False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[UInt160, bool]
     """
     pass
 
@@ -160,7 +272,7 @@ def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     UInt256(0x565554535251504f4e4d4c4b4a49484746454443424139383736353433323130)
 
     >>> get_uint160(b'fake_key')
-    ''
+    UInt256(0x0000000000000000000000000000000000000000000000000000000000000000)
 
     :param key: value identifier in the store
     :type key: bytes
@@ -168,6 +280,27 @@ def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: UInt256
+    """
+    pass
+
+
+def try_get_uint256(key: bytes, context: StorageContext = get_context()) -> tuple[UInt256, bool]:
+    """
+    Gets a value as UInt256 from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_uint256(b'unit', UInt256(b'0123456789ABCDEFGHIJKLMNOPQRSTUV'))
+    ... get_uint256(b'unit')
+    (UInt256(0x565554535251504f4e4d4c4b4a49484746454443424139383736353433323130), True)
+
+    >>> get_uint160(b'fake_key')
+    (UInt256(0x0000000000000000000000000000000000000000000000000000000000000000), False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[UInt256, bool]
     """
     pass
 
@@ -182,7 +315,7 @@ def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     ECPoint(0x57565554535251504f4e4d4c4b4a49484746454443424139383736353433323130)
 
     >>> get_ecpoint(b'fake_key')
-    ''
+    ECPoint(0x000000000000000000000000000000000000000000000000000000000000000000)
 
     :param key: value identifier in the store
     :type key: bytes
@@ -190,6 +323,27 @@ def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: ECPoint
+    """
+    pass
+
+
+def try_get_ecpoint(key: bytes, context: StorageContext = get_context()) -> tuple[ECPoint, bool]:
+    """
+    Gets a value as ECPoint from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_ecpoint(b'unit', ECPoint(b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'))
+    ... try_get_ecpoint(b'unit')
+    (ECPoint(0x57565554535251504f4e4d4c4b4a49484746454443424139383736353433323130), True)
+
+    >>> try_get_ecpoint(b'fake_key')
+    (ECPoint(0x000000000000000000000000000000000000000000000000000000000000000000), False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[ECPoint, bool]
     """
     pass
 
