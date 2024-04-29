@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
@@ -11,7 +9,7 @@ class NeoPermissionsStruct(NeoStruct):
     _methods_fields = 'methods'
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> NeoPermissionsStruct:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         required_fields = [cls._contract_fields,
                            cls._methods_fields
                            ]

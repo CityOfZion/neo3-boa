@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import binascii
+from typing import Self
 
 from boa3.internal.neo import to_hex_str
 from boa3.internal.neo3.core import serialization
@@ -134,7 +133,7 @@ class UInt160(_UIntBase):
         super(UInt160, self).__init__(num_bytes=self._BYTE_LEN, data=data)
 
     @classmethod
-    def deserialize_from_bytes(cls: type[UInt160], data: bytes) -> UInt160:
+    def deserialize_from_bytes(cls: type[Self], data: bytes) -> Self:
         """
         Parse data into an object instance.
 
@@ -149,7 +148,7 @@ class UInt160(_UIntBase):
         return cls(data[:cls._BYTE_LEN])
 
     @classmethod
-    def from_string(cls: type[UInt160], value: str) -> UInt160:
+    def from_string(cls: type[Self], value: str) -> Self:
         """
         Try to parse a string into an instance.
 
@@ -172,7 +171,7 @@ class UInt160(_UIntBase):
         return cls(data=reversed_data)
 
     @classmethod
-    def zero(cls: type[UInt160]) -> UInt160:
+    def zero(cls: type[Self]) -> Self:
         """
         Returns:
             An instance initialized to zero.
@@ -211,7 +210,7 @@ class UInt256(_UIntBase):
         super(UInt256, self).__init__(num_bytes=self._BYTE_LEN, data=data)
 
     @classmethod
-    def deserialize_from_bytes(cls: type[UInt256], data: bytes) -> UInt256:
+    def deserialize_from_bytes(cls: type[Self], data: bytes) -> Self:
         """
         Parse data into an object instance.
 
@@ -226,7 +225,7 @@ class UInt256(_UIntBase):
         return cls(data[:cls._BYTE_LEN])
 
     @classmethod
-    def from_string(cls: type[UInt256], value: str) -> UInt256:
+    def from_string(cls: type[Self], value: str) -> Self:
         """
         Try to parse a string into an instance.
 
@@ -249,7 +248,7 @@ class UInt256(_UIntBase):
         return cls(data=reversed_data)
 
     @classmethod
-    def zero(cls: type[UInt256]) -> UInt256:
+    def zero(cls: type[Self]) -> Self:
         """
         Returns:
             An instance initialized to zero.

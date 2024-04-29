@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import base64
-from typing import Any
+from typing import Any, Self
 
 
 class Witness:
@@ -25,7 +23,7 @@ class Witness:
         }
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> Witness:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         invocation = base64.b64decode(json['invocation'])
         verification = base64.b64decode(json['verification'])
         return cls(invocation, verification)

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = [
     'StackMemento',
     'NeoStack'
@@ -9,6 +7,15 @@ from boa3.internal.compiler.codegenerator.engine.istack import IStack
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.model.type.itype import IType
 from boa3.internal.neo.vm.VMCode import VMCode
+
+
+class NeoStack(IStack):
+    def __init__(self):
+        from boa3.internal.model.type.itype import IType
+        super().__init__(stack_type=IType)
+
+    def _default_constructor_args(self) -> tuple:
+        return tuple()
 
 
 class StackMemento:
@@ -105,12 +112,3 @@ class StackMemento:
             self._current_stack = stack
 
         return stack.reverse(start, end, rotate=rotate)
-
-
-class NeoStack(IStack):
-    def __init__(self):
-        from boa3.internal.model.type.itype import IType
-        super().__init__(stack_type=IType)
-
-    def _default_constructor_args(self) -> tuple:
-        return tuple()

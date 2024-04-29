@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.model.type.annotation.uniontype import UnionType
 from boa3.internal.model.type.classes.pythonclass import PythonClass
@@ -144,7 +142,7 @@ class ICollectionType(PythonClass, ABC):
         return values_type
 
     @classmethod
-    def build_collection(cls, *value_type: IType | Iterable) -> ICollectionType:
+    def build_collection(cls, *value_type: IType | Iterable) -> Self:
         """
         Creates a collection type instance with the given value
 

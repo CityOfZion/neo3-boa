@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.primitive.inttype import IntType
@@ -21,7 +19,7 @@ class WitnessRuleActionType(IntType):
         return WitnessRuleAction.DENY
 
     @classmethod
-    def build(cls, value: Any = None) -> WitnessRuleActionType:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _WitnessRuleAction
 

@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal import constants
 from boa3.internal.neo.utils import contract_parameter_to_json, stack_item_from_json
@@ -8,6 +6,65 @@ from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.serialization import BinaryReader
 from boa3_test.tests.test_classes.nativecontractprefix import get_native_contract_data
+
+
+class StorageKey:
+    def __init__(self, key: bytes, _id: int = 0):
+        self._ID: int = _id
+        self._key: bytes = key
+
+    def to_json(self) -> dict[str, Any]:
+        return {'id': self._ID,
+                'key': contract_parameter_to_json(self._key)
+                }
+
+    @classmethod
+    def from_json(cls, json: dict[str, Any]) -> Self:
+        k = stack_item_from_json(json['key'])
+        if isinstance(k, str):
+            from boa3.internal.neo.vm.type.String import String
+            k = String(k).to_bytes()
+
+        key = StorageKey(k)
+        key._ID = json['id']
+        return key
+
+    def __eq__(self, other) -> bool:
+        return isinstance(other, StorageKey) and self._key == other._key and self._ID == other._ID
+
+    def __str__(self) -> str:
+        return '({0}, {1})'.format(self._key, self._ID)
+
+    def __hash__(self) -> int:
+        return self._key.__hash__()
+
+
+class StorageItem:
+    def __init__(self, value: bytes, is_constant: bool = False):
+        self._is_constant: bool = is_constant
+        self._value: bytes = value
+
+    @property
+    def value(self) -> bytes:
+        return self._value
+
+    def to_json(self) -> dict[str, Any]:
+        return {'isconstant': self._is_constant,
+                'value': contract_parameter_to_json(self._value)
+                }
+
+    @classmethod
+    def from_json(cls, json: dict[str, Any]) -> Self:
+        value = stack_item_from_json(json['value'])
+        if isinstance(value, str):
+            from boa3.internal.neo.vm.type.String import String
+            value = String(value).to_bytes()
+
+        item = StorageItem(value, json['isconstant'])
+        return item
+
+    def __str__(self) -> str:
+        return self._value.__str__()
 
 
 class Storage:
@@ -31,7 +88,7 @@ class Storage:
                 # keep native contracts storage
                 self._dict.pop(key)
 
-    def copy(self) -> Storage:
+    def copy(self) -> Self:
         storage = Storage()
         storage._dict = self._dict.copy()
         return storage
@@ -43,7 +100,7 @@ class Storage:
                 ]
 
     @classmethod
-    def from_json(cls, json: dict[str | Any, list[dict[str, Any]]]) -> Storage:
+    def from_json(cls, json: dict[str, Any | list[dict[str, Any]]]) -> Self:
         if not isinstance(json, list):
             json = [json]
 
@@ -123,62 +180,3 @@ class Storage:
     @staticmethod
     def build_key(key: bytes, index: int) -> StorageKey:
         return StorageKey(key, index)
-
-
-class StorageKey:
-    def __init__(self, key: bytes, _id: int = 0):
-        self._ID: int = _id
-        self._key: bytes = key
-
-    def to_json(self) -> dict[str, Any]:
-        return {'id': self._ID,
-                'key': contract_parameter_to_json(self._key)
-                }
-
-    @classmethod
-    def from_json(cls, json: dict[str, Any]) -> StorageKey:
-        k = stack_item_from_json(json['key'])
-        if isinstance(k, str):
-            from boa3.internal.neo.vm.type.String import String
-            k = String(k).to_bytes()
-
-        key = StorageKey(k)
-        key._ID = json['id']
-        return key
-
-    def __eq__(self, other) -> bool:
-        return isinstance(other, StorageKey) and self._key == other._key and self._ID == other._ID
-
-    def __str__(self) -> str:
-        return '({0}, {1})'.format(self._key, self._ID)
-
-    def __hash__(self) -> int:
-        return self._key.__hash__()
-
-
-class StorageItem:
-    def __init__(self, value: bytes, is_constant: bool = False):
-        self._is_constant: bool = is_constant
-        self._value: bytes = value
-
-    @property
-    def value(self) -> bytes:
-        return self._value
-
-    def to_json(self) -> dict[str, Any]:
-        return {'isconstant': self._is_constant,
-                'value': contract_parameter_to_json(self._value)
-                }
-
-    @classmethod
-    def from_json(cls, json: dict[str, Any]) -> StorageItem:
-        value = stack_item_from_json(json['value'])
-        if isinstance(value, str):
-            from boa3.internal.neo.vm.type.String import String
-            value = String(value).to_bytes()
-
-        item = StorageItem(value, json['isconstant'])
-        return item
-
-    def __str__(self) -> str:
-        return self._value.__str__()

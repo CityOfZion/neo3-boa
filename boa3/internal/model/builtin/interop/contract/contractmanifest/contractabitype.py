@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
@@ -55,7 +53,7 @@ class ContractAbiType(ClassStructType):
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> ContractAbiType:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _ContractAbi
 

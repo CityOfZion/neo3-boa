@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo3.vm import VMState, vmstate
 from boa3_test.test_drive.model.network.payloads.testtransaction import TestTransaction
@@ -39,8 +37,8 @@ class Transaction(TestTransaction):
         return json
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> Transaction:
-        tx: Transaction = super().from_json(json)
+    def from_json(cls, json: dict[str, Any]) -> Self:
+        tx: Self = super().from_json(json)
 
         if 'attributes' in json:
             attributes_json = json['attributes']

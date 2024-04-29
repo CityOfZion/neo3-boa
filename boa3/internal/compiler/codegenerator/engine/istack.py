@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import abc
-from typing import TypeVar
+from typing import TypeVar, Self
 
 T = TypeVar("T")
 
@@ -21,7 +19,7 @@ class IStack(abc.ABC):
     def clear(self):
         return self._stack.clear()
 
-    def copy(self) -> IStack:
+    def copy(self) -> Self:
         new_stack = self.__class__(*self._default_constructor_args())
         new_stack._stack = self._stack.copy()
         return new_stack

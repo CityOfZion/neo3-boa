@@ -146,8 +146,17 @@ class ImportAnalyser(IAstAnalyser):
             self.is_builtin_import = True
             return
 
-        if (os.path.commonpath([self.path, constants.BOA_PACKAGE_PATH]) != constants.BOA_PACKAGE_PATH or
-                ('boa3' in path and constants.PATH_SEPARATOR.join(path[path.index('boa3'):]).startswith('boa3/builtin'))):
+        def is_boa_package() -> bool:
+            common_path = os.path.commonpath([self.path, constants.BOA_PACKAGE_PATH])
+            if common_path == constants.BOA_PACKAGE_PATH:
+                return True
+            if 'boa3' not in path:
+                return False
+
+            boa_path = path[path.index('boa3'):]
+            return len(boa_path) > 1 and boa_path[1] in ('builtin', 'sc')
+
+        if not is_boa_package():
             # doesn't analyse boa3.builtin packages that aren't included in the imports.compilerbuiltin as an user module
             import re
 

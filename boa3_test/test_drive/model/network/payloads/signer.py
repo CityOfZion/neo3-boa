@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo import from_hex_str, to_hex_str
 from boa3.internal.neo3.core.types import UInt160
@@ -34,7 +32,7 @@ class Signer:
         }
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> Signer:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         account_hex = json['account']
         account = UInt160(from_hex_str(account_hex))
         scopes = WitnessScope.get_from_neo_name(json['scopes']) if 'scopes' in json else WitnessScope.CalledByEntry

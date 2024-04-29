@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
+from typing import Self
 
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.symbol import ISymbol
@@ -49,7 +48,7 @@ class IOperation(ISymbol, ABC):
     def is_deprecated(self) -> bool:
         return self._deprecated
 
-    def deprecate(self):
+    def deprecate(self, new_location: str = None):
         self._deprecated = True
 
     @property
@@ -105,7 +104,7 @@ class IOperation(ISymbol, ABC):
 
     @classmethod
     @abstractmethod
-    def build(cls, *operands: IType) -> IOperation | None:
+    def build(cls, *operands: IType) -> Self | None:
         """
         Creates an operation with the given operands types
 

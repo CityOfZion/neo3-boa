@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Self
 
 from boa3.internal import constants
 from boa3.internal.neo.contracts import NEF
@@ -54,7 +54,7 @@ class NefFile:
         return result
 
     @classmethod
-    def deserialize(cls, bts: bytes) -> NefFile:
+    def deserialize(cls, bts: bytes) -> Self:
         """
         Deserialize the NefFile object
 

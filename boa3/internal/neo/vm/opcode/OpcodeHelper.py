@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from boa3.internal.constants import FOUR_BYTES_MAX_VALUE
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer

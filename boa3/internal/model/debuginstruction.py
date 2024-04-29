@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import ast
+from typing import Self
 
 from boa3.internal.neo.vm.VMCode import VMCode
 
@@ -24,7 +23,7 @@ class DebugInstruction:
                                             self.code)
 
     @classmethod
-    def build(cls, ast_node: ast.AST, bytecode: VMCode) -> DebugInstruction:
+    def build(cls, ast_node: ast.AST, bytecode: VMCode) -> Self:
         end_line: int = ast_node.end_lineno if hasattr(ast_node, 'end_lineno') else ast_node.lineno
         end_col: int = ast_node.end_col_offset + 1 if hasattr(ast_node, 'end_lineno') else ast_node.col_offset
         return cls(bytecode, ast_node.lineno, ast_node.col_offset, end_line, end_col)

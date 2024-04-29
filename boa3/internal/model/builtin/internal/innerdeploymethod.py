@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import ast
+from typing import Self
 
 from boa3.internal import constants
 from boa3.internal.model import set_internal_call
@@ -14,7 +13,7 @@ from boa3.internal.model.variable import Variable
 class InnerDeployMethod(IInternalMethod):
 
     @classmethod
-    def instance(cls) -> InnerDeployMethod:
+    def instance(cls) -> Self:
         return _INNER_DEPLOY_METHOD
 
     def __init__(self):
@@ -41,7 +40,7 @@ class InnerDeployMethod(IInternalMethod):
     def _args_on_stack(self) -> int:
         return len(self.args)
 
-    def copy(self) -> InnerDeployMethod:
+    def copy(self) -> Self:
         return InnerDeployMethod()
 
     @classmethod

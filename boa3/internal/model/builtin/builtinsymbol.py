@@ -1,13 +1,12 @@
-from __future__ import annotations
-
 from abc import ABC
+from typing import Self
 
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 
 
 class IBuiltinSymbol(IdentifiedSymbol, ABC):
 
-    def build(self, *args, **kwargs) -> IBuiltinSymbol:
+    def build(self, *args, **kwargs) -> Self:
         """
         Creates a symbol instance with the given value as self
 

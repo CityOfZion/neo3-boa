@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
+from typing import Self
 
 from boa3.internal.model.operation.operation import IOperation
 from boa3.internal.model.type.itype import IType
@@ -46,14 +45,14 @@ class BinaryOperation(IOperation, ABC):
         pass
 
     @classmethod
-    def build(cls, *operands: IType) -> BinaryOperation | None:
+    def build(cls, *operands: IType) -> Self | None:
         if len(operands) == 1:
             return cls._build_with_left_arg(operands[0])
         if len(operands) == 2:
             return cls._build_with_two_args(operands[0], operands[1])
 
     @classmethod
-    def _build_with_left_arg(cls, left: IType) -> BinaryOperation | None:
+    def _build_with_left_arg(cls, left: IType) -> Self | None:
         """
         Creates a binary operation with the given operands types
 
@@ -64,7 +63,7 @@ class BinaryOperation(IOperation, ABC):
         return cls(left)
 
     @classmethod
-    def _build_with_two_args(cls, left: IType, right: IType) -> BinaryOperation | None:
+    def _build_with_two_args(cls, left: IType, right: IType) -> Self | None:
         """
         Creates a binary operation with the given operands types
 

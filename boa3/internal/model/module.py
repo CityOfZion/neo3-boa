@@ -44,7 +44,7 @@ class Module(ISymbol):
     def is_deprecated(self) -> bool:
         return self._deprecated
 
-    def deprecate(self):
+    def deprecate(self, new_location: str = None):
         self._deprecated = True
 
     def include_variable(self, var_id: str, var: Variable):
