@@ -25,8 +25,11 @@ class ImportAnalyser(IAstAnalyser):
         self.is_namespace_package: bool = False
         self.recursive_import: bool = False
         self._import_identifier: str = import_target
+
         self._get_from_entry: bool = get_entry and (os.path.isfile(import_target) or os.path.isdir(import_target))
 
+        from boa3.internal.model.imports.package import Package
+        self._package: Package | None = None
         from boa3.internal.analyser.analyser import Analyser
         self._imported_files: dict[str, Analyser] = (already_imported_modules
                                                      if isinstance(already_imported_modules, dict)
@@ -92,6 +95,10 @@ class ImportAnalyser(IAstAnalyser):
     def tree(self) -> ast.AST:
         return self._tree
 
+    @property
+    def is_import_deprecated(self) -> bool:
+        return self._package.is_deprecated if self._package is not None else False
+
     def export_symbols(self, identifiers: list[str] = None) -> dict[str, ISymbol]:
         """
         Gets a dictionary that maps each exported symbol with its identifier
@@ -125,7 +132,7 @@ class ImportAnalyser(IAstAnalyser):
     def _find_package(self, module_origin: str, origin_file: str | None = None):
         path: list[str] = module_origin.split(os.sep)
 
-        package = imports.builtin.get_package(self._import_identifier)
+        package = imports.compilerbuiltin.get_package(self._import_identifier)
         if hasattr(package, 'symbols'):
             if hasattr(package, 'inner_packages'):
                 # when have symbol and packages with the same id, prioritize symbol
@@ -134,13 +141,14 @@ class ImportAnalyser(IAstAnalyser):
             else:
                 self.symbols = package.symbols
 
+            self._package = package
             self.can_be_imported = True
             self.is_builtin_import = True
             return
 
         if (os.path.commonpath([self.path, constants.BOA_PACKAGE_PATH]) != constants.BOA_PACKAGE_PATH or
                 ('boa3' in path and constants.PATH_SEPARATOR.join(path[path.index('boa3'):]).startswith('boa3/builtin'))):
-            # doesn't analyse boa3.builtin packages that aren't included in the imports.builtin as an user module
+            # doesn't analyse boa3.builtin packages that aren't included in the imports.compilerbuiltin as an user module
             import re
 
             inside_python_folder = any(re.search(r'python(\d\.?)*', folder.lower()) for folder in path)

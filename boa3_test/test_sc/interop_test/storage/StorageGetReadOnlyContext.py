@@ -1,6 +1,6 @@
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop.storage import get_read_only_context
-from boa3.builtin.interop.storage.storagecontext import StorageContext
+from boa3.sc.storage import get_read_only_context
+from boa3.sc.storage.storagecontext import StorageContext
 
 
 @public

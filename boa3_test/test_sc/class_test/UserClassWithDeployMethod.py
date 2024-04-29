@@ -1,8 +1,8 @@
 from typing import Any
 
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop import runtime, storage
-from boa3.builtin.interop.blockchain import Transaction
+from boa3.builtin.interop import runtime
+from boa3.sc import storage
 
 
 class Example:

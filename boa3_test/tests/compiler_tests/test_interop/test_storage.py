@@ -1,7 +1,7 @@
 from boaconstructor import storage
 from neo3.api import StackItemType
 
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
@@ -39,6 +39,9 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         )
 
         output, _ = self.assertCompile('StorageGetBytesKey.py')
+        self.assertEqual(expected_output, output)
+
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'StorageGetDeprecated.py')
         self.assertEqual(expected_output, output)
 
     def test_storage_get_str_key(self):
@@ -89,6 +92,9 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         )
 
         output, _ = self.assertCompile('StoragePutBytesKeyIntValue.py')
+        self.assertEqual(expected_output, output)
+
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'StoragePutDeprecated.py')
         self.assertEqual(expected_output, output)
 
     async def test_storage_put_bytes_key_int_value(self):
@@ -192,6 +198,9 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         )
 
         output, _ = self.assertCompile('StorageDeleteBytesKey.py')
+        self.assertStartsWith(output, expected_output)
+
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'StorageDeleteDeprecated.py')
         self.assertStartsWith(output, expected_output)
 
     async def test_storage_delete_bytes_key(self):

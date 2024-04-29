@@ -1,11 +1,10 @@
 from typing import Any
 
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop import storage
 from boa3.builtin.interop.oracle import OracleResponseCode
 from boa3.builtin.interop.stdlib import serialize
 from boa3.builtin.nativecontract.oracle import Oracle
-from boa3.builtin.type import helper as type_helper
+from boa3.sc import storage
 
 
 @public

@@ -2,7 +2,7 @@ from typing import Any, cast
 
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop.stdlib import deserialize, serialize
-from boa3.builtin.interop.storage import get, put
+from boa3.sc.storage import get, put
 
 
 @public

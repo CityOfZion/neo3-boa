@@ -1,4 +1,4 @@
-from boa3.builtin.interop.storage import get
+from boa3.sc.storage import get
 
 
 def Main(key: int) -> bytes:

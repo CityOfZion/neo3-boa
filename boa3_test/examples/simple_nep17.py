@@ -2,10 +2,11 @@ from typing import Any, Union
 
 from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
-from boa3.builtin.interop import runtime, storage
+from boa3.builtin.interop import runtime
 from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.type import UInt160
+from boa3.sc import storage
 
 
 # -------------------------------------------

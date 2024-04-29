@@ -3,8 +3,8 @@ from typing import cast, Any
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import executing_script_hash, notify
-from boa3.builtin.interop.storage import find, get, get_context, put
 from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.sc.storage import find, get, get_context, put
 
 FEE_RECEIVER_KEY = b'FEE_RECEIVER'
 

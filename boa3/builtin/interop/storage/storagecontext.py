@@ -2,9 +2,12 @@ from __future__ import annotations
 
 __all__ = ['StorageContext']
 
+from deprecation import deprecated
+
 from boa3.builtin.interop.storage.storagemap import StorageMap
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 class StorageContext:
     """
     The storage context used to read and write data in smart contracts.

@@ -1,7 +1,7 @@
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop import storage
 from boa3.builtin.interop.stdlib import serialize
 from boa3.builtin.type.helper import to_bytes
+from boa3.sc import storage
 
 
 @public

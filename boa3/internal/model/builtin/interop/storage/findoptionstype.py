@@ -16,7 +16,7 @@ class FindOptionsType(IntType):
 
     @property
     def default_value(self) -> Any:
-        from boa3.builtin.interop.storage import FindOptions
+        from boa3.sc.storage import FindOptions
         return FindOptions.NONE
 
     @classmethod
@@ -27,7 +27,7 @@ class FindOptionsType(IntType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        from boa3.builtin.interop.storage import FindOptions
+        from boa3.sc.storage import FindOptions
         return isinstance(value, (FindOptions, FindOptionsType))
 
     @property
@@ -37,7 +37,7 @@ class FindOptionsType(IntType):
 
         :return: a dictionary that maps each symbol in the module with its name
         """
-        from boa3.builtin.interop.storage import FindOptions
+        from boa3.sc.storage import FindOptions
         from boa3.internal.model.variable import Variable
 
         _symbols = super().symbols
@@ -51,7 +51,7 @@ class FindOptionsType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        from boa3.builtin.interop.storage import FindOptions
+        from boa3.sc.storage import FindOptions
 
         if symbol_id in self.symbols and symbol_id in FindOptions.__members__:
             return FindOptions.__members__[symbol_id]

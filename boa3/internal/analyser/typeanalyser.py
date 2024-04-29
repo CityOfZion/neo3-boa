@@ -10,6 +10,7 @@ from boa3.internal.analyser.model.symbolscope import SymbolScope
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.attribute import Attribute
 from boa3.internal.model.builtin.builtin import Builtin
+from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.expression import IExpression
@@ -1187,17 +1188,28 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param call: the python ast function call node
         :return: the result type of the called function
         """
+        is_internal_call = hasattr(call, 'is_internal_call') and call.is_internal_call
+
         if isinstance(call.func, ast.Name):
             callable_id: str = call.func.id
             is_internal = hasattr(call, 'is_internal_call') and call.is_internal_call
             callable_target = self.get_symbol(callable_id, is_internal)
-        elif isinstance(call.func, ast.Lambda):
-            self._log_error(
-                CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset, 'lambda function')
-            )
         else:
+            if isinstance(call.func, ast.Lambda):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(call.func.lineno, call.func.col_offset, 'lambda function')
+                )
             callable_id, callable_target = self.get_callable_and_update_args(call)  # type: str, ISymbol
 
+        if callable_target is not None and callable_target.is_deprecated and not is_internal_call:
+            self._log_warning(
+                CompilerWarning.DeprecatedSymbol(
+                    call.lineno,
+                    call.col_offset,
+                    callable_id,
+                    callable_target.new_location if isinstance(callable_target, IBuiltinCallable) else None
+                )
+            )
         callable_target = self.validate_builtin_callable(callable_id, callable_target, call.args)
 
         if not isinstance(callable_target, Callable):
@@ -1253,7 +1265,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                             origin_type_id = cast_types[0].identifier
                             cast_type_id = cast_types[1].identifier
 
-                        if not hasattr(call, 'is_internal_call') or not call.is_internal_call:
+                        if not is_internal_call:
                             self._log_warning(
                                 CompilerWarning.TypeCasting(call.lineno, call.col_offset,
                                                             origin_type_id=origin_type_id,

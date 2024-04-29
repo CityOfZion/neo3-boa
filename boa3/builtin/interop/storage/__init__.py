@@ -22,6 +22,8 @@ __all__ = [
     'find',
 ]
 
+from deprecation import deprecated
+
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.interop.storage.storagecontext import StorageContext
@@ -29,6 +31,7 @@ from boa3.builtin.interop.storage.storagemap import StorageMap
 from boa3.builtin.type import UInt160, UInt256, ECPoint
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_context() -> StorageContext:
     """
     Gets current storage context.
@@ -42,6 +45,7 @@ def get_context() -> StorageContext:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
@@ -63,6 +67,7 @@ def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     """
     Gets a value as integer from the persistent store based on the given key.
@@ -85,6 +90,7 @@ def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     """
     Gets a value as boolean from the persistent store based on the given key.
@@ -107,6 +113,7 @@ def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_str(key: bytes, context: StorageContext = get_context()) -> str:
     """
     Gets a value as string from the persistent store based on the given key.
@@ -129,6 +136,7 @@ def get_str(key: bytes, context: StorageContext = get_context()) -> str:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     """
     Gets a value as UInt160 from the persistent store based on the given key.
@@ -151,6 +159,7 @@ def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     """
     Gets a value as UInt256 from the persistent store based on the given key.
@@ -173,6 +182,7 @@ def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     """
     Gets a value as ECPoint from the persistent store based on the given key.
@@ -195,6 +205,7 @@ def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def get_read_only_context() -> StorageContext:
     """
     Gets current read only storage context.
@@ -208,6 +219,7 @@ def get_read_only_context() -> StorageContext:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def put(key: bytes, value: bytes, context: StorageContext = get_context()):
     """
     Inserts a given bytes value in the key-value format into the persistent storage.
@@ -225,6 +237,7 @@ def put(key: bytes, value: bytes, context: StorageContext = get_context()):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def put_int(key: bytes, value: int, context: StorageContext = get_context()):
     """
     Inserts a given integer value in the key-value format into the persistent storage.
@@ -243,6 +256,7 @@ def put_int(key: bytes, value: int, context: StorageContext = get_context()):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def put_bool(key: bytes, value: bool, context: StorageContext = get_context()):
     """
     Inserts a given boolean value in the key-value format into the persistent storage.
@@ -261,6 +275,7 @@ def put_bool(key: bytes, value: bool, context: StorageContext = get_context()):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def put_str(key: bytes, value: str, context: StorageContext = get_context()):
     """
     Inserts a given str value in the key-value format into the persistent storage.
@@ -279,6 +294,7 @@ def put_str(key: bytes, value: str, context: StorageContext = get_context()):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def put_uint160(key: bytes, value: UInt160, context: StorageContext = get_context()):
     """
     Inserts a given UInt160 value in the key-value format into the persistent storage.
@@ -297,6 +313,7 @@ def put_uint160(key: bytes, value: UInt160, context: StorageContext = get_contex
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def put_uint256(key: bytes, value: UInt256, context: StorageContext = get_context()):
     """
     Inserts a given UInt256 value in the key-value format into the persistent storage.
@@ -315,6 +332,7 @@ def put_uint256(key: bytes, value: UInt256, context: StorageContext = get_contex
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def put_ecpoint(key: bytes, value: ECPoint, context: StorageContext = get_context()):
     """
     Inserts a given ECPoint value in the key-value format into the persistent storage.
@@ -333,6 +351,7 @@ def put_ecpoint(key: bytes, value: ECPoint, context: StorageContext = get_contex
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def delete(key: bytes, context: StorageContext = get_context()):
     """
     Removes a given key from the persistent storage if exists.
@@ -350,6 +369,7 @@ def delete(key: bytes, context: StorageContext = get_context()):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
 def find(prefix: bytes,
          context: StorageContext = get_context(),
          options: FindOptions = FindOptions.NONE) -> Iterator:

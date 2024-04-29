@@ -14,8 +14,12 @@ class Variable(IExpression):
     :ivar var_type: the type of the variable.
     """
 
-    def __init__(self, var_type: IType | None, origin_node: ast.AST | None = None):
-        super().__init__(origin_node)
+    def __init__(self,
+                 var_type: IType | None,
+                 origin_node: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(origin_node, deprecated)
         self.defined_by_entry = True
 
         from boa3.internal.analyser.model.optimizer import Undefined, UndefinedType

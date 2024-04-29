@@ -16,9 +16,14 @@ class Attribute(IExpression):
     :ivar attr_symbol: the found symbol for the attribute
     """
 
-    def __init__(self, value: ast.AST | IExpression | Package, attr_name: str,
-                 attr_symbol: ISymbol | None = None, origin: ast.AST | None = None):
-        super().__init__(origin)
+    def __init__(self,
+                 value: ast.AST | IExpression | Package,
+                 attr_name: str,
+                 attr_symbol: ISymbol | None = None,
+                 origin: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(origin, deprecated)
 
         self.value: ast.AST | IExpression | Package = value
         self.attr_name: str = attr_name

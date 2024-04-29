@@ -7,12 +7,15 @@ from boa3.internal.model.variable import Variable
 
 
 class Event(Callable, IdentifiedSymbol):
-    def __init__(self, event_id: str, args: dict[str, Variable] = None,
+    def __init__(self,
+                 event_id: str, args: dict[str, Variable] = None,
                  vararg: tuple[str, Variable] | None = None,
                  kwargs: dict[str, Variable] | None = None,
                  defaults: list[ast.AST] = None,
-                 origin_node: ast.AST | None = None):
-        super().__init__(args, vararg, kwargs, defaults, Type.none, True, origin_node)
+                 origin_node: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(args, vararg, kwargs, defaults, Type.none, True, origin_node, deprecated=deprecated)
 
         self.name: str = event_id
         self._identifier: str = None

@@ -11,10 +11,15 @@ from boa3.internal.model.variable import Variable
 
 class IInternalMethod(IBuiltinMethod, abc.ABC):
 
-    def __init__(self, identifier: str, args: dict[str, Variable] = None,
-                 defaults: list[ast.AST] = None, return_type: IType = None,
-                 vararg: tuple[str, Variable] | None = None):
-        super().__init__(identifier, args, defaults, return_type, vararg)
+    def __init__(self,
+                 identifier: str,
+                 args: dict[str, Variable] = None,
+                 defaults: list[ast.AST] = None,
+                 return_type: IType = None,
+                 vararg: tuple[str, Variable] | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(identifier, args, defaults, return_type, vararg, deprecated=deprecated)
 
     @classmethod
     @abc.abstractmethod

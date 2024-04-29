@@ -403,7 +403,9 @@ class Interop:
                                        ]
                              )
 
-    FindOptionsModule = Package(identifier=FindOptionsType.identifier.lower(),
+    FindOptionsModule = Package(deprecated=True,
+                                new_location='boa3.sc.types',
+                                identifier=FindOptionsType.identifier.lower(),
                                 types=[FindOptionsType]
                                 )
 
@@ -423,15 +425,21 @@ class Interop:
                                      ]
                             )
 
-    StorageContextModule = Package(identifier=StorageContextType.identifier.lower(),
+    StorageContextModule = Package(deprecated=True,
+                                   new_location='boa3.sc.storage',
+                                   identifier=StorageContextType.identifier.lower(),
                                    types=[StorageContextType]
                                    )
 
-    StorageMapModule = Package(identifier=StorageMapType.identifier.lower(),
+    StorageMapModule = Package(deprecated=True,
+                               new_location='boa3.sc.storage',
+                               identifier=StorageMapType.identifier.lower(),
                                types=[StorageMapType]
                                )
 
-    StoragePackage = Package(identifier=InteropPackage.Storage,
+    StoragePackage = Package(deprecated=True,
+                             new_location='boa3.sc.storage',
+                             identifier=InteropPackage.Storage,
                              types=[FindOptionsType,
                                     StorageContextType,
                                     StorageMapType

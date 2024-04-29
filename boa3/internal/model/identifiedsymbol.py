@@ -10,8 +10,9 @@ class IdentifiedSymbol(ISymbol, ABC):
     :return: the resulting type when the expression is evaluated
     """
 
-    def __init__(self, identifier: str):
+    def __init__(self, identifier: str, deprecated: bool = False):
         self._identifier: str = identifier
+        self._deprecated: bool = deprecated
 
     @property
     def identifier(self) -> str:
@@ -30,3 +31,10 @@ class IdentifiedSymbol(ISymbol, ABC):
         :return: the simple id of the resulting type when the expression is evaluated
         """
         return self._identifier
+
+    @property
+    def is_deprecated(self) -> bool:
+        return self._deprecated
+
+    def deprecate(self):
+        self._deprecated = True
