@@ -1,6 +1,5 @@
-from __future__ import annotations
-
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType

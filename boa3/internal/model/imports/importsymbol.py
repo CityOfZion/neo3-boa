@@ -71,7 +71,7 @@ class Import(ISymbol):
     def is_deprecated(self) -> bool:
         return False
 
-    def deprecate(self):
+    def deprecate(self, new_location: str = None):
         return
 
 

@@ -1,40 +1,9 @@
-from __future__ import annotations
-
 import base64
 import enum
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests.test_classes.transactionattribute import TransactionAttribute, TransactionAttributeType
-
-
-class OracleResponse(TransactionAttribute):
-    def __init__(self, request_id: int, code: OracleResponseCode, result: bytes):
-        super().__init__(TransactionAttributeType.OracleResponse)
-        self._id: int = request_id
-        self._response_code: OracleResponseCode = code
-        self._result: bytes = result
-
-    def to_json(self) -> dict[str, Any]:
-        json = super().to_json()
-        json.update({
-            'id': self._id,
-            'code': self._response_code.value,
-            'result': String.from_bytes(base64.b64encode(self._result))
-        })
-        return json
-
-    @classmethod
-    def from_json(cls, json: dict[str, Any]) -> OracleResponse:
-        return cls(request_id=json['id'],
-                   code=json['code'],
-                   result=base64.b64decode(json['result']))
-
-    def __eq__(self, other) -> bool:
-        return (isinstance(other, OracleResponse)
-                and self._id == other._id
-                and self._response_code == other._response_code
-                and self._result == other._result)
 
 
 class OracleResponseCode(enum.IntEnum):
@@ -64,3 +33,32 @@ class OracleResponseCode(enum.IntEnum):
 
     # Indicates that the request failed due to other errors.
     Error = 0xff
+
+
+class OracleResponse(TransactionAttribute):
+    def __init__(self, request_id: int, code: OracleResponseCode, result: bytes):
+        super().__init__(TransactionAttributeType.OracleResponse)
+        self._id: int = request_id
+        self._response_code: OracleResponseCode = code
+        self._result: bytes = result
+
+    def to_json(self) -> dict[str, Any]:
+        json = super().to_json()
+        json.update({
+            'id': self._id,
+            'code': self._response_code.value,
+            'result': String.from_bytes(base64.b64encode(self._result))
+        })
+        return json
+
+    @classmethod
+    def from_json(cls, json: dict[str, Any]) -> Self:
+        return cls(request_id=json['id'],
+                   code=json['code'],
+                   result=base64.b64decode(json['result']))
+
+    def __eq__(self, other) -> bool:
+        return (isinstance(other, OracleResponse)
+                and self._id == other._id
+                and self._response_code == other._response_code
+                and self._result == other._result)

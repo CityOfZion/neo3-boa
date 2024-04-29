@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Self
 
 from boa3.internal.neo.vm.opcode import OpcodeHelper
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -85,7 +85,7 @@ class VMCode:
         return self.info.opcode
 
     @property
-    def target(self) -> VMCode:
+    def target(self) -> Self:
         """
         Gets the target code of this code
 

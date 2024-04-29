@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import ast
+from typing import Self
 
 from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
@@ -56,11 +55,18 @@ class Analyser:
                           if project_root is not None and os.path.isdir(project_root)
                           else path)
 
-    @staticmethod
-    def analyse(path: str, log: bool = False, fail_fast: bool = False,
-                imported_files: dict[str, Analyser] | None = None,
-                import_stack: list[str] | None = None,
-                root: str = None, env: str = None, compiler_entry: bool = False) -> Analyser:
+    @classmethod
+    def analyse(
+            cls,
+            path: str,
+            log: bool = False,
+            fail_fast: bool = False,
+            imported_files: dict[str, Self] | None = None,
+            import_stack: list[str] | None = None,
+            root: str = None,
+            env: str = None,
+            compiler_entry: bool = False
+    ) -> Self:
         """
         Analyses the syntax of the Python code
 
@@ -116,7 +122,7 @@ class Analyser:
     def env(self) -> str:
         return self._env
 
-    def copy(self) -> Analyser:
+    def copy(self) -> Self:
         copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root,
                           env=self._env, log=self._log, fail_fast=self._fail_fast)
 
@@ -146,7 +152,7 @@ class Analyser:
         return not type_analyser.has_errors
 
     def __analyse_modules(self,
-                          imported_files: dict[str, Analyser] | None = None,
+                          imported_files: dict[str, Self] | None = None,
                           import_stack: list[str] | None = None) -> bool:
         """
         Validates the symbols and constructs the symbol table of the ast tree
@@ -246,5 +252,5 @@ class Analyser:
 
         self._included_imported_files = True
 
-    def get_imports(self) -> list[Analyser]:
+    def get_imports(self) -> list[Self]:
         return list(self._imported_files.values())

@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3_test.tests.test_classes.contract.neoeventstruct import NeoEventStruct
 from boa3_test.tests.test_classes.contract.neomethodstruct import NeoMethodStruct
@@ -12,7 +10,7 @@ class NeoAbiStruct(NeoStruct):
     _events_field = 'events'
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> NeoAbiStruct:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         required_fields = [cls._methods_field,
                            cls._events_field
                            ]

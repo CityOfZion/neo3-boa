@@ -1,3 +1,5 @@
+from typing import Self
+
 from neo3.api import noderpc
 from neo3.contracts.contract import CONTRACT_HASHES
 from neo3.core import types
@@ -272,7 +274,7 @@ class TestWhile(boatestcase.BoaTestCase):
             fee_amount: int
 
             @classmethod
-            def from_untyped_notification(cls, n: noderpc.Notification):
+            def from_untyped_notification(cls, n: noderpc.Notification) -> Self:
                 inner_args_types = tuple(cls.__annotations__.values())
                 e = super().from_notification(n, tuple[inner_args_types])
                 stack = e.state[0]

@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import abc
 import ast
+from typing import Self
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.symbol import ISymbol
@@ -23,7 +22,7 @@ class IInternalMethod(IBuiltinMethod, abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def instance(cls) -> IInternalMethod:
+    def instance(cls) -> Self:
         pass
 
     @classmethod

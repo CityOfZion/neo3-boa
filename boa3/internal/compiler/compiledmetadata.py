@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Self
 
 from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
@@ -9,7 +9,7 @@ class CompiledMetadata:
     _instance = None
 
     @classmethod
-    def instance(cls) -> CompiledMetadata:
+    def instance(cls) -> Self:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance

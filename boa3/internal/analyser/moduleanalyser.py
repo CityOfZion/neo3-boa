@@ -1432,16 +1432,31 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if isinstance(value, Variable):
             value = value.type
+
+        attribute_symbol = None
         if hasattr(value, 'symbols') and attribute.attr in value.symbols:
-            return value.symbols[attribute.attr]
+            attribute_symbol = value.symbols[attribute.attr]
         elif isinstance(value, Package) and attribute.attr in value.inner_packages:
-            return value.inner_packages[attribute.attr]
+            attribute_symbol = value.inner_packages[attribute.attr]
         elif Builtin.get_symbol(attribute.attr) is not None:
-            return Builtin.get_symbol(attribute.attr)
+            attribute_symbol = Builtin.get_symbol(attribute.attr)
         elif isinstance(value, UndefinedType):
-            return value
+            attribute_symbol = value
+
+        attribute_id = '{0}.{1}'.format(value_id, attribute.attr)
+        if attribute_symbol is not None:
+            if attribute_symbol.is_deprecated:
+                self._log_warning(
+                    CompilerWarning.DeprecatedSymbol(
+                        attribute.lineno,
+                        attribute.col_offset,
+                        attribute_id,
+                        attribute_symbol.new_location if hasattr(attribute_symbol, 'new_location') else None
+                    )
+                )
+            return attribute_symbol
         else:
-            return '{0}.{1}'.format(value_id, attribute.attr)
+            return attribute_id
 
     def visit_For(self, for_node: ast.For):
         """

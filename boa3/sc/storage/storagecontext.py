@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 __all__ = [
     'StorageContext'
 ]
 
+from typing import Self
 
 from boa3.sc.storage.storagemap import StorageMap
 
@@ -30,7 +29,7 @@ class StorageContext:
         """
         pass
 
-    def as_read_only(self) -> StorageContext:
+    def as_read_only(self) -> Self:
         """
         Converts the specified storage context to a new readonly storage context.
 

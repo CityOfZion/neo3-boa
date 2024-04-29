@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Self
 
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 
@@ -12,12 +12,26 @@ class Package(IdentifiedSymbol):
     :ivar types: a list that stores every property in the package. Empty by default.
     """
 
+    @classmethod
+    def create_package(
+            cls,
+            package_id: str,
+            symbols: dict[str, IdentifiedSymbol] = None,
+    ) -> Self:
+
+        from boa3.internal import constants
+        package_ids = package_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)
+        pkg = Package(identifier=package_ids[-1], other_symbols=symbols)
+        for pkg_id in reversed(package_ids[:-1]):
+            pkg = Package(identifier=pkg_id, packages=[pkg])
+        return pkg
+
     def __init__(self,
                  identifier: str,
                  properties: list[IdentifiedSymbol] = None,
                  methods: list[IdentifiedSymbol] = None,
                  types: list[IdentifiedSymbol] = None,
-                 packages: list[Package] = None,
+                 packages: list[Self] = None,
                  other_symbols: dict = None,
                  import_origin=None,
                  deprecated: bool = False,
@@ -72,11 +86,10 @@ class Package(IdentifiedSymbol):
             self.origin = None
 
         self._aliases: dict[str, str] = {}
-        self._parent: Package | None = None
+        self._parent: Self | None = None
 
-        self.new_location = new_location
         if deprecated:
-            self.deprecate()
+            self.deprecate(new_location)
 
     @property
     def shadowing_name(self) -> str:
@@ -97,22 +110,24 @@ class Package(IdentifiedSymbol):
         return symbol_map
 
     @property
-    def inner_packages(self) -> dict[str, Package]:
+    def inner_packages(self) -> dict[str, Self]:
         return {symbol.raw_identifier: symbol for symbol in self._packages}
 
     @property
-    def parent(self) -> Package | None:
+    def parent(self) -> Self | None:
         """
         Get the parent package of this one. None if it's the root package.
         """
         return self._parent
 
-    def deprecate(self):
+    def deprecate(self, new_location: str = None):
         if not self._deprecated:
             from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
-            if self._parent is not None and self._parent.new_location is not None:
+            if new_location is not None:
+                self._new_location = new_location
+            elif self._parent is not None and self._parent.new_location is not None:
                 from boa3.internal import constants
-                self.new_location = constants.ATTRIBUTE_NAME_SEPARATOR.join(
+                self._new_location = constants.ATTRIBUTE_NAME_SEPARATOR.join(
                     (self._parent.new_location, self.identifier)
                 )
 

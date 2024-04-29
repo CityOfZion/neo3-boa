@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3_test.test_drive.model.network.payloads.testblock import TestBlock
 from boa3_test.tests.test_classes.transaction import Transaction
@@ -45,8 +43,8 @@ class Block(TestBlock):
         return json_block
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> Block:
-        block: Block = super().from_json(json)
+    def from_json(cls, json: dict[str, Any]) -> Self:
+        block: Self = super().from_json(json)
 
         # 'index' and 'timestamp' fields are required
         block._index = int(json['index'])

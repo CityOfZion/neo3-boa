@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
 
 from boa3.internal.compiler.codegenerator import get_bytes_count
@@ -18,7 +16,7 @@ class ClassType(IType, ABC):
     """
 
     def __init__(self, identifier: str, decorators: list = None,
-                 bases: list[ClassType] = None):
+                 bases: list["ClassType"] = None):
         super().__init__(identifier)
 
         if decorators is None:

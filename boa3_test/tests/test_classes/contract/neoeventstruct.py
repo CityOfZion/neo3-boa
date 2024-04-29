@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
 
@@ -10,7 +8,7 @@ class NeoEventStruct(NeoStruct):
     _parameters_field = 'parameters'
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> NeoEventStruct:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         required_fields = [cls._name_field,
                            cls._parameters_field
                            ]

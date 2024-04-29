@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3_test.test_drive.model.network.payloads.transactionattribute import TransactionAttribute, \
     TransactionAttributeType
@@ -24,8 +22,8 @@ class OracleResponse(TransactionAttribute):
 
         return json_response
 
-    @staticmethod
-    def from_json(json: dict[str, Any]) -> OracleResponse:
+    @classmethod
+    def from_json(cls, json: dict[str, Any]) -> Self:
         oracle_response: OracleResponse = OracleResponse(json['id'], json['code'], json['result'])
 
         return oracle_response

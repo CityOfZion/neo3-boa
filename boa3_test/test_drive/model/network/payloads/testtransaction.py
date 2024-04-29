@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo import from_hex_str, utils
 from boa3.internal.neo3.core.types import UInt256
@@ -44,7 +42,7 @@ class TestTransaction:
         }
 
     @classmethod
-    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> TestTransaction:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> Self:
         import base64
 
         if 'hash' in json and isinstance(json['hash'], str):
@@ -120,7 +118,7 @@ class TransactionExecution:
         return self._notifications.copy()
 
     @classmethod
-    def from_json(cls, json: dict[str, Any], contract_collection: ContractCollection = None) -> TransactionExecution:
+    def from_json(cls, json: dict[str, Any], contract_collection: ContractCollection = None) -> Self:
         tx_exec = cls()
 
         tx_exec._trigger = TriggerType[json['trigger']]

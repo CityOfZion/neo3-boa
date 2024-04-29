@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Self
 
 from neo3.api import noderpc
 from neo3.api.wrappers import NeoToken
@@ -20,7 +21,7 @@ class CandidateStateChangedEvent(boatestcase.BoaTestEvent):
     votes: int
 
     @classmethod
-    def from_untyped_notification(cls, n: noderpc.Notification):
+    def from_untyped_notification(cls, n: noderpc.Notification) -> Self:
         inner_args_types = tuple(cls.__annotations__.values())
         e = super().from_notification(n, *inner_args_types)
         return cls(e.contract, e.name, e.state, *e.state)

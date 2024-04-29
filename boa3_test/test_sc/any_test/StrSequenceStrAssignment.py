@@ -1,4 +1,4 @@
-from typing import Sequence
+from collections.abc import Sequence
 
 from boa3.builtin.compile_time import public
 

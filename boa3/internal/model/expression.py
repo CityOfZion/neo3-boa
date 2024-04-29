@@ -28,7 +28,7 @@ class IExpression(ISymbol):
     def is_deprecated(self) -> bool:
         return self._deprecated
 
-    def deprecate(self):
+    def deprecate(self, new_location: str = None):
         self._deprecated = True
 
     @property

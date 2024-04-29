@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 
 class TransactionAttributeType:
@@ -19,8 +17,8 @@ class TransactionAttribute:
             'type': self._type,
         }
 
-    @staticmethod
-    def from_json(json: dict[str, Any]) -> TransactionAttribute:
+    @classmethod
+    def from_json(cls, json: dict[str, Any]) -> Self:
         if json['type'] == TransactionAttributeType.ORACLE_RESPONSE:
             from boa3_test.test_drive.model.network.payloads.oracleresponse import OracleResponse
             tx_attr = OracleResponse.from_json(json)

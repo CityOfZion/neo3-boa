@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.interopinterfacetype import InteropInterfaceType
 from boa3.internal.model.method import Method
@@ -49,7 +47,7 @@ class IteratorType(InteropInterfaceType, ICollectionType):
         return self._origin_collection.is_valid_key(key_type)
 
     @classmethod
-    def build(cls, value: Any = None) -> IteratorType:
+    def build(cls, value: Any = None) -> Self:
         if isinstance(value, ICollectionType):
             return IteratorType(value)
         else:

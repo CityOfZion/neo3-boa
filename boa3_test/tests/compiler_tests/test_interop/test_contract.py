@@ -1,4 +1,5 @@
 import json
+from typing import Self
 
 from boaconstructor import storage
 from neo3.contracts.contract import CONTRACT_HASHES
@@ -97,7 +98,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
             state: str
 
             @classmethod
-            def from_untyped_notification(cls, n: noderpc.Notification):
+            def from_untyped_notification(cls, n: noderpc.Notification) -> Self:
                 inner_args_types = tuple(cls.__annotations__.values())
                 e = super().from_notification(n, *inner_args_types)
                 return cls(e.contract, e.name, e.state[0])
