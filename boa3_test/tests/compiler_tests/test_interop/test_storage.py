@@ -56,8 +56,8 @@ class TestStorageInterop(boatestcase.BoaTestCase):
     def test_storage_get_mismatched_type(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageGetMismatchedType.py')
 
-    async def test_storage_get_check(self):
-        await self.set_up_contract('StorageGetCheck.py', compile_if_found=True)
+    async def test_storage_try_get(self):
+        await self.set_up_contract('StorageTryGet.py')
 
         key = b'example_key'
         value = 42
@@ -79,6 +79,52 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         contract_storage = await self.get_storage(values_post_processor=storage.as_int)
         self.assertIn(key, contract_storage)
         self.assertEqual(value, contract_storage[key])
+
+    async def test_storage_try_get_value(self):
+        await self.set_up_contract('StorageTryGetValue.py')
+
+        key = b'example_key'
+        value = 42
+
+        expected = 0
+        result, _ = await self.call('get_value', [key], return_type=int)
+        self.assertEqual(expected, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertNotIn(key, contract_storage)
+
+        result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result, _ = await self.call('get_value', [key], return_type=int)
+        self.assertEqual(value, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertIn(key, contract_storage)
+        self.assertEqual(value, contract_storage[key])
+
+    async def test_storage_try_get_exists(self):
+        await self.set_up_contract('StorageTryGetExists.py')
+
+        key = b'example_key'
+        value = 42
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertNotIn(key, contract_storage)
+
+        expected = key in contract_storage
+        result, _ = await self.call('get_value', [key], return_type=bool)
+        self.assertEqual(expected, result)
+
+        result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertIn(key, contract_storage)
+
+        expected = key in contract_storage
+        result, _ = await self.call('get_value', [key], return_type=bool)
+        self.assertEqual(expected, result)
 
     async def test_storage_put_bytes_key_bytes_value(self):
         await self.set_up_contract('StoragePutBytesKeyBytesValue.py')
