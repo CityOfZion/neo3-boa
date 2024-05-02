@@ -199,6 +199,13 @@ class Interop:
     StorageGetUInt160 = StorageGetUInt160Method()
     StorageGetUInt256 = StorageGetUInt256Method()
     StorageGetECPoint = StorageGetECPointMethod()
+    StorageGetCheck = StorageTryGetBytesMethod()
+    StorageGetCheckInt = StorageTryGetIntMethod()
+    StorageGetCheckBool = StorageTryGetBoolMethod()
+    StorageGetCheckStr = StorageTryGetStrMethod()
+    StorageGetCheckUInt160 = StorageTryGetUInt160Method()
+    StorageGetCheckUInt256 = StorageTryGetUInt256Method()
+    StorageGetCheckECPoint = StorageTryGetECPointMethod()
     StoragePut = StoragePutBytesMethod()
     StoragePutInt = StoragePutIntMethod()
     StoragePutBool = StoragePutBoolMethod()
@@ -453,6 +460,13 @@ class Interop:
                                       StorageGetUInt160,
                                       StorageGetUInt256,
                                       StorageGetECPoint,
+                                      StorageGetCheck,
+                                      StorageGetCheckInt,
+                                      StorageGetCheckBool,
+                                      StorageGetCheckStr,
+                                      StorageGetCheckUInt160,
+                                      StorageGetCheckUInt256,
+                                      StorageGetCheckECPoint,
                                       StorageGetContext,
                                       StorageGetReadOnlyContext,
                                       StoragePut,

@@ -18,11 +18,19 @@ __all__ = ['FindOptionsType',
            'StoragePutIntMethod',
            'StoragePutStrMethod',
            'StoragePutUInt160Method',
-           'StoragePutUInt256Method'
+           'StoragePutUInt256Method',
+           'StorageTryGetBoolMethod',
+           'StorageTryGetBytesMethod',
+           'StorageTryGetECPointMethod',
+           'StorageTryGetIntMethod',
+           'StorageTryGetStrMethod',
+           'StorageTryGetUInt160Method',
+           'StorageTryGetUInt256Method',
            ]
 
 from boa3.internal.model.builtin.interop.storage.findoptionstype import FindOptionsType
 from boa3.internal.model.builtin.interop.storage.get import *
+from boa3.internal.model.builtin.interop.storage.getcheck import *
 from boa3.internal.model.builtin.interop.storage.put import *
 from boa3.internal.model.builtin.interop.storage.storagecontext import StorageContextType
 from boa3.internal.model.builtin.interop.storage.storagedeletemethod import StorageDeleteMethod
