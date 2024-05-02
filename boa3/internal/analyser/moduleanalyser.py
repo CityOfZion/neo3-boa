@@ -1465,7 +1465,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def visit_Match(self, match_node: ast.Match):
         for case in match_node.cases:
-            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)) or
+            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton, ast.MatchMapping)) or
                     isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None and case.guard is None
             ):
                 self._log_error(
