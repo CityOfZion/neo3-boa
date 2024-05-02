@@ -707,6 +707,17 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if isinstance(case.pattern, ast.MatchSingleton):
                     self.generator.convert_literal(case.pattern.value)
                     pattern_type = self.get_type(case.pattern.value)
+                elif isinstance(case.pattern, ast.MatchMapping):
+                    pattern_type = Type.dict
+
+                    self.generator.convert_new_map(pattern_type)
+
+                    for map_index in range(len(case.pattern.keys)):
+                        start_address = VMCodeMapping.instance().bytecode_size
+                        self.generator.duplicate_stack_top_item()
+                        self.visit_to_generate(case.pattern.keys[map_index])
+                        self.visit_to_generate(case.pattern.patterns[map_index].value)
+                        self.generator.convert_set_item(start_address)
                 else:
                     pattern = self.visit_to_generate(case.pattern.value)
                     pattern_type = pattern.type
@@ -714,9 +725,19 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.duplicate_stack_item(2)
                 pattern_type.generate_is_instance_type_check(self.generator)
 
-                self.generator.swap_reverse_stack_items(3)
-                self.generator.convert_operation(BinaryOp.NumEq)
-                self.generator.convert_operation(BinaryOp.And)
+                is_same_type = self.generator.convert_begin_if()
+
+                self.generator.swap_reverse_stack_items(2)
+                if isinstance(case.pattern, ast.MatchMapping):
+                    self.generator.compare_dicts_match_case()
+                else:
+                    self.generator.convert_operation(BinaryOp.NumEq)
+
+                is_not_same_type = self.generator.convert_begin_else(is_same_type)
+                self.generator.remove_stack_top_item()
+                self.generator.remove_stack_top_item()
+                self.generator.convert_literal(False)
+                self.generator.convert_end_if(is_not_same_type)
 
                 case_addresses.append(self.generator.convert_begin_if())
                 for stmt in case.body:

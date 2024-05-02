@@ -12,6 +12,8 @@ def main(x: Any) -> str:
             return "one"
         case "2":
             return "2 string"
+        case {}:
+            return "dictionary"
         case _:
             # this is the default case, when all others are False
             return "other"
