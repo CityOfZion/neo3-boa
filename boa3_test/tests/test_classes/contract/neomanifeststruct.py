@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3_test.tests.test_classes.contract.neoabistruct import NeoAbiStruct
 from boa3_test.tests.test_classes.contract.neopermissionsstruct import NeoPermissionsStruct
@@ -18,7 +16,7 @@ class NeoManifestStruct(NeoStruct):
     _extra_field = 'extra'
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> NeoManifestStruct:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         required_fields = [cls._name_field,
                            cls._groups_field,
                            cls._supported_standards_field,

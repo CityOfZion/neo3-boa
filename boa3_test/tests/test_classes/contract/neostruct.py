@@ -1,14 +1,12 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Self
 
 
 class NeoStruct(list, ABC):
 
     @classmethod
     @abstractmethod
-    def from_json(cls, json: dict[str, Any]) -> NeoStruct:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         pass
 
     @classmethod

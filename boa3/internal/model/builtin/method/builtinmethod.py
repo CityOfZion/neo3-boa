@@ -1,8 +1,6 @@
-from __future__ import annotations
-
 import ast
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 from boa3.internal.model.method import Method
@@ -198,7 +196,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         """
         return None
 
-    def build(self, value: Any) -> IBuiltinMethod:
+    def build(self, value: Any) -> Self:
         """
         Creates a method instance with the given value as self
 

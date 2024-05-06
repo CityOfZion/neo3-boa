@@ -1,10 +1,10 @@
-from __future__ import annotations
-
 __all__ = [
     'get_package',
     'get_internal_symbol',
     'CompilerBuiltin'
 ]
+
+from typing import Self
 
 from boa3.internal import constants
 from boa3.internal.model.builtin.builtin import Builtin, BoaPackage
@@ -16,7 +16,7 @@ from boa3.internal.model.imports.package import Package
 from boa3.internal.model.sc import ContractImports, BoaSCPackage
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.math import Math
-from boa3.internal.model.type.typeutils import TypeUtils
+from boa3.internal.model.type.typeutils import TypeUtils, TypingPackage
 
 
 def get_package(package_full_path: str) -> Package | None:
@@ -31,7 +31,7 @@ class CompilerBuiltin:
     _instance = None
 
     @classmethod
-    def instance(cls) -> CompilerBuiltin:
+    def instance(cls) -> Self:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
@@ -40,7 +40,8 @@ class CompilerBuiltin:
         self.packages: list[Package] = []
         self._events: list[Event] = []
 
-        self._generate_builtin_package('typing', TypeUtils.get_types_from_typing_lib())
+        self._generate_builtin_package('typing', TypeUtils.package_symbols(TypingPackage.Typing))
+        self._generate_builtin_package('collections', TypeUtils.package_symbols(TypingPackage.Collections))
         self._generate_builtin_package('math', Math.get_methods_from_math_lib())
 
         self._generate_builtin_package('boa3.sc.types', ContractImports.package_symbols(BoaSCPackage.Types))

@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import abc
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.wallet import utils
@@ -47,7 +45,7 @@ class Account(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def from_json(cls, json: dict[str, Any]) -> Account:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         pass
 
     def get_identifier(self) -> str:

@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -61,7 +59,7 @@ class ContractType(ClassArrayType):
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> ContractType:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _Contract
 

@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Self
 
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
@@ -27,7 +27,7 @@ class OpcodeInformation:
             stack_items = 0
         self.stack_items: int = stack_items
 
-    def get_large(self) -> OpcodeInformation | None:
+    def get_large(self) -> Self | None:
         large_op = self.opcode.get_large
         if large_op is None:
             return None

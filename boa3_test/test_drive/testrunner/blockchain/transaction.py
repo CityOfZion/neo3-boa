@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.network.payloads.signer import Signer
@@ -66,8 +64,8 @@ class TestRunnerTransaction(TestTransaction):
         return self._witnesses.copy()
 
     @classmethod
-    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> TestRunnerTransaction:
-        tx: TestRunnerTransaction = super().from_json(json)
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> Self:
+        tx: Self = super().from_json(json)
 
         if 'neoxp_config' in kwargs:
             neoxp_config = kwargs['neoxp_config']

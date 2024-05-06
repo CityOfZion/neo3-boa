@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import ast
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.itype import IType
@@ -32,7 +30,7 @@ class Variable(IExpression):
         self._origin_variable: Variable | None = None
         self._first_assign_value: Any = Undefined
 
-    def copy(self) -> Variable:
+    def copy(self) -> Self:
         var = Variable(self._var_type, self._origin_node)
         var.is_reassigned = self.is_reassigned
         var._first_assign_value = self._first_assign_value

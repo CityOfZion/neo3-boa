@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
+from typing import Self
 
 from boa3.internal.model.operation.operation import IOperation
 from boa3.internal.model.type.itype import IType
@@ -36,7 +35,7 @@ class UnaryOperation(IOperation, ABC):
         pass
 
     @classmethod
-    def build(cls, operand: IType) -> UnaryOperation | None:
+    def build(cls, operand: IType) -> Self | None:
         """
         Creates a unary operation with the given operand type
 

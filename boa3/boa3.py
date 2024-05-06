@@ -11,9 +11,14 @@ class Boa3:
     """
 
     @staticmethod
-    def compile(path: str, root_folder: str = None, log_level: str = None,
-                env: str = None, fail_fast: bool = True,
-                optimize: bool = True) -> bytes:
+    def compile(
+            path: str,
+            root_folder: str = None,
+            log_level: str = None,
+            env: str = None,
+            fail_fast: bool = True,
+            optimize: bool = True
+    ) -> bytes:
         """
         Load a Python file to be compiled but don't write the result into a file
 
@@ -33,10 +38,17 @@ class Boa3:
                                   )
 
     @staticmethod
-    def compile_and_save(path: str, output_path: str = None, root_folder: str = None,
-                         show_errors: bool = True, log_level: str = None,
-                         debug: bool = False, env: str = None, fail_fast: bool = True,
-                         optimize: bool = True):
+    def compile_and_save(
+            path: str,
+            output_path: str = None,
+            root_folder: str = None,
+            show_errors: bool = True,
+            log_level: str = None,
+            debug: bool = False,
+            env: str = None,
+            fail_fast: bool = True,
+            optimize: bool = True
+    ):
         """
         Load a Python file to be compiled and save the result into the files.
         By default, the resultant .nef file is saved in the same folder of the

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __all__ = [
     'BoaTestCase',
     'BoaTestEvent',
@@ -16,7 +14,7 @@ import logging
 import os
 import threading
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Protocol, TypeVar, Type, Sequence
+from typing import Any, Callable, Optional, Protocol, TypeVar, Type, Sequence, Self
 
 from boaconstructor import (SmartContractTestCase,
                             AbortException,
@@ -51,7 +49,7 @@ CompilerOutput = tuple[ContractScript, JsonObject]
 
 class TestNotification(Protocol):
     @classmethod
-    def from_notification(cls, n: noderpc.Notification) -> TestNotification:
+    def from_notification(cls, n: noderpc.Notification) -> Self:
         ...
 
 
@@ -69,7 +67,7 @@ class BoaTestEvent:
     state: tuple
 
     @classmethod
-    def from_notification(cls, n: noderpc.Notification, *state_type: Type) -> BoaTestEvent:
+    def from_notification(cls, n: noderpc.Notification, *state_type: Type) -> Self:
         if not state_type:
             if cls is not BoaTestEvent:
                 # for inherited classes
@@ -86,14 +84,18 @@ class BoaTestEvent:
 
     @classmethod
     @abc.abstractmethod
-    def from_untyped_notification(cls, n: noderpc.Notification):
-        return cls.from_notification(n, *cls.__annotations__.values())
+    def from_untyped_notification(cls, n: noderpc.Notification) -> Self:
+        if cls is BoaTestEvent:
+            state_type = tuple()
+        else:
+            state_type = cls.__annotations__.values()
+        return cls.from_notification(n, *state_type)
 
 
 @dataclass
 class Nep17TransferEvent(_Nep17TransferEvent):
     @classmethod
-    def from_notification(cls, n: noderpc.Notification):
+    def from_notification(cls, n: noderpc.Notification) -> Self:
         try:
             return super().from_notification(n)
         except ValueError:
@@ -110,7 +112,7 @@ class Nep11TransferEvent(Nep17TransferEvent):
     token_id: str
 
     @classmethod
-    def from_notification(cls, n: noderpc.Notification):
+    def from_notification(cls, n: noderpc.Notification) -> Self:
         from neo3.api import StackItemType
         stack = n.state.as_list()
         source = stack[0].as_uint160() if stack[0].type != StackItemType.ANY else stack[0].as_none()
@@ -196,14 +198,15 @@ class BoaTestCase(SmartContractTestCase):
         return self._contract
 
     @classmethod
-    async def set_up_contract(cls,
-                              *contract_path: str,
-                              output_name: str = None,
-                              change_manifest_name: bool = False,
-                              signing_account: account.Account = None,
-                              compile_if_found: bool = False,
-                              **kwargs
-                              ) -> GenericContract:
+    async def set_up_contract(
+            cls,
+            *contract_path: str,
+            output_name: str = None,
+            change_manifest_name: bool = False,
+            signing_account: account.Account = None,
+            compile_if_found: bool = False,
+            **kwargs
+    ) -> GenericContract:
 
         contract_path = cls.get_contract_path(*contract_path)
         cls.contract_hash = await cls.compile_and_deploy(contract_path,
@@ -217,15 +220,16 @@ class BoaTestCase(SmartContractTestCase):
         return cls.contract
 
     @classmethod
-    async def compile_and_deploy(cls,
-                                 contract_path: str,
-                                 *extra_args: str,
-                                 output_name: str = None,
-                                 change_manifest_name: bool = False,
-                                 signing_account: account.Account = None,
-                                 compile_if_found: bool = False,
-                                 **kwargs
-                                 ) -> types.UInt160:
+    async def compile_and_deploy(
+            cls,
+            contract_path: str,
+            *extra_args: str,
+            output_name: str = None,
+            change_manifest_name: bool = False,
+            signing_account: account.Account = None,
+            compile_if_found: bool = False,
+            **kwargs
+    ) -> types.UInt160:
 
         nef_abs_path, _ = cls.get_deploy_file_paths(*(contract_path, *extra_args),
                                                     output_name=output_name,
@@ -280,7 +284,9 @@ class BoaTestCase(SmartContractTestCase):
 
     @classmethod
     async def deploy(
-            cls, path_to_nef: str, signing_account: account.Account
+            cls,
+            path_to_nef: str,
+            signing_account: account.Account
     ) -> types.UInt160:
 
         import inspect
@@ -336,7 +342,12 @@ class BoaTestCase(SmartContractTestCase):
             return {}
 
     @classmethod
-    def unwrap_inner_values(cls, value: list | dict, *args: type, expected_result: Type[T] | None = None):
+    def unwrap_inner_values(
+            cls,
+            value: list | dict,
+            *args: type,
+            expected_result: Type[T] | None = None
+    ):
         if isinstance(value, list):
             if expected_result not in (list, tuple):
                 expected_result = list
@@ -370,7 +381,8 @@ class BoaTestCase(SmartContractTestCase):
                     )
 
                 dict_key = key if not isinstance(key, noderpc.StackItem) else cls._unwrap_stack_item(key, dict_key_type)
-                dict_item = item if not isinstance(item, noderpc.StackItem) else cls._unwrap_stack_item(item, dict_value_type)
+                dict_item = item if not isinstance(item, noderpc.StackItem) else cls._unwrap_stack_item(item,
+                                                                                                        dict_value_type)
                 if isinstance(dict_item, list):
                     if dict_item and isinstance(dict_item[0], tuple):
                         dict_item = cls._unwrap_stack_item(
@@ -383,7 +395,11 @@ class BoaTestCase(SmartContractTestCase):
                 value[dict_key] = dict_item
 
     @classmethod
-    def _unwrap_stack_item(cls, stack_item: noderpc.StackItem, expected_type: type | None = None) -> Any:
+    def _unwrap_stack_item(
+            cls,
+            stack_item: noderpc.StackItem,
+            expected_type: type | None = None
+    ) -> Any:
         result = None
 
         if stack_item.type is noderpc.StackItemType.STRUCT:
@@ -460,13 +476,14 @@ class BoaTestCase(SmartContractTestCase):
             result = stack_item.value
         return result
 
-    def filter_events(self,
-                      events: list[noderpc.Notification],
-                      *,
-                      origin: types.UInt160 | list[types.UInt160] = None,
-                      event_name: str = None,
-                      notification_type: Type[T] = noderpc.Notification
-                      ) -> list[T]:
+    def filter_events(
+            self,
+            events: list[noderpc.Notification],
+            *,
+            origin: types.UInt160 | list[types.UInt160] = None,
+            event_name: str = None,
+            notification_type: Type[T] = noderpc.Notification
+    ) -> list[T]:
 
         if issubclass(notification_type, BoaTestEvent):
             convert_event: Callable[[noderpc.Notification], BoaTestEvent] = notification_type.from_untyped_notification
@@ -557,12 +574,13 @@ class BoaTestCase(SmartContractTestCase):
         if hasattr(receipt, 'tx_hash'):
             cls.called_tx = receipt.tx_hash
 
-    def get_all_symbols(self,
-                        compiler: Compiler,
-                        *,
-                        symbol_type: Type[T],
-                        debug_info: bool = False
-                        ) -> dict[str, T]:
+    def get_all_symbols(
+            self,
+            compiler: Compiler,
+            *,
+            symbol_type: Type[T],
+            debug_info: bool = False
+    ) -> dict[str, T]:
 
         from boa3.internal.compiler.filegenerator.filegenerator import FileGenerator
         from boa3.internal.model.method import Method
@@ -587,14 +605,15 @@ class BoaTestCase(SmartContractTestCase):
 
         return symbols
 
-    def assertCompile(self,
-                      contract_path: str,
-                      *,
-                      root_folder: str = None,
-                      fail_fast: bool = False,
-                      get_manifest: bool = False,
-                      **kwargs
-                      ) -> CompilerOutput:
+    def assertCompile(
+            self,
+            contract_path: str,
+            *,
+            root_folder: str = None,
+            fail_fast: bool = False,
+            get_manifest: bool = False,
+            **kwargs
+    ) -> CompilerOutput:
 
         py_abs_path = self.get_contract_path(contract_path)
         if not get_manifest:
@@ -615,10 +634,11 @@ class BoaTestCase(SmartContractTestCase):
 
         return result, result_manifest
 
-    def assertCompilerLogs(self,
-                           expected_logged_exception,
-                           *path: str
-                           ) -> CompilerOutput | str:
+    def assertCompilerLogs(
+            self,
+            expected_logged_exception,
+            *path: str
+    ) -> CompilerOutput | str:
         py_abs_path = self.get_contract_path(*path)
         output, error_msg = self._assert_compiler_logs_error(expected_logged_exception, py_abs_path)
 
@@ -634,10 +654,11 @@ class BoaTestCase(SmartContractTestCase):
             except BaseException:
                 return output, manifest
 
-    def assertCompilerNotLogs(self,
-                              expected_logged_exception,
-                              path
-                              ) -> ContractScript:
+    def assertCompilerNotLogs(
+            self,
+            expected_logged_exception,
+            path
+    ) -> ContractScript:
 
         output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
         if len(expected_logged) > 0:
@@ -671,22 +692,24 @@ class BoaTestCase(SmartContractTestCase):
         if not (hasattr(first, 'startswith') and first.startswith(second)):
             self.fail(f'{first} != {second}')
 
-    def _assert_compiler_logs_error(self,
-                                    expected_logged_exception,
-                                    path
-                                    ) -> tuple[ContractScript, str]:
+    def _assert_compiler_logs_error(
+            self,
+            expected_logged_exception,
+            path
+    ) -> tuple[ContractScript, str]:
 
         output, expected_logged = self._get_compiler_log_data(expected_logged_exception, path)
         if len(expected_logged) < 1:
             raise AssertionError('{0} not logged'.format(expected_logged_exception.__name__))
         return output, expected_logged[0].message
 
-    def _get_compiler_log_data(self,
-                               expected_logged_exception,
-                               path,
-                               *,
-                               fail_fast=False
-                               ) -> tuple[ContractScript, list[logging.LogRecord]]:
+    def _get_compiler_log_data(
+            self,
+            expected_logged_exception,
+            path,
+            *,
+            fail_fast=False
+    ) -> tuple[ContractScript, list[logging.LogRecord]]:
         output = None
 
         with _LOGGING_LOCK:
@@ -702,13 +725,14 @@ class BoaTestCase(SmartContractTestCase):
                                if isinstance(exception.msg, expected_logged_exception)]
         return output, expected_logged
 
-    def get_all_compile_log_data(self,
-                                 path: str,
-                                 *,
-                                 get_errors: bool = True,
-                                 get_warnings: bool = False,
-                                 fail_fast: bool = False
-                                 ) -> tuple[list[CompilerError], list[CompilerWarning]]:
+    def get_all_compile_log_data(
+            self,
+            path: str,
+            *,
+            get_errors: bool = True,
+            get_warnings: bool = False,
+            fail_fast: bool = False
+    ) -> tuple[list[CompilerError], list[CompilerWarning]]:
 
         instance_logs = []
         if get_errors:
@@ -820,11 +844,15 @@ class BoaTestCase(SmartContractTestCase):
         return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
 
     @classmethod
-    def get_deploy_file_paths(cls, *args: str, output_name: str = None,
-                              compile_if_found: bool = False, change_manifest_name: bool = False,
-                              debug: bool = False,
-                              **kwargs
-                              ) -> tuple[str, str]:
+    def get_deploy_file_paths(
+            cls,
+            *args: str,
+            output_name: str = None,
+            compile_if_found: bool = False,
+            change_manifest_name: bool = False,
+            debug: bool = False,
+            **kwargs
+    ) -> tuple[str, str]:
         contract_path = cls.get_contract_path(*args)
         if isinstance(contract_path, str):
             nef_path, manifest_path = cls.get_deploy_file_paths_without_compiling(contract_path, output_name)
@@ -844,7 +872,12 @@ class BoaTestCase(SmartContractTestCase):
         return contract_path, contract_path
 
     @staticmethod
-    def compile(path: str, root_folder: str = None, fail_fast: bool = False, **kwargs) -> ContractScript:
+    def compile(
+            path: str,
+            root_folder: str = None,
+            fail_fast: bool = False,
+            **kwargs
+    ) -> ContractScript:
         from boa3.boa3 import Boa3
 
         with _COMPILER_LOCK:
@@ -856,8 +889,16 @@ class BoaTestCase(SmartContractTestCase):
         return result
 
     @classmethod
-    def compile_and_save(cls, path: str, root_folder: str = None, debug: bool = False, log: bool = True,
-                         output_name: str = None, env: str = None, **kwargs) -> CompilerOutput:
+    def compile_and_save(
+            cls,
+            path: str,
+            root_folder: str = None,
+            debug: bool = False,
+            log: bool = True,
+            output_name: str = None,
+            env: str = None,
+            **kwargs
+    ) -> CompilerOutput:
 
         if output_name is not None:
             output_dir, manifest_name = os.path.split(output_name)  # get name

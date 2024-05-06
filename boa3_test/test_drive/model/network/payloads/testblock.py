@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo import from_hex_str
 from boa3.internal.neo3.core.types import UInt256
@@ -35,7 +33,7 @@ class TestBlock:
         return json_block
 
     @classmethod
-    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> TestBlock:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> Self:
         block = object.__new__(cls)
 
         if 'index' in json:

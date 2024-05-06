@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3_test.test_drive.model.interface.itransactionobject import ITransactionObject
 from boa3_test.test_drive.model.network.payloads.testtransaction import TransactionExecution
@@ -17,7 +15,7 @@ class TestRunnerTransactionLog(ITransactionObject):
         return self._executions.copy()
 
     @classmethod
-    def from_json(cls, json: dict[str, Any], contract_collection: ContractCollection = None) -> TestRunnerTransactionLog:
+    def from_json(cls, json: dict[str, Any], contract_collection: ContractCollection = None) -> Self:
         tx_log = cls()
 
         tx_log._executions = [TransactionExecution.from_json(execution, contract_collection) for execution in json['executions']]

@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 
 class ScopeValue:
@@ -9,14 +7,14 @@ class ScopeValue:
         self._assigned_variables: set[str] = set()
         self._parent_scope: ScopeValue | None = None
 
-    def new_scope(self) -> ScopeValue:
+    def new_scope(self) -> Self:
         scope = ScopeValue()
         scope._values = self._values.copy()
         scope._assigned_variables = self._assigned_variables.copy()
         scope._parent_scope = self
         return scope
 
-    def previous_scope(self) -> ScopeValue | None:
+    def previous_scope(self) -> Self | None:
         return self._parent_scope
 
     def update_values(self, *scopes, is_loop_scope: bool = False):
@@ -91,6 +89,10 @@ class UndefinedType:
     @property
     def identifier(self) -> str:
         return 'undefined'
+
+    @property
+    def is_deprecated(self) -> bool:
+        return False
 
 
 Undefined = UndefinedType()

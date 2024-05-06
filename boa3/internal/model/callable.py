@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import ast
 from abc import ABC
+from typing import Self
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.expression import IExpression
@@ -25,7 +24,7 @@ class Callable(IExpression, ABC):
                  kwargs: dict[str, Variable] | None = None,
                  defaults: list[ast.AST] = None,
                  return_type: IType = Type.none, is_public: bool = False,
-                 decorators: list[Callable] = None,
+                 decorators: list[Self] = None,
                  external_name: str = None,
                  is_safe: bool = False,
                  origin_node: ast.AST | None = None,

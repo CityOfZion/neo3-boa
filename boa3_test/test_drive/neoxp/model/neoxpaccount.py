@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.wallet import utils
@@ -18,9 +18,11 @@ class NeoExpressAccount(Account):
         return utils.address_from_script_hash(self._script_hash.to_array(), self._version)
 
     @classmethod
-    def from_json(cls, json: dict[str, Any]) -> Account:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         address = json['script-hash']
         label = json['label']
-        account = NeoExpressAccount(script_hash=UInt160(utils.address_to_script_hash(address)),
-                                    label=label)
+        account = NeoExpressAccount(
+            script_hash=UInt160(utils.address_to_script_hash(address)),
+            label=label
+        )
         return account

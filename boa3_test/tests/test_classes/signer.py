@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from boa3.internal import constants
 from boa3.internal.neo import from_hex_str
 from boa3.internal.neo3.core.types import UInt160

@@ -1,4 +1,4 @@
-from __future__ import annotations
+from typing import Self
 
 from boa3.internal.compiler.codegenerator.methodtokencollection import MethodTokenCollection
 from boa3.internal.compiler.codegenerator.vmcodemap import VMCodeMap
@@ -14,7 +14,7 @@ class VMCodeMapping:
     """
     This class is responsible for managing the Neo VM instruction during the bytecode generation.
     """
-    _instance: VMCodeMapping = None
+    _instance: Self = None
 
     @classmethod
     def instance(cls):

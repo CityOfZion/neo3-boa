@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 import ast
 from enum import Enum
+from typing import Self
 
 
 class Operator(str, Enum):
@@ -41,7 +40,7 @@ class Operator(str, Enum):
     NotIn = 'not in'
 
     @classmethod
-    def get_operation(cls, node: ast.operator) -> Operator | None:
+    def get_operation(cls, node: ast.operator) -> Self | None:
         operators: dict[type[ast.operator], Operator] = {
             ast.Add: Operator.Plus,
             ast.Sub: Operator.Minus,

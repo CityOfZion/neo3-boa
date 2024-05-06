@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, Self
 
 from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.model.network.payloads.testblock import TestBlock
@@ -74,10 +72,10 @@ class TestRunnerBlock(TestBlock):
         return json_block
 
     @classmethod
-    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> TestRunnerBlock:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> Self:
         from boa3.internal.neo import from_hex_str
 
-        block: TestRunnerBlock = super().from_json(json)
+        block: Self = super().from_json(json)
 
         if 'neoxp_config' in kwargs:
             neoxp_config = kwargs['neoxp_config']

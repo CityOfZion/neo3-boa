@@ -24,7 +24,7 @@ class ISymbol(ABC):
         return False
 
     @abstractmethod
-    def deprecate(self):
+    def deprecate(self, new_location: str = None):
         """
         Deprecate this symbol
         """

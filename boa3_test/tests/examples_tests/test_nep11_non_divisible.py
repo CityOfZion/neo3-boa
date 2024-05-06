@@ -1,4 +1,5 @@
 import json
+from typing import Self
 
 from neo3.api import StackItemType
 from neo3.contracts.contract import CONTRACT_HASHES
@@ -384,7 +385,7 @@ class TestNEP11NonDivisibleTemplate(boatestcase.BoaTestCase):
             add: bool
 
             @classmethod
-            def from_untyped_notification(cls, n: noderpc.Notification):
+            def from_untyped_notification(cls, n: noderpc.Notification) -> Self:
                 inner_args_types = tuple(cls.__annotations__.values())
                 e = super().from_notification(n, *inner_args_types)
                 return cls(e.contract, e.name, e.state, *e.state)
