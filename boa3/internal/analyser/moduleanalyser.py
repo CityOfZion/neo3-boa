@@ -1250,7 +1250,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         value_type: IType | None = None
 
-        if isinstance(value, (ast.Subscript, ast.Attribute, ast.Tuple)):
+        if isinstance(value, (ast.Subscript, ast.Attribute, ast.Tuple, ast.BinOp)):
             # index is another subscription
             value_type = self.visit(value)
         elif isinstance(value, ast.Name):
