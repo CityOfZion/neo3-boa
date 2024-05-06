@@ -50,6 +50,7 @@ class BinaryOp:
     # Other operations
     In = CollectionMembership()
     NotIn = CollectionNotMembership()
+    UnionTypesOp = UnionTypesOperation()
 
     @classmethod
     def validate_type(cls, operator: Operator, left: IType, right: IType) -> BinaryOperation | None:

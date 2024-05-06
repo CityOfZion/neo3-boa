@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
@@ -294,7 +294,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     return True
 
 
-def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160, None], amount: int, data: Any):
+def post_transfer(from_address: UInt160 | None, to_address: UInt160 | None, amount: int, data: Any):
     """
     Checks if the one receiving NEP17 tokens is a smart contract and if it's one the onPayment method will be called
 
@@ -314,7 +314,7 @@ def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160,
 
 
 @public(name='onNEP17Payment')
-def on_nep17_payment(from_address: Union[UInt160, None], amount: int, data: Any):
+def on_nep17_payment(from_address: UInt160 | None, amount: int, data: Any):
     """
     NEP-17 affirms :"if the receiver is a deployed contract, the function MUST call onPayment method on receiver
     contract with the data parameter from transfer AFTER firing the Transfer event. If the receiver doesn't want to

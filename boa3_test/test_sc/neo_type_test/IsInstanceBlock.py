@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop.blockchain import Block, get_block
@@ -11,6 +11,6 @@ def is_block(value: Any) -> bool:
 
 
 @public
-def get_block_is_block(index_or_hash: Union[int, UInt256]) -> bool:
+def get_block_is_block(index_or_hash: int | UInt256) -> bool:
     block = get_block(index_or_hash)
     return is_block(block)

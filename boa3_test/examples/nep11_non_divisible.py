@@ -3,7 +3,7 @@
 # with further instructions on how to modify and use it.
 # ------------------------------------------------------------------------------------------------------------------------
 
-from typing import Any, Union, cast
+from typing import Any, cast
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.contract import abort
@@ -254,7 +254,7 @@ def transfer(to: UInt160, tokenId: bytes, data: Any) -> bool:
     return True
 
 
-def post_transfer(token_owner: Union[UInt160, None], to: Union[UInt160, None], tokenId: bytes, data: Any):
+def post_transfer(token_owner: UInt160 | None, to: UInt160 | None, tokenId: bytes, data: Any):
     """
     Checks if the one receiving NEP11 tokens is a smart contract and if it's one the onPayment method will be called - internal
 

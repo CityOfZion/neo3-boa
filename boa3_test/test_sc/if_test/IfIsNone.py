@@ -1,10 +1,8 @@
-from typing import Union
-
 from boa3.builtin.compile_time import public
 
 
 @public
-def main(a: Union[int, None]) -> bool:
+def main(a: int | None) -> bool:
     if a is None:
         return True
     else:
