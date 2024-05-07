@@ -9,7 +9,7 @@ if __name__ == '__main__':
     sys.path.append(project_root)
 
     from boa3.internal import env
-    from boa3_test.tests import boa_test
+    from boa3_test.tests import boatestcase
     from boa3_test.tests.test_suite import *
     from boa3_test.test_drive import utils
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
         shutil.copy(f'{neo_express_dir}/default.neo-express', neo_express_exec_file)
         env.NEO_EXPRESS_INSTANCE_DIRECTORY = neo_express_exec_dir
         env.TEST_RUNNER_DIRECTORY = test_runner_dir
-        boa_test.USE_UNIQUE_NAME = True
+        boatestcase.USE_UNIQUE_NAME = True
 
         suite = AsyncTestSuite()
         default_suite = unittest.TestSuite()
@@ -39,23 +39,13 @@ if __name__ == '__main__':
         test_discover = unittest.loader.defaultTestLoader.discover(discover_path,
                                                                    top_level_dir=env.PROJECT_ROOT_DIRECTORY,
                                                                    )
-        try:
-            from boaconstructor import SmartContractTestCase
-            can_use_test_constructor = True
-        except (ModuleNotFoundError, ImportError):
-            can_use_test_constructor = False
+        from boaconstructor import SmartContractTestCase
 
         for test in list_of_tests_gen(test_discover):
-            if can_use_test_constructor:
-                if isinstance(test, SmartContractTestCase):
-                    default_suite.addTest(test)
-                else:
-                    suite.addTest(test)
+            if isinstance(test, SmartContractTestCase):
+                default_suite.addTest(test)
             else:
-                # boa-test-constructor install is failing with python 3.12, skip for now
-                from boa3_test.tests.boa_test import BoaTest
-                if isinstance(test, BoaTest):
-                    suite.addTest(test)
+                suite.addTest(test)
 
         default_suite.addTest(suite)
         print(f'Found {default_suite.countTestCases()} tests\n')
@@ -69,7 +59,7 @@ if __name__ == '__main__':
         # set environment variables back to their starting state
         env.NEO_EXPRESS_INSTANCE_DIRECTORY = neo_express_dir
         env.TEST_RUNNER_DIRECTORY = env_test_runner_dir
-        boa_test.USE_UNIQUE_NAME = False
+        boatestcase.USE_UNIQUE_NAME = False
         # clear test directories
         shutil.rmtree(neo_express_exec_dir)
         if len(os.listdir(test_runner_dir)) == 0:
