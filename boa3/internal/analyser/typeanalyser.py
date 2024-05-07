@@ -55,6 +55,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         self.modules: dict[str, Module] = {}
         self.symbols: dict[str, ISymbol] = symbol_table
 
+        self._is_annotation: bool = False
         self._current_class: UserClass = None
         self._current_method: Method = None
         self._scope_stack: list[SymbolScope] = []
@@ -257,8 +258,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 CompilerError.TypeHintMissing(arg.lineno, arg.col_offset, symbol_id=arg.arg)
             )
 
+        self._is_annotation = True
         # continue to walk through the tree
         self.generic_visit(arg)
+        self._is_annotation = False
 
     def visit_Return(self, ret: ast.Return):
         """
@@ -891,10 +894,15 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the type of the result of the operation if the operation is valid. Otherwise, returns None
         :rtype: IType or None
         """
-        operation = self.validate_binary_operation(bin_op, bin_op.left, bin_op.right)
-        if operation is not None:
-            bin_op.op = operation
-            return operation.result
+        if self._is_annotation and isinstance(bin_op.op, ast.BitOr):
+            left_type = self.get_type(bin_op.left)
+            right_type = self.get_type(bin_op.right)
+            return left_type.union_type(right_type)
+        else:
+            operation = self.validate_binary_operation(bin_op, bin_op.left, bin_op.right)
+            if operation is not None:
+                bin_op.op = operation
+                return operation.result
 
     def validate_binary_operation(self, node: ast.AST, left_op: ast.AST, right_op: ast.AST) -> IOperation | None:
         """
