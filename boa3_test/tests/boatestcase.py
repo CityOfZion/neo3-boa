@@ -5,7 +5,9 @@ __all__ = [
     'AbortException',
     'AssertException',
     'FaultException',
-    '_COMPILER_LOCK'
+    '_COMPILER_LOCK',
+    '_LOGGING_LOCK',
+    'USE_UNIQUE_NAME',
 ]
 
 import abc
@@ -36,9 +38,6 @@ from boa3.internal.compiler.compiler import Compiler
 from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.exception.CompilerWarning import CompilerWarning
 from boa3_test.tests.annotation import JsonObject
-from boa3_test.tests.boa_test import (USE_UNIQUE_NAME,  # move theses to this module when refactoring is done
-                                      _COMPILER_LOCK,
-                                      _LOGGING_LOCK)
 
 # type annotations
 T = TypeVar("T")
@@ -54,6 +53,10 @@ class TestNotification(Protocol):
 
 
 _CONTRACT_LOCK = threading.RLock()
+_COMPILER_LOCK = threading.RLock()
+_LOGGING_LOCK = threading.Lock()
+
+USE_UNIQUE_NAME = False
 
 
 class FaultException(Exception):

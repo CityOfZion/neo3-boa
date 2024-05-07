@@ -11,7 +11,7 @@ def get_path_from_boa3_test(*args: str, get_unique=False) -> str:
     result = constants.PATH_SEPARATOR.join([env.PROJECT_ROOT_DIRECTORY, 'boa3_test', *args])
 
     if get_unique:
-        from boa3_test.tests.boa_test import USE_UNIQUE_NAME
+        from boa3_test.tests.boatestcase import USE_UNIQUE_NAME
 
         if USE_UNIQUE_NAME:
             import os.path
