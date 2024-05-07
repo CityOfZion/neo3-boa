@@ -1,5 +1,5 @@
 __all__ = ['CollectionMembership',
-           'CollectionNotMembership'
+           'CollectionNotMembership',
            ]
 
 from boa3.internal.model.operation.binary.additional.membership import CollectionMembership

@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
@@ -8,25 +8,25 @@ def main(x: Any) -> list[Any]:
     return list(x)
 
 
-def verify_union_types_1(x: Union[int, str, bytes]) -> list[int]:
+def verify_union_types_1(x: int | str | bytes) -> list[int]:
     return list(x)
 
 
-def verify_union_types_2(x: Union[int, str]) -> list[str]:
+def verify_union_types_2(x: int | str) -> list[str]:
     return list(x)
 
 
-def verify_union_types_3(x: Union[list[int], str]) -> list[Union[str, int]]:
+def verify_union_types_3(x: list[int] | str) -> list[str | int]:
     return list(x)
 
 
-def verify_union_types_4(x: Union[list[int], str]) -> list[Union[int, str]]:
+def verify_union_types_4(x: list[int] | str) -> list[int | str]:
     return list(x)
 
 
-def verify_union_types_5(x: Union[dict[str, bytes], int]) -> list[str]:
+def verify_union_types_5(x: dict[str, bytes] | int) -> list[str]:
     return list(x)
 
 
-def verify_union_types_6(x: Union[dict[str, bytes], list[bytes], str, bytes]) -> list[str, int, bytes]:
+def verify_union_types_6(x: dict[str, bytes] | list[bytes] | str | bytes) -> list[str, int, bytes]:
     return list(x)
