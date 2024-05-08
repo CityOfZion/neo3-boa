@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.method import ByteArrayMethod
 from boa3.internal.model.variable import Variable
 
@@ -9,7 +7,7 @@ class ByteArrayEncodingMethod(ByteArrayMethod):
     def __init__(self):
         from boa3.internal.model.type.type import Type
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'object': Variable(Type.str),
             'encoding': Variable(Type.str)
         }
@@ -25,5 +23,5 @@ class ByteArrayEncodingMethod(ByteArrayMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return

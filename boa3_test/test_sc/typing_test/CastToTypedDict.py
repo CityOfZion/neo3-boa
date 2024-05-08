@@ -1,9 +1,9 @@
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from boa3.builtin.compile_time import public
 
 
 @public
 def Main(value: Any) -> int:
-    x = cast(Dict[str, int], value)
+    x = cast(dict[str, int], value)
     return x['example']

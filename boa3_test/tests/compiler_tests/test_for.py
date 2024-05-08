@@ -1,16 +1,13 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestFor(BoaTest):
+class TestFor(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/for_test'
 
-    def test_for_tuple_condition(self):
+    def test_for_tuple_condition_compile(self):
         jmpif_address = Integer(19).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-22).to_byte_array(min_length=1, signed=True)
 
@@ -58,42 +55,22 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TupleCondition.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TupleCondition.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_for_tuple_condition_run(self):
+        await self.set_up_contract('TupleCondition.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(23, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(23)
+    async def test_for_string_condition(self):
+        await self.set_up_contract('StringCondition.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('5', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_for_string_condition(self):
-        path, _ = self.get_deploy_file_paths('StringCondition.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append('5')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_for_iterator_condition(self):
+    def test_for_iterator_condition_compile(self):
         from boa3.internal.model.builtin.interop.interop import Interop
         from boa3.internal.neo.vm.type.StackItem import StackItemType
 
@@ -138,35 +115,24 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('IteratorCondition.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('IteratorCondition.py')
         self.assertStartsWith(output, expected_output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_for_iterator_condition_run(self):
+        await self.set_up_contract('IteratorCondition.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(6)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(6, result)
 
     def test_for_mismatched_type_condition(self):
-        path = self.get_contract_path('MismatchedTypeCondition.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypeCondition.py')
 
     def test_for_no_condition(self):
         path = self.get_contract_path('NoCondition.py')
         with self.assertRaises(SyntaxError):
-            output = self.compile(path)
+            self.compile(path)
 
-    def test_nested_for(self):
+    def test_nested_for_compile(self):
         outer_jmpif_address = Integer(47).to_byte_array(min_length=1, signed=True)
         outer_jmp_address = Integer(-50).to_byte_array(min_length=1, signed=True)
 
@@ -247,26 +213,16 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('NestedFor.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NestedFor.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_nested_for_run(self):
+        await self.set_up_contract('NestedFor.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(529, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(529)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_for_else(self):
+    def test_for_else_compile(self):
         jmpif_address = Integer(19).to_byte_array(min_length=1, signed=True)
         jmp_address = Integer(-22).to_byte_array(min_length=1, signed=True)
 
@@ -320,229 +276,93 @@ class TestFor(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ForElse.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ForElse.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_for_else_run(self):
+        await self.set_up_contract('ForElse.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(24, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(24)
+    async def test_for_continue(self):
+        await self.set_up_contract('ForContinue.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(20, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_for_break(self):
+        await self.set_up_contract('ForBreak.py')
 
-    def test_for_continue(self):
-        path, _ = self.get_deploy_file_paths('ForContinue.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(6, result)
 
-        invokes = []
-        expected_results = []
+    async def test_for_break_else(self):
+        await self.set_up_contract('ForBreakElse.py')
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(20)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_for_break(self):
-        path, _ = self.get_deploy_file_paths('ForBreak.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(6)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_for_break_else(self):
-        path, _ = self.get_deploy_file_paths('ForBreakElse.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(6)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(6, result)
 
     def test_for_iterate_dict(self):
-        path = self.get_contract_path('ForIterateDict.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ForIterateDict.py')
 
-    def test_boa2_iteration_test(self):
-        path, _ = self.get_deploy_file_paths('IterBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_iteration_test(self):
+        await self.set_up_contract('IterBoa2Test.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(18, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(18)
+    async def test_boa2_iteration_test2(self):
+        await self.set_up_contract('IterBoa2Test2.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(8, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_boa2_iteration_test3(self):
+        await self.set_up_contract('IterBoa2Test3.py')
 
-    def test_boa2_iteration_test2(self):
-        path, _ = self.get_deploy_file_paths('IterBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(8)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_iteration_test3(self):
-        path, _ = self.get_deploy_file_paths('IterBoa2Test3.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(7)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(7, result)
 
     def test_boa2_iteration_test4(self):
-        path = self.get_contract_path('IterBoa2Test4.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IterBoa2Test4.py')
 
-    def test_boa2_iteration_test5(self):
-        path, _ = self.get_deploy_file_paths('IterBoa2Test5.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_iteration_test5(self):
+        await self.set_up_contract('IterBoa2Test5.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(51, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(51)
+    async def test_boa2_iteration_test6(self):
+        await self.set_up_contract('IterBoa2Test6.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(10, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_boa2_iteration_test7(self):
+        await self.set_up_contract('IterBoa2Test7.py')
 
-    def test_boa2_iteration_test6(self):
-        path, _ = self.get_deploy_file_paths('IterBoa2Test6.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(12, result)
 
-        invokes = []
-        expected_results = []
+    async def test_boa2_iteration_test8(self):
+        await self.set_up_contract('IterBoa2Test8.py')
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(10)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(6, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_iteration_test7(self):
-        path, _ = self.get_deploy_file_paths('IterBoa2Test7.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(12)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_iteration_test8(self):
-        path, _ = self.get_deploy_file_paths('IterBoa2Test8.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(6)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_for_pass(self):
-        path = self.get_contract_path('ForPass.py')
-        output = self.compile(path)
+    async def test_for_pass(self):
+        output, _ = self.assertCompile('ForPass.py')
         self.assertIn(Opcode.NOP, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+        await self.set_up_contract('ForPass.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=None)
+        self.assertEqual(None, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(None)
+    async def test_for_range(self):
+        await self.compile_and_deploy('ForWithContractInterfaceCalled.py')
+        await self.set_up_contract('ForWithContractInterface.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_for_range(self):
-        path, _ = self.get_deploy_file_paths('ForWithContractInterface.py')
-        path_contract_called, _ = self.get_deploy_file_paths('ForWithContractInterfaceCalled.py')
-
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        runner.deploy_contract(path_contract_called)
-
-        invokes.append(runner.call_contract(path, 'main', 3))
-        expected_results.append([0, 0, 0])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [3], return_type=list)
+        self.assertEqual([0, 0, 0], result)

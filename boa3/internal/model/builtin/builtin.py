@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union
 
 from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 from boa3.internal.model.builtin.classmethod import *
@@ -33,13 +32,13 @@ class BoaPackage(str, Enum):
 
 class Builtin:
     @classmethod
-    def get_symbol(cls, symbol_id: str) -> Optional[Callable]:
+    def get_symbol(cls, symbol_id: str) -> Callable | None:
         for method in cls._python_builtins:
             if isinstance(method, IBuiltinCallable) and method.identifier == symbol_id:
                 return method
 
     @classmethod
-    def get_by_self(cls, symbol_id: str, self_type: IType) -> Optional[Callable]:
+    def get_by_self(cls, symbol_id: str, self_type: IType) -> Callable | None:
         for name, method in vars(cls).items():
             if (isinstance(method, IBuiltinMethod)
                     and method.identifier == symbol_id
@@ -119,63 +118,58 @@ class Builtin:
     PropertyDecorator = PropertyDecorator()
     StaticMethodDecorator = StaticMethodDecorator()
 
-    _python_builtins: List[IdentifiedSymbol] = [Abs,
-                                                ByteArray,
-                                                ByteArrayEncoding,
-                                                BytesStringIndex,
-                                                BytesStringIsDigit,
-                                                BytesStringJoin,
-                                                BytesStringLower,
-                                                BytesStringStartswith,
-                                                BytesStringStrip,
-                                                BytesStringUpper,
-                                                BytesStringReplace,
-                                                ClassMethodDecorator,
-                                                ConvertToBool,
-                                                ConvertToBytes,
-                                                ConvertToInt,
-                                                ConvertToStr,
-                                                Copy,
-                                                CountSequenceGeneric,
-                                                CountSequencePrimitive,
-                                                CountStr,
-                                                DictKeys,
-                                                DictValues,
-                                                Exception,
-                                                Exit,
-                                                IsInstance,
-                                                Len,
-                                                ListSort,
-                                                Max,
-                                                Min,
-                                                Print,
-                                                PropertyDecorator,
-                                                Range,
-                                                Reversed,
-                                                ScriptHashMethod_,
-                                                SequenceAppend,
-                                                SequenceClear,
-                                                SequenceExtend,
-                                                SequenceIndex,
-                                                SequenceInsert,
-                                                SequencePop,
-                                                SequenceRemove,
-                                                SequenceReverse,
-                                                StaticMethodDecorator,
-                                                StrSplit,
-                                                Sum,
-                                                Super,
-                                                ]
-
-    @classmethod
-    def interop_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:
-        return {symbol.raw_identifier if hasattr(symbol, 'raw_identifier') else symbol.identifier: symbol
-                for symbol in Interop.interop_symbols(package)}
+    _python_builtins: list[IdentifiedSymbol] = [
+        Abs,
+        ByteArray,
+        ByteArrayEncoding,
+        BytesStringIndex,
+        BytesStringIsDigit,
+        BytesStringJoin,
+        BytesStringLower,
+        BytesStringStartswith,
+        BytesStringStrip,
+        BytesStringUpper,
+        BytesStringReplace,
+        ClassMethodDecorator,
+        ConvertToBool,
+        ConvertToBytes,
+        ConvertToInt,
+        ConvertToStr,
+        Copy,
+        CountSequenceGeneric,
+        CountSequencePrimitive,
+        CountStr,
+        DictKeys,
+        DictValues,
+        Exception,
+        Exit,
+        IsInstance,
+        Len,
+        ListSort,
+        Max,
+        Min,
+        Print,
+        PropertyDecorator,
+        Range,
+        Reversed,
+        ScriptHashMethod_,
+        SequenceAppend,
+        SequenceClear,
+        SequenceExtend,
+        SequenceIndex,
+        SequenceInsert,
+        SequencePop,
+        SequenceRemove,
+        SequenceReverse,
+        StaticMethodDecorator,
+        StrSplit,
+        Sum,
+        Super,
+    ]
 
     # boa builtin decorator
     ContractInterface = ContractDecorator()
     ContractMethodDisplayName = DisplayNameDecorator()
-    Metadata = MetadataDecorator()
     Public = PublicDecorator()
 
     # boa builtin type
@@ -218,11 +212,11 @@ class Builtin:
 
     # endregion
 
-    boa_builtins: List[IdentifiedSymbol] = []
+    boa_builtins: list[IdentifiedSymbol] = []
     boa_builtins.extend(_modules)
     boa_builtins.extend(_symbols)
 
-    metadata_fields: Dict[str, Union[type, Tuple[type]]] = {
+    metadata_fields: dict[str, type | tuple[type, ...]] = {
         'name': str,
         'source': (str, type(None)),
         'supported_standards': list,
@@ -234,19 +228,19 @@ class Builtin:
     }
 
     @classmethod
-    def boa_symbols(cls) -> Dict[str, IdentifiedSymbol]:
+    def boa_symbols(cls) -> dict[str, IdentifiedSymbol]:
         return {symbol.identifier: symbol for symbol in cls.boa_builtins}
 
     @classmethod
-    def package_symbols(cls, package: str = None) -> Dict[str, IdentifiedSymbol]:
+    def package_symbols(cls, package: str = None) -> dict[str, IdentifiedSymbol]:
         if package in BoaPackage.__members__.values():
             return {symbol.identifier: symbol for symbol in cls._boa_symbols[package]}
 
         return cls.boa_symbols()
 
     @classmethod
-    def builtin_events(cls) -> List[EventSymbol]:
-        lst: List[EventSymbol] = [event for event in cls.boa_builtins if isinstance(event, EventSymbol)]
+    def builtin_events(cls) -> list[EventSymbol]:
+        lst: list[EventSymbol] = [event for event in cls.boa_builtins if isinstance(event, EventSymbol)]
 
         for symbols in cls._boa_symbols.values():
             lst.extend([event for event in symbols if isinstance(event, EventSymbol)])
@@ -272,7 +266,7 @@ class Builtin:
                                              )
                                      ]
 
-    _boa_symbols: Dict[BoaPackage, List[IdentifiedSymbol]] = {
+    _boa_symbols: dict[BoaPackage, list[IdentifiedSymbol]] = {
         BoaPackage.Contract: [Abort,
                               NeoAccountState,
                               Nep11Transfer,
@@ -287,7 +281,6 @@ class Builtin:
                         ],
         BoaPackage.CompileTime: [ContractInterface,
                                  ContractMethodDisplayName,
-                                 Metadata,
                                  NeoMetadataType,
                                  Public,
                                  NewEvent

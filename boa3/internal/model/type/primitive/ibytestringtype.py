@@ -1,5 +1,5 @@
 import abc
-from typing import Any, List
+from typing import Any
 
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
 from boa3.internal.model.type.itype import IType
@@ -13,7 +13,7 @@ class IByteStringType(SequenceType, PrimitiveType, abc.ABC):
     A class used to represent Neo ByteString type
     """
 
-    def __init__(self, identifier: str, values_type: List[IType]):
+    def __init__(self, identifier: str, values_type: list[IType]):
         super().__init__(identifier, values_type)
 
     @property

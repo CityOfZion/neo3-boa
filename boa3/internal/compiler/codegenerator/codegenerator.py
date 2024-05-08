@@ -3,7 +3,8 @@ __all__ = [
 ]
 
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.analyser.analyser import Analyser
@@ -154,7 +155,7 @@ class CodeGenerator:
         return compilation_result
 
     @staticmethod
-    def _find_all_imports(analyser: Analyser) -> Dict[str, Import]:
+    def _find_all_imports(analyser: Analyser) -> dict[str, Import]:
         imports = {}
         for key, symbol in analyser.symbol_table.copy().items():
             if isinstance(symbol, Import):
@@ -171,41 +172,41 @@ class CodeGenerator:
         return imports
 
     def __init__(self,
-                 symbol_table: Dict[str, ISymbol],
+                 symbol_table: dict[str, ISymbol],
                  optimization_level: OptimizationLevel = OptimizationLevel.DEFAULT
                  ):
 
-        self.symbol_table: Dict[str, ISymbol] = symbol_table.copy()
+        self.symbol_table: dict[str, ISymbol] = symbol_table.copy()
         self._optimization_level = (optimization_level
                                     if isinstance(optimization_level, OptimizationLevel)
                                     else OptimizationLevel.DEFAULT)
-        self.additional_symbols: Optional[Dict[str, ISymbol]] = None
+        self.additional_symbols: dict[str, ISymbol] | None = None
 
         self._current_method: Method = None
         self._current_class: Method = None
 
-        self._missing_target: Dict[int, List[VMCode]] = {}  # maps targets with address not included yet
+        self._missing_target: dict[int, list[VMCode]] = {}  # maps targets with address not included yet
         self._can_append_target: bool = True
 
-        self._scope_stack: List[SymbolScope] = []
+        self._scope_stack: list[SymbolScope] = []
         self._global_scope = SymbolScope()
 
-        self._current_loop: List[int] = []  # a stack with the converting loops' start addresses
-        self._current_for: List[int] = []
-        self._jumps_to_loop_condition: Dict[int, List[int]] = {}
+        self._current_loop: list[int] = []  # a stack with the converting loops' start addresses
+        self._current_for: list[int] = []
+        self._jumps_to_loop_condition: dict[int, list[int]] = {}
 
-        self._jumps_to_loop_break: Dict[int, List[int]] = {}
+        self._jumps_to_loop_break: dict[int, list[int]] = {}
         # the indexes of boolean insertion values indicating if the jmp is from a break
-        self._inserted_loop_breaks: Dict[int, List[int]] = {}
+        self._inserted_loop_breaks: dict[int, list[int]] = {}
 
-        self._opcodes_to_remove: List[int] = []
+        self._opcodes_to_remove: list[int] = []
         self._stack_states: StackMemento = StackMemento()  # simulates neo execution stack
 
         self.can_init_static_fields: bool = False
         self.initialized_static_fields: bool = False
 
-        self._static_vars: Optional[list] = None
-        self._global_vars: Optional[list] = None
+        self._static_vars: list | None = None
+        self._global_vars: list | None = None
 
     @property
     def bytecode(self) -> bytes:
@@ -242,7 +243,7 @@ class CodeGenerator:
         return VMCodeMapping.instance().result()
 
     @property
-    def last_code(self) -> Optional[VMCode]:
+    def last_code(self) -> VMCode | None:
         """
         Gets the last code in the bytecode
 
@@ -268,10 +269,13 @@ class CodeGenerator:
         return len(self._stack)
 
     def _stack_append(self, value_type: IType):
-        self._stack_states.append(value_type, self.last_code)
+        self._stack_states.append(self.last_code, value_type)
 
     def _stack_pop(self, index: int = -1) -> IType:
         return self._stack_states.pop(self.last_code, index)
+
+    def _stack_reverse(self, start: int = 0, end: int = None, *, rotate: bool = False) -> IType:
+        return self._stack_states.reverse(self.last_code, start, end, rotate=rotate)
 
     @property
     def last_code_start_address(self) -> int:
@@ -296,7 +300,7 @@ class CodeGenerator:
         return VMCodeMapping.instance().bytecode_size
 
     @property
-    def _args(self) -> List[str]:
+    def _args(self) -> list[str]:
         """
         Gets a list with the arguments names of the current method
 
@@ -305,7 +309,7 @@ class CodeGenerator:
         return [] if self._current_method is None else list(self._current_method.args.keys())
 
     @property
-    def _locals(self) -> List[str]:
+    def _locals(self) -> list[str]:
         """
         Gets a list with the variables names in the scope of the current method
 
@@ -314,14 +318,14 @@ class CodeGenerator:
         return [] if self._current_method is None else list(self._current_method.locals.keys())
 
     @property
-    def _globals(self) -> List[str]:
+    def _globals(self) -> list[str]:
         return self._module_variables(True)
 
     @property
-    def _statics(self) -> List[str]:
+    def _statics(self) -> list[str]:
         return self._module_variables(False)
 
-    def _module_variables(self, modified_variable: bool) -> List[str]:
+    def _module_variables(self, modified_variable: bool) -> list[str]:
         """
         Gets a list with the variables name in the global scope
 
@@ -451,7 +455,7 @@ class CodeGenerator:
         return (self.last_code.opcode is Opcode.PUSHNULL or
                 (len(self._stack) > 0 and self._stack[-1] is Type.none))
 
-    def get_symbol(self, identifier: str, scope: Optional[ISymbol] = None, is_internal: bool = False) -> Tuple[str, ISymbol]:
+    def get_symbol(self, identifier: str, scope: ISymbol | None = None, is_internal: bool = False) -> tuple[str, ISymbol]:
         """
         Gets a symbol in the symbol table by its id
 
@@ -576,7 +580,7 @@ class CodeGenerator:
             method.init_bytecode = self.last_code
         self._current_method = method
 
-    def convert_end_method(self, method_id: Optional[str] = None):
+    def convert_end_method(self, method_id: str | None = None):
         """
         Converts the end of the method
         """
@@ -825,7 +829,7 @@ class CodeGenerator:
 
         return self.last_code_start_address
 
-    def convert_try_except(self, exception_id: Optional[str]) -> int:
+    def convert_try_except(self, exception_id: str | None) -> int:
         """
         Converts the end of the try statement
 
@@ -844,8 +848,8 @@ class CodeGenerator:
         return last_try_code
 
     def convert_end_try(self, start_address: int,
-                        end_address: Optional[int] = None,
-                        else_address: Optional[int] = None) -> int:
+                        end_address: int | None = None,
+                        else_address: int | None = None) -> int:
         """
         Converts the end of the try statement
 
@@ -1556,8 +1560,8 @@ class CodeGenerator:
 
         self.convert_cast(Type.tuple)
 
-    def convert_load_symbol(self, symbol_id: str, params_addresses: List[int] = None, is_internal: bool = False,
-                            class_type: Optional[UserClass] = None):
+    def convert_load_symbol(self, symbol_id: str, params_addresses: list[int] = None, is_internal: bool = False,
+                            class_type: UserClass | None = None):
         """
         Converts the load of a symbol
 
@@ -1604,7 +1608,7 @@ class CodeGenerator:
             self._stack_pop()  # pop class type
             self._stack_append(var.type)  # push variable type
 
-    def convert_load_variable(self, var_id: str, var: Variable, class_type: Optional[UserClass] = None):
+    def convert_load_variable(self, var_id: str, var: Variable, class_type: UserClass | None = None):
         """
         Converts the assignment of a variable
 
@@ -1715,7 +1719,7 @@ class CodeGenerator:
             # once the value is retrieved, it must be deserialized
             self.convert_builtin_method_call(Interop.Deserialize, addresses)
 
-    def _get_variable_info(self, var_id: str) -> Tuple[int, bool, bool]:
+    def _get_variable_info(self, var_id: str) -> tuple[int, bool, bool]:
         """
         Gets the necessary information about the variable to get the correct opcode
 
@@ -1748,7 +1752,7 @@ class CodeGenerator:
 
         return index, local, is_arg
 
-    def convert_builtin_method_call(self, function: IBuiltinMethod, args_address: List[int] = None, is_internal: bool = False):
+    def convert_builtin_method_call(self, function: IBuiltinMethod, args_address: list[int] = None, is_internal: bool = False):
         """
         Converts a builtin method function call
 
@@ -1901,7 +1905,7 @@ class CodeGenerator:
         from boa3.internal.model.builtin.interop.interop import Interop
         self._convert_builtin_call(Interop.Notify, is_internal=True)
 
-    def convert_class_symbol(self, class_type: ClassType, symbol_id: str, load: bool = True) -> Optional[int]:
+    def convert_class_symbol(self, class_type: ClassType, symbol_id: str, load: bool = True) -> int | None:
         """
         Converts an class symbol
 
@@ -1937,7 +1941,7 @@ class CodeGenerator:
             self.convert_method_call(method, 0)
         return symbol_id
 
-    def convert_user_class(self, class_type: UserClass, symbol_id: str) -> Optional[int]:
+    def convert_user_class(self, class_type: UserClass, symbol_id: str) -> int | None:
         """
         Converts an class symbol
 
@@ -2072,7 +2076,7 @@ class CodeGenerator:
         self.__insert1(OpcodeInfo.THROW)
 
     def insert_opcode(self, opcode: Opcode, data: bytes = None,
-                      add_to_stack: List[IType] = None, pop_from_stack: bool = False):
+                      add_to_stack: list[IType] = None, pop_from_stack: bool = False):
         """
         Inserts one opcode into the bytecode. Used to generate built-in symbols.
 
@@ -2092,7 +2096,7 @@ class CodeGenerator:
             for stack_item in add_to_stack:
                 self._stack_append(stack_item)
 
-    def insert_type_check(self, type_to_check: Optional[StackItemType]):
+    def insert_type_check(self, type_to_check: StackItemType | None):
         if isinstance(type_to_check, StackItemType):
             self.__insert1(OpcodeInfo.ISTYPE, type_to_check)
         else:
@@ -2241,7 +2245,7 @@ class CodeGenerator:
             if len(vmcodes) == 0:
                 self._missing_target.pop(target)
 
-    def _insert_jump(self, op_info: OpcodeInformation, jump_to: Union[int, VMCode] = 0, insert_jump: bool = False):
+    def _insert_jump(self, op_info: OpcodeInformation, jump_to: int | VMCode = 0, insert_jump: bool = False):
         """
         Inserts a jump opcode into the bytecode
 
@@ -2385,7 +2389,7 @@ class CodeGenerator:
             if pos > 0 and len(self._stack) > 0:
                 self._stack_pop(-pos)
 
-    def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: Optional[int] = None):
+    def _remove_inserted_opcodes_since(self, last_address: int, last_stack_size: int | None = None):
         self._stack_states.restore_state(last_address)
         if VMCodeMapping.instance().bytecode_size > last_address:
             # remove opcodes inserted during the evaluation of the symbol
@@ -2407,7 +2411,7 @@ class CodeGenerator:
             if opcode is Opcode.REVERSEN and no_items > 0:
                 self._stack_pop()
             if no_items > 0:
-                self._stack.reverse(-no_items, rotate=rotate)
+                self._stack_reverse(-no_items, rotate=rotate)
 
     def convert_init_user_class(self, class_type: ClassType):
         if isinstance(class_type, UserClass):

@@ -1,7 +1,5 @@
 __all__ = ['StorageMap']
 
-from typing import Union
-
 
 class StorageMap:
     """
@@ -28,7 +26,7 @@ class StorageMap:
         """
         pass
 
-    def put(self, key: bytes, value: Union[int, bytes, str]):
+    def put(self, key: bytes, value: int | bytes | str):
         """
         Inserts a given value in the key-value format into the map.
 

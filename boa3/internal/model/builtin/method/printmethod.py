@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -11,13 +11,13 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 class PrintMethod(IBuiltinMethod):
 
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
         identifier = 'print'
         if not isinstance(arg_value, IType):
             arg_value = Type.str
 
-        args: Dict[str, Variable] = {}
+        args: dict[str, Variable] = {}
         vararg = ('values', Variable(arg_value))
         super().__init__(identifier, args, return_type=Type.none, vararg=vararg)
 
@@ -92,7 +92,7 @@ class PrintMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

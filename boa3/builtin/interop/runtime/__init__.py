@@ -22,15 +22,17 @@ __all__ = [
 ]
 
 
-from typing import Any, List, Union, Sequence
+from collections.abc import Sequence
+from typing import Any
 
+from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
 from boa3.builtin.type import ECPoint, UInt160
 
 
-def check_witness(hash_or_pubkey: Union[UInt160, ECPoint]) -> bool:
+def check_witness(hash_or_pubkey: UInt160 | ECPoint) -> bool:
     """
     Verifies that the transactions or block of the calling contract has validated the required script hash.
 
@@ -94,7 +96,7 @@ def get_trigger() -> TriggerType:
     pass
 
 
-def get_notifications(script_hash: UInt160 = UInt160()) -> List[Notification]:
+def get_notifications(script_hash: UInt160 = UInt160()) -> list[Notification]:
     """
     This method gets current invocation notifications from specific 'script_hash'.
 
@@ -122,7 +124,7 @@ def get_notifications(script_hash: UInt160 = UInt160()) -> List[Notification]:
         (like a * wildcard)
     :type script_hash: UInt160
     :return: It will return an array of all matched notifications
-    :rtype: List[Notification]
+    :rtype: list[Notification]
     """
     pass
 
@@ -268,7 +270,7 @@ b'\\tK\\xb31\\xa8\\x13\\x80`\\xad\\xf6\\xda\\xdf\\xc6R\\x9b\\xfdB\\xbf\\x83\\x8f
 :meta hide-value:
 """
 
-script_container: Any = None
+script_container: Transaction = Transaction()
 """
 Gets the current script container.
 

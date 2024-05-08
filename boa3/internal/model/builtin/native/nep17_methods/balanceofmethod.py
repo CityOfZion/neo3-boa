@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import Nep17Method
 from boa3.internal.model.variable import Variable
 
@@ -12,5 +10,5 @@ class BalanceOfMethod(Nep17Method):
 
         identifier = 'balanceOf'
         native_identifier = 'balanceOf'
-        args: Dict[str, Variable] = {'account': Variable(UInt160Type.build())}
+        args: dict[str, Variable] = {'account': Variable(UInt160Type.build())}
         super().__init__(identifier, native_identifier, args, return_type=Type.int, script_hash=contract_script_hash)

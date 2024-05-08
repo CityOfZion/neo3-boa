@@ -1,12 +1,10 @@
-from typing import Optional
-
 from boa3.internal.model.builtin.method.maxmethod import MaxMethod
 from boa3.internal.model.type.itype import IType
 
 
 class MaxByteStringMethod(MaxMethod):
 
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
         is_valid_type = Type.str.is_type_of(arg_value) or Type.bytes.is_type_of(arg_value)
         super().__init__(arg_value if is_valid_type else Type.str)

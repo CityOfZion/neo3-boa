@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -16,7 +16,7 @@ class ExceptionMethod(IBuiltinMethod):
             argument_type = Type.str
 
         identifier = '-Exception'
-        args: Dict[str, Variable] = {'message': Variable(argument_type)}
+        args: dict[str, Variable] = {'message': Variable(argument_type)}
         default_message = "'{0}'".format(self.default_message) if argument_type is Type.str else "{0}"
         default = ast.parse(default_message.format(argument_type.default_value)
                             ).body[0].value
@@ -55,7 +55,7 @@ class ExceptionMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

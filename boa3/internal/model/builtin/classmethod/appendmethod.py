@@ -1,4 +1,5 @@
-from typing import Any, Dict, Optional, Sized
+from collections.abc import Sized
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -18,7 +19,7 @@ class AppendMethod(IBuiltinMethod):
             item_arg = Variable(sequence_type.value_type)
 
         identifier = 'append'
-        args: Dict[str, Variable] = {'self': self_arg, 'item': item_arg}
+        args: dict[str, Variable] = {'self': self_arg, 'item': item_arg}
         super().__init__(identifier, args)
 
     @property
@@ -73,7 +74,7 @@ class AppendMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

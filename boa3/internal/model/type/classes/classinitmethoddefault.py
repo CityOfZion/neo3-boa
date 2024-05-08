@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal import constants
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.method import Method
@@ -8,7 +6,7 @@ from boa3.internal.model.variable import Variable
 
 
 class ClassInitMethod(IdentifiedSymbol, Method):
-    def __init__(self, user_class: UserClass):
+    def __init__(self, user_class: UserClass, deprecated: bool = False):
         self_var = Variable(user_class)
         args = {
             'self': self_var
@@ -22,8 +20,8 @@ class ClassInitMethod(IdentifiedSymbol, Method):
             # but change the self type
             args['self'] = self_var
 
-        Method.__init__(self, args=args, return_type=user_class)
-        IdentifiedSymbol.__init__(self, identifier=constants.INIT_METHOD_ID)
+        Method.__init__(self, args=args, return_type=user_class, deprecated=deprecated)
+        IdentifiedSymbol.__init__(self, identifier=constants.INIT_METHOD_ID, deprecated=deprecated)
 
         self.defined_by_entry = False
         self.is_init = True
@@ -41,5 +39,5 @@ class ClassInitMethod(IdentifiedSymbol, Method):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None

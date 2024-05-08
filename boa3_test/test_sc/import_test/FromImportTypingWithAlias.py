@@ -1,8 +1,8 @@
-from typing import Any as Bar, List as Foo
+from typing import Any as Bar
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def EmptyList() -> Foo[Bar]:
+def EmptyList() -> list[Bar]:
     return []

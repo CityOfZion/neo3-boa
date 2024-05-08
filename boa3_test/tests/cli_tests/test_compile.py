@@ -1,11 +1,8 @@
 import os.path
 
-from boa3_test.tests.cli_tests.cli_test import BoaCliTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal import constants
-from boa3.internal.neo3.vm import VMState
+from boa3_test.tests.cli_tests.cli_test import BoaCliTest
 from boa3_test.tests.cli_tests.utils import neo3_boa_cli, get_path_from_boa3_test
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestCliCompile(BoaCliTest):
@@ -111,10 +108,13 @@ class TestCliCompile(BoaCliTest):
     @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
                   '-e', 'env_changed',
                   '-o', get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env_cli.nef', get_unique=True))
-    def test_cli_compile_env(self):
+    async def test_cli_compile_env(self):
+        contract_path = get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py')
+        output_name = 'Env_cli.nef'
+
         nef_path, _ = self.get_deploy_file_paths(
-            get_path_from_boa3_test('test_sc', 'boa_built_in_methods_test', 'Env.py'),
-            output_name='Env_cli.nef',
+            contract_path,
+            output_name=output_name,
             compile_if_found=False
         )
         nef_generated = nef_path.split(constants.PATH_SEPARATOR)[-1]
@@ -127,15 +127,11 @@ class TestCliCompile(BoaCliTest):
         self.assertTrue(f'Wrote {nef_generated} to ' in logs.output[-1],
                         msg=f'Something went wrong when compiling {nef_generated}')
 
-        runner = BoaTestRunner(runner_id=self.method_name())
+        await self.set_up_contract(contract_path, output_name=output_name)
 
-        runner.deploy_contract(nef_path)
-        invoke = runner.call_contract(nef_path, 'main')
         expected_result = 'env_changed'
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(invoke.result, expected_result)
+        result, _ = await self.call('main', return_type=str)
+        self.assertEqual(expected_result, result)
 
     @neo3_boa_cli('compile', 'wrong_file')
     def test_cli_compile_wrong_file(self):

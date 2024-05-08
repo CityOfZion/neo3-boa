@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.method.listmethod import ListMethod
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.variable import Variable
@@ -14,7 +12,7 @@ class ListBytesStringMethod(ListMethod):
         if value is None:
             value = Type.bytes
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'value': Variable(value),
         }
 

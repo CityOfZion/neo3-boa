@@ -1,16 +1,15 @@
 import ast
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.analyser.typeanalyser import TypeAnalyser
 from boa3.internal.model.type.annotation.uniontype import UnionType
 from boa3.internal.model.type.collection.sequence.mutable.listtype import ListType
 from boa3.internal.model.type.collection.sequence.tupletype import TupleType
 from boa3.internal.model.type.type import Type
+from boa3_test.tests import boatestcase
 
 
-class TestTypes(BoaTest):
+class TestTypes(boatestcase.BoaTestCase):
 
     def test_small_integer_constant(self):
         input = 42
@@ -183,6 +182,11 @@ class TestTypes(BoaTest):
         tuple_type = Type.tuple.build_collection(Type.int)
         tuple_any_type = Type.tuple
         self.assertFalse(tuple_type.is_type_of(tuple_any_type))
+
+    def test_typed_tuple_is_type_of_empty_tuple(self):
+        tuple_type = Type.tuple.build_any_length(Type.int)
+        empty_tuple = tuple()
+        self.assertTrue(tuple_type.is_type_of(empty_tuple))
 
     def test_list_any_is_type_of_sequence(self):
         list_type = Type.list

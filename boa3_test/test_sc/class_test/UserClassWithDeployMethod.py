@@ -20,7 +20,7 @@ def get_obj() -> Example:
 def _deploy(data: Any, update: bool):
     if not update:
         # setup instructions that will be executed when the smart contract is deployed
-        container: Transaction = runtime.script_container
-        storage.put(b'owner', container.sender)
+        container = runtime.script_container
+        storage.put_uint160(b'owner', container.sender)
     else:
         return

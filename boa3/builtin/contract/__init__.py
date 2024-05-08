@@ -8,7 +8,7 @@ __all__ = [
     'to_script_hash',
 ]
 
-from typing import Any, Optional, Union
+from typing import Any
 
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.contract.Nep17Contract import Nep17Contract
@@ -16,10 +16,10 @@ from boa3.builtin.type import ECPoint, UInt160, Event
 
 Nep11TransferEvent: Event = CreateNewEvent(
     [
-        ('from', Union[UInt160, None]),
-        ('to', Union[UInt160, None]),
+        ('from', UInt160 | None),
+        ('to', UInt160 | None),
         ('amount', int),
-        ('tokenId', Union[str, bytes])
+        ('tokenId', str | bytes)
     ],
     'Transfer'
 )
@@ -49,8 +49,8 @@ Check out the `proposal <https://github.com/neo-project/proposals/blob/master/ne
 
 Nep17TransferEvent: Event = CreateNewEvent(
     [
-        ('from', Union[UInt160, None]),
-        ('to', Union[UInt160, None]),
+        ('from', UInt160 | None),
+        ('to', UInt160 | None),
         ('amount', int)
     ],
     'Transfer'
@@ -78,7 +78,7 @@ Check out the `proposal <https://github.com/neo-project/proposals/blob/master/ne
 """
 
 
-def abort(msg: Optional[str] = None):
+def abort(msg: str | None = None):
     """
     Aborts the execution of a smart contract. Using this will cancel the changes made on the blockchain by the
     transaction.
@@ -110,6 +110,7 @@ class NeoAccountState:
         self.balance: int = 0
         self.height: int = 0
         self.vote_to: ECPoint = ECPoint(bytes(constants.SIZE_OF_ECPOINT))
+        self.last_gas_per_vote: int = 0
 
 
 def to_script_hash(data_bytes: Any) -> bytes:

@@ -1,12 +1,17 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.core import types
 
 from boa3.internal.exception import CompilerError
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestContractInterface(BoaTest):
+class TestContractInterface(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/contract_interface_test'
+    nep17_contract: types.UInt160
+
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        await super().asyncSetupClass()
+        cls.nep17_contract = await cls.compile_and_deploy('examples', 'nep17.py')
 
     def test_contract_interface_decorator_literal_hash_str(self):
         path = self.get_contract_path('ContractInterfaceLiteralStrHash.py')
@@ -17,52 +22,34 @@ class TestContractInterface(BoaTest):
         self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_decorator_invalid_hash(self):
-        path = self.get_contract_path('ContractInterfaceInvalidHash.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceInvalidHash.py')
 
     def test_contract_interface_decorator_variable_hash(self):
-        path = self.get_contract_path('ContractInterfaceVariableArgument.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceVariableArgument.py')
 
     def test_contract_interface_decorator_too_few_arguments(self):
-        path = self.get_contract_path('ContractInterfaceTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceTooFewArguments.py')
 
     def test_contract_interface_decorator_too_many_arguments(self):
-        path = self.get_contract_path('ContractInterfaceTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ContractInterfaceTooManyArguments.py')
 
     def test_contract_interface_decorator_without_call(self):
-        path = self.get_contract_path('ContractInterfaceWithoutCall.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceWithoutCall.py')
 
     def test_contract_interface_with_instance_method(self):
-        path = self.get_contract_path('ContractInterfaceInstanceMethod.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceInstanceMethod.py')
 
     def test_contract_interface_with_class_method(self):
-        path = self.get_contract_path('ContractInterfaceClassMethod.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceClassMethod.py')
 
-    def test_contract_interface_nep17(self):
-        path, _ = self.get_deploy_file_paths('Nep17Interface.py')
-        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_contract_interface_nep17(self):
+        await self.set_up_contract('Nep17Interface.py')
 
-        invokes = []
-        expected_results = []
-
-        nep17_call = runner.call_contract(nep17_path, 'symbol')
-        invokes.append(runner.call_contract(path, 'nep17_symbol'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        nep17_result = nep17_call.result
-        expected_results.append(nep17_result)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('nep17_symbol', [], return_type=str)
+        nep17_result, _ = await self.call('symbol', [], return_type=str,
+                                          target_contract=self.nep17_contract
+                                          )
+        self.assertEqual(nep17_result, result)
 
     def test_contract_interface_display_name_argument(self):
         path = self.get_contract_path('ContractInterfaceDisplayNameRegularArgument.py')
@@ -73,57 +60,36 @@ class TestContractInterface(BoaTest):
         self.compile(path)  # test if compiles because the smart contract doesn't exist
 
     def test_contract_interface_display_name_variable_name(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameVariableArgument.py')
-        self.assertCompilerLogs(CompilerError.InvalidUsage, path)
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'ContractInterfaceDisplayNameVariableArgument.py')
 
     def test_contract_interface_display_name_too_few_arguments(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceDisplayNameTooFewArguments.py')
 
     def test_contract_interface_display_name_without_call(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameWithoutCall.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ContractInterfaceDisplayNameWithoutCall.py')
 
     def test_contract_interface_display_name_too_many_arguments(self):
-        path = self.get_contract_path('ContractInterfaceDisplayNameTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ContractInterfaceDisplayNameTooManyArguments.py')
 
-    def test_contract_interface_nep17_with_display_name(self):
-        path, _ = self.get_deploy_file_paths('Nep17InterfaceWithDisplayName.py')
-        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_contract_interface_nep17_with_display_name(self):
+        await self.set_up_contract('Nep17InterfaceWithDisplayName.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('nep17_total_supply', [], return_type=int)
+        nep17_result, _ = await self.call('totalSupply', [], return_type=int,
+                                          target_contract=self.nep17_contract
+                                          )
+        self.assertEqual(nep17_result, result)
 
-        nep17_call = runner.call_contract(nep17_path, 'totalSupply')
-        invokes.append(runner.call_contract(path, 'nep17_total_supply'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        nep17_result = nep17_call.result
-        expected_results.append(nep17_result)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_contract_interface_code_optimization(self):
+    def test_contract_interface_code_optimization_compile(self):
         from boa3.internal.model.builtin.interop.interop import Interop
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         from boa3.internal.neo.vm.type.Integer import Integer
         from boa3.internal.neo.vm.type.String import String
-        from boa3.internal.neo3.core.types import UInt160
-
-        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-        nep17_contract = runner.deploy_contract(nep17_path)
-        runner.update_contracts(export_checkpoint=True)
 
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = nep17_contract.script_hash
-        contract_script_hex_str = str(UInt160(contract_script_bytes))
+        contract_script_bytes = self.nep17_contract.to_array()
+        contract_script_hex_str = f'0x{self.nep17_contract}'
 
         expected_output = (
             Opcode.NEWARRAY0    # arguments list
@@ -139,8 +105,9 @@ class TestContractInterface(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ContractInterfaceCodeOptimization.py')
-        output, manifest = self.compile_and_save(path)
+        output, manifest = self.assertCompile('ContractInterfaceCodeOptimization.py',
+                                              get_manifest=True
+                                              )
 
         self.assertEqual(expected_output, output)
         self.assertIn('permissions', manifest)
@@ -150,37 +117,24 @@ class TestContractInterface(BoaTest):
                        },
                       manifest['permissions'])
 
-        path, _ = self.get_deploy_file_paths(path)
+    async def test_contract_interface_code_optimization_run(self):
+        await self.set_up_contract('ContractInterfaceCodeOptimization.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('nep17_symbol', [], return_type=str)
+        nep17_result, _ = await self.call('symbol', [], return_type=str,
+                                          target_contract=self.nep17_contract
+                                          )
+        self.assertEqual(nep17_result, result)
 
-        nep17_call = runner.call_contract(nep17_path, 'symbol')
-        invokes.append(runner.call_contract(path, 'nep17_symbol'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        nep17_result = nep17_call.result
-        expected_results.append(nep17_result)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_contract_manual_interface_code_optimization(self):
+    def test_contract_manual_interface_code_optimization_compile(self):
         from boa3.internal.model.builtin.interop.interop import Interop
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         from boa3.internal.neo.vm.type.Integer import Integer
         from boa3.internal.neo.vm.type.String import String
 
-        nep17_path, _ = self.get_deploy_file_paths('examples', 'nep17.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-        nep17_contract = runner.deploy_contract(nep17_path)
-        runner.update_contracts(export_checkpoint=True)
-
         external_contract_name = 'symbol'
         function_name_bytes = String(external_contract_name).to_bytes()
-        contract_script_bytes = nep17_contract.script_hash
+        contract_script_bytes = self.nep17_contract.to_array()
 
         expected_output = (
             # start public method
@@ -219,48 +173,29 @@ class TestContractInterface(BoaTest):
             # start class method
         )
 
-        path = self.get_contract_path('ContractManualInterfaceCodeOptimization.py')
-        output, manifest = self.compile_and_save(path)
+        output, _ = self.assertCompile('ContractManualInterfaceCodeOptimization.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
+    async def test_contract_manual_interface_code_optimization_run(self):
+        await self.set_up_contract('ContractManualInterfaceCodeOptimization.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('nep17_symbol', [], return_type=str)
+        nep17_result, _ = await self.call('symbol', [], return_type=str,
+                                          target_contract=self.nep17_contract
+                                          )
+        self.assertEqual(nep17_result, result)
 
-        nep17_call = runner.call_contract(nep17_path, 'symbol')
-        invokes.append(runner.call_contract(path, 'nep17_symbol'))
+    async def test_get_hash(self):
+        await self.set_up_contract('ContractInterfaceGetHash.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        contract_script = types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213')
+        result, _ = await self.call('main', [], return_type=types.UInt160)
+        self.assertEqual(contract_script, result)
 
-        nep17_result = nep17_call.result
-        expected_results.append(nep17_result)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_get_hash(self):
-        path, _ = self.get_deploy_file_paths('ContractInterfaceGetHash.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        contract_script_bytes = bytes(reversed(range(20)))
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(contract_script_bytes)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_get_hash_on_metadata(self):
-        path = self.get_contract_path('ContractInterfaceGetHashOnMetadata.py')
-        _, manifest = self.compile_and_save(path)
+    def test_get_hash_on_metadata_compile(self):
+        _, manifest = self.assertCompile('ContractInterfaceGetHashOnMetadata.py',
+                                         get_manifest=True
+                                         )
 
         self.assertIn('permissions', manifest)
         self.assertIsInstance(manifest['permissions'], list)
@@ -269,19 +204,9 @@ class TestContractInterface(BoaTest):
                        },
                       manifest['permissions'])
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_hash_on_metadata_run(self):
+        await self.set_up_contract('ContractInterfaceGetHashOnMetadata.py')
 
-        invokes = []
-        expected_results = []
-
-        contract_script_bytes = bytes(reversed(range(20)))
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(contract_script_bytes)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        contract_script = types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213')
+        result, _ = await self.call('main', [], return_type=types.UInt160)
+        self.assertEqual(contract_script, result)

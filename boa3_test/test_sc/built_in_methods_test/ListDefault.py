@@ -1,8 +1,8 @@
-from typing import Any, List
+from typing import Any
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def main() -> List[Any]:
+def main() -> list[Any]:
     return list()

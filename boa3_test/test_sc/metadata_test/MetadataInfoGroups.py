@@ -9,7 +9,7 @@ def main() -> int:
 def permissions_manifest() -> NeoMetadata:
     meta = NeoMetadata()
 
-    meta.add_group("031f64da8a38e6c1e5423a72ddd6d4fc4a777abe537e5cb5aa0425685cda8e063b",
-                   "fhsOJNF3N5Pm3oV1b7wYTx0QVelYNu7whwXMi8GsNGFKUnu3ZG8z7oWLfzzEz9pbnzwQe8WFCALEiZhLD1jG/w==")
+    meta.add_group("033d523f36a732974c0f7dbdfafb5206ecd087211366a274190f05b86d357f4bad",
+                   "QqtxfL5kHskQXtH5Jmg8+OoM6ltJF5gCpZlujpE9AvdZhzfns4I2jSZaxm+evA/nLRJpQlKmupXfuj2P8viQQg==")
 
     return meta

@@ -1,5 +1,4 @@
 import ast
-from typing import Optional
 
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
@@ -13,10 +12,15 @@ class Property(IExpression):
     :ivar var_type: the type of the variable.
     """
 
-    def __init__(self, getter: Method, setter: Method = None, origin_node: Optional[ast.AST] = None):
-        super().__init__(origin_node)
+    def __init__(self,
+                 getter: Method,
+                 setter: Method = None,
+                 origin_node: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(origin_node, deprecated)
         self._getter: Method = getter
-        self._setter: Optional[Method] = setter
+        self._setter: Method | None = setter
 
     @property
     def shadowing_name(self) -> str:
@@ -31,7 +35,7 @@ class Property(IExpression):
         return self._getter
 
     @property
-    def setter(self) -> Optional[Method]:
+    def setter(self) -> Method | None:
         return self._setter
 
     def __str__(self) -> str:

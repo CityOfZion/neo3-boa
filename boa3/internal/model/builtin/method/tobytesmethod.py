@@ -1,5 +1,6 @@
 from abc import ABC
-from typing import Any, Dict, Optional, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -15,7 +16,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 class ToBytesMethod(IBuiltinMethod, ABC):
     def __init__(self, self_type: IType):
         identifier = 'to_bytes'
-        args: Dict[str, Variable] = {'self': Variable(self_type)}
+        args: dict[str, Variable] = {'self': Variable(self_type)}
         from boa3.internal.model.type.type import Type
         super().__init__(identifier, args, return_type=Type.bytes)
 
@@ -54,7 +55,7 @@ class ToBytesMethod(IBuiltinMethod, ABC):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
 

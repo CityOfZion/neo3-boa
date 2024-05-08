@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from boa3.internal.model.type.itype import IType
 from boa3.internal.neo.vm.type.AbiType import AbiType
@@ -12,7 +12,7 @@ class MetaType(IType):
     def __init__(self, type_of: IType = None):
         identifier = 'type'
         super().__init__(identifier)
-        self._internal_type: Optional[IType] = type_of
+        self._internal_type: IType | None = type_of
 
     @property
     def abi_type(self) -> AbiType:
@@ -46,11 +46,11 @@ class MetaType(IType):
         return self._internal_type is not None
 
     @property
-    def meta_type(self) -> Optional[IType]:
+    def meta_type(self) -> IType | None:
         return self._internal_type
 
     @property
-    def meta_id(self) -> Optional[None]:
+    def meta_id(self) -> str | None:
         return self._internal_type.identifier if self._internal_type is not None else None
 
 

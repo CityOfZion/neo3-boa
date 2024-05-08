@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -11,7 +11,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 class MinMethod(IBuiltinMethod):
 
-    def __init__(self, arg_value: Optional[IType] = None):
+    def __init__(self, arg_value: IType | None = None):
         from boa3.internal.model.type.type import Type
         identifier = 'min'
 
@@ -20,7 +20,7 @@ class MinMethod(IBuiltinMethod):
         if not self._is_valid_type(arg_value):
             arg_value = default_type
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'args1': Variable(arg_value),
             'args2': Variable(arg_value)
         }
@@ -29,7 +29,7 @@ class MinMethod(IBuiltinMethod):
 
         self.internal_call_args = len(args)
 
-    def _is_valid_type(self, arg_type: Optional[IType]) -> bool:
+    def _is_valid_type(self, arg_type: IType | None) -> bool:
         return (isinstance(arg_type, IType) and
                 any(allowed_type.is_type_of(arg_type) for allowed_type in self._allowed_types))
 
@@ -73,7 +73,7 @@ class MinMethod(IBuiltinMethod):
         code_generator.insert_opcode(Opcode.INC)
         code_generator.insert_opcode(Opcode.INC)
         code_generator.convert_end_if(else_stack_size_equals_3, is_internal=True)
-        code_generator.insert_opcode(Opcode.PACK)
+        code_generator.insert_opcode(Opcode.PACK, add_to_stack=[Type.list.build(self._arg_values.type)])
 
         # index = len(aux_list) - 1
         code_generator.duplicate_stack_top_item()
@@ -125,7 +125,7 @@ class MinMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

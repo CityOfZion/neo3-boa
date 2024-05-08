@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from boa3.internal.model.operation.binary.additional import *
 from boa3.internal.model.operation.binary.arithmetic import *
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
@@ -38,6 +36,10 @@ class BinaryOp:
     IsNot = NotIdentity()
     Eq = ObjectEquality()
     NotEq = ObjectInequality()
+    StrBytesGt = StrBytesGreaterThan()
+    StrBytesGtE = StrBytesGreaterThanOrEqual()
+    StrBytesLt = StrBytesLessThan()
+    StrBytesLtE = StrBytesLessThanOrEqual()
 
     # Logical operations
     And = BooleanAnd()
@@ -54,7 +56,7 @@ class BinaryOp:
     NotIn = CollectionNotMembership()
 
     @classmethod
-    def validate_type(cls, operator: Operator, left: IType, right: IType) -> Optional[BinaryOperation]:
+    def validate_type(cls, operator: Operator, left: IType, right: IType) -> BinaryOperation | None:
         """
         Gets a binary operation given the operator and the operands types.
 
@@ -75,7 +77,7 @@ class BinaryOp:
 
     @classmethod
     def get_operation_by_operator(cls, operator: Operator, left_operand: IType,
-                                  right_operand: Optional[IType] = None) -> Optional[BinaryOperation]:
+                                  right_operand: IType | None = None) -> BinaryOperation | None:
         """
         Gets a binary operation given the operator.
 
@@ -86,7 +88,7 @@ class BinaryOp:
         the same left operand. If none has the same left operand, returns the first found. None otherwise;
         :rtype: BinaryOperation or None
         """
-        valid_operations: List[BinaryOperation] = []
+        valid_operations: list[BinaryOperation] = []
         for id, op in vars(cls).items():
             if isinstance(op, BinaryOperation) and op.operator is operator:
                 left, right = op.get_valid_operand_for_validation(left_operand, right_operand)
@@ -98,7 +100,7 @@ class BinaryOp:
         return valid_operations[0] if len(valid_operations) > 0 else None
 
     @classmethod
-    def get_operation(cls, operation: BinaryOperation) -> Optional[BinaryOperation]:
+    def get_operation(cls, operation: BinaryOperation) -> BinaryOperation | None:
         """
         Gets a binary operation given another operation.
 

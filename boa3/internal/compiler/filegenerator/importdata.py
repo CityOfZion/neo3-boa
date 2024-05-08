@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.symbol import ISymbol
 
 
@@ -24,7 +22,7 @@ class ImportData:
         return self._origin_file
 
     @property
-    def all_symbols(self) -> Dict[str, ISymbol]:
+    def all_symbols(self) -> dict[str, ISymbol]:
         if hasattr(self._imported_symbol, 'all_symbols'):
             return self._imported_symbol.all_symbols
 

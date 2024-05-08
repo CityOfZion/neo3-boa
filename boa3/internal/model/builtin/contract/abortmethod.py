@@ -1,4 +1,5 @@
-from typing import Dict, Optional, Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.itype import IType
@@ -16,7 +17,7 @@ class AbortMethod(IBuiltinMethod):
         identifier = 'abort'
 
         if isinstance(message_type, IType):
-            args: Dict[str, Variable] = {
+            args: dict[str, Variable] = {
                 'msg': Variable(Type.optional.build(message_type))
             }
             defaults = [
@@ -24,7 +25,7 @@ class AbortMethod(IBuiltinMethod):
             ]
 
         else:
-            args: Dict[str, Variable] = {}
+            args: dict[str, Variable] = {}
             defaults = []
 
         super().__init__(identifier, args, defaults, return_type=Type.none)
@@ -58,7 +59,7 @@ class AbortMethod(IBuiltinMethod):
         return obj
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
 
@@ -76,7 +77,7 @@ class AbortStrMethod(AbortMethod):
         from boa3.internal.model.type.type import Type
 
         msg = code_generator._stack[-1] if len(code_generator._stack) else self.msg_arg_type()
-        # if msg is optional[str] both variables are going to be set as True
+        # if msg is str | None both variables are going to be set as True
         is_not_str = not Type.str.is_type_of(msg)
         is_not_none = not Type.none.is_type_of(msg)
 

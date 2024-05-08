@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from abc import abstractmethod
-from typing import Any, Dict
+from typing import Any, Self
 
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.symbol import ISymbol
@@ -16,8 +14,8 @@ class IType(IdentifiedSymbol):
     :ivar identifier: the name identifier of the type
     """
 
-    def __init__(self, identifier: str):
-        super().__init__(identifier)
+    def __init__(self, identifier: str, deprecated: bool = False):
+        super().__init__(identifier, deprecated)
 
     @property
     def shadowing_name(self) -> str:
@@ -85,7 +83,7 @@ class IType(IdentifiedSymbol):
 
     @classmethod
     @abstractmethod
-    def build(cls, value: Any) -> IType:
+    def build(cls, value: Any) -> Self:
         """
         Creates a type instance with the given value
 
@@ -104,7 +102,7 @@ class IType(IdentifiedSymbol):
         code_generator.insert_type_check(self.stack_item)
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         """
         Gets the class symbols of this type
 
@@ -112,7 +110,7 @@ class IType(IdentifiedSymbol):
         """
         return {}
 
-    def union_type(self, other_type: IType) -> IType:
+    def union_type(self, other_type: "IType") -> "IType":
         """
         Gets a type that is an union of `self` and `other_type`
 
@@ -124,7 +122,7 @@ class IType(IdentifiedSymbol):
         from boa3.internal.model.type.annotation.uniontype import UnionType
         return UnionType.build((self, other_type))
 
-    def except_type(self, other_type: IType) -> IType:
+    def except_type(self, other_type: "IType") -> "IType":
         """
         Gets a type that is type of `self` but is not type of `other_type`.
         If `other_type` is an implementation of `self`, returns `self`
@@ -136,7 +134,7 @@ class IType(IdentifiedSymbol):
         """
         return self
 
-    def intersect_type(self, other_type: IType) -> IType:
+    def intersect_type(self, other_type: "IType") -> "IType":
         """
         Gets a type that is the intersection of `self` but is not type of `other_type`.
         If `other_type` is an implementation of `self`, returns `other_type`

@@ -1,6 +1,5 @@
 import ast
 from abc import ABC
-from typing import Dict, List, Optional
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -10,16 +9,22 @@ from boa3.internal.model.variable import Variable
 
 class InteropMethod(IBuiltinMethod, ABC):
 
-    def __init__(self, identifier: str, sys_call: str, args: Dict[str, Variable] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None):
+    def __init__(self,
+                 identifier: str,
+                 sys_call: str,
+                 args: dict[str, Variable] = None,
+                 defaults: list[ast.AST] = None,
+                 return_type: IType = None,
+                 deprecated: bool = False
+                 ):
         self._sys_call: str = sys_call
-        super().__init__(identifier, args, defaults, return_type)
+        super().__init__(identifier, args, defaults, return_type, deprecated=deprecated)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
             return False
 
-        args: List[IType] = [arg.type for arg in self.args.values()]
+        args: list[IType] = [arg.type for arg in self.args.values()]
         if len(params) != len(args):
             return False
         return all(args[index].is_type_of(params[index]) for index in range(len(args)))
@@ -47,5 +52,5 @@ class InteropMethod(IBuiltinMethod, ABC):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None

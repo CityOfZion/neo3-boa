@@ -1,4 +1,5 @@
-from typing import Any, Iterable, List, Set
+from collections.abc import Iterable
+from typing import Any
 
 from boa3.internal.model.type.annotation.uniontype import UnionType
 from boa3.internal.model.type.itype import IType
@@ -10,7 +11,7 @@ class OptionalType(UnionType):
     An class used to represent Python Optional annotation type
     """
 
-    def __init__(self, optional_types: Set[IType] = None):
+    def __init__(self, optional_types: set[IType] = None):
         if optional_types is None:
             union_types = None
         else:
@@ -30,7 +31,7 @@ class OptionalType(UnionType):
                                  ', '.join([t.identifier for t in self._optional_type]))
 
     @property
-    def optional_types(self) -> List[IType]:
+    def optional_types(self) -> list[IType]:
         return list(self._optional_type)
 
     def _is_type_of(self, value: Any) -> bool:

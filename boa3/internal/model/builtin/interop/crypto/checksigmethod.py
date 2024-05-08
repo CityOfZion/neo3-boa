@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
 
@@ -14,7 +12,7 @@ class CheckSigMethod(InteropMethod):
 
         identifier = 'check_sig'
         syscall = 'System.Crypto.CheckSig'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'pubkeys': Variable(ECPointType.build()),
             'signatures': Variable(Type.bytes)
         }

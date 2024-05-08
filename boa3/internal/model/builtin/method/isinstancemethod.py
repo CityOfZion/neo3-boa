@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -13,7 +13,7 @@ class IsInstanceMethod(IBuiltinMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'isinstance'
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'x': Variable(Type.any),
             'A_tuple': None
         }
@@ -32,9 +32,9 @@ class IsInstanceMethod(IBuiltinMethod):
         else:
             instances = [target_type.meta_type if isinstance(target_type, MetaType) else target_type]
 
-        self._instances_type: List[IType] = instances
+        self._instances_type: list[IType] = instances
 
-    def set_instance_type(self, value: List[IType]):
+    def set_instance_type(self, value: list[IType]):
         new_list = []
         for tpe in value:
             if isinstance(tpe, IType):
@@ -55,7 +55,7 @@ class IsInstanceMethod(IBuiltinMethod):
         types.sort()
         return '-{0}_of_{1}'.format(self._identifier, '_or_'.join(types))
 
-    def args_to_be_generated(self) -> List[int]:
+    def args_to_be_generated(self) -> list[int]:
         args = [name for name, symbol in self.args.items() if isinstance(symbol, Variable)]
         return [list(self.args).index(key) for key in args]
 
@@ -75,7 +75,7 @@ class IsInstanceMethod(IBuiltinMethod):
     def arg_x(self) -> Variable:
         return self.args['x']
 
-    def validate_parameters(self, *params: Union[IExpression, IType]) -> bool:
+    def validate_parameters(self, *params: IExpression | IType) -> bool:
         if len(params) != 2:
             return False
 
@@ -115,7 +115,7 @@ class IsInstanceMethod(IBuiltinMethod):
         return 1
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         # type should not be converted
         indexes = super().generation_order
         typ_index = list(self.args).index('A_tuple')
@@ -126,7 +126,7 @@ class IsInstanceMethod(IBuiltinMethod):
         return indexes
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

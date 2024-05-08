@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import abc
-from typing import Any, Dict, Optional
+from typing import Any, Self
 
 from boa3.internal.neo3.core.types import UInt160
 from boa3_test.test_drive.model.wallet import utils
@@ -23,31 +21,31 @@ class Account(abc.ABC):
 
         if name is not None and not isinstance(name, str):
             raise TypeError(f"Invalid data type {type(name)}. Expecting str or None")
-        self._name: Optional[str] = name
+        self._name: str | None = name
 
         if label is not None and not isinstance(label, str):
             raise TypeError(f"Invalid data type {type(label)}. Expecting str or None")
-        self._label: Optional[str] = label
+        self._label: str | None = label
 
     @property
     def script_hash(self) -> UInt160:
         return self._script_hash
 
     @property
-    def address(self) -> Optional[str]:
+    def address(self) -> str | None:
         return utils.address_from_script_hash(self._script_hash.to_array(), self._version)
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str | None:
         return self._name
 
     @property
-    def label(self) -> Optional[str]:
+    def label(self) -> str | None:
         return self._label
 
     @classmethod
     @abc.abstractmethod
-    def from_json(cls, json: Dict[str, Any]) -> Account:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         pass
 
     def get_identifier(self) -> str:

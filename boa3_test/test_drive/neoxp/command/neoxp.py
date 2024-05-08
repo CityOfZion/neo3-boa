@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
@@ -23,7 +23,7 @@ def fastfwd(block_count: int, time_interval_in_secs: int = 0) -> NeoExpressComma
 
 
 def transfer(sender: Account, receiver: Account, asset: str,
-             quantity: Union[int, float], decimals: int = 0,
+             quantity: int | float, decimals: int = 0,
              data: Any = None) -> NeoExpressCommand:
 
     return neoxp.transfer.TransferAssetCommand(asset, sender, receiver, quantity,

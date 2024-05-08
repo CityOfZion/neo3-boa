@@ -1,5 +1,4 @@
 import ast
-from typing import Optional
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
@@ -13,10 +12,10 @@ class ClassMethodDecorator(IBuiltinDecorator):
         identifier = 'classmethod'
         super().__init__(identifier)
 
-    def update_args(self, args: ast.arguments, origin: Optional[ISymbol] = None):
+    def update_args(self, args: ast.arguments, origin: ISymbol | None = None):
         if isinstance(origin, UserClass) and len(args.args) > 0 and args.args[0].annotation is None:
             # the user doesn't need to explicitly write the type of the first argument if it's a classmethod
-            # the first argument is a Type[Class]
+            # the first argument is a type[Class]
             cls_type = metatype.metaType.build(origin)
             cls_type_annotation = (cls_type.meta_identifier
                                    if isinstance(cls_type, metatype.MetaType)

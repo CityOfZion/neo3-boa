@@ -15,5 +15,5 @@ def Main(key: bytes) -> bytes:
 def _deploy(data: Any, update: bool):
     # test data to test in unit tests
     context = get_context()
-    storage.put(b'example', 23, context)
-    storage.put(b'test', 42, context)
+    storage.put_int(b'example', 23, context)
+    storage.put_int(b'test', 42, context)

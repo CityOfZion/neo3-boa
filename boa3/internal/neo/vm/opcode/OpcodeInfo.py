@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal import constants
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.opcode.OpcodeInformation import OpcodeInformation
@@ -7,7 +5,7 @@ from boa3.internal.neo.vm.opcode.OpcodeInformation import OpcodeInformation
 
 class OpcodeInfo:
     @classmethod
-    def get_info(cls, opcode: Opcode) -> Optional[OpcodeInformation]:
+    def get_info(cls, opcode: Opcode) -> OpcodeInformation | None:
         """
         Gets a binary operation given the operator.
 
@@ -207,7 +205,7 @@ class OpcodeInfo:
     # The top three items on the stack are rotated to the left.
     ROT = OpcodeInformation(Opcode.ROT)
     # The item n back in the stack is moved to the top.
-    ROLL = OpcodeInformation(Opcode.ROLL)
+    ROLL = OpcodeInformation(Opcode.ROLL, stack_items=1)
     # Reverse the order of the top 3 items on the stack.
     REVERSE3 = OpcodeInformation(Opcode.REVERSE3)
     # Reverse the order of the top 4 items on the stack.

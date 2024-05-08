@@ -1,20 +1,20 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError, CompilerWarning
-from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestException(BoaTest):
+class TestException(boatestcase.BoaTestCase):
+    from boa3.internal.model.builtin.builtin import Builtin
+
     default_folder: str = 'test_sc/exception_test'
 
-    EXCEPTION_EMPTY_MESSAGE = String(Builtin.Exception.default_message).to_bytes()
+    default_message = Builtin.Exception.default_message
+    EXCEPTION_EMPTY_MESSAGE = String(default_message).to_bytes()
+    UNHANDLED_ERROR_MESSAGE = r'unhandled exception: "{0}"'
 
-    def test_raise_exception_empty_message(self):
+    def test_raise_exception_empty_message_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -31,23 +31,21 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('RaiseExceptionEmptyMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RaiseExceptionEmptyMessage.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_raise_exception_empty_message_run(self):
+        await self.set_up_contract('RaiseExceptionEmptyMessage.py')
+        
+        result, _ = await self.call('test_raise', [10], return_type=None)
+        self.assertIsNone(result)
 
-        runner.call_contract(path, 'test_raise', 10)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('test_raise', [-10], return_type=None)
 
-        runner.call_contract(path, 'test_raise', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+        self.assertRegex(str(context.exception), self.UNHANDLED_ERROR_MESSAGE.format(self.default_message))
 
-    def test_raise_exception_with_message(self):
+    def test_raise_exception_with_message_compile(self):
         exception_message = String('raised an exception').to_bytes()
         expected_output = (
             Opcode.INITSLOT     # function signature
@@ -65,23 +63,22 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('RaiseExceptionWithMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RaiseExceptionWithMessage.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_raise_exception_with_message_run(self):
+        await self.set_up_contract('RaiseExceptionWithMessage.py')
 
-        runner.call_contract(path, 'test_raise', 10)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        exception_message = 'raised an exception'
+        result, _ = await self.call('test_raise', [10], return_type=None)
+        self.assertIsNone(result)
 
-        runner.call_contract(path, 'test_raise', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('test_raise', [-10], return_type=None)
 
-    def test_raise_exception_without_call(self):
+        self.assertRegex(str(context.exception), self.UNHANDLED_ERROR_MESSAGE.format(exception_message))
+
+    def test_raise_exception_without_call_contract(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -98,23 +95,21 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('RaiseExceptionWithoutCall.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RaiseExceptionWithoutCall.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_raise_exception_without_call_run(self):
+        await self.set_up_contract('RaiseExceptionWithoutCall.py')
 
-        runner.call_contract(path, 'test_raise', 10)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('test_raise', [10], return_type=None)
+        self.assertIsNone(result)
 
-        runner.call_contract(path, 'test_raise', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('test_raise', [-10], return_type=None)
 
-    def test_raise_variable_exception(self):
+        self.assertRegex(str(context.exception), self.UNHANDLED_ERROR_MESSAGE.format(self.default_message))
+
+    def test_raise_variable_exception_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -133,23 +128,21 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('RaiseVariableException.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RaiseVariableException.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_raise_variable_exception_run(self):
+        await self.set_up_contract('RaiseVariableException.py')
 
-        runner.call_contract(path, 'test_raise', 10)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('test_raise', [10], return_type=None)
+        self.assertIsNone(result)
 
-        runner.call_contract(path, 'test_raise', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('test_raise', [-10], return_type=None)
 
-    def test_raise_exception_variable_message(self):
+        self.assertRegex(str(context.exception), self.UNHANDLED_ERROR_MESSAGE.format(self.default_message))
+
+    def test_raise_exception_variable_message_compile(self):
         message = 'raised an exception'
         exception_message = String(message).to_bytes()
         expected_output = (
@@ -172,23 +165,22 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('RaiseExceptionVariableMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RaiseExceptionVariableMessage.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_raise_exception_variable_message_run(self):
+        await self.set_up_contract('RaiseExceptionVariableMessage.py')
 
-        runner.call_contract(path, 'test_raise', 10)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        exception_message = 'raised an exception'
+        result, _ = await self.call('test_raise', [10], return_type=None)
+        self.assertIsNone(result)
 
-        runner.call_contract(path, 'test_raise', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, message)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('test_raise', [-10], return_type=None)
 
-    def test_raise_specific_exception(self):
+        self.assertRegex(str(context.exception), self.UNHANDLED_ERROR_MESSAGE.format(exception_message))
+
+    def test_raise_specific_exception_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -205,27 +197,24 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('RaiseSpecificException.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('RaiseSpecificException.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_raise_specific_exception_run(self):
+        await self.set_up_contract('RaiseSpecificException.py')
 
-        runner.call_contract(path, 'test_raise', 10)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('test_raise', [10], return_type=None)
+        self.assertIsNone(result)
 
-        runner.call_contract(path, 'test_raise', -10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.UNHANDLED_EXCEPTION_MSG_PREFIX}')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('test_raise', [-10], return_type=None)
+
+        self.assertRegex(str(context.exception), self.UNHANDLED_ERROR_MESSAGE.format(self.default_message))
 
     def test_raise_mismatched_type(self):
-        path = self.get_contract_path('RaiseMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'RaiseMismatchedType.py')
 
-    def test_try_except_without_exception(self):
+    def test_try_except_without_exception_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -246,28 +235,19 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TryExceptWithoutException.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TryExceptWithoutException.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_try_except_without_exception_run(self):
+        await self.set_up_contract('TryExceptWithoutException.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('test_try_except', [10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'test_try_except', 10))
-        expected_results.append(10)
-        invokes.append(runner.call_contract(path, 'test_try_except', -110))
-        expected_results.append(-110)
+        result, _ = await self.call('test_try_except', [-110], return_type=int)
+        self.assertEqual(-110, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_try_except_base_exception(self):
+    def test_try_except_base_exception_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -288,28 +268,19 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TryExceptBaseException.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TryExceptBaseException.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_try_except_base_exception_run(self):
+        await self.set_up_contract('TryExceptBaseException.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('test_try_except', [10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'test_try_except', 10))
-        expected_results.append(10)
-        invokes.append(runner.call_contract(path, 'test_try_except', -110))
-        expected_results.append(-110)
+        result, _ = await self.call('test_try_except', [-110], return_type=int)
+        self.assertEqual(-110, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_try_except_specific_exception(self):
+    def test_try_except_specific_exception_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -330,32 +301,22 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TryExceptSpecificException.py')
-        output = self.assertCompilerLogs(CompilerWarning.UsingSpecificException, path)
+        output, _ = self.assertCompilerLogs(CompilerWarning.UsingSpecificException, 'TryExceptSpecificException.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_try_except_specific_exception_run(self):
+        await self.set_up_contract('TryExceptSpecificException.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('test_try_except', [10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'test_try_except', 10))
-        expected_results.append(10)
-        invokes.append(runner.call_contract(path, 'test_try_except', -110))
-        expected_results.append(-110)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('test_try_except', [-110], return_type=int)
+        self.assertEqual(-110, result)
 
     def test_try_except_with_name(self):
-        path = self.get_contract_path('TryExceptWithName.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'TryExceptWithName.py')
 
-    def test_try_except_finally(self):
+    def test_try_except_finally_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -388,28 +349,19 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TryExceptFinally.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TryExceptFinally.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_try_except_finally_run(self):
+        await self.set_up_contract('TryExceptFinally.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('test_try_except', [10], return_type=int)
+        self.assertEqual(24, result)
 
-        invokes.append(runner.call_contract(path, 'test_try_except', 10))
-        expected_results.append(24)
-        invokes.append(runner.call_contract(path, 'test_try_except', -110))
-        expected_results.append(-274)
+        result, _ = await self.call('test_try_except', [-110], return_type=int)
+        self.assertEqual(-274, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_try_except_else(self):
+    def test_try_except_else_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -435,28 +387,19 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TryExceptElse.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TryExceptElse.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_try_except_else_run(self):
+        await self.set_up_contract('TryExceptElse.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('test_try_except', [10], return_type=int)
+        self.assertEqual(-10, result)
 
-        invokes.append(runner.call_contract(path, 'test_try_except', 10))
-        expected_results.append(-10)
-        invokes.append(runner.call_contract(path, 'test_try_except', -110))
-        expected_results.append(110)
+        result, _ = await self.call('test_try_except', [-110], return_type=int)
+        self.assertEqual(110, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_try_except_else_finally(self):
+    def test_try_except_else_finally_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -495,23 +438,14 @@ class TestException(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('TryExceptElseFinally.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('TryExceptElseFinally.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_try_except_else_finally_run(self):
+        await self.set_up_contract('TryExceptElseFinally.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('test_try_except', [10], return_type=int)
+        self.assertEqual(44, result)
 
-        invokes.append(runner.call_contract(path, 'test_try_except', 10))
-        expected_results.append(44)
-        invokes.append(runner.call_contract(path, 'test_try_except', -110))
-        expected_results.append(-494)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('test_try_except', [-110], return_type=int)
+        self.assertEqual(-494, result)

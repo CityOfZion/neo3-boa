@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict, Optional
+from typing import Any, Self
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -18,20 +16,20 @@ class StorageMapType(ClassArrayType):
     def __init__(self):
         super().__init__('StorageMap')
 
-        self._variables: Dict[str, Variable] = {}
+        self._variables: dict[str, Variable] = {}
         self._constructor: Method = None
-        self._instance_methods: Dict[str, Method] = {}
+        self._instance_methods: dict[str, Method] = {}
 
     @property
-    def instance_variables(self) -> Dict[str, Variable]:
+    def instance_variables(self) -> dict[str, Variable]:
         return self._variables.copy()
 
     @property
-    def class_variables(self) -> Dict[str, Variable]:
+    def class_variables(self) -> dict[str, Variable]:
         return {}
 
     @property
-    def _all_variables(self) -> Dict[str, Variable]:
+    def _all_variables(self) -> dict[str, Variable]:
         from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import \
             _StorageContext as StorageContextType
         from boa3.internal.model.type.type import Type
@@ -45,19 +43,19 @@ class StorageMapType(ClassArrayType):
         return variables
 
     @property
-    def properties(self) -> Dict[str, Property]:
+    def properties(self) -> dict[str, Property]:
         return {}
 
     @property
-    def static_methods(self) -> Dict[str, Method]:
+    def static_methods(self) -> dict[str, Method]:
         return {}
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         return {}
 
     @property
-    def instance_methods(self) -> Dict[str, Method]:
+    def instance_methods(self) -> dict[str, Method]:
         # avoid recursive import
         if len(self._instance_methods) == 0:
             from boa3.internal.model.builtin.interop.storage.storagemap.storagemapdeletemethod import StorageMapDeleteMethod
@@ -71,14 +69,14 @@ class StorageMapType(ClassArrayType):
             }
         return self._instance_methods
 
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self) -> Method | None:
         # was having a problem with recursive import
         if self._constructor is None:
             self._constructor: Method = StorageMapMethod(self)
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> StorageMapType:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _StorageMap
 
@@ -98,7 +96,7 @@ class StorageMapMethod(IBuiltinMethod):
             _StorageContext as StorageContextType
 
         identifier = '-StorageMap__init__'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'context': Variable(StorageContextType),
             'prefix': Variable(Type.bytes)
         }
@@ -115,5 +113,5 @@ class StorageMapMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return

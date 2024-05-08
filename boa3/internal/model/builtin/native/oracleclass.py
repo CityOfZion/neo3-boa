@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict
+from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import OracleContract
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
@@ -16,7 +14,7 @@ class OracleClass(INativeContractClass):
         super().__init__('Oracle', OracleContract)
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
         from boa3.internal.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod
         from boa3.internal.model.builtin.interop.oracle.oraclerequestmethod import OracleRequestMethod
@@ -29,7 +27,7 @@ class OracleClass(INativeContractClass):
         return super().class_methods
 
     @classmethod
-    def build(cls, value: Any = None) -> OracleClass:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _Oracle
 

@@ -1,5 +1,3 @@
-from typing import List, Optional
-
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
@@ -15,7 +13,7 @@ class Concat(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str, Type.bytes]
+    _valid_types: list[IType] = [Type.str, Type.bytes]
 
     def __init__(self, left: IType = Type.str, right: IType = None):
         self.operator: Operator = Operator.Plus
@@ -48,7 +46,7 @@ class Concat(BinaryOperation):
         else:
             return Type.none
 
-    def _get_valid_type(self, operator_type: IType) -> Optional[IType]:
+    def _get_valid_type(self, operator_type: IType) -> IType | None:
         return next((valid_type for valid_type in self._valid_types
                      if valid_type.is_type_of(operator_type)), None)
 

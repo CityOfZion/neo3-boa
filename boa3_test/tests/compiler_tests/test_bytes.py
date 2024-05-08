@@ -1,14 +1,13 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.core import types
 
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestBytes(BoaTest):
+class TestBytes(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/bytes_test'
 
     SUBSEQUENCE_NOT_FOUND_MSG = 'subsequence of bytes not found'
@@ -26,11 +25,10 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytesLiteral.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytesLiteral.py')
         self.assertEqual(expected_output, output)
 
-    def test_bytes_get_value(self):
+    def test_bytes_get_value_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -41,28 +39,19 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytesGetValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytesGetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bytes_get_value_run(self):
+        await self.set_up_contract('BytesGetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', bytes([1, 2, 3])))
-        expected_results.append(1)
-        invokes.append(runner.call_contract(path, 'Main', b'0'))
-        expected_results.append(48)
+        result, _ = await self.call('Main', [b'0'], return_type=int)
+        self.assertEqual(48, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_get_value_negative_index(self):
+    def test_bytes_get_value_negative_index_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -76,104 +65,59 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytesGetValueNegativeIndex.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytesGetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bytes_get_value_negative_index_run(self):
+        await self.set_up_contract('BytesGetValueNegativeIndex.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'Main', bytes([1, 2, 3])))
-        expected_results.append(3)
-        invokes.append(runner.call_contract(path, 'Main', b'0'))
-        expected_results.append(48)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [b'0'], return_type=int)
+        self.assertEqual(48, result)
 
     def test_bytes_set_value(self):
-        path = self.get_contract_path('BytesSetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'BytesSetValue.py')
 
     def test_bytes_clear(self):
-        path = self.get_contract_path('BytesClear.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytesClear.py')
 
     def test_bytes_reverse(self):
-        path = self.get_contract_path('BytesReverse.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytesReverse.py')
 
-    def test_bytes_to_int(self):
-        path, _ = self.get_deploy_file_paths('BytesToInt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bytes_to_int(self):
+        await self.set_up_contract('BytesToInt.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_int'))
-        expected_results.append(513)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('bytes_to_int', return_type=int)
+        self.assertEqual(513, result)
 
     def test_bytes_to_int_with_builtin(self):
-        path = self.get_contract_path('BytesToIntWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToIntWithBuiltin.py')
 
-    def test_bytes_to_bool(self):
-        path, _ = self.get_deploy_file_paths('BytesToBool.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bytes_to_bool(self):
+        await self.set_up_contract('BytesToBool.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('bytes_to_bool', [b'\x00'], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'bytes_to_bool', b'\x00'))
-        expected_results.append(False)
+        result, _ = await self.call('bytes_to_bool', [b'\x01'], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'bytes_to_bool', b'\x01'))
-        expected_results.append(True)
-
-        invokes.append(runner.call_contract(path, 'bytes_to_bool', b'\x02'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('bytes_to_bool', [b'\x02'], return_type=bool)
+        self.assertEqual(True, result)
 
     def test_bytes_to_bool_with_builtin(self):
-        path = self.get_contract_path('BytesToBoolWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToBoolWithBuiltin.py')
 
-    def test_bytes_to_str(self):
-        path, _ = self.get_deploy_file_paths('BytesToStr.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bytes_to_str(self):
+        await self.set_up_contract('BytesToStr.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_str'))
-        expected_results.append('abc')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('bytes_to_str', return_type=str)
+        self.assertEqual('abc', result)
 
     def test_bytes_to_str_with_builtin(self):
-        path = self.get_contract_path('BytesToStrWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToStrWithBuiltin.py')
 
     def test_bytes_from_byte_array(self):
         data = b'\x01\x02\x03'
@@ -191,345 +135,242 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytesFromBytearray.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytesFromBytearray.py')
         self.assertEqual(expected_output, output)
 
-    def test_assign_with_slice(self):
-        path, _ = self.get_deploy_file_paths('AssignSlice.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_assign_with_slice(self):
+        await self.set_up_contract('AssignSlice.py')
 
-        invokes = []
-        expected_results = []
+        arg = b'unittest'
+        result, _ = await self.call('main', [arg], return_type=bytearray)
+        self.assertEqual(arg[1:2], result)
 
-        invokes.append(runner.call_contract(path, 'main', b'unittest',
-                                            expected_result_type=bytearray))
-        expected_results.append(b'unittest'[1:2])
+        arg = b'123'
+        result, _ = await self.call('main', [arg], return_type=bytearray)
+        self.assertEqual(arg[1:2], result)
 
-        invokes.append(runner.call_contract(path, 'main', b'123',
-                                            expected_result_type=bytearray))
-        expected_results.append(b'123'[1:2])
+        arg = bytearray()
+        result, _ = await self.call('main', [arg], return_type=bytearray)
+        self.assertEqual(arg[1:2], result)
 
-        invokes.append(runner.call_contract(path, 'main', bytearray(),
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray()[1:2])
+    async def test_slice_with_cast(self):
+        await self.set_up_contract('SliceWithCast.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [b'unittest'], return_type=bytes)
+        self.assertEqual(b'unittest'[1:2], result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['123'], return_type=bytes)
+        self.assertEqual(b'123'[1:2], result)
 
-    def test_slice_with_cast(self):
-        path, _ = self.get_deploy_file_paths('SliceWithCast.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [12345], return_type=bytes)
+        self.assertEqual(Integer(12345).to_byte_array()[1:2], result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [bytearray()], return_type=bytes)
+        self.assertEqual(bytearray()[1:2], result)
 
-        invokes.append(runner.call_contract(path, 'main', b'unittest',
-                                            expected_result_type=bytes))
-        expected_results.append(b'unittest'[1:2])
-
-        invokes.append(runner.call_contract(path, 'main', '123',
-                                            expected_result_type=bytes))
-        expected_results.append(b'123'[1:2])
-
-        invokes.append(runner.call_contract(path, 'main', 12345,
-                                            expected_result_type=bytes))
-        expected_results.append(Integer(12345).to_byte_array()[1:2])
-
-        invokes.append(runner.call_contract(path, 'main', bytearray(),
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray()[1:2])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_slice_with_stride(self):
-        path, _ = self.get_deploy_file_paths('SliceWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_slice_with_stride(self):
+        await self.set_up_contract('SliceWithStride.py')
 
         a = b'unit_test'
         expected_result = a[2:5:2]
-        invokes.append(runner.call_contract(path, 'literal_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('literal_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-6:5:2]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[0:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-6:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-999:5:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[0:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-999:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[999:5:2]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[0:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[999:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_slice_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('SliceWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_slice_with_negative_stride(self):
+        await self.set_up_contract('SliceWithNegativeStride.py')
 
         a = b'unit_test'
         expected_result = a[2:5:-1]
-        invokes.append(runner.call_contract(path, 'literal_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('literal_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-6:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[0:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-6:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-999:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[0:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-999:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[999:5:-1]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[0:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[999:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_slice_omitted_with_stride(self):
-        path, _ = self.get_deploy_file_paths('SliceOmittedWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_slice_omitted_with_stride(self):
+        await self.set_up_contract('SliceOmittedWithStride.py')
 
         a = b'unit_test'
         expected_result = a[::2]
-        invokes.append(runner.call_contract(path, 'omitted_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:5:2]
-        invokes.append(runner.call_contract(path, 'omitted_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[2::2]
-        invokes.append(runner.call_contract(path, 'omitted_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-6::2]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-999::2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[999::2]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_slice_omitted_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('SliceOmittedWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_slice_omitted_with_negative_stride(self):
+        await self.set_up_contract('SliceOmittedWithNegativeStride.py')
 
         a = b'unit_test'
         expected_result = a[::-2]
-        invokes.append(runner.call_contract(path, 'omitted_values',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_values', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:5:-2]
-        invokes.append(runner.call_contract(path, 'omitted_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[2::-2]
-        invokes.append(runner.call_contract(path, 'omitted_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-6::-2]
-        invokes.append(runner.call_contract(path, 'negative_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:-1:-2]
-        invokes.append(runner.call_contract(path, 'negative_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[-999::-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:-999:-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[999::-2]
-        invokes.append(runner.call_contract(path, 'really_high_start',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         a = b'unit_test'
         expected_result = a[:999:-2]
-        invokes.append(runner.call_contract(path, 'really_high_end',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_get_value(self):
+    def test_byte_array_get_value_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -540,28 +381,19 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayGetValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearrayGetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_get_value_run(self):
+        await self.set_up_contract('BytearrayGetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', bytes([1, 2, 3])))
-        expected_results.append(1)
-        invokes.append(runner.call_contract(path, 'Main', b'0'))
-        expected_results.append(48)
+        result, _ = await self.call('Main', [b'0'], return_type=int)
+        self.assertEqual(48, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_get_value_negative_index(self):
+    def test_byte_array_get_value_negative_index_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -575,28 +407,19 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayGetValueNegativeIndex.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearrayGetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_get_value_negative_index_run(self):
+        await self.set_up_contract('BytearrayGetValueNegativeIndex.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [bytes([1, 2, 3])], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'Main', bytes([1, 2, 3])))
-        expected_results.append(3)
-        invokes.append(runner.call_contract(path, 'Main', b'0'))
-        expected_results.append(48)
+        result, _ = await self.call('Main', [b'0'], return_type=int)
+        self.assertEqual(48, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_set_value(self):
+    def test_byte_array_set_value_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -620,30 +443,19 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearraySetValue.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearraySetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_set_value_run(self):
+        await self.set_up_contract('BytearraySetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [b'123'], return_type=bytes)
+        self.assertEqual(b'\x0123', result)
 
-        invokes.append(runner.call_contract(path, 'Main', b'123',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x0123')
-        invokes.append(runner.call_contract(path, 'Main', b'0',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01')
+        result, _ = await self.call('Main', [b'0'], return_type=bytes)
+        self.assertEqual(b'\x01', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_set_value_negative_index(self):
+    def test_byte_array_set_value_negative_index_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x01'
@@ -667,72 +479,36 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearraySetValueNegativeIndex.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearraySetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_set_value_negative_index_run(self):
+        await self.set_up_contract('BytearraySetValueNegativeIndex.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [b'123'], return_type=bytes)
+        self.assertEqual(b'12\x01', result)
 
-        invokes.append(runner.call_contract(path, 'Main', b'123',
-                                            expected_result_type=bytes))
-        expected_results.append(b'12\x01')
-        invokes.append(runner.call_contract(path, 'Main', b'0',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [b'0'], return_type=bytes)
+        self.assertEqual(b'\x01', result)
 
     def test_byte_array_literal_value(self):
-        data = b'\x01\x02\x03'
-        expected_output = (
-            Opcode.INITSLOT     # function signature
-            + b'\x01'
-            + b'\x00'
-            + Opcode.PUSHDATA1  # a = bytearray(b'\x01\x02\x03')
-            + Integer(len(data)).to_byte_array(min_length=1)
-            + data
-            + Opcode.STLOC0
-            + Opcode.RET        # return
-        )
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytearrayLiteral.py')
 
-        path = self.get_contract_path('BytearrayLiteral.py')
-        output = self.assertCompilerLogs(CompilerWarning.TypeCasting, path)
-        self.assertEqual(expected_output, output)
-
-    def test_byte_array_default(self):
+    def test_byte_array_default_compile(self):
         expected_output = (
             Opcode.PUSH0      # bytearray()
             + Opcode.NEWBUFFER
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayDefault.py')
-        output, manifest = self.compile_and_save(path)
+        output, _ = self.assertCompile('BytearrayDefault.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_default_run(self):
+        await self.set_up_contract('BytearrayDefault.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'create_bytearray',
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray())
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('create_bytearray', return_type=bytearray)
+        self.assertEqual(bytearray(), result)
 
     def test_byte_array_from_literal_bytes(self):
         data = b'\x01\x02\x03'
@@ -748,8 +524,7 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayFromLiteralBytes.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearrayFromLiteralBytes.py')
         self.assertEqual(expected_output, output)
 
     def test_byte_array_from_variable_bytes(self):
@@ -770,11 +545,10 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayFromVariableBytes.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytearrayFromVariableBytes.py')
         self.assertEqual(expected_output, output)
 
-    def test_byte_array_from_size(self):
+    def test_byte_array_from_size_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -784,40 +558,24 @@ class TestBytes(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('BytearrayFromSize.py')
-        output, manifest = self.compile_and_save(path)
+        output, _ = self.assertCompile('BytearrayFromSize.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_from_size_run(self):
+        await self.set_up_contract('BytearrayFromSize.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('create_bytearray', [10], return_type=bytearray)
+        self.assertEqual(bytearray(10), result)
 
-        invokes.append(runner.call_contract(path, 'create_bytearray', 10,
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray(10))
+        result, _ = await self.call('create_bytearray', [0], return_type=bytearray)
+        self.assertEqual(bytearray(0), result)
 
-        invokes.append(runner.call_contract(path, 'create_bytearray', 0,
-                                            expected_result_type=bytearray))
-        expected_results.append(bytearray(0))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        # cannot build with negative size
-        runner.call_contract(path, 'create_bytearray', -10,
-                             expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.MAX_ITEM_SIZE_EXCEED_MSG_PREFIX}')
+        with self.assertRaises(Exception) as context:
+            await self.call('create_bytearray', [-10], return_type=bytearray)
+        self.assertRegex(context.exception.__str__(), 'invalid size')
 
     def test_byte_array_from_list_of_int(self):
-        path = self.get_contract_path('BytearrayFromListOfInt.py')
-        compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        compiler_error_message = self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'BytearrayFromListOfInt.py')
 
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.type.type import Type
@@ -825,977 +583,615 @@ class TestBytes(BoaTest):
         expected_error = CompilerError.NotSupportedOperation(0, 0, f'{Builtin.ByteArray.identifier}({arg_type.identifier})')
         self.assertEqual(expected_error._error_message, compiler_error_message)
 
-    def test_byte_array_string(self):
-        path, _ = self.get_deploy_file_paths('BytearrayFromString.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_byte_array_string(self):
+        await self.set_up_contract('BytearrayFromString.py')
 
         # Neo3-boa's bytearray only converts with utf-8 encoding
         string = 'string value'
-        invokes.append(runner.call_contract(path, 'main', string, expected_result_type=bytearray))
-        expected_results.append(bytearray(string, 'utf-8'))
+        expected = bytearray(string, 'utf-8')
+        result, _ = await self.call('main', [string], return_type=bytearray)
+        self.assertEqual(expected, result)
 
         string = 'áãõ😀'
-        invokes.append(runner.call_contract(path, 'main', string, expected_result_type=bytearray))
-        expected_results.append(bytearray(string, 'utf-8'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = bytearray(string, 'utf-8')
+        result, _ = await self.call('main', [string], return_type=bytearray)
+        self.assertEqual(expected, result)
 
     def test_byte_array_string_with_encoding(self):
-        path = self.get_contract_path('BytearrayFromStringWithEncoding.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'BytearrayFromStringWithEncoding.py')
 
-    def test_byte_array_append(self):
-        path, _ = self.get_deploy_file_paths('BytearrayAppend.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_append(self):
+        await self.set_up_contract('BytearrayAppend.py')
 
-        invokes = []
-        expected_results = []
+        expected = bytearray(b'\x01\x02\x03')
+        expected.append(4)
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
+    async def test_byte_array_append_with_builtin(self):
+        await self.set_up_contract('BytearrayAppendWithBuiltin.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected = bytearray(b'\x01\x02\x03')
+        expected.append(4)
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_byte_array_append_mutable_sequence_with_builtin(self):
+        await self.set_up_contract('BytearrayAppendWithMutableSequence.py')
 
-    def test_byte_array_append_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayAppendWithBuiltin.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        expected = bytearray(b'\x01\x02\x03')
+        expected.append(4)
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        invokes = []
-        expected_results = []
+    async def test_byte_array_clear(self):
+        await self.set_up_contract('BytearrayClear.py')
 
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
+        expected = bytearray()
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_byte_array_reverse(self):
+        await self.set_up_contract('BytearrayReverse.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = bytearray(b'\x01\x02\x03')
+        expected.reverse()
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-    def test_byte_array_append_mutable_sequence_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayAppendWithMutableSequence.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_byte_array_extend(self):
+        await self.set_up_contract('BytearrayExtend.py')
 
-        invokes = []
-        expected_results = []
+        expected = bytearray(b'\x01\x02\x03')
+        expected.extend(b'\x04\x05\x06')
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
+    async def test_byte_array_extend_with_builtin(self):
+        await self.set_up_contract('BytearrayExtendWithBuiltin.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected = bytearray(b'\x01\x02\x03')
+        expected.extend(b'\x04\x05\x06')
+        result, _ = await self.call('Main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_byte_array_to_int(self):
+        await self.set_up_contract('BytearrayToInt.py')
 
-    def test_byte_array_clear(self):
-        path, _ = self.get_deploy_file_paths('BytearrayClear.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_reverse(self):
-        path, _ = self.get_deploy_file_paths('BytearrayReverse.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x03\x02\x01')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_extend(self):
-        path, _ = self.get_deploy_file_paths('BytearrayExtend.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04\x05\x06')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_extend_with_builtin(self):
-        path, _ = self.get_deploy_file_paths('BytearrayExtendWithBuiltin.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04\x05\x06')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_byte_array_to_int(self):
-        path, _ = self.get_deploy_file_paths('BytearrayToInt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_to_int'))
-        expected_results.append(513)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('bytes_to_int', return_type=int)
+        self.assertEqual(513, result)
 
     def test_byte_array_to_int_with_builtin(self):
-        path = self.get_contract_path('BytearrayToIntWithBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytearrayToIntWithBuiltin.py')
 
     def test_byte_array_to_int_with_bytes_builtin(self):
-        path = self.get_contract_path('BytearrayToIntWithBytesBuiltin.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytearrayToIntWithBytesBuiltin.py')
 
-    def test_boa2_byte_array_test(self):
-        path, _ = self.get_deploy_file_paths('BytearrayBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_byte_array_test(self):
+        await self.set_up_contract('BytearrayBoa2Test.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\t\x01\x02')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', return_type=bytes)
+        self.assertEqual(b'\t\x01\x02', result)
 
     def test_boa2_byte_array_test2(self):
-        path = self.get_contract_path('BytearrayBoa2Test2.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytearrayBoa2Test2.py')
 
-    def test_boa2_byte_array_test3(self):
-        path, _ = self.get_deploy_file_paths('BytearrayBoa2Test3.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_byte_array_test3(self):
+        await self.set_up_contract('BytearrayBoa2Test3.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', return_type=bytes)
+        self.assertEqual(b'\x01\x02\xaa\xfe', result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(b'\x01\x02\xaa\xfe')
+    async def test_boa2_slice_test(self):
+        await self.set_up_contract('SliceBoa2Test.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected = bytearray(b'\x01\x02\x03\x04\x05\x06\x07\x08')[:4]
+        result, _ = await self.call('main', return_type=bytearray)
+        self.assertEqual(expected, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_boa2_slice_test2(self):
+        await self.set_up_contract('SliceBoa2Test2.py')
 
-    def test_boa2_slice_test(self):
-        path, _ = self.get_deploy_file_paths('SliceBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', return_type=bytes)
+        self.assertEqual(b'\x02\x03\x04\x02\x03\x04\x05\x06\x01\x02\x03\x04\x03\x04', result)
 
-        invokes = []
-        expected_results = []
+    async def test_uint160_bytes(self):
+        await self.set_up_contract('UInt160Bytes.py')
 
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x01\x02\x03\x04')
+        expected = types.UInt160(b'0123456789abcdefghij')
+        result, _ = await self.call('main', return_type=types.UInt160)
+        self.assertEqual(expected, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_uint160_int(self):
+        await self.set_up_contract('UInt160Int.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = types.UInt160((160).to_bytes(2, 'little') + bytes(18))
+        result, _ = await self.call('main', return_type=types.UInt160)
+        self.assertEqual(expected, result)
 
-    def test_boa2_slice_test2(self):
-        path, _ = self.get_deploy_file_paths('SliceBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_uint256_bytes(self):
+        await self.set_up_contract('UInt256Bytes.py')
 
-        invokes = []
-        expected_results = []
+        expected = types.UInt256(b'0123456789abcdefghijklmnopqrstuv')
+        result, _ = await self.call('main', return_type=types.UInt256)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'\x02\x03\x04\x02\x03\x04\x05\x06\x01\x02\x03\x04\x03\x04')
+    async def test_uint256_int(self):
+        await self.set_up_contract('UInt256Int.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected = types.UInt256((256).to_bytes(2, 'little') + bytes(30))
+        result, _ = await self.call('main', return_type=types.UInt256)
+        self.assertEqual(expected, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_uint160_bytes(self):
-        path, _ = self.get_deploy_file_paths('UInt160Bytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'0123456789abcdefghij')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_uint160_int(self):
-        path, _ = self.get_deploy_file_paths('UInt160Int.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append((160).to_bytes(2, 'little') + bytes(18))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_uint256_bytes(self):
-        path, _ = self.get_deploy_file_paths('UInt256Bytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'0123456789abcdefghijklmnopqrstuv')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_uint256_int(self):
-        path, _ = self.get_deploy_file_paths('UInt256Int.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main',
-                                            expected_result_type=bytes))
-        expected_results.append((256).to_bytes(2, 'little') + bytes(30))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_upper(self):
-        path, _ = self.get_deploy_file_paths('UpperBytesMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_upper(self):
+        await self.set_up_contract('UpperBytesMethod.py')
 
         bytes_value = b'abcdefghijklmnopqrstuvwxyz'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, expected_result_type=bytes))
-        expected_results.append(bytes_value.upper())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
 
         bytes_value = b'a1b123y3z'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, expected_result_type=bytes))
-        expected_results.append(bytes_value.upper())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
 
         bytes_value = b'!@#$%123*-/'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, expected_result_type=bytes))
-        expected_results.append(bytes_value.upper())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.upper(), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_lower(self):
-        path, _ = self.get_deploy_file_paths('LowerBytesMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_lower(self):
+        await self.set_up_contract('LowerBytesMethod.py')
 
         bytes_value = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, expected_result_type=bytes))
-        expected_results.append(bytes_value.lower())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
 
         bytes_value = b'A1B123Y3Z'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, expected_result_type=bytes))
-        expected_results.append(bytes_value.lower())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
 
         bytes_value = b'!@#$%123*-/'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, expected_result_type=bytes))
-        expected_results.append(bytes_value.lower())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.lower(), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_startswith_method(self):
-        path, _ = self.get_deploy_file_paths('StartswithBytesMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_startswith_method(self):
+        await self.set_up_contract('StartswithBytesMethod.py')
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit'
         start = 0
         end = len(bytes_value)
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start, end))
-        expected_results.append(bytes_value.startswith(subbytes_value, start, end))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start, end], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit'
         start = 2
         end = 6
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start, end))
-        expected_results.append(bytes_value.startswith(subbytes_value, start, end))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start, end], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'it'
         start = 2
         end = 6
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start, end))
-        expected_results.append(bytes_value.startswith(subbytes_value, start, end))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start, end], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'it'
         start = 2
         end = 3
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start, end))
-        expected_results.append(bytes_value.startswith(subbytes_value, start, end))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start, end], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit_tes'
         start = -99
         end = -1
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start, end))
-        expected_results.append(bytes_value.startswith(subbytes_value, start, end))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start, end], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b''
         start = 0
         end = 0
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start, end))
-        expected_results.append(bytes_value.startswith(subbytes_value, start, end))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start, end], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit_test'
         start = 0
         end = 99
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start, end))
-        expected_results.append(bytes_value.startswith(subbytes_value, start, end))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start, end], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start, end), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_startswith_method_default_end(self):
-        path, _ = self.get_deploy_file_paths('StartswithBytesMethodDefaultEnd.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_startswith_method_default_end(self):
+        await self.set_up_contract('StartswithBytesMethodDefaultEnd.py')
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit'
         start = 0
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit'
         start = 2
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'it'
         start = 2
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'it'
         start = 3
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit_tes'
         start = -99
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b''
         start = 0
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b''
         start = 99
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit_test'
         start = 0
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value, start))
-        expected_results.append(bytes_value.startswith(subbytes_value, start))
+        result, _ = await self.call('main', [bytes_value, subbytes_value, start], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value, start), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_startswith_method_defaults(self):
-        path, _ = self.get_deploy_file_paths('StartswithBytesMethodDefaults.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_startswith_method_defaults(self):
+        await self.set_up_contract('StartswithBytesMethodDefaults.py')
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value))
-        expected_results.append(bytes_value.startswith(subbytes_value))
+        result, _ = await self.call('main', [bytes_value, subbytes_value], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'unit_test'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value))
-        expected_results.append(bytes_value.startswith(subbytes_value))
+        result, _ = await self.call('main', [bytes_value, subbytes_value], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b''
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value))
-        expected_results.append(bytes_value.startswith(subbytes_value))
+        result, _ = await self.call('main', [bytes_value, subbytes_value], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'12345'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value))
-        expected_results.append(bytes_value.startswith(subbytes_value))
+        result, _ = await self.call('main', [bytes_value, subbytes_value], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
 
         bytes_value = b'unit_test'
         subbytes_value = b'bigger subbytes_value'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, subbytes_value))
-        expected_results.append(bytes_value.startswith(subbytes_value))
+        result, _ = await self.call('main', [bytes_value, subbytes_value], return_type=bool)
+        self.assertEqual(bytes_value.startswith(subbytes_value), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_strip(self):
-        path, _ = self.get_deploy_file_paths('StripBytesMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_strip(self):
+        await self.set_up_contract('StripBytesMethod.py')
 
         bytes_value = b'abcdefghijklmnopqrstuvwxyz'
         sub_bytes = b'abcxyz'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, sub_bytes,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.strip(sub_bytes))
+        result, _ = await self.call('main', [bytes_value, sub_bytes], return_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
 
         bytes_value = b'abcdefghijklmnopqrsvwxyz unit test abcdefghijklmnopqrsvwxyz'
         sub_bytes = b'abcdefghijklmnopqrsvwxyz '
-        invokes.append(runner.call_contract(path, 'main', bytes_value, sub_bytes,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.strip(sub_bytes))
+        result, _ = await self.call('main', [bytes_value, sub_bytes], return_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
 
         bytes_value = b'0123456789hello world987654310'
         sub_bytes = b'0987654321'
-        invokes.append(runner.call_contract(path, 'main', bytes_value, sub_bytes,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.strip(sub_bytes))
+        result, _ = await self.call('main', [bytes_value, sub_bytes], return_type=bytes)
+        self.assertEqual(bytes_value.strip(sub_bytes), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_strip_default(self):
-        path, _ = self.get_deploy_file_paths('StripBytesMethodDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_strip_default(self):
+        await self.set_up_contract('StripBytesMethodDefault.py')
 
         bytes_value = b'     unit test    '
-        invokes.append(runner.call_contract(path, 'main', bytes_value,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.strip())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
 
         bytes_value = b'unit test    '
-        invokes.append(runner.call_contract(path, 'main', bytes_value,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.strip())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
 
         bytes_value = b'    unit test'
-        invokes.append(runner.call_contract(path, 'main', bytes_value,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.strip())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
 
         bytes_value = b' \t\n\r\f\vunit test \t\n\r\f\v'
-        invokes.append(runner.call_contract(path, 'main', bytes_value,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.strip())
+        result, _ = await self.call('main', [bytes_value], return_type=bytes)
+        self.assertEqual(bytes_value.strip(), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_isdigit_method(self):
-        path, _ = self.get_deploy_file_paths('IsdigitMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_isdigit_method(self):
+        await self.set_up_contract('BytesIsdigitMethod.py')
 
         bytes_value = b'0123456789'
-        invokes.append(runner.call_contract(path, 'main', bytes_value))
-        expected_results.append(bytes_value.isdigit())
+        result, _ = await self.call('main', [bytes_value], return_type=bool)
+        self.assertEqual(bytes_value.isdigit(), result)
 
         bytes_value = b'23mixed01'
-        invokes.append(runner.call_contract(path, 'main', bytes_value))
-        expected_results.append(bytes_value.isdigit())
+        result, _ = await self.call('main', [bytes_value], return_type=bool)
+        self.assertEqual(bytes_value.isdigit(), result)
 
         bytes_value = b'no digits here'
-        invokes.append(runner.call_contract(path, 'main', bytes_value))
-        expected_results.append(bytes_value.isdigit())
+        result, _ = await self.call('main', [bytes_value], return_type=bool)
+        self.assertEqual(bytes_value.isdigit(), result)
 
         bytes_value = b''
-        invokes.append(runner.call_contract(path, 'main', bytes_value))
-        expected_results.append(bytes_value.isdigit())
+        result, _ = await self.call('main', [bytes_value], return_type=bool)
+        self.assertEqual(bytes_value.isdigit(), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_join_with_sequence(self):
-        path, _ = self.get_deploy_file_paths('JoinBytesMethodWithSequence.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_join_with_sequence(self):
+        await self.set_up_contract('JoinBytesMethodWithSequence.py')
 
         bytes_value = b' '
         sequence = [b"Unit", b"Test", b"Neo3-boa"]
-        invokes.append(runner.call_contract(path, 'main', bytes_value, sequence,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.join(sequence))
+        result, _ = await self.call('main', [bytes_value, sequence], return_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
 
         bytes_value = b' '
         sequence = []
-        invokes.append(runner.call_contract(path, 'main', bytes_value, sequence,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.join(sequence))
+        result, _ = await self.call('main', [bytes_value, sequence], return_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
 
         bytes_value = b' '
         sequence = [b"UnitTest"]
-        invokes.append(runner.call_contract(path, 'main', bytes_value, sequence,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.join(sequence))
+        result, _ = await self.call('main', [bytes_value, sequence], return_type=bytes)
+        self.assertEqual(bytes_value.join(sequence), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_join_with_dictionary(self):
-        path, _ = self.get_deploy_file_paths('JoinBytesMethodWithDictionary.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_join_with_dictionary(self):
+        await self.set_up_contract('JoinBytesMethodWithDictionary.py')
 
         bytes_value = b' '
         dictionary = {b"Unit": 1, b"Test": 2, b"Neo3-boa": 3}
-        invokes.append(runner.call_contract(path, 'main', bytes_value, dictionary,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.join(dictionary))
+        result, _ = await self.call('main', [bytes_value, dictionary], return_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)
 
         bytes_value = b' '
         dictionary = {}
-        invokes.append(runner.call_contract(path, 'main', bytes_value, dictionary,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.join(dictionary))
+        result, _ = await self.call('main', [bytes_value, dictionary], return_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)
 
         bytes_value = b' '
         dictionary = {b"UnitTest": 1}
-        invokes.append(runner.call_contract(path, 'main', bytes_value, dictionary,
-                                            expected_result_type=bytes))
-        expected_results.append(bytes_value.join(dictionary))
+        result, _ = await self.call('main', [bytes_value, dictionary], return_type=bytes)
+        self.assertEqual(bytes_value.join(dictionary), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_index(self):
-        path, _ = self.get_deploy_file_paths('IndexBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_index(self):
+        await self.set_up_contract('IndexBytes.py')
 
         bytes_ = b'unit test'
         subsequence = b'i'
         start = 0
         end = 4
-        invokes.append(runner.call_contract(path, 'main', bytes_, subsequence, start, end))
-        expected_results.append(bytes_.index(subsequence, start, end))
+        result, _ = await self.call('main', [bytes_, subsequence, start, end], return_type=int)
+        self.assertEqual(bytes_.index(subsequence, start, end), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b'i'
         start = 2
         end = 4
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start, end))
-        expected_results.append(bytes_.index(bytes_sequence, start, end))
+        result, _ = await self.call('main', [bytes_, bytes_sequence, start, end], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence, start, end), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b'i'
         start = 0
         end = -1
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start, end))
-        expected_results.append(bytes_.index(bytes_sequence, start, end))
+        result, _ = await self.call('main', [bytes_, bytes_sequence, start, end], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence, start, end), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b'n'
         start = 0
         end = 99
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start, end))
-        expected_results.append(bytes_.index(bytes_sequence, start, end))
+        result, _ = await self.call('main', [bytes_, bytes_sequence, start, end], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence, start, end), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['unit test', 'i', 3, 4], return_type=int)
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['unit test', 'i', 4, -1], return_type=int)
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
-        invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 3, 4))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['unit test', 'i', 0, -99], return_type=int)
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
-        invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 4, -1))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
-
-        invokes.append(runner.call_contract(path, 'main', 'unit test', 'i', 0, -99))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
-
-    def test_bytes_index_end_default(self):
-        path, _ = self.get_deploy_file_paths('IndexBytesEndDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_index_end_default(self):
+        await self.set_up_contract('IndexBytesEndDefault.py')
 
         bytes_ = b'unit test'
         bytes_sequence = b't'
         start = 0
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
-        expected_results.append(bytes_.index(bytes_sequence, start))
+        result, _ = await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b't'
         start = 4
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
-        expected_results.append(bytes_.index(bytes_sequence, start))
+        result, _ = await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b't'
         start = 6
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
-        expected_results.append(bytes_.index(bytes_sequence, start))
+        result, _ = await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b'i'
         start = -10
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
-        expected_results.append(bytes_.index(bytes_sequence, start))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence, start), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b'i'
         start = 99
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
-        self.assertRaises(ValueError, bytes_.index, bytes_sequence, start)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
         bytes_ = b'unit test'
         bytes_sequence = b's'
         start = -1
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence, start))
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSEQUENCE_NOT_FOUND_MSG}$')
-        self.assertRaises(ValueError, bytes_.index, bytes_sequence, start)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [bytes_, bytes_sequence, start], return_type=int)
+        self.assertRegex(str(context.exception), f'{self.SUBSEQUENCE_NOT_FOUND_MSG}')
 
-    def test_bytes_index_defaults(self):
-        path, _ = self.get_deploy_file_paths('IndexBytesDefaults.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_index_defaults(self):
+        await self.set_up_contract('IndexBytesDefaults.py')
 
         bytes_ = b'unit test'
         bytes_sequence = b'u'
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence))
-        expected_results.append(bytes_.index(bytes_sequence))
+        result, _ = await self.call('main', [bytes_, bytes_sequence], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b't'
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence))
-        expected_results.append(bytes_.index(bytes_sequence))
+        result, _ = await self.call('main', [bytes_, bytes_sequence], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence), result)
 
         bytes_ = b'unit test'
         bytes_sequence = b' '
-        invokes.append(runner.call_contract(path, 'main', bytes_, bytes_sequence))
-        expected_results.append(bytes_.index(bytes_sequence))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [bytes_, bytes_sequence], return_type=int)
+        self.assertEqual(bytes_.index(bytes_sequence), result)
 
     def test_bytes_index_mismatched_type(self):
-        path = self.get_contract_path('IndexBytesMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IndexBytesMismatchedType.py')
 
-    def test_bytes_property_slicing(self):
-        path, _ = self.get_deploy_file_paths('BytesPropertySlicing.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_property_slicing(self):
+        await self.set_up_contract('BytesPropertySlicing.py')
 
         bytes_value = b'unit test'
         start = 0
         end = len(bytes_value)
-        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [bytes_value, start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
         start = 2
         end = len(bytes_value) - 1
-        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [bytes_value, start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
         start = len(bytes_value)
         end = 0
-        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [bytes_value, start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_bytes_instance_variable_slicing(self):
-        path, _ = self.get_deploy_file_paths('BytesInstanceVariableSlicing.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_instance_variable_slicing(self):
+        await self.set_up_contract('BytesInstanceVariableSlicing.py')
 
         bytes_value = b'unit test'
         start = 0
         end = len(bytes_value)
-        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [bytes_value, start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
         start = 2
         end = len(bytes_value) - 1
-        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [bytes_value, start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
         start = len(bytes_value)
         end = 0
-        invokes.append(runner.call_contract(path, 'main', bytes_value, start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [bytes_value, start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_bytes_class_variable_slicing(self):
-        path, _ = self.get_deploy_file_paths('BytesClassVariableSlicing.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_class_variable_slicing(self):
+        await self.set_up_contract('BytesClassVariableSlicing.py')
 
         bytes_value = b'unit test'
         start = 0
         end = len(bytes_value)
-        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
         start = 2
         end = len(bytes_value) - 1
-        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
         start = len(bytes_value)
         end = 0
-        invokes.append(runner.call_contract(path, 'main', start, end, expected_result_type=bytes))
-        expected_results.append(bytes_value[start:end])
+        result, _ = await self.call('main', [start, end], return_type=bytes)
+        self.assertEqual(bytes_value[start:end], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_bytes_replace(self):
-        path, _ = self.get_deploy_file_paths('ReplaceBytesMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_bytes_replace(self):
+        await self.set_up_contract('ReplaceBytesMethod.py')
 
         string = b'banana'
         old = b'an'
         new = b'o'
         count = -1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=bytes)
+        self.assertEqual(string.replace(old, new, count), result)
 
         old = b'a'
         new = b'o'
         count = -1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=bytes)
+        self.assertEqual(string.replace(old, new, count), result)
 
         old = b'a'
         new = b'oo'
         count = -1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=bytes)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = b'banana'
         old = b'an'
         new = b'o'
         count = 1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=bytes)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = b'banana'
         old = b'an'
         new = b'o'
         count = 2
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=bytes)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = b'banana'
         old = b'an'
         new = b'o'
         count = 3
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count, expected_result_type=bytes))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=bytes)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = b'banana'
         old = b'an'
         new = b'o'
-        invokes.append(runner.call_contract(path, 'main_default_count', string, old, new, expected_result_type=bytes))
-        expected_results.append(string.replace(old, new))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+        result, _ = await self.call('main_default_count', [string, old, new], return_type=bytes)
+        self.assertEqual(string.replace(old, new), result)
 
     def test_bytes_replace_mismatched_type(self):
-        path = self.get_contract_path('ReplaceBytesMethodMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReplaceBytesMethodMismatchedType.py')
 
     def test_bytes_replace_too_many_arguments(self):
-        path = self.get_contract_path('ReplaceBytesMethodTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ReplaceBytesMethodTooManyArguments.py')
 
     def test_bytes_replace_too_few_arguments(self):
-        path = self.get_contract_path('ReplaceBytesMethodTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ReplaceBytesMethodTooFewArguments.py')

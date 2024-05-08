@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from boa3.builtin.compile_time import public
 
 
@@ -15,7 +13,7 @@ def test() -> int:
 
 
 @public
-def result() -> Tuple[int, int]:
+def result() -> tuple[int, int]:
     a = Example.test()
     b = test()
     c = (a, b)

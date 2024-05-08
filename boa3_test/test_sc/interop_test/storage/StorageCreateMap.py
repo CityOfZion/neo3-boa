@@ -9,7 +9,7 @@ def get_from_map(key: bytes) -> bytes:
 
 
 @public
-def insert_to_map(key: bytes, value: str):
+def insert_to_map(key: bytes, value: bytes):
     context = create_map()
     context.put(key, value)
 

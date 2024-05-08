@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import Self
 
 from boa3.internal.model.operation.operation import IOperation
 from boa3.internal.model.type.itype import IType
@@ -16,7 +14,7 @@ class BinaryOperation(IOperation, ABC):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = []
+    _valid_types: list[IType] = []
 
     def __init__(self, left: IType, right: IType = None):
         if right is None:
@@ -47,14 +45,14 @@ class BinaryOperation(IOperation, ABC):
         pass
 
     @classmethod
-    def build(cls, *operands: IType) -> Optional[BinaryOperation]:
+    def build(cls, *operands: IType) -> Self | None:
         if len(operands) == 1:
             return cls._build_with_left_arg(operands[0])
         if len(operands) == 2:
             return cls._build_with_two_args(operands[0], operands[1])
 
     @classmethod
-    def _build_with_left_arg(cls, left: IType) -> Optional[BinaryOperation]:
+    def _build_with_left_arg(cls, left: IType) -> Self | None:
         """
         Creates a binary operation with the given operands types
 
@@ -65,7 +63,7 @@ class BinaryOperation(IOperation, ABC):
         return cls(left)
 
     @classmethod
-    def _build_with_two_args(cls, left: IType, right: IType) -> Optional[BinaryOperation]:
+    def _build_with_two_args(cls, left: IType, right: IType) -> Self | None:
         """
         Creates a binary operation with the given operands types
 
@@ -80,7 +78,7 @@ class BinaryOperation(IOperation, ABC):
         return cls(left, left)
 
     def get_valid_operand_for_validation(self, left_operand: IType,
-                                         right_operand: IType = None) -> Tuple[Optional[IType], Optional[IType]]:
+                                         right_operand: IType = None) -> tuple[IType | None, IType | None]:
         """
         Returns a valid operand type for the given types.
 

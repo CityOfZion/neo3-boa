@@ -1,4 +1,4 @@
-from typing import MutableSequence
+from collections.abc import MutableSequence
 
 from boa3.builtin.compile_time import public
 

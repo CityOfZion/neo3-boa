@@ -1,17 +1,21 @@
-from __future__ import annotations
-
 __all__ = [
     'StackMemento',
     'NeoStack'
 ]
 
-
-from typing import Dict, List, Tuple
-
 from boa3.internal.compiler.codegenerator.engine.istack import IStack
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.model.type.itype import IType
 from boa3.internal.neo.vm.VMCode import VMCode
+
+
+class NeoStack(IStack):
+    def __init__(self):
+        from boa3.internal.model.type.itype import IType
+        super().__init__(stack_type=IType)
+
+    def _default_constructor_args(self) -> tuple:
+        return tuple()
 
 
 class StackMemento:
@@ -20,11 +24,11 @@ class StackMemento:
     """
 
     def __init__(self):
-        self._stacks: List[Tuple[VMCode, NeoStack]] = []
+        self._stacks: list[tuple[VMCode, NeoStack]] = []
         self._current_stack: NeoStack = NeoStack()
 
     @property
-    def stack_map(self) -> Dict[int, NeoStack]:
+    def stack_map(self) -> dict[int, NeoStack]:
         vm_code_mapping = VMCodeMapping.instance()
         return {vm_code_mapping.get_start_address(vmcode): stack for vmcode, stack in self._stacks}
 
@@ -60,7 +64,7 @@ class StackMemento:
         if latest_stack is not None:
             self._current_stack = latest_stack
 
-    def append(self, value: IType, code: VMCode):
+    def append(self, code: VMCode, value: IType):
         states = self.stack_map
         index = VMCodeMapping.instance().get_start_address(code)
         if index in states:
@@ -93,11 +97,18 @@ class StackMemento:
         if len(stack) > 0:
             return stack.pop(index)
 
+    def reverse(self, code: VMCode, start: int = 0, end: int = None, *, rotate: bool = False):
+        states = self.stack_map
+        stack_index = VMCodeMapping.instance().get_start_address(code)
+        if stack_index in states:
+            stack = states[stack_index]
+        else:
+            if self._current_stack is not None:
+                stack = self._current_stack.copy()
+            else:
+                stack = NeoStack()
 
-class NeoStack(IStack):
-    def __init__(self):
-        from boa3.internal.model.type.itype import IType
-        super().__init__(stack_type=IType)
+            self._stacks.append((code, stack))
+            self._current_stack = stack
 
-    def _default_constructor_args(self) -> tuple:
-        return tuple()
+        return stack.reverse(start, end, rotate=rotate)

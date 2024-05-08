@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3_test.test_drive.model.network.payloads.witnessscope import WitnessScope
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import utils
@@ -30,7 +28,7 @@ class ContractInvokeCommand(IContractCommand):
 
         super().__init__('invoke', [invoke_file, account.get_identifier()])
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if isinstance(self.witness_scope, WitnessScope):

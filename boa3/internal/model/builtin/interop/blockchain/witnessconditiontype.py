@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict, Optional
+from typing import Any, Self
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -19,43 +17,43 @@ class WitnessConditionType(ClassArrayType):
         super().__init__('WitnessCondition')
         from boa3.internal.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
 
-        self._variables: Dict[str, Variable] = {
+        self._variables: dict[str, Variable] = {
             'type': Variable(WitnessConditionEnum.build())
         }
         self._constructor: Method = None
 
     @property
-    def class_variables(self) -> Dict[str, Variable]:
+    def class_variables(self) -> dict[str, Variable]:
         return {}
 
     @property
-    def instance_variables(self) -> Dict[str, Variable]:
+    def instance_variables(self) -> dict[str, Variable]:
         return self._variables.copy()
 
     @property
-    def properties(self) -> Dict[str, Property]:
+    def properties(self) -> dict[str, Property]:
         return {}
 
     @property
-    def static_methods(self) -> Dict[str, Method]:
+    def static_methods(self) -> dict[str, Method]:
         return {}
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         return {}
 
     @property
-    def instance_methods(self) -> Dict[str, Method]:
+    def instance_methods(self) -> dict[str, Method]:
         return {}
 
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self) -> Method | None:
         # was having a problem with recursive import
         if self._constructor is None:
             self._constructor: Method = WitnessConditionMethod(self)
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> WitnessConditionType:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _WitnessCondition
 
@@ -71,7 +69,7 @@ class WitnessConditionMethod(IBuiltinMethod):
 
     def __init__(self, return_type: WitnessConditionType):
         identifier = '-WitnessCondition__init__'
-        args: Dict[str, Variable] = {}
+        args: dict[str, Variable] = {}
         super().__init__(identifier, args, return_type=return_type)
 
     def validate_parameters(self, *params: IExpression) -> bool:
@@ -88,5 +86,5 @@ class WitnessConditionMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return

@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from boa3_test.test_drive.model.network.payloads.witness import Witness as TestWitness
 
 __all__ = ['Witness']

@@ -1,7 +1,4 @@
-from typing import List
-
-
-def Main(op: str, args: list) -> List[int]:
+def Main(op: str, args: list) -> list[int]:
     a = [1, 2, 3]
     list.clear()
     return a

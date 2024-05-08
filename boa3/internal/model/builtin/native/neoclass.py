@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict
+from typing import Any, Self
 
 from boa3.internal.constants import NEO_SCRIPT
 from boa3.internal.model.builtin.interop.contract import NeoToken
@@ -17,7 +15,7 @@ class NeoClass(INativeContractClass):
         super().__init__('NEO', NeoToken)
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
         from boa3.internal.model.builtin.native.nep17_methods import (BalanceOfMethod, DecimalsMethod, SymbolMethod,
                                                                       TotalSupplyMethod, TransferMethod)
@@ -53,7 +51,7 @@ class NeoClass(INativeContractClass):
         return super().class_methods
 
     @classmethod
-    def build(cls, value: Any = None) -> NeoClass:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _Neo
 

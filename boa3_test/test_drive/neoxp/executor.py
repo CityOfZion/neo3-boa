@@ -7,7 +7,6 @@ import os.path
 import re
 import subprocess
 import threading
-from typing import Tuple, List, Union
 
 from boa3.internal.neo3.core.types import UInt256
 from boa3_test.test_drive.neoxp.command import neoexpresscommand as neoxp
@@ -22,7 +21,7 @@ _NEOXP_CONFIG_LOCK = threading.Lock()
 
 class NeoExpressWrapper:
     @classmethod
-    def run_neo_express_cli(cls, command: neoxp.NeoExpressCommand) -> Tuple[str, str]:
+    def run_neo_express_cli(cls, command: neoxp.NeoExpressCommand) -> tuple[str, str]:
         neoxp_args = ['neoxp']
         neoxp_args.extend(command.cli_command().split())
 
@@ -64,7 +63,7 @@ class NeoExpressWrapper:
         return stdout
 
     @classmethod
-    def get_deployed_contracts(cls, neoxp_path: str, check_point_file: str = None) -> List[Contract]:
+    def get_deployed_contracts(cls, neoxp_path: str, check_point_file: str = None) -> list[Contract]:
         command = neoxp.contract.ContractListCommand(neo_express_data_file=neoxp_path)
         with _NEOXP_CONFIG_LOCK:
             cls.reset_neo_express_instance(neoxp_path, check_point_file)
@@ -127,7 +126,7 @@ class NeoExpressWrapper:
         return cls.get_block(neoxp_path, check_point_file=check_point_file)
 
     @classmethod
-    def get_block(cls, neoxp_path: str, block_hash_or_index: Union[UInt256, int] = None,
+    def get_block(cls, neoxp_path: str, block_hash_or_index: UInt256 | int = None,
                   check_point_file: str = None) -> Block:
         if isinstance(block_hash_or_index, (UInt256, int)):
             if isinstance(block_hash_or_index, int):
@@ -171,7 +170,7 @@ class NeoExpressWrapper:
 
     @classmethod
     def oracle_response(cls, neoxp_path: str, url: str, response_path: str, request_id: int = None,
-                        check_point_file: str = None) -> List[UInt256]:
+                        check_point_file: str = None) -> list[UInt256]:
         command = neoxp.oracle.OracleResponseCommand(url, response_path, request_id, neo_express_data_file=neoxp_path)
 
         with _NEOXP_CONFIG_LOCK:

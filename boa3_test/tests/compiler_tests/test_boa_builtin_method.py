@@ -1,40 +1,27 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestBoaBuiltinMethod(BoaTest):
+class TestBoaBuiltinMethod(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/boa_built_in_methods_test'
 
-    def test_abort(self):
-        path, _ = self.get_deploy_file_paths('Abort.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_abort(self):
+        await self.set_up_contract('Abort.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [False], return_type=int)
+        self.assertEqual(123, result)
 
-        invokes.append(runner.call_contract(path, 'main', False))
-        expected_results.append(123)
+        with self.assertRaises(boatestcase.AbortException) as context:
+            await self.call('main', [True], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertIsNone(context.exception.args[0])
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'main', True)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.ABORTED_CONTRACT_MSG)
-
-    def test_abort_with_message(self):
+    def test_abort_with_message_compile(self):
         assert_msg = String('abort was called').to_bytes()
         number_123 = Integer(123).to_byte_array(signed=True, min_length=1)
 
@@ -53,11 +40,21 @@ class TestBoaBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AbortWithMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AbortWithMessage.py')
         self.assertEqual(expected_output, output)
 
-    def test_abort_with_optional_message(self):
+    async def test_abort_with_message_run(self):
+        await self.set_up_contract('AbortWithMessage.py')
+
+        result, _ = await self.call('main', [False], return_type=int)
+        self.assertEqual(123, result)
+
+        with self.assertRaises(boatestcase.AbortException) as context:
+            await self.call('main', [True], return_type=int)
+
+        self.assertRegex(str(context.exception), 'abort was called')
+
+    def test_abort_with_optional_message_compile(self):
         number_123 = Integer(123).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
@@ -80,137 +77,110 @@ class TestBoaBuiltinMethod(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AbortWithOptionalMessage.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AbortWithOptionalMessage.py')
         self.assertEqual(expected_output, output)
 
-    def test_env(self):
-        path = self.get_contract_path('Env.py')
+    async def test_abort_with_optional_message_run(self):
+        await self.set_up_contract('AbortWithOptionalMessage.py')
+
+        result, _ = await self.call('main', [False, None], return_type=int)
+        self.assertEqual(123, result)
+
+        with self.assertRaises(boatestcase.AbortException) as context:
+            await self.call('main', [True, None], return_type=int)
+
+        self.assertIsNone(context.exception.args[0])
+
+        abort_message = 'Off chain message'
+        with self.assertRaises(boatestcase.AbortException) as context:
+            await self.call('main', [True, abort_message], return_type=int)
+
+        self.assertRegex(str(context.exception), abort_message)
+
+    async def test_env(self):
+        test_smart_contract_name = 'Env.py'
         custom_env = 'testnet'
         custom_name = f'Env_{custom_env}.nef'
 
-        path_default_env, _ = self.get_deploy_file_paths(path)
-        self.compile_and_save(path, env=custom_env, output_name=custom_name, change_manifest_name=True)
-        path_custom_env, _ = self.get_deploy_file_paths(path, output_name=custom_name)
+        await self.set_up_contract(test_smart_contract_name)
+        custom_env_contract = await self.compile_and_deploy(test_smart_contract_name,
+                                                            env=custom_env,
+                                                            output_name=custom_name,
+                                                            change_manifest_name=True
+                                                            )
 
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual(constants.DEFAULT_CONTRACT_ENVIRONMENT, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=str,
+                                    target_contract=custom_env_contract)
+        self.assertEqual(custom_env, result)
 
-        invokes.append(runner.call_contract(path_custom_env, 'main'))
-        expected_results.append(custom_env)
+    async def test_deploy_def(self):
+        await self.set_up_contract('DeployDef.py')
 
-        invokes.append(runner.call_contract(path_default_env, 'main'))
-        expected_results.append(constants.DEFAULT_CONTRACT_ENVIRONMENT)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_deploy_def(self):
-        path, _ = self.get_deploy_file_paths('DeployDef.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_var'))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_var', [], return_type=int)
+        self.assertEqual(10, result)
 
     def test_deploy_def_incorrect_signature(self):
-        path = self.get_contract_path('DeployDefWrongSignature.py')
-        self.assertCompilerLogs(CompilerError.InternalIncorrectSignature, path)
+        self.assertCompilerLogs(CompilerError.InternalIncorrectSignature, 'DeployDefWrongSignature.py')
 
     def test_will_not_compile(self):
-        path = self.get_contract_path('WillNotCompile.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'WillNotCompile.py')
 
     # region math builtins
 
-    def test_sqrt_method(self):
-        path, _ = self.get_deploy_file_paths('Sqrt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_sqrt_method(self):
+        await self.set_up_contract('Sqrt.py')
 
         from math import sqrt
 
         expected_result = int(sqrt(0))
-        invokes.append(runner.call_contract(path, 'main', 0))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [0], return_type=int)
+        self.assertEqual(expected_result, result)
 
         expected_result = int(sqrt(1))
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [1], return_type=int)
+        self.assertEqual(expected_result, result)
 
         expected_result = int(sqrt(3))
-        invokes.append(runner.call_contract(path, 'main', 3))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [3], return_type=int)
+        self.assertEqual(expected_result, result)
 
         expected_result = int(sqrt(4))
-        invokes.append(runner.call_contract(path, 'main', 4))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [4], return_type=int)
+        self.assertEqual(expected_result, result)
 
         expected_result = int(sqrt(8))
-        invokes.append(runner.call_contract(path, 'main', 8))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [8], return_type=int)
+        self.assertEqual(expected_result, result)
 
         expected_result = int(sqrt(10))
-        invokes.append(runner.call_contract(path, 'main', 10))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [10], return_type=int)
+        self.assertEqual(expected_result, result)
 
         val = 25
         expected_result = int(sqrt(val))
-        invokes.append(runner.call_contract(path, 'main', val))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [val], return_type=int)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [-1], return_type=int)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertRegex(str(context.exception), 'negative value')
 
-        runner.call_contract(path, 'main', -1)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_CANNOT_BE_NEGATIVE_MSG)
-
-    def test_sqrt_method_from_math(self):
-        path, _ = self.get_deploy_file_paths('SqrtFromMath.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_sqrt_method_from_math(self):
+        await self.set_up_contract('SqrtFromMath.py')
 
         from math import sqrt
 
         val = 25
         expected_result = int(sqrt(val))
-        invokes.append(runner.call_contract(path, 'main', val))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [val], return_type=int)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_decimal_floor_method(self):
-        path, _ = self.get_deploy_file_paths('DecimalFloor.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_decimal_floor_method(self):
+        await self.set_up_contract('DecimalFloor.py')
 
         from math import floor
 
@@ -220,44 +190,34 @@ class TestBoaBuiltinMethod(BoaTest):
         multiplier = 10 ** decimals
         value_floor = int(floor(value)) * multiplier
         integer_value = int(value * multiplier)
-        invokes.append(runner.call_contract(path, 'main', integer_value, decimals))
-        expected_results.append(value_floor)
+        result, _ = await self.call('main', [integer_value, decimals], return_type=int)
+        self.assertEqual(value_floor, result)
 
         decimals = 12
 
         multiplier = 10 ** decimals
         value_floor = int(floor(value)) * multiplier
         integer_value = int(value * multiplier)
-        invokes.append(runner.call_contract(path, 'main', integer_value, decimals))
-        expected_results.append(value_floor)
+        result, _ = await self.call('main', [integer_value, decimals], return_type=int)
+        self.assertEqual(value_floor, result)
 
         value = -3.983541
 
         multiplier = 10 ** decimals
         value_floor = int(floor(value) * multiplier)
         integer_value = int(value * multiplier)
-        invokes.append(runner.call_contract(path, 'main', integer_value, decimals))
-        expected_results.append(value_floor)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [integer_value, decimals], return_type=int)
+        self.assertEqual(value_floor, result)
 
         # negative decimals will raise an exception
-        runner.call_contract(path, 'main', integer_value, -1)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [integer_value, -1], return_type=int)
+
         from boa3.internal.model.builtin.builtin import Builtin
-        self.assertRegex(runner.error, f'{Builtin.BuiltinMathFloor.exception_message}$')
+        self.assertRegex(str(context.exception), Builtin.BuiltinMathFloor.exception_message)
 
-    def test_decimal_ceil_method(self):
-        path, _ = self.get_deploy_file_paths('DecimalCeiling.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_decimal_ceil_method(self):
+        await self.set_up_contract('DecimalCeiling.py')
 
         from math import ceil
 
@@ -267,36 +227,30 @@ class TestBoaBuiltinMethod(BoaTest):
         multiplier = 10 ** decimals
         value_ceiling = int(ceil(value)) * multiplier
         integer_value = int(value * multiplier)
-        invokes.append(runner.call_contract(path, 'main', integer_value, decimals))
-        expected_results.append(value_ceiling)
+        result, _ = await self.call('main', [integer_value, decimals], return_type=int)
+        self.assertEqual(value_ceiling, result)
 
         decimals = 12
 
         multiplier = 10 ** decimals
         value_ceiling = int(ceil(value)) * multiplier
         integer_value = int(value * multiplier)
-        invokes.append(runner.call_contract(path, 'main', integer_value, decimals))
-        expected_results.append(value_ceiling)
+        result, _ = await self.call('main', [integer_value, decimals], return_type=int)
+        self.assertEqual(value_ceiling, result)
 
         value = -3.983541
 
         multiplier = 10 ** decimals
         value_ceiling = int(ceil(value) * multiplier)
         integer_value = int(value * multiplier)
-        invokes.append(runner.call_contract(path, 'main', integer_value, decimals))
-        expected_results.append(value_ceiling)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [integer_value, decimals], return_type=int)
+        self.assertEqual(value_ceiling, result)
 
         # negative decimals will raise an exception
-        runner.call_contract(path, 'main', integer_value, -1)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [integer_value, -1], return_type=int)
+
         from boa3.internal.model.builtin.builtin import Builtin
-        self.assertRegex(runner.error, f'{Builtin.BuiltinMathCeil.exception_message}$')
+        self.assertRegex(str(context.exception), Builtin.BuiltinMathCeil.exception_message)
 
     # endregion

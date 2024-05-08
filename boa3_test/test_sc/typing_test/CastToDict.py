@@ -1,9 +1,9 @@
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from boa3.builtin.compile_time import public
 
 
 @public
-def Main(value: Any) -> Dict[Any, Any]:
+def Main(value: Any) -> dict[Any, Any]:
     x = cast(dict, value)
     return x

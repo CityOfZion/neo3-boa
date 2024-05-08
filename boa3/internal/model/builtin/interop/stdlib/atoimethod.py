@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.model.builtin.interop.nativecontract import StdLibMethod
 from boa3.internal.model.variable import Variable
@@ -11,7 +10,7 @@ class AtoiMethod(StdLibMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'atoi'
         syscall = 'atoi'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'value': Variable(Type.str),
             'base': Variable(Type.int)
         }

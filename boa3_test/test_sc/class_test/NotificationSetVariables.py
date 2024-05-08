@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any
 
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop.runtime import Notification
@@ -20,7 +20,7 @@ def event_name(event: str) -> str:
 
 
 @public
-def state(obj: Tuple[Any]) -> Any:
+def state(obj: tuple[Any, ...]) -> Any:
     x = Notification()
     x.state = obj
     return x.state

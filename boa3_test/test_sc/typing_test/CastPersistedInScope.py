@@ -1,4 +1,4 @@
-from typing import Any, cast, Union
+from typing import Any, cast
 
 from boa3.builtin.compile_time import public
 from boa3.builtin.interop import runtime
@@ -10,7 +10,7 @@ TEST_AMOUNT_2 = 2
 
 
 @public
-def main(from_address: Union[UInt160, None], amount: int, data: Any):
+def main(from_address: UInt160 | None, amount: int, data: Any):
     if from_address is None:
         return
     from_address = cast(UInt160, from_address)

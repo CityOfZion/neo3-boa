@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import ast
-from typing import Dict, List, Optional
+from typing import Self
 
 from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
@@ -27,7 +25,7 @@ class Analyser:
 
     def __init__(self, ast_tree: ast.AST, path: str = None, project_root: str = None,
                  env: str = None, log: bool = False, fail_fast: bool = False):
-        self.symbol_table: Dict[str, ISymbol] = {}
+        self.symbol_table: dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
         self.metadata: NeoMetadata = NeoMetadata()
@@ -39,7 +37,7 @@ class Analyser:
         self.__include_builtins_symbols()
         self._errors = []
         self._warnings = []
-        self._imported_files: Dict[str, Analyser] = {}
+        self._imported_files: dict[str, Analyser] = {}
         self._included_imported_files: bool = False
 
         import os
@@ -57,11 +55,18 @@ class Analyser:
                           if project_root is not None and os.path.isdir(project_root)
                           else path)
 
-    @staticmethod
-    def analyse(path: str, log: bool = False, fail_fast: bool = False,
-                imported_files: Optional[Dict[str, Analyser]] = None,
-                import_stack: Optional[List[str]] = None,
-                root: str = None, env: str = None, compiler_entry: bool = False) -> Analyser:
+    @classmethod
+    def analyse(
+            cls,
+            path: str,
+            log: bool = False,
+            fail_fast: bool = False,
+            imported_files: dict[str, Self] | None = None,
+            import_stack: list[str] | None = None,
+            root: str = None,
+            env: str = None,
+            compiler_entry: bool = False
+    ) -> Self:
         """
         Analyses the syntax of the Python code
 
@@ -85,7 +90,7 @@ class Analyser:
         CompiledMetadata.set_current_metadata(analyser.metadata)
 
         if compiler_entry:
-            from boa3.internal.model.imports.builtin import CompilerBuiltin
+            from boa3.internal.model.imports.compilerbuiltin import CompilerBuiltin
             CompilerBuiltin.update_with_analyser(analyser)
 
         # fill symbol table
@@ -106,18 +111,18 @@ class Analyser:
         return analyser
 
     @property
-    def errors(self) -> List[CompilerError]:
+    def errors(self) -> list[CompilerError]:
         return self._errors.copy()
 
     @property
-    def warnings(self) -> List[CompilerWarning]:
+    def warnings(self) -> list[CompilerWarning]:
         return self._warnings.copy()
 
     @property
     def env(self) -> str:
         return self._env
 
-    def copy(self) -> Analyser:
+    def copy(self) -> Self:
         copied = Analyser(ast_tree=self.ast_tree, path=self.path, project_root=self.root,
                           env=self._env, log=self._log, fail_fast=self._fail_fast)
 
@@ -147,8 +152,8 @@ class Analyser:
         return not type_analyser.has_errors
 
     def __analyse_modules(self,
-                          imported_files: Optional[Dict[str, Analyser]] = None,
-                          import_stack: Optional[List[str]] = None) -> bool:
+                          imported_files: dict[str, Self] | None = None,
+                          import_stack: list[str] | None = None) -> bool:
         """
         Validates the symbols and constructs the symbol table of the ast tree
 
@@ -201,7 +206,7 @@ class Analyser:
         optimizer = AstOptimizer(self, log=self._log, fail_fast=self._fail_fast)
         self._update_logs(optimizer)
 
-    def update_symbol_table(self, symbol_table: Dict[str, ISymbol]):
+    def update_symbol_table(self, symbol_table: dict[str, ISymbol]):
         for symbol_id, symbol in symbol_table.items():
             if (hasattr(symbol, 'origin')
                     and hasattr(symbol.origin, 'origin')
@@ -247,5 +252,5 @@ class Analyser:
 
         self._included_imported_files = True
 
-    def get_imports(self) -> List[Analyser]:
+    def get_imports(self) -> list[Self]:
         return list(self._imported_files.values())

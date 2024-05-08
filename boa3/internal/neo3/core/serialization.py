@@ -1,64 +1,12 @@
-from __future__ import annotations
-
 import abc
 import struct
 import sys
 from io import BytesIO, SEEK_END
-from typing import Any, List, Type, TypeVar, Union
+from typing import Any, TypeVar
 
 ISerializable_T = TypeVar('ISerializable_T', bound='ISerializable')
 
 __all__ = ['ISerializable', 'BinaryReader', 'BinaryWriter']
-
-
-class ISerializable(abc.ABC):
-    """
-    An interface like class supporting NEO's network serialization protocol.
-    """
-
-    @abc.abstractmethod
-    def serialize(self, writer: BinaryWriter) -> None:
-        """
-        Serialize the object into a binary stream.
-
-        Args:
-            writer: instance.
-        """
-
-    @abc.abstractmethod
-    def deserialize(self, reader: BinaryReader) -> None:
-        """
-        Deserialize the object from a binary stream.
-
-        Args:
-            reader: instance.
-        """
-
-    @classmethod
-    def deserialize_from_bytes(cls: Type[ISerializable_T], data: Union[bytes, bytearray]) -> ISerializable_T:
-        """
-        Parse data into an object instance.
-
-        Args:
-            data: hex escaped bytes.
-
-        Returns:
-            a deserialized instance of the class.
-        """
-        with BinaryReader(data) as br:
-            payload = cls()
-            payload.deserialize(br)
-            return payload
-
-    def to_array(self) -> bytes:
-        """ Serialize the object into a bytearray."""
-        with BinaryWriter() as bw:
-            self.serialize(bw)
-            return bw._stream.getvalue()
-
-    @abc.abstractmethod
-    def __len__(self):
-        """ Return the length of the object in number of bytes."""
 
 
 class BinaryReader(object):
@@ -74,7 +22,7 @@ class BinaryReader(object):
                 my_value = br.read_uint16()
     """
 
-    def __init__(self, stream: Union[bytes, bytearray]) -> None:
+    def __init__(self, stream: bytes | bytearray) -> None:
         """
         Create an instance.
 
@@ -344,7 +292,7 @@ class BinaryReader(object):
         except Exception as e:
             raise ValueError(str(e))
 
-    def read_serializable(self, obj_type: Type[ISerializable_T]) -> ISerializable_T:
+    def read_serializable(self, obj_type: type[ISerializable_T]) -> ISerializable_T:
         """
         Read and deserialize an object of `obj_type` from the stream.
 
@@ -355,7 +303,7 @@ class BinaryReader(object):
         obj.deserialize(self)
         return obj
 
-    def read_serializable_list(self, obj_type: Type[ISerializable_T], max: int = None) -> list[ISerializable_T]:
+    def read_serializable_list(self, obj_type: type[ISerializable_T], max: int = None) -> list[ISerializable_T]:
         """
         Read and deserialize a list of objects of `obj_type` from the stream.
 
@@ -407,7 +355,7 @@ class BinaryWriter(object):
             self.assertEqual(b'\\x05', bw._stream.getvalue())
     """
 
-    def __init__(self, stream: Union[bytearray, bytes] = None) -> None:
+    def __init__(self, stream: bytearray | bytes = None) -> None:
         """
         Create an instance.
 
@@ -701,7 +649,7 @@ class BinaryWriter(object):
         """
         obj_instance.serialize(self)
 
-    def write_serializable_list(self, objects: List[ISerializable_T]) -> None:
+    def write_serializable_list(self, objects: list[ISerializable_T]) -> None:
         """
         Serialize a list of objects and write them to the stream.
 
@@ -727,3 +675,53 @@ class BinaryWriter(object):
         Get the raw bytes from the underlying stream.
         """
         return self._stream.getvalue()
+
+
+class ISerializable(abc.ABC):
+    """
+    An interface like class supporting NEO's network serialization protocol.
+    """
+
+    @abc.abstractmethod
+    def serialize(self, writer: BinaryWriter) -> None:
+        """
+        Serialize the object into a binary stream.
+
+        Args:
+            writer: instance.
+        """
+
+    @abc.abstractmethod
+    def deserialize(self, reader: BinaryReader) -> None:
+        """
+        Deserialize the object from a binary stream.
+
+        Args:
+            reader: instance.
+        """
+
+    @classmethod
+    def deserialize_from_bytes(cls: type[ISerializable_T], data: bytes | bytearray) -> ISerializable_T:
+        """
+        Parse data into an object instance.
+
+        Args:
+            data: hex escaped bytes.
+
+        Returns:
+            a deserialized instance of the class.
+        """
+        with BinaryReader(data) as br:
+            payload = cls()
+            payload.deserialize(br)
+            return payload
+
+    def to_array(self) -> bytes:
+        """ Serialize the object into a bytearray."""
+        with BinaryWriter() as bw:
+            self.serialize(bw)
+            return bw._stream.getvalue()
+
+    @abc.abstractmethod
+    def __len__(self):
+        """ Return the length of the object in number of bytes."""

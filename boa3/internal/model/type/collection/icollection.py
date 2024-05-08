@@ -1,7 +1,6 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, Set, Union
+from collections.abc import Iterable
+from typing import Any, Self
 
 from boa3.internal.model.type.annotation.uniontype import UnionType
 from boa3.internal.model.type.classes.pythonclass import PythonClass
@@ -14,7 +13,7 @@ class ICollectionType(PythonClass, ABC):
     An interface used to represent Python mapping type
     """
 
-    def __init__(self, identifier: str, keys_type: Set[IType] = None, values_type: Set[IType] = None):
+    def __init__(self, identifier: str, keys_type: set[IType] = None, values_type: set[IType] = None):
         if keys_type is None:
             keys_type = set()
         self.key_type: IType = self._get_collection_type(keys_type)
@@ -54,7 +53,7 @@ class ICollectionType(PythonClass, ABC):
     def valid_key(self) -> IType:
         pass
 
-    def _get_collection_type(self, values_type: Set[IType]):
+    def _get_collection_type(self, values_type: set[IType]):
         if len(values_type) == 0:
             from boa3.internal.model.type.anytype import anyType
             val_type: IType = anyType
@@ -66,7 +65,7 @@ class ICollectionType(PythonClass, ABC):
         return val_type
 
     @classmethod
-    def get_types(cls, value: Any) -> Set[IType]:
+    def get_types(cls, value: Any) -> set[IType]:
         from boa3.internal.model.type.type import Type
         if isinstance(value, IType):
             return {value}
@@ -74,11 +73,14 @@ class ICollectionType(PythonClass, ABC):
         if not isinstance(value, Iterable):
             value = {value}
 
-        types: Set[IType] = {val if isinstance(val, IType) else Type.get_type(val) for val in value}
+        types: set[IType] = {val if isinstance(val, IType) else Type.get_type(val) for val in value}
         return cls.filter_types(types)
 
+    def get_item_type(self, index: tuple):
+        return self.item_type
+
     @classmethod
-    def filter_types(cls, values_type) -> Set[IType]:
+    def filter_types(cls, values_type) -> set[IType]:
         if values_type is None:
             values_type = set()
         elif not isinstance(values_type, set):
@@ -91,6 +93,11 @@ class ICollectionType(PythonClass, ABC):
             from boa3.internal.model.type.type import Type
             if any(t is Type.any or t is Type.none for t in values_type):
                 return {Type.any}
+
+            if Type.ellipsis in values_type:
+                values_type.remove(Type.ellipsis)
+                if len(values_type) == 1:
+                    return values_type
 
             actual_types = list(values_type)[:1]
             for value in list(values_type)[1:]:
@@ -126,7 +133,7 @@ class ICollectionType(PythonClass, ABC):
                 if (isinstance(generic_type, ICollectionType)
                         and all(isinstance(x.item_type, value_type) for x in values_type)):
                     # the collections doesn't have the same type but the value type is the same
-                    # for example: Tuple[int] and List[int]
+                    # for example: tuple[int] and list[int]
                     values_type = {generic_type.build_collection(first_item.item_type)}
                 else:
                     # otherwise, built a generic sequence with any as parameters
@@ -135,7 +142,7 @@ class ICollectionType(PythonClass, ABC):
         return values_type
 
     @classmethod
-    def build_collection(cls, *value_type: Union[IType, Iterable]) -> ICollectionType:
+    def build_collection(cls, *value_type: IType | Iterable) -> Self:
         """
         Creates a collection type instance with the given value
 

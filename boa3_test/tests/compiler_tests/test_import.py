@@ -1,13 +1,10 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import annotation, boatestcase
 
 
-class TestImport(BoaTest):
+class TestImport(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/import_test'
 
     def test_import_typing(self):
@@ -19,8 +16,7 @@ class TestImport(BoaTest):
             + Opcode.STLOC0
             + Opcode.RET        # return
         )
-        path = self.get_contract_path('ImportTyping.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ImportTyping.py')
         self.assertEqual(expected_output, output)
 
     def test_import_typing_with_alias(self):
@@ -32,11 +28,10 @@ class TestImport(BoaTest):
             + Opcode.STLOC0
             + Opcode.RET        # return
         )
-        path = self.get_contract_path('ImportTypingWithAlias.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ImportTypingWithAlias.py')
         self.assertEqual(expected_output, output)
 
-    def test_import_user_module(self):
+    def test_import_user_module_compile(self):
         expected_output = (
             Opcode.CALL
             + Integer(3).to_byte_array(min_length=1, signed=True)
@@ -49,26 +44,16 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ImportUserModule.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ImportUserModule.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_user_module_run(self):
+        await self.set_up_contract('ImportUserModule.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_import_user_module_with_alias(self):
+    def test_import_user_module_with_alias_compile(self):
         expected_output = (
             Opcode.CALL
             + Integer(3).to_byte_array(min_length=1, signed=True)
@@ -81,26 +66,16 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ImportUserModuleWithAlias.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ImportUserModuleWithAlias.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_user_module_with_alias(self):
+        await self.set_up_contract('ImportUserModuleWithAlias.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_import_user_module_with_global_variables(self):
+    def test_import_user_module_with_global_variables_compile(self):
         expected_output = (
             Opcode.LDSFLD0  # b = a
             + Opcode.RET
@@ -115,26 +90,16 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FromImportWithGlobalVariables.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FromImportWithGlobalVariables.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_user_module_with_global_variables_run(self):
+        await self.set_up_contract('FromImportWithGlobalVariables.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_import_variable(self):
+    def test_import_variable_compile(self):
         expected_output = (
             Opcode.LDSFLD0  # return empty_list
             + Opcode.RET
@@ -146,66 +111,35 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FromImportVariable.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FromImportVariable.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_variable(self):
+        await self.set_up_contract('FromImportVariable.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
+    async def test_variable_from_imported_module(self):
+        await self.set_up_contract('variable_import', 'VariableFromImportedModule.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('get_foo', [], return_type=bytes)
+        self.assertEqual(b'Foo', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_bar', [], return_type=str)
+        self.assertEqual('bar', result)
 
-    def test_variable_from_imported_module(self):
-        path, _ = self.get_deploy_file_paths('variable_import', 'VariableFromImportedModule.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_variable_access_from_imported_module(self):
+        await self.set_up_contract('variable_import', 'VariableAccessFromImportedModule.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('get_foo', [], return_type=bytes)
+        self.assertEqual(b'Foo', result)
 
-        invokes.append(runner.call_contract(path, 'get_foo', expected_result_type=bytes))
-        expected_results.append(b'Foo')
-
-        invokes.append(runner.call_contract(path, 'get_bar'))
-        expected_results.append('bar')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_variable_access_from_imported_module(self):
-        path, _ = self.get_deploy_file_paths('variable_import', 'VariableAccessFromImportedModule.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_foo', expected_result_type=bytes))
-        expected_results.append(b'Foo')
-
-        invokes.append(runner.call_contract(path, 'get_bar'))
-        expected_results.append('bar')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_bar', [], return_type=str)
+        self.assertEqual('bar', result)
 
     def test_typing_python_library(self):
-        path = self.get_contract_path('ImportPythonLib.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportPythonLib.py')
 
     def test_from_typing_import(self):
         expected_output = (
@@ -217,8 +151,7 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FromImportTyping.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FromImportTyping.py')
         self.assertEqual(expected_output, output)
 
     def test_from_typing_import_with_alias(self):
@@ -227,15 +160,13 @@ class TestImport(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('FromImportTypingWithAlias.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FromImportTypingWithAlias.py')
         self.assertEqual(expected_output, output)
 
     def test_from_typing_import_not_supported_type(self):
-        path = self.get_contract_path('FromImportTypingNotImplementedType.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'FromImportTypingNotImplementedType.py')
 
-    def test_from_import_all(self):
+    def test_from_import_all_compile(self):
         expected_output = (
             Opcode.INITSLOT  # function signature
             + b'\x01'
@@ -255,29 +186,19 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FromImportAll.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FromImportAll.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_from_import_all_run(self):
+        await self.set_up_contract('FromImportAll.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('call_imported_method', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'call_imported_method'))
-        expected_results.append([])
+        result, _ = await self.call('call_imported_variable', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'call_imported_variable'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_from_import_user_module(self):
+    def test_from_import_user_module_compile(self):
         expected_output = (
             Opcode.INITSLOT  # function signature
             + b'\x01'
@@ -295,26 +216,16 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FromImportUserModule.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FromImportUserModule.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_from_import_user_module_run(self):
+        await self.set_up_contract('FromImportUserModule.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_from_import_user_module_with_alias(self):
+    def test_from_import_user_module_with_alias_compile(self):
         expected_output = (
             Opcode.INITSLOT  # function signature
             + b'\x01'
@@ -332,116 +243,69 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FromImportUserModuleWithAlias.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FromImportUserModuleWithAlias.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_from_import_user_module_with_alias_run(self):
+        await self.set_up_contract('FromImportUserModuleWithAlias.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
+    async def test_from_import_user_module_from_root_and_file_directories(self):
+        await self.set_up_contract('FromImportUserModuleFromRootAndFileDir.py',
+                                   root_folder=self.get_dir_path(self.test_root_dir)
+                                   )
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('call_imported_from_root', [], return_type=list)
+        self.assertEqual([], result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_from_import_user_module_from_root_and_file_directories(self):
-        path = self.get_contract_path('FromImportUserModuleFromRootAndFileDir.py')
-        self.compile_and_save(path, root_folder=self.get_dir_path(self.test_root_dir))
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner()
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_imported_from_root'))
-        expected_results.append([])
-
-        invokes.append(runner.call_contract(path, 'call_imported_from_file_dir'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('call_imported_from_file_dir', [], return_type=list)
+        self.assertEqual([], result)
 
     def test_import_non_existent_package(self):
-        path = self.get_contract_path('ImportNonExistentPackage.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportNonExistentPackage.py')
 
-    def test_import_interop_with_alias(self):
-        path, _ = self.get_deploy_file_paths('ImportInteropWithAlias.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_interop_with_alias(self):
+        await self.set_up_contract('ImportInteropWithAlias.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
     def test_import_user_module_recursive_import(self):
-        path = self.get_contract_path('ImportUserModuleRecursiveImport.py')
-        self.assertCompilerLogs(CompilerError.CircularImport, path)
+        self.assertCompilerLogs(CompilerError.CircularImport, 'ImportUserModuleRecursiveImport.py')
 
     def test_from_import_user_module_recursive_import(self):
-        path = self.get_contract_path('FromImportUserModuleRecursiveImport.py')
-        self.assertCompilerLogs(CompilerError.CircularImport, path)
+        self.assertCompilerLogs(CompilerError.CircularImport, 'FromImportUserModuleRecursiveImport.py')
 
-    def test_import_user_module_with_not_imported_symbols(self):
-        path, _ = self.get_deploy_file_paths('ImportUserModuleWithNotImportedSymbols.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_user_module_with_not_imported_symbols(self):
+        await self.set_up_contract('ImportUserModuleWithNotImportedSymbols.py')
 
-        invokes = []
-        expected_results = []
+        Notification = annotation.Notification[list[int]]
+        script = self.contract_hash
+        result, _ = await self.call('main', [[], script], return_type=list)
+        self.assertEqual([], result)
 
-        contract = runner.deploy_contract(path)
-        runner.update_contracts(export_checkpoint=True)
-        script = contract.script_hash
+        arg = [1, 2, 3]
+        expected_result: list[Notification] = [
+            (script, 'notify', [x]) for x in arg
+        ]
+        result, _ = await self.call('main', [arg, script], return_type=list[Notification])
+        self.assertEqual(expected_result, result)
 
-        invokes.append(runner.call_contract(path, 'main', [], script))
-        expected_results.append([])
-
-        invokes.append(runner.call_contract(path, 'main', [1, 2, 3], script))
-        expected_result = []
-        for x in [1, 2, 3]:
-            expected_result.append([script,
-                                    'notify',
-                                    [x]])
-        expected_results.append(expected_result)
-
-        invokes.append(runner.call_contract(path, 'main', [1, 2, 3], b'\x01' * 20))
-        expected_results.append([])
+        result, _ = await self.call('main', [arg,  b'\x01' * 20], return_type=list[Notification])
+        self.assertEqual([], result)
 
         # 'with_param' is a public method, so it should be included in the manifest when imported
-        invokes.append(runner.call_contract(path, 'with_param', [1, 2, 3], b'\x01' * 20))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('with_param', [arg,  b'\x01' * 20], return_type=list[Notification])
+        self.assertEqual([], result)
 
         # 'without_param' is a public method, but it isn't imported, so it shouldn't be included in the manifest
-        runner.call_contract(path, 'without_param', [1, 2, 3])
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.FORMAT_METHOD_DOESNT_EXIST_IN_CONTRACT_MSG_REGEX_PREFIX.format('without_param'))
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('without_param', [arg], return_type=list)
 
-    def test_import_user_module_with_not_imported_variables(self):
+        self.assertRegex(str(context.exception), 'method not found: without_param/1')
+
+    def test_import_user_module_with_not_imported_variables_compile(self):
         expected_output = (
             Opcode.CALL
             + Integer(5).to_byte_array(min_length=1, signed=True)
@@ -451,7 +315,12 @@ class TestImport(BoaTest):
             + Opcode.PUSH5    # imported function
             + Opcode.RET  # return
         )
-        expected_output_no_optimization = (
+
+        output, _ = self.assertCompile('ImportUserModuleWithNotImportedVariables.py')
+        self.assertEqual(expected_output, output)
+
+    def test_import_user_module_with_not_imported_variables_compile_no_optimization(self):
+        expected_output = (
             Opcode.CALL
             + Integer(5).to_byte_array(min_length=1, signed=True)
             + Opcode.RET
@@ -469,127 +338,70 @@ class TestImport(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ImportUserModuleWithNotImportedVariables.py')
-        output = self.compile(path, optimize=False)
-        self.assertEqual(expected_output_no_optimization, output)
-
-        output = self.compile(path)
+        output, _ = self.assertCompile('ImportUserModuleWithNotImportedVariables.py', optimize=False)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_user_module_with_not_imported_variables(self):
+        await self.set_up_contract('ImportUserModuleWithNotImportedVariables.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(5)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(5, result)
 
     def test_not_imported_builtin_public(self):
-        path = self.get_contract_path('NotImportedBuiltinPublic.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinPublic.py')
 
     def test_not_imported_builtin_from_typing(self):
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInReturn.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInReturn.py')
 
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInArgs.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInArgs.py')
 
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInSubscript.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInSubscript.py')
 
-        path = self.get_contract_path('NotImportedBuiltinFromTypingInVariable.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'NotImportedBuiltinFromTypingInVariable.py')
 
-    def test_incorrect_circular_import(self):
-        path, _ = self.get_deploy_file_paths('incorrect_circular_import', 'IncorrectCircularImportDetection.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_incorrect_circular_import(self):
+        await self.set_up_contract('incorrect_circular_import', 'IncorrectCircularImportDetection.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(3)
+    async def test_import_module_with_init(self):
+        await self.set_up_contract('ImportModuleWithInit.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('call_imported_method', [], return_type=list)
+        self.assertEqual([], result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('call_imported_variable', [], return_type=int)
+        self.assertEqual(42, result)
 
-    def test_import_module_with_init(self):
-        path, _ = self.get_deploy_file_paths('ImportModuleWithInit.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_module_without_init(self):
+        await self.set_up_contract('ImportModuleWithoutInit.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('call_imported_method', [], return_type=dict)
+        self.assertEqual({}, result)
 
-        invokes.append(runner.call_contract(path, 'call_imported_method'))
-        expected_results.append([])
+        result, _ = await self.call('call_imported_variable', [], return_type=list)
+        self.assertEqual([], result)
 
-        invokes.append(runner.call_contract(path, 'call_imported_variable'))
-        expected_results.append(42)
+    async def test_import_user_class_inner_files(self):
+        await self.set_up_contract('ImportUserClassInnerFiles.py')
+        contract_2 = await self.compile_and_deploy('class_import', 'ImportUserClass.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        from boa3_test.test_sc.import_test.class_import.example import Example
+        expected_result = Example(42, '42')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('build_example_object', [], return_type=list,
+                                    target_contract=contract_2)
+        self.assertObjectEqual(expected_result, result)
 
-    def test_import_module_without_init(self):
-        path, _ = self.get_deploy_file_paths('ImportModuleWithoutInit.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_imported_method'))
-        expected_results.append({})
-
-        invokes.append(runner.call_contract(path, 'call_imported_variable'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_import_user_class_inner_files(self):
-        inner_path, _ = self.get_deploy_file_paths('class_import', 'ImportUserClass.py')
-        path, _ = self.get_deploy_file_paths('ImportUserClassInnerFiles.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(inner_path, 'build_example_object'))
-        expected_results.append([42, '42'])
-
-        invokes.append(runner.call_contract(path, 'build_example_object'))
-        expected_results.append('42')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('build_example_object', [], return_type=str)
+        self.assertEqual(expected_result.var_str, result)
 
     def test_from_import_not_existing_method(self):
-        path = self.get_contract_path('FromImportNotExistingMethod.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'FromImportNotExistingMethod.py')
 
     def test_import_not_existing_method(self):
-        path = self.get_contract_path('ImportNotExistingMethod.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportNotExistingMethod.py')
 
     def test_import_boa_invalid_package(self):
-        path = self.get_contract_path('ImportBoaInvalidPackage.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'ImportBoaInvalidPackage.py')

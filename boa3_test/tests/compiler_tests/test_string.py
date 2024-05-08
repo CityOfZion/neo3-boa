@@ -1,20 +1,22 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.vm import VMState
+from boa3_test.tests import boatestcase
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
-class TestString(BoaTest):
+class TestString(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/string_test'
 
     SUBSTRING_NOT_FOUND_MSG = 'substring not found'
+    VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX = r'The value \d+ is out of range.'
+    INVALID_OFFSET_MSG = 'invalid offset'
+    NEGATIVE_INDEX_MSG = 'negative index'
 
-    def test_string_get_value(self):
+    def test_string_get_value_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -26,34 +28,24 @@ class TestString(BoaTest):
             + Opcode.CONVERT + StackItemType.ByteString
             + Opcode.RET        # return
         )
-        path = self.get_contract_path('GetValue.py')
-        output = self.compile(path)
+
+        output, _ = self.assertCompile('StringGetValue.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_get_value(self):
+        await self.set_up_contract('StringGetValue.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['unit'], return_type=str)
+        self.assertEqual('u', result)
+        result, _ = await self.call('Main', ['123'], return_type=str)
+        self.assertEqual('1', result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'unit'))
-        expected_results.append('u')
-        invokes.append(runner.call_contract(path, 'Main', '123'))
-        expected_results.append('1')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [''], return_type=str)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertRegex(str(context.exception), self.INVALID_OFFSET_MSG)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', '')
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
-
-    def test_string_get_value_with_negative_index(self):
+    def test_string_get_value_with_negative_index_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -70,34 +62,24 @@ class TestString(BoaTest):
             + Opcode.CONVERT + StackItemType.ByteString
             + Opcode.RET        # return
         )
-        path = self.get_contract_path('GetValueNegativeIndex.py')
-        output = self.compile(path)
+
+        output, _ = self.assertCompile('StringGetValueNegativeIndex.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_get_value_with_negative_index(self):
+        await self.set_up_contract('StringGetValueNegativeIndex.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['unit_test'], return_type=str)
+        self.assertEqual('t', result)
+        result, _ = await self.call('main', ['abc'], return_type=str)
+        self.assertEqual('c', result)
 
-        invokes.append(runner.call_contract(path, 'main', 'unit_test'))
-        expected_results.append('t')
-        invokes.append(runner.call_contract(path, 'main', 'abc'))
-        expected_results.append('c')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [[]], return_type=str)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertRegex(str(context.exception), self.NEGATIVE_INDEX_MSG)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'main', [])
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
-
-    def test_string_get_value_with_variable(self):
+    def test_string_get_value_with_variable_compile(self):
         test_string = String('test').to_bytes(min_length=1)
 
         expected_output = (
@@ -130,154 +112,71 @@ class TestString(BoaTest):
             + Opcode.CONVERT + StackItemType.ByteString
             + Opcode.RET        # return
         )
-        path = self.get_contract_path('GetValueWithVariable.py')
-        output = self.compile(path)
+
+        output, _ = self.assertCompile('StringGetValueWithVariable.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_get_value_with_variable(self):
+        await self.set_up_contract('StringGetValueWithVariable.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [1], return_type=str)
+        self.assertEqual('e', result)
+        result, _ = await self.call('main', [2], return_type=str)
+        self.assertEqual('s', result)
 
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append('e')
-        invokes.append(runner.call_contract(path, 'main', 2))
-        expected_results.append('s')
+    async def test_string_get_value_to_variable(self):
+        await self.set_up_contract('StringGetValueToVariable.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', ['unit'], return_type=str)
+        self.assertEqual('u', result)
+        result, _ = await self.call('Main', ['123'], return_type=str)
+        self.assertEqual('1', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [''], return_type=str)
 
-    def test_string_get_value_to_variable(self):
-        path, _ = self.get_deploy_file_paths('GetValueToVariable.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 'unit'))
-        expected_results.append('u')
-        invokes.append(runner.call_contract(path, 'Main', '123'))
-        expected_results.append('1')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'Main', '')
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.VALUE_IS_OUT_OF_RANGE_MSG_REGEX_SUFFIX)
+        self.assertRegex(str(context.exception), self.INVALID_OFFSET_MSG)
 
     def test_string_set_value(self):
-        path = self.get_contract_path('SetValue.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedOperation, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedOperation, 'StringSetValue.py')
 
-    def test_string_slicing(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingLiteralValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_slicing(self):
+        await self.set_up_contract('StringSlicingLiteralValues.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('i', result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append('i')
+    async def test_string_slicing_start_larger_than_ending(self):
+        await self.set_up_contract('StringSlicingStartLargerThanEnding.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_string_slicing_with_variables(self):
+        await self.set_up_contract('StringSlicingVariableValues.py')
 
-    def test_string_slicing_start_larger_than_ending(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingStartLargerThanEnding.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('i', result)
 
-        invokes = []
-        expected_results = []
+    async def test_string_slicing_negative_start(self):
+        await self.set_up_contract('StringSlicingNegativeStartOmitted.py')
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append('')
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('unit_', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_string_slicing_negative_end_omitted(self):
+        await self.set_up_contract('StringSlicingNegativeEndOmitted.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('test', result)
 
-    def test_string_slicing_with_variables(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingVariableValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_slicing_start_omitted(self):
+        await self.set_up_contract('StringSlicingStartOmitted.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('uni', result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append('i')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_negative_start(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingNegativeStartOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'unit_')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_negative_end_omitted(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingNegativeEndOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append('test')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_start_omitted(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingStartOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'uni')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_omitted(self):
+    def test_string_slicing_omitted_compile(self):
         string_value = 'unit_test'
         byte_input = String(string_value).to_bytes()
 
@@ -294,41 +193,21 @@ class TestString(BoaTest):
             + byte_input
             + Opcode.RET
         )
-        path = self.get_contract_path('StringSlicingOmitted.py')
-        output = self.compile(path)
+
+        output, _ = self.assertCompile('StringSlicingOmitted.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_slicing_omitted(self):
+        await self.set_up_contract('StringSlicingOmitted.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('unit_test', result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append('unit_test')
+    async def test_string_slicing_end_omitted(self):
+        await self.set_up_contract('StringSlicingEndOmitted.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_end_omitted(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingEndOmitted.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main',
-                                            expected_result_type=bytes))
-        expected_results.append(b'it_test')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('it_test', result)
 
     def test_string_slicing_positive_index_opcode(self):
         unit_test_string = String('unit_test').to_bytes(min_length=1)
@@ -420,8 +299,7 @@ class TestString(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StringSlicingNegativeEndOmitted.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StringSlicingNegativeEndOmitted.py')
         self.assertEqual(expected_output, output)
 
     def test_string_slicing_negative_upper_index_opcode(self):
@@ -460,8 +338,7 @@ class TestString(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StringSlicingNegativeStartOmitted.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StringSlicingNegativeStartOmitted.py')
         self.assertEqual(expected_output, output)
 
     def test_string_slicing_variable_index_opcode(self):
@@ -530,952 +407,703 @@ class TestString(BoaTest):
         output = self.compile(path)
         self.assertIn(expected_output, output)
 
-    def test_string_slicing_with_stride(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_slicing_with_stride(self):
+        await self.set_up_contract('StringSlicingWithStride.py')
 
         a = 'unit_test'
         expected_result = a[2:5:2]
-        invokes.append(runner.call_contract(path, 'literal_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('literal_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-6:5:2]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[0:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-6:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-999:5:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[0:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-999:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[999:5:2]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[0:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[999:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         x = 0
         y = 5
         expected_result = a[x:y:2]
-        invokes.append(runner.call_contract(path, 'with_variables', x, y))
-        expected_results.append(expected_result)
+        result, _ = await self.call('with_variables', [x, y], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_slicing_with_negative_stride(self):
+        await self.set_up_contract('StringSlicingWithNegativeStride.py')
 
         a = 'unit_test'
         expected_result = a[2:5:-1]
-        invokes.append(runner.call_contract(path, 'literal_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('literal_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-6:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[0:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-6:-1:-1]
-        invokes.append(runner.call_contract(path, 'negative_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-999:5:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[0:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-999:-999:-1]
-        invokes.append(runner.call_contract(path, 'negative_really_low_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[999:5:-1]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[0:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[999:999:-1]
-        invokes.append(runner.call_contract(path, 'really_high_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_omitted_with_stride(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingOmittedWithStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_slicing_omitted_with_stride(self):
+        await self.set_up_contract('StringSlicingOmittedWithStride.py')
 
         a = 'unit_test'
         expected_result = a[::2]
-        invokes.append(runner.call_contract(path, 'omitted_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:5:2]
-        invokes.append(runner.call_contract(path, 'omitted_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[2::2]
-        invokes.append(runner.call_contract(path, 'omitted_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-6::2]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:-1:2]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-999::2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:-999:2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[999::2]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:999:2]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_slicing_omitted_with_negative_stride(self):
-        path, _ = self.get_deploy_file_paths('StringSlicingOmittedWithNegativeStride.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_slicing_omitted_with_negative_stride(self):
+        await self.set_up_contract('StringSlicingOmittedWithNegativeStride.py')
 
         a = 'unit_test'
         expected_result = a[::-2]
-        invokes.append(runner.call_contract(path, 'omitted_values'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_values', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:5:-2]
-        invokes.append(runner.call_contract(path, 'omitted_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[2::-2]
-        invokes.append(runner.call_contract(path, 'omitted_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('omitted_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-6::-2]
-        invokes.append(runner.call_contract(path, 'negative_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:-1:-2]
-        invokes.append(runner.call_contract(path, 'negative_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[-999::-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:-999:-2]
-        invokes.append(runner.call_contract(path, 'negative_really_low_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('negative_really_low_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[999::-2]
-        invokes.append(runner.call_contract(path, 'really_high_start'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_start', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
         a = 'unit_test'
         expected_result = a[:999:-2]
-        invokes.append(runner.call_contract(path, 'really_high_end'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('really_high_end', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_string_simple_concat(self):
+        await self.set_up_contract('StringSimpleConcat.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('bye worldhi', result)
 
-    def test_string_simple_concat(self):
-        path, _ = self.get_deploy_file_paths('StringSimpleConcat.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_string_concat_test(self):
+        await self.set_up_contract('ConcatBoa2Test.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('helloworld', result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append('bye worldhi')
+    async def test_boa2_string_concat_test2(self):
+        await self.set_up_contract('ConcatBoa2Test2.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', ['concat', ['hello', 'world']], return_type=str)
+        self.assertEqual('helloworld', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['blah', ['hello', 'world']], return_type=bool)
+        self.assertEqual(False, result)
 
-    def test_boa2_string_concat_test(self):
-        path, _ = self.get_deploy_file_paths('ConcatBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', ['concat', ['blah']], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['concat', ['hello', 'world', 'third']], return_type=str)
+        self.assertEqual('helloworld', result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append('helloworld')
+        result, _ = await self.call('main', ['concat', ['1', 'neo']], return_type=str)
+        self.assertEqual('1neo', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', ['concat', ['', 'neo']], return_type=str)
+        self.assertEqual('neo', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_string_with_double_quotes(self):
+        await self.set_up_contract('StringWithDoubleQuotes.py')
 
-    def test_boa2_string_concat_test2(self):
-        path, _ = self.get_deploy_file_paths('ConcatBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('string_test', ['hello', 'world'], return_type=str)
+        self.assertEqual('"hell"test_symbol":world}"', result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('string_test', ['1', 'neo'], return_type=str)
+        self.assertEqual('""test_symbol":neo}"', result)
 
-        invokes.append(runner.call_contract(path, 'main', 'concat', ['hello', 'world']))
-        expected_results.append('helloworld')
+        result, _ = await self.call('string_test', ['neo', ''], return_type=str)
+        self.assertEqual('"ne"test_symbol":}"', result)
 
-        invokes.append(runner.call_contract(path, 'main', 'blah', ['hello', 'world']))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'main', 'concat', ['blah']))
-        expected_results.append(False)
-
-        invokes.append(runner.call_contract(path, 'main', 'concat', ['hello', 'world', 'third']))
-        expected_results.append('helloworld')
-
-        invokes.append(runner.call_contract(path, 'main', 'concat', ['1', 'neo']))
-        expected_results.append('1neo')
-
-        invokes.append(runner.call_contract(path, 'main', 'concat', ['', 'neo']))
-        expected_results.append('neo')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_with_double_quotes(self):
-        path, _ = self.get_deploy_file_paths('StringWithDoubleQuotes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'string_test', 'hello', 'world'))
-        expected_results.append('"hell"test_symbol":world}"')
-
-        invokes.append(runner.call_contract(path, 'string_test', '1', 'neo'))
-        expected_results.append('""test_symbol":neo}"')
-
-        invokes.append(runner.call_contract(path, 'string_test', 'neo', ''))
-        expected_results.append('"ne"test_symbol":}"')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_upper(self):
-        path, _ = self.get_deploy_file_paths('UpperStringMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_upper(self):
+        await self.set_up_contract('UpperStringMethod.py')
 
         string = 'abcdefghijklmnopqrstuvwxyz'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.upper())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.upper(), result)
 
         string = 'a1b123y3z'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.upper())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.upper(), result)
 
         string = '!@#$%123*-/'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.upper())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.upper(), result)
 
         string = 'áõèñ'
-        not_as_expected = runner.call_contract(path, 'main', string)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
+        not_as_expected, _ = await self.call('main', [string], return_type=str)
         # upper was implemented for ASCII characters only
-        self.assertNotEqual(string.upper(), not_as_expected.result)
+        self.assertNotEqual(string.upper(), not_as_expected)
 
-    def test_string_lower(self):
-        path, _ = self.get_deploy_file_paths('LowerStringMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_lower(self):
+        await self.set_up_contract('LowerStringMethod.py')
 
         string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.lower())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.lower(), result)
 
         string = 'A1B123Y3Z'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.lower())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.lower(), result)
 
         string = '!@#$%123*-/'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.lower())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.lower(), result)
 
         string = 'ÁÕÈÑ'
-        not_as_expected = runner.call_contract(path, 'main', string)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
+        not_as_expected, _ = await self.call('main', [string], return_type=str)
         # lower was implemented for ASCII characters only
-        self.assertNotEqual(string.lower(), not_as_expected.result)
+        self.assertNotEqual(string.lower(), not_as_expected)
 
-    def test_string_startswith_method(self):
-        path, _ = self.get_deploy_file_paths('StartswithStringMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_startswith_method(self):
+        await self.set_up_contract('StartswithStringMethod.py')
 
         string = 'unit_test'
         substring = 'unit'
         start = 0
         end = len(string)
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
         string = 'unit_test'
         substring = 'unit'
         start = 2
         end = 6
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
         string = 'unit_test'
         substring = 'it'
         start = 2
         end = 6
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
         string = 'unit_test'
         substring = 'it'
         start = 2
         end = 3
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
         string = 'unit_test'
         substring = 'unit_tes'
         start = -99
         end = -1
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
         string = 'unit_test'
         substring = ''
         start = 0
         end = 0
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
         string = 'unit_test'
         substring = 'unit_test'
         start = 0
         end = 99
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
         string = 'unit_test'
         substring = 'unit_test'
         start = 100
         end = 99
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.startswith(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=bool)
+        self.assertEqual(string.startswith(substring, start, end), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_startswith_method_default_end(self):
-        path, _ = self.get_deploy_file_paths('StartswithStringMethodDefaultEnd.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_startswith_method_default_end(self):
+        await self.set_up_contract('StartswithStringMethodDefaultEnd.py')
 
         string = 'unit_test'
         substring = 'unit'
         start = 0
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
         string = 'unit_test'
         substring = 'unit'
         start = 2
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
         string = 'unit_test'
         substring = 'it'
         start = 2
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
         string = 'unit_test'
         substring = 'it'
         start = 3
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
         string = 'unit_test'
         substring = 'unit_tes'
         start = -99
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
         string = 'unit_test'
         substring = ''
         start = 0
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
         string = 'unit_test'
         substring = ''
         start = 99
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
         string = 'unit_test'
         substring = 'unit_test'
         start = 0
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.startswith(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=bool)
+        self.assertEqual(string.startswith(substring, start), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_startswith_method_defaults(self):
-        path, _ = self.get_deploy_file_paths('StartswithStringMethodDefaults.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_startswith_method_defaults(self):
+        await self.set_up_contract('StartswithStringMethodDefaults.py')
 
         string = 'unit_test'
         substring = 'unit'
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.startswith(substring))
+        result, _ = await self.call('main', [string, substring], return_type=bool)
+        self.assertEqual(string.startswith(substring), result)
 
         string = 'unit_test'
         substring = 'unit_test'
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.startswith(substring))
+        result, _ = await self.call('main', [string, substring], return_type=bool)
+        self.assertEqual(string.startswith(substring), result)
 
         string = 'unit_test'
         substring = ''
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.startswith(substring))
+        result, _ = await self.call('main', [string, substring], return_type=bool)
+        self.assertEqual(string.startswith(substring), result)
 
         string = 'unit_test'
         substring = '12345'
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.startswith(substring))
+        result, _ = await self.call('main', [string, substring], return_type=bool)
+        self.assertEqual(string.startswith(substring), result)
 
         string = 'unit_test'
         substring = 'bigger substring'
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.startswith(substring))
+        result, _ = await self.call('main', [string, substring], return_type=bool)
+        self.assertEqual(string.startswith(substring), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_strip(self):
-        path, _ = self.get_deploy_file_paths('StripStringMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_strip(self):
+        await self.set_up_contract('StripStringMethod.py')
 
         string = 'abcdefghijklmnopqrstuvwxyz'
         chars = 'abcxyz'
-        invokes.append(runner.call_contract(path, 'main', string, chars))
-        expected_results.append(string.strip(chars))
+        result, _ = await self.call('main', [string, chars], return_type=str)
+        self.assertEqual(string.strip(chars), result)
 
         string = 'abcdefghijklmnopqrsvwxyz unit test abcdefghijklmnopqrsvwxyz'
         chars = 'abcdefghijklmnopqrsvwxyz '
-        invokes.append(runner.call_contract(path, 'main', string, chars))
-        expected_results.append(string.strip(chars))
+        result, _ = await self.call('main', [string, chars], return_type=str)
+        self.assertEqual(string.strip(chars), result)
 
         string = '0123456789hello world987654310'
         chars = '0987654321'
-        invokes.append(runner.call_contract(path, 'main', string, chars))
-        expected_results.append(string.strip(chars))
+        result, _ = await self.call('main', [string, chars], return_type=str)
+        self.assertEqual(string.strip(chars), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_strip_default(self):
-        path, _ = self.get_deploy_file_paths('StripStringMethodDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_strip_default(self):
+        await self.set_up_contract('StripStringMethodDefault.py')
 
         string = '     unit test    '
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.strip())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.strip(), result)
 
         string = 'unit test    '
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.strip())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.strip(), result)
 
         string = '    unit test'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.strip())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.strip(), result)
 
         string = ' \t\n\r\f\vunit test \t\n\r\f\v'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.strip())
+        result, _ = await self.call('main', [string], return_type=str)
+        self.assertEqual(string.strip(), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_isdigit_method(self):
-        path, _ = self.get_deploy_file_paths('IsdigitMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_isdigit_method(self):
+        await self.set_up_contract('StringIsdigitMethod.py')
 
         string = '0123456789'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.isdigit())
+        result, _ = await self.call('main', [string], return_type=bool)
+        self.assertEqual(string.isdigit(), result)
 
         string = '23mixed01'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.isdigit())
+        result, _ = await self.call('main', [string], return_type=bool)
+        self.assertEqual(string.isdigit(), result)
 
         string = 'no digits here'
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.isdigit())
+        result, _ = await self.call('main', [string], return_type=bool)
+        self.assertEqual(string.isdigit(), result)
 
         string = ''
-        invokes.append(runner.call_contract(path, 'main', string))
-        expected_results.append(string.isdigit())
+        result, _ = await self.call('main', [string], return_type=bool)
+        self.assertEqual(string.isdigit(), result)
 
         string = '¹²³'
-        not_as_expected = runner.call_contract(path, 'main', string)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
+        not_as_expected, _ = await self.call('main', [string], return_type=bool)
         # neo3-boas isdigit implementation does not verify values that are not from the ASCII
-        self.assertNotEqual(string.isdigit(), not_as_expected.result)
+        self.assertNotEqual(string.isdigit(), not_as_expected)
 
-    def test_string_join_with_sequence(self):
-        path, _ = self.get_deploy_file_paths('JoinStringMethodWithSequence.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_join_with_sequence(self):
+        await self.set_up_contract('JoinStringMethodWithSequence.py')
 
         string = ' '
         sequence = ["Unit", "Test", "Neo3-boa"]
-        invokes.append(runner.call_contract(path, 'main', string, sequence))
-        expected_results.append(string.join(sequence))
+        result, _ = await self.call('main', [string, sequence], return_type=str)
+        self.assertEqual(string.join(sequence), result)
 
         string = ' '
         sequence = []
-        invokes.append(runner.call_contract(path, 'main', string, sequence))
-        expected_results.append(string.join(sequence))
+        result, _ = await self.call('main', [string, sequence], return_type=str)
+        self.assertEqual(string.join(sequence), result)
 
         string = ' '
         sequence = ["UnitTest"]
-        invokes.append(runner.call_contract(path, 'main', string, sequence))
-        expected_results.append(string.join(sequence))
+        result, _ = await self.call('main', [string, sequence], return_type=str)
+        self.assertEqual(string.join(sequence), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_join_with_dictionary(self):
-        path, _ = self.get_deploy_file_paths('JoinStringMethodWithDictionary.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_join_with_dictionary(self):
+        await self.set_up_contract('JoinStringMethodWithDictionary.py')
 
         string = ' '
         dictionary = {"Unit": 1, "Test": 2, "Neo3-boa": 3}
-        invokes.append(runner.call_contract(path, 'main', string, dictionary))
-        expected_results.append(string.join(dictionary))
+        result, _ = await self.call('main', [string, dictionary], return_type=str)
+        self.assertEqual(string.join(dictionary), result)
 
         string = ' '
         dictionary = {}
-        invokes.append(runner.call_contract(path, 'main', string, dictionary))
-        expected_results.append(string.join(dictionary))
+        result, _ = await self.call('main', [string, dictionary], return_type=str)
+        self.assertEqual(string.join(dictionary), result)
 
         string = ' '
         dictionary = {"UnitTest": 1}
-        invokes.append(runner.call_contract(path, 'main', string, dictionary))
-        expected_results.append(string.join(dictionary))
+        result, _ = await self.call('main', [string, dictionary], return_type=str)
+        self.assertEqual(string.join(dictionary), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_index(self):
-        path, _ = self.get_deploy_file_paths('IndexString.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_index(self):
+        await self.set_up_contract('IndexString.py')
 
         string = 'unit test'
         substring = 'i'
         start = 0
         end = 4
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.index(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=int)
+        self.assertEqual(string.index(substring, start, end), result)
 
         string = 'unit test'
         substring = 'i'
         start = 2
         end = 4
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.index(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=int)
+        self.assertEqual(string.index(substring, start, end), result)
 
         string = 'unit test'
         substring = 'i'
         start = 0
         end = -1
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.index(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=int)
+        self.assertEqual(string.index(substring, start, end), result)
 
         string = 'unit test'
         substring = 'n'
         start = 0
         end = 99
-        invokes.append(runner.call_contract(path, 'main', string, substring, start, end))
-        expected_results.append(string.index(substring, start, end))
+        result, _ = await self.call('main', [string, substring, start, end], return_type=int)
+        self.assertEqual(string.index(substring, start, end), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['unit test', 'i', 3, 4], return_type=int)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
 
-        runner.call_contract(path, 'main', 'unit test', 'i', 3, 4)
-        runner.execute()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['unit test', 'i', 4, -1], return_type=int)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+        self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
 
-        runner.call_contract(path, 'main', 'unit test', 'i', 4, -1)
-        runner.execute()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['unit test', 'i', 0, -99], return_type=int)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+        self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
 
-        runner.call_contract(path, 'main', 'unit test', 'i', 0, -99)
-        runner.execute()
-
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
-
-    def test_string_index_end_default(self):
-        path, _ = self.get_deploy_file_paths('IndexStringEndDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_index_end_default(self):
+        await self.set_up_contract('IndexStringEndDefault.py')
 
         string = 'unit test'
         substring = 't'
         start = 0
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.index(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=int)
+        self.assertEqual(string.index(substring, start), result)
 
         string = 'unit test'
         substring = 't'
         start = 4
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.index(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=int)
+        self.assertEqual(string.index(substring, start), result)
 
         string = 'unit test'
         substring = 't'
         start = 6
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.index(substring, start))
+        result, _ = await self.call('main', [string, substring, start], return_type=int)
+        self.assertEqual(string.index(substring, start), result)
 
         string = 'unit test'
         substring = 'i'
         start = -10
-        invokes.append(runner.call_contract(path, 'main', string, substring, start))
-        expected_results.append(string.index(substring, start))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [string, substring, start], return_type=int)
+        self.assertEqual(string.index(substring, start), result)
 
         string = 'unit test'
         substring = 'i'
         start = 99
-        runner.call_contract(path, 'main', string, substring, start)
-        runner.execute()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [string, substring, start], return_type=int)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+        self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
         self.assertRaises(ValueError, string.index, substring, start)
 
         string = 'unit test'
         substring = 's'
         start = -1
-        runner.call_contract(path, 'main', string, substring, start)
-        runner.execute()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [string, substring, start], return_type=int)
 
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'{self.SUBSTRING_NOT_FOUND_MSG}$')
+        self.assertRegex(str(context.exception), self.SUBSTRING_NOT_FOUND_MSG)
         self.assertRaises(ValueError, string.index, substring, start)
 
-    def test_string_index_defaults(self):
-        path, _ = self.get_deploy_file_paths('IndexStringDefaults.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_index_defaults(self):
+        await self.set_up_contract('IndexStringDefaults.py')
 
         string = 'unit test'
         substring = 'u'
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.index(substring))
+        result, _ = await self.call('main', [string, substring], return_type=int)
+        self.assertEqual(string.index(substring), result)
 
         string = 'unit test'
         substring = 't'
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.index(substring))
+        result, _ = await self.call('main', [string, substring], return_type=int)
+        self.assertEqual(string.index(substring), result)
 
         string = 'unit test'
         substring = ' '
-        invokes.append(runner.call_contract(path, 'main', string, substring))
-        expected_results.append(string.index(substring))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [string, substring], return_type=int)
+        self.assertEqual(string.index(substring), result)
 
     def test_string_index_mismatched_type(self):
-        path = self.get_contract_path('IndexStringMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'IndexStringMismatchedType.py')
 
-    def test_string_property_slicing(self):
-        path, _ = self.get_deploy_file_paths('StringPropertySlicing.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_property_slicing(self):
+        await self.set_up_contract('StringPropertySlicing.py')
 
         string = 'unit test'
         start = 0
         end = len(string)
-        invokes.append(runner.call_contract(path, 'main', string, start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [string, start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
         start = 2
         end = len(string) - 1
-        invokes.append(runner.call_contract(path, 'main', string, start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [string, start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
         start = len(string)
         end = 0
-        invokes.append(runner.call_contract(path, 'main', string, start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [string, start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_string_instance_variable_slicing(self):
-        path, _ = self.get_deploy_file_paths('StringInstanceVariableSlicing.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_instance_variable_slicing(self):
+        await self.set_up_contract('StringInstanceVariableSlicing.py')
 
         string = 'unit test'
         start = 0
         end = len(string)
-        invokes.append(runner.call_contract(path, 'main', string, start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [string, start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
         start = 2
         end = len(string) - 1
-        invokes.append(runner.call_contract(path, 'main', string, start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [string, start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
         start = len(string)
         end = 0
-        invokes.append(runner.call_contract(path, 'main', string, start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [string, start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_string_class_variable_slicing(self):
-        path, _ = self.get_deploy_file_paths('StringClassVariableSlicing.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_class_variable_slicing(self):
+        await self.set_up_contract('StringClassVariableSlicing.py')
 
         string = 'unit test'
         start = 0
         end = len(string)
-        invokes.append(runner.call_contract(path, 'main', start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
         start = 2
         end = len(string) - 1
-        invokes.append(runner.call_contract(path, 'main', start, end))
-        expected_results.append(string[start:end])
+        result, _ = await self.call('main', [start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
         start = len(string)
         end = 0
-        invokes.append(runner.call_contract(path, 'main', start, end))
-        expected_results.append(string[start:end])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+        result, _ = await self.call('main', [start, end], return_type=str)
+        self.assertEqual(string[start:end], result)
 
     def test_f_string_literal(self):
         path, _ = self.get_deploy_file_paths('FStringLiteral.py')
@@ -1489,192 +1117,117 @@ class TestString(BoaTest):
 
         self.assertEqual(expected_result, invoke.result)
 
-    def test_f_string_string_var(self):
-        path, _ = self.get_deploy_file_paths('FStringStringVar.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_f_string_string_var(self):
+        await self.set_up_contract('FStringStringVar.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ["unit test"], return_type=str)
+        self.assertEqual("F-string: unit test", result)
 
-        invokes.append(runner.call_contract(path, 'main', "unit test"))
-        expected_results.append("F-string: unit test")
+        result, _ = await self.call('main', [""], return_type=str)
+        self.assertEqual("F-string: ", result)
 
-        invokes.append(runner.call_contract(path, 'main', ""))
-        expected_results.append("F-string: ")
+    async def test_f_string_int_var(self):
+        await self.set_up_contract('FStringIntVar.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [123], return_type=str)
+        self.assertEqual("F-string: 123", result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+        result, _ = await self.call('main', [-100], return_type=str)
+        self.assertEqual("F-string: -100", result)
 
-    def test_f_string_int_var(self):
-        path, _ = self.get_deploy_file_paths('FStringIntVar.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_f_string_bool_var(self):
+        await self.set_up_contract('FStringBoolVar.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [True], return_type=str)
+        self.assertEqual("F-string: True", result)
 
-        invokes.append(runner.call_contract(path, 'main', 123))
-        expected_results.append("F-string: 123")
+        result, _ = await self.call('main', [False], return_type=str)
+        self.assertEqual("F-string: False", result)
 
-        invokes.append(runner.call_contract(path, 'main', -100))
-        expected_results.append("F-string: -100")
+    async def test_f_string_bytes_var(self):
+        await self.set_up_contract('FStringBytesVar.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [b"unit test"], return_type=str)
+        self.assertEqual("F-string: unit test", result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+        result, _ = await self.call('main', [""], return_type=str)
+        self.assertEqual("F-string: ", result)
 
-    def test_f_string_bool_var(self):
-        path, _ = self.get_deploy_file_paths('FStringBoolVar.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_f_string_sequence_var(self):
+        await self.set_up_contract('FStringSequenceVar.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [[1, 2, 3]], return_type=str)
+        self.assertEqual("F-string: [1,2,3]", result)
 
-        invokes.append(runner.call_contract(path, 'main', True))
-        expected_results.append("F-string: True")
+        result, _ = await self.call('main', [[]], return_type=str)
+        self.assertEqual("F-string: []", result)
 
-        invokes.append(runner.call_contract(path, 'main', False))
-        expected_results.append("F-string: False")
+    async def test_f_string_user_class_var(self):
+        await self.set_up_contract('FStringUserClassVar.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_f_string_bytes_var(self):
-        path, _ = self.get_deploy_file_paths('FStringBytesVar.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', b"unit test"))
-        expected_results.append("F-string: unit test")
-
-        invokes.append(runner.call_contract(path, 'main', ""))
-        expected_results.append("F-string: ")
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_f_string_sequence_var(self):
-        path, _ = self.get_deploy_file_paths('FStringSequenceVar.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', [1, 2, 3]))
-        expected_results.append("F-string: [1,2,3]")
-
-        invokes.append(runner.call_contract(path, 'main', []))
-        expected_results.append("F-string: []")
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
-
-    def test_f_string_user_class_var(self):
-        path, _ = self.get_deploy_file_paths('FStringUserClassVar.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append('F-string: {"string":"unit test","number":123}')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('F-string: {"string":"unit test","number":123}', result)
 
     def test_f_string_any_var(self):
-        path = self.get_contract_path('FStringAnyVar.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'FStringAnyVar.py')
 
     def test_f_string_union_var(self):
-        path = self.get_contract_path('FStringUnionVar.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'FStringUnionVar.py')
 
-    def test_string_replace(self):
-        path, _ = self.get_deploy_file_paths('ReplaceStringMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_string_replace(self):
+        await self.set_up_contract('ReplaceStringMethod.py')
 
         string = 'banana'
         old = 'an'
         new = 'o'
         count = -1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=str)
+        self.assertEqual(string.replace(old, new, count), result)
 
         old = 'a'
         new = 'o'
         count = -1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=str)
+        self.assertEqual(string.replace(old, new, count), result)
 
         old = 'a'
         new = 'oo'
         count = -1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=str)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = 'banana'
         old = 'an'
         new = 'o'
         count = 1
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=str)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = 'banana'
         old = 'an'
         new = 'o'
         count = 2
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=str)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = 'banana'
         old = 'an'
         new = 'o'
         count = 3
-        invokes.append(runner.call_contract(path, 'main', string, old, new, count))
-        expected_results.append(string.replace(old, new, count))
+        result, _ = await self.call('main', [string, old, new, count], return_type=str)
+        self.assertEqual(string.replace(old, new, count), result)
 
         string = 'banana'
         old = 'an'
         new = 'o'
-        invokes.append(runner.call_contract(path, 'main_default_count', string, old, new))
-        expected_results.append(string.replace(old, new))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result, msg=x)
+        result, _ = await self.call('main_default_count', [string, old, new], return_type=str)
+        self.assertEqual(string.replace(old, new), result)
 
     def test_string_replace_mismatched_type(self):
-        path = self.get_contract_path('ReplaceStringMethodMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReplaceStringMethodMismatchedType.py')
 
     def test_string_replace_too_many_arguments(self):
-        path = self.get_contract_path('ReplaceStringMethodTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ReplaceStringMethodTooManyArguments.py')
 
     def test_string_replace_too_few_arguments(self):
-        path = self.get_contract_path('ReplaceStringMethodTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ReplaceStringMethodTooFewArguments.py')

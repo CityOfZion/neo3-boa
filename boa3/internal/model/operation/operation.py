@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Self
 
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.symbol import ISymbol
@@ -16,9 +14,10 @@ class IOperation(ISymbol, ABC):
     :ivar result: the result type of the operation
     """
 
-    def __init__(self, operator: Operator, result_type: IType):
+    def __init__(self, operator: Operator, result_type: IType, deprecated: bool = False):
         self.operator: Operator = operator
         self.result: IType = result_type
+        self._deprecated: bool = deprecated
 
     def generate_opcodes(self, code_generator):
         """
@@ -44,6 +43,13 @@ class IOperation(ISymbol, ABC):
         :return: the resulting type when the expression is evaluated
         """
         return self.operator.value
+
+    @property
+    def is_deprecated(self) -> bool:
+        return self._deprecated
+
+    def deprecate(self, new_location: str = None):
+        self._deprecated = True
 
     @property
     @abstractmethod
@@ -98,7 +104,7 @@ class IOperation(ISymbol, ABC):
 
     @classmethod
     @abstractmethod
-    def build(cls, *operands: IType) -> Optional[IOperation]:
+    def build(cls, *operands: IType) -> Self | None:
         """
         Creates an operation with the given operands types
 

@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import List
+from typing import Self
 
 from boa3.internal import constants
 from boa3.internal.neo.contracts import NEF
@@ -16,7 +14,7 @@ class NefFile:
     """
 
     def __init__(self, script_bytes: bytes,
-                 method_tokens: List[MethodToken] = None,
+                 method_tokens: list[MethodToken] = None,
                  source: str = None):
         """
         :param script_bytes: the script of the smart contract
@@ -56,7 +54,7 @@ class NefFile:
         return result
 
     @classmethod
-    def deserialize(cls, bts: bytes) -> NefFile:
+    def deserialize(cls, bts: bytes) -> Self:
         """
         Deserialize the NefFile object
 

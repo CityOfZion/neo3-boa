@@ -1,7 +1,4 @@
 import os
-from typing import Dict, Tuple
-
-from boa3_test.tests.boa_test import BoaTest, _COMPILER_LOCK as LOCK  # needs to be the first import to avoid circular imports
 
 from boa3.internal import constants
 from boa3.internal.compiler.compiler import Compiler
@@ -13,9 +10,10 @@ from boa3.internal.model.variable import Variable
 from boa3.internal.neo.contracts.neffile import NefFile
 from boa3.internal.neo.vm.type.AbiType import AbiType
 from boa3.internal.neo.vm.type.Integer import Integer
+from boa3_test.tests import boatestcase
 
 
-class TestFileGeneration(BoaTest):
+class TestFileGeneration(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/generation_test'
 
     def test_generate_files(self):
@@ -137,15 +135,10 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('test_sc/event_test', 'EventWithArgument.py')
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            events: Dict[str, Event] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Event)
-            }
-
+            events = self.get_all_symbols(compiler, symbol_type=Event)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -176,16 +169,10 @@ class TestFileGeneration(BoaTest):
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            events: Dict[str, Event] = {}
-            for name, method in self.get_compiler_analyser(compiler).symbol_table.items():
-                if isinstance(method, Event):
-                    events[name] = method
-                    if method.name not in events:
-                        events[method.name] = method
-
+            events = self.get_all_symbols(compiler, symbol_type=Event)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -242,8 +229,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual('Add', method0['name'])
 
     def test_metadata_abi_method_name_mismatched_type(self):
-        path = self.get_contract_path('MetadataMethodNameMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MetadataMethodNameMismatchedType.py')
 
     def test_metadata_abi_method_with_duplicated_name_but_different_args(self):
         path = self.get_contract_path('MetadataMethodDuplicatedNameDifferentArgs.py')
@@ -272,8 +258,7 @@ class TestFileGeneration(BoaTest):
         self.assertEqual(2, len(method1['parameters']))
 
     def test_metadata_abi_method_with_duplicated_name_and_args(self):
-        path = self.get_contract_path('MetadataMethodDuplicatedNameAndArgs.py')
-        self.assertCompilerLogs(CompilerError.DuplicatedManifestIdentifier, path)
+        self.assertCompilerLogs(CompilerError.DuplicatedManifestIdentifier, 'MetadataMethodDuplicatedNameAndArgs.py')
 
     def test_generate_manifest_file_with_public_safe_decorator_kwarg(self):
         path = self.get_contract_path('MetadataMethodSafe.py')
@@ -333,13 +318,12 @@ class TestFileGeneration(BoaTest):
         self.assertIn('parameters', event)
         self.assertEqual(3, len(event['parameters']))
         parameters = event['parameters']
-        self.assertEqual(('var4', 'Integer'), (parameters[0]['name'], parameters[0]['type']))
-        self.assertEqual(('var5', 'String'), (parameters[1]['name'], parameters[1]['type']))
-        self.assertEqual(('var6', 'ByteArray'), (parameters[2]['name'], parameters[2]['type']))
+        self.assertEqual(('var4', AbiType.Integer), (parameters[0]['name'], parameters[0]['type']))
+        self.assertEqual(('var5', AbiType.String), (parameters[1]['name'], parameters[1]['type']))
+        self.assertEqual(('var6', AbiType.ByteArray), (parameters[2]['name'], parameters[2]['type']))
 
     def test_metadata_abi_method_safe_mismatched_type(self):
-        path = self.get_contract_path('MetadataMethodSafeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MetadataMethodSafeMismatchedType.py')
 
     def test_generate_nefdbgnfo_file(self):
         from boa3.internal.model.type.itype import IType
@@ -348,15 +332,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
@@ -367,10 +346,9 @@ class TestFileGeneration(BoaTest):
 
         for debug_method in debug_info['methods']:
             self.assertIn('name', debug_method)
-            parsed_name = debug_method['name'].split(constants.VARIABLE_NAME_SEPARATOR)
-            self.assertEqual(2, len(parsed_name))
-            self.assertIn(parsed_name[-1], methods)
-            actual_method = methods[parsed_name[-1]]
+            debug_method_name = debug_method['name']
+            self.assertIn(debug_method_name, methods)
+            actual_method = methods[debug_method_name]
 
             # validate id
             self.assertIn('id', debug_method)
@@ -401,15 +379,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            events: Dict[str, Event] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Event)
-            }
-
+            events = self.get_all_symbols(compiler, symbol_type=Event, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
@@ -444,15 +417,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_info_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            variables: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Variable)
-            }
-
+            variables = self.get_all_symbols(compiler, symbol_type=Variable, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_info_output))
@@ -484,15 +452,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_all_imported_methods(compiler).items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method, debug_info=True)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertTrue(os.path.exists(expected_debug_output))
@@ -540,14 +503,10 @@ class TestFileGeneration(BoaTest):
         expected_debug_output = nef_output.replace('.nef', '.nefdbgnfo')
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_all_imported_methods(compiler).items()
-                if isinstance(method, Method)
-            }
+            methods = self.get_all_symbols(compiler, symbol_type=Method, debug_info=True)
 
             debug_info = self.get_debug_info(nef_output)
 
@@ -642,15 +601,10 @@ class TestFileGeneration(BoaTest):
         nef_output, manifest_path = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(manifest_path))
@@ -673,15 +627,10 @@ class TestFileGeneration(BoaTest):
         nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             debug_info = self.get_debug_info(nef_output)
 
         self.assertGreater(len(methods), 0)
@@ -722,15 +671,10 @@ class TestFileGeneration(BoaTest):
         nef_output, _ = self.get_deploy_file_paths_without_compiling(path)
 
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output, debug=True)
 
-            methods: Dict[str, Method] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             output, manifest = self.get_output(nef_output)
 
         self.assertGreater(len(methods), 0)
@@ -819,7 +763,7 @@ class TestFileGeneration(BoaTest):
         with self.assertRaises(NotLoadedException):
             from boa3.boa3 import Boa3
 
-            with LOCK:
+            with boatestcase._COMPILER_LOCK:
                 Boa3.compile_and_save(path)
 
         with self.assertRaises(NotLoadedException):
@@ -844,14 +788,14 @@ class TestFileGeneration(BoaTest):
         return f * self.fact(f - 1)
 
     def test_generate_manifest_file_with_type_hint_list(self):
-        path = self.get_contract_path('test_sc/list_test', 'CopyBool.py')
+        path = self.get_contract_path('test_sc/list_test', 'ListCopyBool.py')
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Array, abi_method_main['returntype'])
         self.assertIn('returngeneric', abi_method_main)
         self.assertIn('type', abi_method_main['returngeneric'])
-        self.assertEqual('Array', abi_method_main['returngeneric']['type'])
+        self.assertEqual(AbiType.Array, abi_method_main['returngeneric']['type'])
         self.assertIn('generic', abi_method_main['returngeneric'])
         self.assertIn('type', abi_method_main['returngeneric']['generic'])
 
@@ -860,11 +804,11 @@ class TestFileGeneration(BoaTest):
         self.assertIn('type', abi_method_main_parameters[0]['generic'])
 
     def test_generate_manifest_file_with_type_hint_dict(self):
-        path = self.get_contract_path('test_sc/dict_test', 'SetValue.py')
+        path = self.get_contract_path('test_sc/dict_test', 'DictSetValue.py')
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Map', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Map, abi_method_main['returntype'])
         self.assertIn('returngenerickey', abi_method_main)
         self.assertIn('type', abi_method_main['returngenerickey'])
         self.assertIn('returngenericitem', abi_method_main)
@@ -881,7 +825,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Any', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Any, abi_method_main['returntype'])
         self.assertIn('returnunion', abi_method_main)
         self.assertIsInstance(abi_method_main['returnunion'], list)
         for union_type in abi_method_main['returnunion']:
@@ -903,7 +847,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('Integer', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Integer, abi_method_main['returntype'])
         self.assertIn('returnnullable', abi_method_main)
 
         abi_method_main_parameters = abi_method_main['parameters']
@@ -918,7 +862,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('InteropInterface', abi_method_main['returntype'])
+        self.assertEqual(AbiType.InteropInterface, abi_method_main['returntype'])
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'StorageContext')
 
@@ -927,7 +871,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual('InteropInterface', abi_method_main['returntype'])
+        self.assertEqual(AbiType.InteropInterface, abi_method_main['returntype'])
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'Iterator')
 
@@ -941,7 +885,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, AddressType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'String')
+        self.assertEqual(abi_method_main['returntype'], AbiType.String)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'Address')
 
@@ -964,7 +908,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, BlockHashType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash256')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash256)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'BlockHash')
 
@@ -987,7 +931,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, PublicKeyType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'PublicKey')
+        self.assertEqual(abi_method_main['returntype'], AbiType.PublicKey)
         # 'PublicKey' already is a abi type, so there is no need to use a 'returnhint'
         self.assertNotIn('returnhint', abi_method_main)
 
@@ -1010,7 +954,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, ScriptHashType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash160')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash160)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'ScriptHash')
 
@@ -1033,7 +977,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, ScriptHashLittleEndianType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash160')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash160)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'ScriptHashLittleEndian')
 
@@ -1056,7 +1000,7 @@ class TestFileGeneration(BoaTest):
         self.assertIsInstance(method_main.return_type, TransactionIdType)
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Hash256')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Hash256)
         self.assertIn('returnhint', abi_method_main)
         self.assertEqual(abi_method_main['returnhint'], 'TransactionId')
 
@@ -1074,7 +1018,7 @@ class TestFileGeneration(BoaTest):
         _, abi_methods = self.verify_parameters_and_return_manifest(path)  # type: dict, list
 
         abi_method_main = abi_methods[0]
-        self.assertEqual(abi_method_main['returntype'], 'Any')
+        self.assertEqual(abi_method_main['returntype'], AbiType.Any)
         # verifying if 'returnunion' was not wrongfully added to the manifest
         self.assertNotIn('returnunion', abi_method_main)
 
@@ -1086,25 +1030,25 @@ class TestFileGeneration(BoaTest):
         abi_method_main_parameter = abi_method_main['parameters'][0]
 
         # verifying arg type
-        self.assertEqual('Map', abi_method_main_parameter['type'])
+        self.assertEqual(AbiType.Map, abi_method_main_parameter['type'])
         self.assertIn('generickey', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['generickey'])
-        self.assertEqual('String', abi_method_main_parameter['generickey']['type'])
+        self.assertEqual(AbiType.String, abi_method_main_parameter['generickey']['type'])
         self.assertIn('genericitem', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['genericitem'])
-        self.assertEqual('Array', abi_method_main_parameter['genericitem']['type'])
+        self.assertEqual(AbiType.Array, abi_method_main_parameter['genericitem']['type'])
         self.assertIn('generic', abi_method_main_parameter['genericitem'])
         self.assertIn('type', abi_method_main_parameter['genericitem']['generic'])
 
         # verifying return type
-        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Array, abi_method_main['returntype'])
         self.assertIn('returngeneric', abi_method_main)
         self.assertIn('type', abi_method_main['returngeneric'])
-        self.assertEqual('Any', abi_method_main['returngeneric']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main['returngeneric']['type'])
         self.assertIn('union', abi_method_main['returngeneric'])
         self.assertEqual(3, len(abi_method_main['returngeneric']['union']))
         self.assertTrue(any(
-            union_type['type'] == 'Map' and 'generickey' in union_type and 'genericitem' in union_type
+            union_type['type'] == AbiType.Map and 'generickey' in union_type and 'genericitem' in union_type
             for union_type in abi_method_main['returngeneric']['union']
         ))
 
@@ -1116,32 +1060,27 @@ class TestFileGeneration(BoaTest):
         abi_method_main_parameter = abi_method_main['parameters'][0]
 
         # verifying arg type
-        self.assertEqual('Map', abi_method_main_parameter['type'])
+        self.assertEqual(AbiType.Map, abi_method_main_parameter['type'])
         self.assertIn('generickey', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['generickey'])
-        self.assertEqual('Any', abi_method_main_parameter['generickey']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main_parameter['generickey']['type'])
         self.assertIn('genericitem', abi_method_main_parameter)
         self.assertIn('type', abi_method_main_parameter['genericitem'])
-        self.assertEqual('Any', abi_method_main_parameter['genericitem']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main_parameter['genericitem']['type'])
 
         # verifying return type
-        self.assertEqual('Array', abi_method_main['returntype'])
+        self.assertEqual(AbiType.Array, abi_method_main['returntype'])
         self.assertIn('returngeneric', abi_method_main)
         self.assertIn('type', abi_method_main['returngeneric'])
-        self.assertEqual('Any', abi_method_main['returngeneric']['type'])
+        self.assertEqual(AbiType.Any, abi_method_main['returngeneric']['type'])
 
-    def verify_parameters_and_return_manifest(self, path: str) -> Tuple[dict, list]:
+    def verify_parameters_and_return_manifest(self, path: str) -> tuple[dict, list]:
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
 
-            methods: Dict[str, Event] = {
-                name: method
-                for name, method in self.get_compiler_analyser(compiler).symbol_table.items()
-                if isinstance(method, Method)
-            }
-
+            methods = self.get_all_symbols(compiler, symbol_type=Method)
             output, manifest = self.get_output(nef_output)
 
         self.assertTrue(os.path.exists(expected_manifest_output))
@@ -1168,7 +1107,7 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('ManifestEventRuntimeNotify.py')
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
             _, manifest = self.get_output(nef_output)
 
@@ -1179,9 +1118,12 @@ class TestFileGeneration(BoaTest):
         path = self.get_contract_path('test_sc/generation_test', 'ManifestOptionalUnionEvent.py')
         nef_output, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         compiler = Compiler()
-        with LOCK:
+        with boatestcase._COMPILER_LOCK:
             compiler.compile_and_save(path, nef_output)
             _, manifest = self.get_output(nef_output)
 
-        self.assertEqual(manifest['abi']['events'][0]['parameters'][0]['type'], 'String')
-        self.assertEqual(manifest['abi']['events'][0]['parameters'][1]['type'], 'Integer')
+        events_parameters = manifest['abi']['events'][0]['parameters']
+        self.assertEqual(3, len(events_parameters))
+        self.assertEqual(events_parameters[0]['type'], AbiType.String)
+        self.assertEqual(events_parameters[1]['type'], AbiType.Integer)
+        self.assertEqual(events_parameters[2]['type'], AbiType.Boolean)

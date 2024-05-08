@@ -1,9 +1,8 @@
-from __future__ import annotations
-
 __all__ = [
     'ExecutionScript'
 ]
 
+from typing import Self
 
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.neo.vm.VMCode import VMCode
@@ -21,7 +20,7 @@ class ExecutionScript:
         self._tokens = tokens
 
     @classmethod
-    def from_code_map(cls, instance: VMCodeMapping) -> ExecutionScript:
+    def from_code_map(cls, instance: VMCodeMapping) -> Self:
         obj = ExecutionScript(instance.code_map, instance._method_tokens.to_list())
         return obj
 

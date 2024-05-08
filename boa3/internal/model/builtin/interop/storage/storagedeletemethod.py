@@ -1,5 +1,6 @@
 import ast
-from typing import Any, Dict, Iterable, List, Sized
+from collections.abc import Iterable, Sized
+from typing import Any
 
 from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
@@ -19,7 +20,7 @@ class StorageDeleteMethod(InteropMethod):
         syscall = 'System.Storage.Delete'
         context_type = StorageContextType.build()
 
-        args: Dict[str, Variable] = {'key': Variable(Type.bytes),
+        args: dict[str, Variable] = {'key': Variable(Type.bytes),
                                      'context': Variable(context_type)}
 
         from boa3.internal.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
@@ -29,7 +30,7 @@ class StorageDeleteMethod(InteropMethod):
         super().__init__(identifier, syscall, args, defaults=[context_default], return_type=Type.none)
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         """
         Gets the indexes order that need to be used during code generation.
         If the order for generation is the same as inputted in code, returns reversed(range(0,len_args))
@@ -51,7 +52,7 @@ class StorageDeleteMethod(InteropMethod):
         return self.args['key']
 
     def build(self, value: Any) -> IBuiltinMethod:
-        exp: List[IExpression] = []
+        exp: list[IExpression] = []
         if isinstance(value, Sized):
             if len(value) > 2 or not isinstance(value, Iterable):
                 return self

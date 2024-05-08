@@ -1,6 +1,5 @@
-from boa3_test.tests.cli_tests.cli_test import BoaCliTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal import constants
+from boa3_test.tests.cli_tests.cli_test import BoaCliTest
 from boa3_test.tests.cli_tests.utils import neo3_boa_cli
 
 

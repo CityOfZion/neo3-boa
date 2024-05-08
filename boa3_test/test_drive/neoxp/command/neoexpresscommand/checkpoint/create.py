@@ -1,10 +1,8 @@
-from typing import Dict, Optional
-
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.checkpoint.icheckpointcommand import ICheckpointCommand
 
 
 class CheckpointCreateCommand(ICheckpointCommand):
-    def __init__(self, file_name: Optional[str] = None,
+    def __init__(self, file_name: str | None = None,
                  force: bool = False,
                  neo_express_data_file: str = None):
 
@@ -18,7 +16,7 @@ class CheckpointCreateCommand(ICheckpointCommand):
 
         super().__init__('create', args)
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if self.force:

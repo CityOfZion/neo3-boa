@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from decimal import Decimal, localcontext
-from typing import Type
+from typing import Self
 
 
 class BigInteger(int):
@@ -10,7 +8,7 @@ class BigInteger(int):
     """
 
     @classmethod
-    def ZERO(cls: Type[BigInteger]) -> BigInteger:
+    def ZERO(cls: type[Self]) -> Self:
         """
         Returns:
             An instance initialized to zero.
@@ -18,7 +16,7 @@ class BigInteger(int):
         return cls(0)
 
     @classmethod
-    def ONE(cls: Type[BigInteger]) -> BigInteger:
+    def ONE(cls: type[Self]) -> Self:
         """
         Returns:
             An instance initialized to one.
@@ -26,7 +24,7 @@ class BigInteger(int):
         return cls(1)
 
     @classmethod
-    def frombytes(cls: Type[BigInteger], bytes: bytes) -> BigInteger:
+    def frombytes(cls: type[Self], bytes: bytes) -> Self:
         """
         Return the BigInteger represented by the given array of bytes.
 

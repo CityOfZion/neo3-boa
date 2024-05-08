@@ -2,7 +2,6 @@ import ast
 import importlib.util
 import os
 import sys
-from typing import Dict, List, Optional
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -14,8 +13,8 @@ from boa3.internal.model.type.type import Type
 class ImportAnalyser(IAstAnalyser):
 
     def __init__(self, import_target: str, root_folder: str,
-                 importer_file: Optional[str] = None,
-                 import_stack: List[str] = None,
+                 importer_file: str | None = None,
+                 import_stack: list[str] = None,
                  already_imported_modules: dict = None,
                  log: bool = False,
                  fail_fast: bool = True,
@@ -26,13 +25,16 @@ class ImportAnalyser(IAstAnalyser):
         self.is_namespace_package: bool = False
         self.recursive_import: bool = False
         self._import_identifier: str = import_target
+
         self._get_from_entry: bool = get_entry and (os.path.isfile(import_target) or os.path.isdir(import_target))
 
+        from boa3.internal.model.imports.package import Package
+        self._package: Package | None = None
         from boa3.internal.analyser.analyser import Analyser
-        self._imported_files: Dict[str, Analyser] = (already_imported_modules
+        self._imported_files: dict[str, Analyser] = (already_imported_modules
                                                      if isinstance(already_imported_modules, dict)
                                                      else {})
-        self._import_stack: List[str] = import_stack if isinstance(import_stack, list) else []
+        self._import_stack: list[str] = import_stack if isinstance(import_stack, list) else []
         self.analyser: Analyser = None  # set if the import is successful
         self._submodule_search_locations = None
 
@@ -82,7 +84,7 @@ class ImportAnalyser(IAstAnalyser):
             if module_origin is None:
                 return
 
-        path: List[str] = module_origin.split(os.sep)
+        path: list[str] = module_origin.split(os.sep)
         self.filename = path[-1]
         self._submodule_search_locations = import_spec.submodule_search_locations
         self.path: str = module_origin.replace(os.sep, constants.PATH_SEPARATOR)
@@ -93,7 +95,11 @@ class ImportAnalyser(IAstAnalyser):
     def tree(self) -> ast.AST:
         return self._tree
 
-    def export_symbols(self, identifiers: List[str] = None) -> Dict[str, ISymbol]:
+    @property
+    def is_import_deprecated(self) -> bool:
+        return self._package.is_deprecated if self._package is not None else False
+
+    def export_symbols(self, identifiers: list[str] = None) -> dict[str, ISymbol]:
         """
         Gets a dictionary that maps each exported symbol with its identifier
 
@@ -123,25 +129,35 @@ class ImportAnalyser(IAstAnalyser):
             if path not in external_files and analyser.is_analysed:
                 external_files[path] = analyser
 
-    def _find_package(self, module_origin: str, origin_file: Optional[str] = None):
-        path: List[str] = module_origin.split(os.sep)
+    def _find_package(self, module_origin: str, origin_file: str | None = None):
+        path: list[str] = module_origin.split(os.sep)
 
-        package = imports.builtin.get_package(self._import_identifier)
+        package = imports.compilerbuiltin.get_package(self._import_identifier)
         if hasattr(package, 'symbols'):
             if hasattr(package, 'inner_packages'):
                 # when have symbol and packages with the same id, prioritize symbol
-                self.symbols: Dict[str, ISymbol] = package.inner_packages
+                self.symbols: dict[str, ISymbol] = package.inner_packages
                 self.symbols.update(package.symbols)
             else:
                 self.symbols = package.symbols
 
+            self._package = package
             self.can_be_imported = True
             self.is_builtin_import = True
             return
 
-        if (os.path.commonpath([self.path, constants.BOA_PACKAGE_PATH]) != constants.BOA_PACKAGE_PATH or
-                ('boa3' in path and constants.PATH_SEPARATOR.join(path[path.index('boa3'):]).startswith('boa3/builtin'))):
-            # doesn't analyse boa3.builtin packages that aren't included in the imports.builtin as an user module
+        def is_boa_package() -> bool:
+            common_path = os.path.commonpath([self.path, constants.BOA_PACKAGE_PATH])
+            if common_path == constants.BOA_PACKAGE_PATH:
+                return True
+            if 'boa3' not in path:
+                return False
+
+            boa_path = path[path.index('boa3'):]
+            return len(boa_path) > 1 and boa_path[1] in ('builtin', 'sc')
+
+        if not is_boa_package():
+            # doesn't analyse boa3.builtin packages that aren't included in the imports.compilerbuiltin as an user module
             import re
 
             inside_python_folder = any(re.search(r'python(\d\.?)*', folder.lower()) for folder in path)

@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import RoleManagementMethod
 from boa3.internal.model.variable import Variable
 
@@ -14,7 +12,7 @@ class GetDesignatedByRoleMethod(RoleManagementMethod):
         native_identifier = 'getDesignatedByRole'
 
         role_type = RoleType.build()
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'role': Variable(role_type),
             'index': Variable(Type.int)
         }

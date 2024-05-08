@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict, List
+from typing import Any, Self
 
 from boa3.internal.neo import from_hex_str, to_hex_str
 from boa3.internal.neo3.core.types import UInt160
@@ -13,8 +11,8 @@ class Signer:
             raise NotImplementedError
         self._account: UInt160 = account
         self._scopes: WitnessScope = scopes
-        self._allowed_contracts: List[UInt160] = []
-        self._allowed_groups: List[bytes] = []
+        self._allowed_contracts: list[UInt160] = []
+        self._allowed_groups: list[bytes] = []
 
     @property
     def account(self) -> UInt160:
@@ -24,7 +22,7 @@ class Signer:
     def scopes(self) -> WitnessScope:
         return self._scopes
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         return {
             'account': str(self._account),
             'scopes': self._scopes.neo_name(),
@@ -34,7 +32,7 @@ class Signer:
         }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> Signer:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         account_hex = json['account']
         account = UInt160(from_hex_str(account_hex))
         scopes = WitnessScope.get_from_neo_name(json['scopes']) if 'scopes' in json else WitnessScope.CalledByEntry

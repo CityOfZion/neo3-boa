@@ -1,5 +1,2 @@
-from typing import Tuple
-
-
-def Main(a: Tuple[int]):
+def Main(a: tuple[int]):
     a[0] = '1'

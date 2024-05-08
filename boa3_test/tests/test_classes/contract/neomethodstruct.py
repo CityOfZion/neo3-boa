@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict
+from typing import Any, Self
 
 from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
 from boa3_test.tests.test_classes.contract.neostruct import NeoStruct
@@ -14,7 +12,7 @@ class NeoMethodStruct(NeoStruct):
     _is_safe_field = 'safe'
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> NeoMethodStruct:
+    def from_json(cls, json: dict[str, Any]) -> Self:
         required_fields = [cls._name_field,
                            cls._parameters_field,
                            cls._return_type_field,

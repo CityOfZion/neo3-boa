@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from enum import Enum
-from typing import List
+from typing import Self
 
 
 class AbiType(str, Enum):
@@ -19,8 +17,8 @@ class AbiType(str, Enum):
     Any = 'Any'
     Void = 'Void'
 
-    @staticmethod
-    def union(abi_types: List[AbiType]) -> AbiType:
+    @classmethod
+    def union(cls, abi_types: list[Self]) -> Self:
         if len(abi_types) == 0:
             return AbiType.Any
 

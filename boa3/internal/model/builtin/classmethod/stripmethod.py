@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.primitive.ibytestringtype import IByteStringType
@@ -15,7 +15,7 @@ class StripMethod(IBuiltinMethod):
             self_type = Type.bytes
 
         identifier = 'strip'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(self_type),
             'chars': Variable(self_type),
         }
@@ -210,7 +210,7 @@ class StripMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

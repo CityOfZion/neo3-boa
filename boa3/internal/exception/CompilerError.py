@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Iterable, Optional, Union
+from collections.abc import Iterable
 
 from boa3.internal import constants
 from boa3.internal.model.builtin.internal.internalmethod import IInternalMethod
@@ -15,7 +15,7 @@ class CompilerError(ABC, BaseException):
     def __init__(self, line: int, col: int):
         self.line: int = line
         self.col: int = col
-        self.filepath: Optional[str] = None
+        self.filepath: str | None = None
 
     @property
     def message(self) -> str:
@@ -25,7 +25,7 @@ class CompilerError(ABC, BaseException):
         return '{0}:{1}{2}'.format(self.line, self.col, message)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return None
 
     def __str__(self) -> str:
@@ -49,7 +49,7 @@ class CircularImport(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Circular import with '%s' ('%s')" % (self.target_import, self.target_origin)
 
 
@@ -63,7 +63,7 @@ class DuplicatedIdentifier(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return f"Duplicate identifier: '{self._duplicated_id}'"
 
 
@@ -78,7 +78,7 @@ class DuplicatedManifestIdentifier(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return f"Duplicate manifest identifier: '{self._duplicated_id}' with {self._arg_count} argument(s)"
 
 
@@ -93,7 +93,7 @@ class IncorrectNumberOfOperands(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Incorrect number of operands: expected '%s', got '%s' instead" % (self.expected, self.actual)
 
 
@@ -107,7 +107,7 @@ class InvalidUsage(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         message = "Invalid usage"
         if self.custom_error_message is not None:
             message += f": {self.custom_error_message}"
@@ -124,7 +124,7 @@ class InvalidType(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         message = "Invalid type"
         if self.symbol_id is not None:
             message += ": '%s'" % self.symbol_id
@@ -141,7 +141,7 @@ class InternalError(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         message = "Internal compiler error"
         if self.raised_exception is not None:
             message += ". {0}: {1}".format(type(self.raised_exception).__name__, str(self.raised_exception))
@@ -158,7 +158,7 @@ class InternalIncorrectSignature(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "The implementation of '{0}' is different " \
                "from the expected '{1}'.".format(self.expected_method.raw_identifier,
                                                  self.expected_method)
@@ -175,7 +175,7 @@ class MetadataImplementationMissing(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "'{0}' requires '{1}' implementation".format(self.metadata_attr_id, self.symbol_id)
 
 
@@ -194,7 +194,7 @@ class MetadataIncorrectImplementation(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return ("'{0}' is not correctly implemented. Expecting '{1}', got '{2}' instead"
                 .format(self.symbol_id, self.expected_symbol, self.actual_symbol))
 
@@ -210,7 +210,7 @@ class MetadataInformationMissing(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "'{0}' requires '{1}' attribute, which is missing in the metadata".format(self.symbol_id,
                                                                                          self.metadata_attr_id)
 
@@ -220,8 +220,8 @@ class MismatchedTypes(CompilerError):
     An error raised when the evaluated and expected types are not the same
     """
 
-    def __init__(self, line: int, col: int, expected_type_id: Union[str, Iterable[str]],
-                 actual_type_id: Union[str, Iterable[str]]):
+    def __init__(self, line: int, col: int, expected_type_id: str | Iterable[str],
+                 actual_type_id: str | Iterable[str]):
         if isinstance(expected_type_id, str):
             expected_type_id = [expected_type_id]
         if isinstance(actual_type_id, str):
@@ -232,7 +232,7 @@ class MismatchedTypes(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         expected_types = join_args(self.expected_types)
         actual_types = join_args(self.actual_types)
         return "Expected type '%s', got '%s' instead" % (expected_types, actual_types)
@@ -247,7 +247,7 @@ class MissingInitCall(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Call to __init__ of super class is missed"
 
 
@@ -261,7 +261,7 @@ class MissingReturnStatement(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "'%s': Missing return statement" % self.symbol_id
 
 
@@ -270,14 +270,14 @@ class MissingStandardDefinition(CompilerError):
     An error raised when a contract standard is defined in the metadata and are required symbols missing
     """
 
-    def __init__(self, standard_id: str, symbol_id: str, symbol: Union[Method, Event]):
+    def __init__(self, standard_id: str, symbol_id: str, symbol: Method | Event):
         self.standard = standard_id
         self.symbol_id = symbol_id
         self.symbol = symbol
         super().__init__(0, 0)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         safe_symbol_prefix = 'safe ' if self.symbol.is_safe else ''
         return f"'{self.standard}': Missing '{self.symbol_id}' {self.symbol.shadowing_name} definition " \
                f"'{safe_symbol_prefix}{self.symbol}'"
@@ -297,7 +297,7 @@ class NotSupportedOperation(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "The following operation is not supported: '%s'" % self.symbol_id
 
 
@@ -310,7 +310,7 @@ class UnexpectedArgument(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Unexpected argument"
 
 
@@ -324,7 +324,7 @@ class UnfilledArgument(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Parameter '%s' unfilled" % self.param
 
 
@@ -338,7 +338,7 @@ class UnresolvedReference(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Unresolved reference '%s'" % self.symbol_id
 
     def __eq__(self, other) -> bool:
@@ -358,7 +358,7 @@ class UnresolvedOperation(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Unresolved reference: '{0}' does not have a definition of '{1}' operator".format(self.type_id,
                                                                                                  self.operation_id)
 
@@ -372,7 +372,7 @@ class TooManyReturns(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "Too many returns"
 
 
@@ -386,7 +386,7 @@ class TypeHintMissing(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         if self.symbol_id is not None:
             return "Type hint is missing for the symbol '%s'" % self.symbol_id
 
@@ -400,7 +400,7 @@ class SelfArgumentError(CompilerError):
         super().__init__(line, col)
 
     @property
-    def _error_message(self) -> Optional[str]:
+    def _error_message(self) -> str | None:
         return "The self argument was not found or the annotation is incorrect"
 
 

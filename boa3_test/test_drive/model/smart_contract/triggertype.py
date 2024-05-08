@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import enum
+from typing import Self
 
 
 class TriggerType(enum.IntEnum):
@@ -25,6 +24,6 @@ class TriggerType(enum.IntEnum):
     def neo_name(self) -> str:
         return self.name
 
-    @staticmethod
-    def get_from_neo_name(neo_name: str) -> TriggerType:
+    @classmethod
+    def get_from_neo_name(cls, neo_name: str) -> Self:
         return TriggerType[neo_name]

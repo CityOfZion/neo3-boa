@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
 
@@ -13,7 +11,7 @@ class CheckWitnessMethod(InteropMethod):
 
         identifier = 'check_witness'
         syscall = 'System.Runtime.CheckWitness'
-        args: Dict[str, Variable] = {'hash_or_pubkey': Variable(Type.union.build([ECPointType.build(),
+        args: dict[str, Variable] = {'hash_or_pubkey': Variable(Type.union.build([ECPointType.build(),
                                                                                   UInt160Type.build()
                                                                                   ]))}
         super().__init__(identifier, syscall, args, return_type=Type.bool)

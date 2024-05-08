@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Union
+from typing import Self
 
 from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
@@ -11,7 +9,7 @@ class CompiledMetadata:
     _instance = None
 
     @classmethod
-    def instance(cls) -> CompiledMetadata:
+    def instance(cls) -> Self:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
@@ -27,7 +25,7 @@ class CompiledMetadata:
     def set_current_metadata(cls, metadata: NeoMetadata):
         cls.instance()._metadata = metadata
 
-    def add_contract_permission(self, contract: Union[UInt160, bytes, str], method: str = None):
+    def add_contract_permission(self, contract: UInt160 | bytes | str, method: str = None):
         if isinstance(contract, bytes):
             contract = UInt160(contract)
         elif not isinstance(contract, UInt160):

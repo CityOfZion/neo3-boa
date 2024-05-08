@@ -1,12 +1,11 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import NeoMetadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
-from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.builtin.type import UInt160
 
 
 # -------------------------------------------
@@ -109,7 +108,7 @@ def balance_of(account: UInt160) -> int:
     :type account: UInt160
     """
     assert len(account) == 20
-    return type_helper.to_int(storage.get(account))
+    return storage.get_int(account)
 
 
 @public
@@ -151,9 +150,9 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         if from_balance == amount:
             storage.delete(from_address)
         else:
-            storage.put(from_address, from_balance - amount)
+            storage.put_int(from_address, from_balance - amount)
 
-        storage.put(to_address, to_balance + amount)
+        storage.put_int(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -165,7 +164,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
 
 
 @public(name='onNEP17Payment')
-def on_nep17_payment(from_address: Union[UInt160, None], amount: int, data: Any):
+def on_nep17_payment(from_address: UInt160 | None, amount: int, data: Any):
     """
     NEP-17 affirms: "if the receiver is a deployed contract, the function MUST call onPayment method on receiver
     contract with the data parameter from transfer AFTER firing the Transfer event. If the receiver doesn't want to
@@ -191,8 +190,8 @@ def _deploy(data: Any, update: bool):
     Initializes the storage when the smart contract is deployed. Sending all tokens to the deployer account
     """
     if not update:
-        container: Transaction = runtime.script_container
+        container = runtime.script_container
 
-        storage.put(container.sender, total_supply())
+        storage.put_int(container.sender, total_supply())
 
         on_transfer(None, container.sender, total_supply())

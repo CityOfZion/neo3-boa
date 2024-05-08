@@ -1,132 +1,68 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo3.contracts import FindOptions
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive import neoxp
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestArithmetic(BoaTest):
+class TestArithmetic(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/arithmetic_test'
 
     # region Addition
 
-    def test_boa2_add_test(self):
-        path, _ = self.get_deploy_file_paths('AddBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_add_test(self):
+        await self.set_up_contract('AddBoa2Test.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [2], return_type=int)
+        self.assertEqual(4, result)
 
-        invokes.append(runner.call_contract(path, 'main', 2))
-        expected_results.append(4)
+        result, _ = await self.call('main', [23234], return_type=int)
+        self.assertEqual(23236, result)
 
-        invokes.append(runner.call_contract(path, 'main', 23234))
-        expected_results.append(23236)
+        result, _ = await self.call('main', [0], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', 0))
-        expected_results.append(2)
+        result, _ = await self.call('main', [-112], return_type=int)
+        self.assertEqual(-110, result)
 
-        invokes.append(runner.call_contract(path, 'main', -112))
-        expected_results.append(-110)
+    async def test_boa2_add_test1(self):
+        await self.set_up_contract('AddBoa2Test1.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [1, 2, 3, 4], return_type=int)
+        self.assertEqual(9, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [0, 0, 0, 2], return_type=int)
+        self.assertEqual(2, result)
 
-    def test_boa2_add_test1(self):
-        path, _ = self.get_deploy_file_paths('AddBoa2Test1.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [-2, 3, -6, 2], return_type=int)
+        self.assertEqual(-2, result)
 
-        invokes = []
-        expected_results = []
+    async def test_boa2_add_test2(self):
+        await self.set_up_contract('AddBoa2Test2.py')
 
-        invokes.append(runner.call_contract(path, 'main', 1, 2, 3, 4))
-        expected_results.append(9)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'main', 0, 0, 0, 2))
-        expected_results.append(2)
+    async def test_boa2_add_test3(self):
+        await self.set_up_contract('AddBoa2Test3.py')
 
-        invokes.append(runner.call_contract(path, 'main', -2, 3, -6, 2))
-        expected_results.append(-2)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(-9, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_add_test4(self):
+        await self.set_up_contract('AddBoa2Test4.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [1, 2, 3, 4], return_type=int)
+        self.assertEqual(-9, result)
 
-    def test_boa2_add_test2(self):
-        path, _ = self.get_deploy_file_paths('AddBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_add_test_void(self):
+        await self.set_up_contract('AddBoa2TestVoid.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [3], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(3)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_add_test3(self):
-        path, _ = self.get_deploy_file_paths('AddBoa2Test3.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(-9)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_add_test4(self):
-        path, _ = self.get_deploy_file_paths('AddBoa2Test4.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', 1, 2, 3, 4))
-        expected_results.append(-9)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_add_test_void(self):
-        path, _ = self.get_deploy_file_paths('AddBoa2TestVoid.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', 3))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_addition_operation(self):
+    def test_addition_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -137,30 +73,22 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('Addition.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('Addition.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_addition_operation_run(self):
+        await self.set_up_contract('Addition.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('add', [1, 2], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'add', 1, 2))
-        expected_results.append(3)
-        invokes.append(runner.call_contract(path, 'add', -42, -24))
-        expected_results.append(-66)
-        invokes.append(runner.call_contract(path, 'add', -42, 24))
-        expected_results.append(-18)
+        result, _ = await self.call('add', [-42, -24], return_type=int)
+        self.assertEqual(-66, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('add', [-42, 24], return_type=int)
+        self.assertEqual(-18, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_addition_augmented_assignment(self):
+    def test_addition_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -172,52 +100,33 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AdditionAugmentedAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AdditionAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
-    def test_addition_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('AdditionBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_addition_builtin_type(self):
+        await self.set_up_contract('AdditionBuiltinType.py')
 
-        invokes = []
-        expected_results = []
+        args = [FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES]
+        expected = args[0] + args[1]
+        result, _ = await self.call('main', args, return_type=int)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'main', FindOptions.VALUES_ONLY, FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(FindOptions.VALUES_ONLY + FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_addition_literal_operation(self):
+    def test_addition_literal_operation_compile(self):
         expected_output = (
             Opcode.PUSH3
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AdditionLiteral.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AdditionLiteral.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_addition_literal_operation_run(self):
+        await self.set_up_contract('AdditionLiteral.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('add_one_two', [], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'add_one_two'))
-        expected_results.append(3)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_addition_literal_and_variable(self):
+    def test_addition_literal_and_variable_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -228,30 +137,22 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AdditionLiteralAndVariable.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AdditionLiteralAndVariable.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_addition_literal_and_variable_run(self):
+        await self.set_up_contract('AdditionLiteralAndVariable.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('add_one', [1], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'add_one', 1))
-        expected_results.append(2)
-        invokes.append(runner.call_contract(path, 'add_one', -10))
-        expected_results.append(-9)
-        invokes.append(runner.call_contract(path, 'add_one', -1))
-        expected_results.append(0)
+        result, _ = await self.call('add_one', [-10], return_type=int)
+        self.assertEqual(-9, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('add_one', [-1], return_type=int)
+        self.assertEqual(0, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_sequence_addition(self):
+    def test_sequence_addition_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -264,30 +165,22 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AdditionThreeElements.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AdditionThreeElements.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_sequence_addition_run(self):
+        await self.set_up_contract('AdditionThreeElements.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('add_four', [1, 2], return_type=int)
+        self.assertEqual(7, result)
 
-        invokes.append(runner.call_contract(path, 'add_four', 1, 2))
-        expected_results.append(7)
-        invokes.append(runner.call_contract(path, 'add_four', -42, -24))
-        expected_results.append(-62)
-        invokes.append(runner.call_contract(path, 'add_four', -42, 24))
-        expected_results.append(-14)
+        result, _ = await self.call('add_four', [-42, -24], return_type=int)
+        self.assertEqual(-62, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('add_four', [-42, 24], return_type=int)
+        self.assertEqual(-14, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_sequence_addition_different_orders(self):
+    def test_sequence_addition_different_orders_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'
@@ -296,47 +189,36 @@ class TestArithmetic(BoaTest):
             + Opcode.ADD
             + Opcode.RET
         )
-        path_1 = self.get_contract_path('AdditionThreeValuesUnordered1.py')
-        output_1 = self.compile(path_1)
-        self.assertEqual(expected_output, output_1)
 
-        path_2 = self.get_contract_path('AdditionThreeValuesUnordered2.py')
-        output_2 = self.compile(path_2)
-        self.assertEqual(expected_output, output_2)
+        output, _ = self.assertCompile('AdditionThreeValuesUnordered1.py')
+        self.assertEqual(expected_output, output)
 
-        path_3 = self.get_contract_path('AdditionThreeValuesUnordered3.py')
-        output_3 = self.compile(path_3)
-        self.assertEqual(expected_output, output_3)
+        output, _ = self.assertCompile('AdditionThreeValuesUnordered2.py')
+        self.assertEqual(expected_output, output)
 
-        path_1, _ = self.get_deploy_file_paths(path_1)
-        path_2, _ = self.get_deploy_file_paths(path_2)
-        path_3, _ = self.get_deploy_file_paths(path_3)
-        runner = BoaTestRunner(runner_id=self.method_name())
+        output, _ = self.assertCompile('AdditionThreeValuesUnordered3.py')
+        self.assertEqual(expected_output, output)
 
-        invokes = []
-        expected_results = []
+    async def test_sequence_addition_different_orders_run(self):
+        await self.set_up_contract('AdditionThreeValuesUnordered1.py')
+        contract_2 = await self.compile_and_deploy('AdditionThreeValuesUnordered2.py')
+        contract_3 = await self.compile_and_deploy('AdditionThreeValuesUnordered3.py')
 
-        invokes.append(runner.call_contract(path_1, 'add_six', 5))
-        expected_results.append(11)
-        invokes.append(runner.call_contract(path_2, 'add_six', 5))
-        expected_results.append(11)
-        invokes.append(runner.call_contract(path_3, 'add_six', 5))
-        expected_results.append(11)
+        result, _ = await self.call('add_six', [5], return_type=int)
+        self.assertEqual(11, result)
+        result, _ = await self.call('add_six', [5], return_type=int, target_contract=contract_2)
+        self.assertEqual(11, result)
+        result, _ = await self.call('add_six', [5], return_type=int, target_contract=contract_3)
+        self.assertEqual(11, result)
 
-        invokes.append(runner.call_contract(path_1, 'add_six', -42))
-        expected_results.append(-36)
-        invokes.append(runner.call_contract(path_2, 'add_six', -42))
-        expected_results.append(-36)
-        invokes.append(runner.call_contract(path_3, 'add_six', -42))
-        expected_results.append(-36)
+        result, _ = await self.call('add_six', [-42], return_type=int)
+        self.assertEqual(-36, result)
+        result, _ = await self.call('add_six', [-42], return_type=int, target_contract=contract_2)
+        self.assertEqual(-36, result)
+        result, _ = await self.call('add_six', [-42], return_type=int, target_contract=contract_3)
+        self.assertEqual(-36, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_addition_variable_and_literal(self):
+    def test_addition_variable_and_literal_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -347,60 +229,43 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('AdditionVariableAndLiteral.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('AdditionVariableAndLiteral.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_addition_variable_and_literal_run(self):
+        await self.set_up_contract('AdditionVariableAndLiteral.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('add_one', [1], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'add_one', 1))
-        expected_results.append(2)
-        invokes.append(runner.call_contract(path, 'add_one', -10))
-        expected_results.append(-9)
-        invokes.append(runner.call_contract(path, 'add_one', -1))
-        expected_results.append(0)
+        result, _ = await self.call('add_one', [-10], return_type=int)
+        self.assertEqual(-9, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('add_one', [-1], return_type=int)
+        self.assertEqual(0, result)
 
     # endregion
 
     # region Concatenation
 
-    def test_concat_bytes_variables_and_constants(self):
-        path, _ = self.get_deploy_file_paths('ConcatBytesVariablesAndConstants.py')
-        address_version = Integer(neoxp.utils.get_address_version()).to_byte_array()
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_concat_bytes_variables_and_constants(self):
+        await self.set_up_contract('ConcatBytesVariablesAndConstants.py')
 
-        invokes = []
-        expected_results = []
+        address_version = Integer(53).to_byte_array()
 
-        invokes.append(runner.call_contract(path, 'concat1',
-                                            expected_result_type=bytes))
-        expected_results.append(b'value1  value2  value3  ' + address_version + b'some_bytes_after')
+        expected = b'value1  value2  value3  ' + address_version + b'some_bytes_after'
+        result, _ = await self.call('concat1', [], return_type=bytes)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'concat2',
-                                            expected_result_type=bytes))
-        expected_results.append(b'value1value2value3' + address_version + b'some_bytes_after')
+        expected = b'value1value2value3' + address_version + b'some_bytes_after'
+        result, _ = await self.call('concat2', [], return_type=bytes)
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'concat3',
-                                            expected_result_type=bytes))
-        expected_results.append(b'value1__value2__value3__' + address_version + b'some_bytes_after')
+        expected = b'value1__value2__value3__' + address_version + b'some_bytes_after'
+        result, _ = await self.call('concat3', [], return_type=bytes)
+        self.assertEqual(expected, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_concatenation_operation(self):
+    def test_concatenation_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -413,28 +278,19 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('Concatenation.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('Concatenation.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_concatenation_operation_run(self):
+        await self.set_up_contract('Concatenation.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('concat', ['a', 'b'], return_type=str)
+        self.assertEqual('ab', result)
 
-        invokes.append(runner.call_contract(path, 'concat', 'a', 'b'))
-        expected_results.append('ab')
-        invokes.append(runner.call_contract(path, 'concat', 'unit', 'test'))
-        expected_results.append('unittest')
+        result, _ = await self.call('concat', ['unit', 'test'], return_type=str)
+        self.assertEqual('unittest', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_concatenation_augmented_assignment(self):
+    def test_concatenation_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -448,56 +304,32 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ConcatenationAugmentedAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ConcatenationAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
-    def test_concat_string_variables_and_constants(self):
-        path, _ = self.get_deploy_file_paths('ConcatStringVariablesAndConstants.py')
+    async def test_concat_string_variables_and_constants(self):
+        await self.set_up_contract('ConcatStringVariablesAndConstants.py')
 
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'concat'))
-        expected_results.append('[1,2]')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('concat', [], return_type=str)
+        self.assertEqual('[1,2]', result)
 
     # endregion
 
     # region Division
 
     def test_division_operation(self):
-        path = self.get_contract_path('Division.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'Division.py')
 
     def test_division_augmented_assignment(self):
-        path = self.get_contract_path('DivisionAugmentedAssignment.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'DivisionAugmentedAssignment.py')
 
-    def test_division_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('DivisionBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_division_builtin_type(self):
+        await self.set_up_contract('DivisionBuiltinType.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY], return_type=int)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES // FindOptions.VALUES_ONLY, result)
 
-        invokes.append(runner.call_contract(path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.DESERIALIZE_VALUES // FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_integer_division_operation(self):
+    def test_integer_division_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -508,30 +340,22 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('IntegerDivision.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('IntegerDivision.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_integer_division_operation_run(self):
+        await self.set_up_contract('IntegerDivision.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('floor_div', [10, 3], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'floor_div', 10, 3))
-        expected_results.append(3)
-        invokes.append(runner.call_contract(path, 'floor_div', -42, -9))
-        expected_results.append(4)
-        invokes.append(runner.call_contract(path, 'floor_div', -100, 3))
-        expected_results.append(-33)
+        result, _ = await self.call('floor_div', [-42, -9], return_type=int)
+        self.assertEqual(4, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('floor_div', [-100, 3], return_type=int)
+        self.assertEqual(-33, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_integer_division_augmented_assignment(self):
+    def test_integer_division_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -543,53 +367,51 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('IntegerDivisionAugmentedAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('IntegerDivisionAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
     # endregion
 
     # region ListAddition
 
-    def test_list_addition(self):
-        path, _ = self.get_deploy_file_paths('ListAddition.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_list_addition(self):
+        await self.set_up_contract('ListAddition.py')
 
-        invokes = []
-        expected_results = []
+        arg0 = [1, 'str', '123']
+        arg1 = [2, True, False]
+        result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
+        self.assertEqual(arg0 + arg1, result)
 
-        invokes.append(runner.call_contract(path, 'add_any', [1, 'str', '123'], [2, True, False]))
-        expected_results.append([1, 'str', '123'] + [2, True, False])
-        invokes.append(runner.call_contract(path, 'add_int', [1, 3], [2, 5]))
-        expected_results.append([1, 3] + [2, 5])
-        invokes.append(runner.call_contract(path, 'add_bool', [True], [False, True]))
-        expected_results.append([True] + [False, True])
-        invokes.append(runner.call_contract(path, 'add_str', ['unit', ' '], ['test', '.']))
-        expected_results.append(['unit', ' '] + ['test', '.'])
+        arg0 = [1, 3]
+        arg1 = [2, 5]
+        result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
+        self.assertEqual(arg0 + arg1, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        arg0 = [True]
+        arg1 = [False, True]
+        result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
+        self.assertEqual(arg0 + arg1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        arg0 = ['unit', ' ']
+        arg1 = ['test', '.']
+        result, _ = await self.call('add_any', [arg0, arg1], return_type=list)
+        self.assertEqual(arg0 + arg1, result)
 
     # endregion
 
     # region Mismatched
 
     def test_mismatched_type_binary_operation(self):
-        path = self.get_contract_path('MismatchedOperandBinary.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedOperandBinary.py')
 
     def test_mismatched_type_unary_operation(self):
-        path = self.get_contract_path('MismatchedOperandUnary.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedOperandUnary.py')
 
     # endregion
 
     # region Mixed
 
-    def test_mixed_operations(self):
+    def test_mixed_operations_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -607,26 +429,16 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MixedOperations.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('MixedOperations.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_mixed_operations_run(self):
+        await self.set_up_contract('MixedOperations.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('mixed', [10, 20, 30, 40, 50], return_type=int)
+        self.assertEqual(10 + 30 * 50 + 40 // 20, result)
 
-        invokes.append(runner.call_contract(path, 'mixed', 10, 20, 30, 40, 50))
-        expected_results.append(10 + 30 * 50 + 40 // 20)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_mixed_operations_with_parentheses(self):
+    def test_mixed_operations_with_parentheses_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -644,124 +456,84 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('WithParentheses.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('WithParentheses.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_mixed_operations_with_parentheses_run(self):
+        await self.set_up_contract('WithParentheses.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'mixed', 10, 20, 30, 40, 50))
-        expected_results.append(10 + 30 * (50 + 40) // 20)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('mixed', [10, 20, 30, 40, 50], return_type=int)
+        self.assertEqual(10 + 30 * (50 + 40) // 20, result)
 
     # endregion
 
     # region Modulo
 
-    def test_modulo_operation(self):
-        path, _ = self.get_deploy_file_paths('Modulo.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_modulo_operation(self):
+        await self.set_up_contract('Modulo.py')
 
         op1 = 10
         op2 = 3
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
         op1 = -42
         op2 = -9
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
         op1 = -100
         op2 = 3
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
         op1 = 100
         op2 = -3
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_modulo_augmented_assignment(self):
-        path, _ = self.get_deploy_file_paths('ModuloAugmentedAssignment.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_modulo_augmented_assignment(self):
+        await self.set_up_contract('ModuloAugmentedAssignment.py')
 
         op1 = 10
         op2 = 3
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
         op1 = -42
         op2 = -9
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
         op1 = -100
         op2 = 3
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
         op1 = 100
         op2 = -3
         expected_output = op1 % op2
-        invokes.append(runner.call_contract(path, 'mod', op1, op2))
-        expected_results.append(expected_output)
+        result, _ = await self.call('mod', [op1, op2], return_type=int)
+        self.assertEqual(expected_output, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_modulo_builtin_type(self):
+        await self.set_up_contract('ModuloBuiltinType.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_modulo_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('ModuloBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.DESERIALIZE_VALUES % FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY], return_type=int)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES % FindOptions.VALUES_ONLY, result)
 
     # endregion
 
     # region Multiplication
 
-    def test_multiplication_operation(self):
+    def test_multiplication_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -772,32 +544,25 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('Multiplication.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('Multiplication.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiplication_operation_run(self):
+        await self.set_up_contract('Multiplication.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('mult', [10, 3], return_type=int)
+        self.assertEqual(30, result)
 
-        invokes.append(runner.call_contract(path, 'mult', 10, 3))
-        expected_results.append(30)
-        invokes.append(runner.call_contract(path, 'mult', -42, -2))
-        expected_results.append(84)
-        invokes.append(runner.call_contract(path, 'mult', -4, 20))
-        expected_results.append(-80)
-        invokes.append(runner.call_contract(path, 'mult', 0, 20))
-        expected_results.append(0)
+        result, _ = await self.call('mult', [-42, -2], return_type=int)
+        self.assertEqual(84, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('mult', [-4, 20], return_type=int)
+        self.assertEqual(-80, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('mult', [0, 20], return_type=int)
+        self.assertEqual(0, result)
 
-    def test_multiplication_augmented_assignment(self):
+    def test_multiplication_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -809,31 +574,20 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('MultiplicationAugmentedAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('MultiplicationAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
-    def test_multiplication_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('MultiplicationBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiplication_builtin_type(self):
+        await self.set_up_contract('MultiplicationBuiltinType.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.DESERIALIZE_VALUES * FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY], return_type=int)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES * FindOptions.VALUES_ONLY, result)
 
     # endregion
 
     # region Power
 
-    def test_power_operation(self):
+    def test_power_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -843,37 +597,31 @@ class TestArithmetic(BoaTest):
             + Opcode.POW
             + Opcode.RET
         )
-        path = self.get_contract_path('Power.py')
-        output = self.compile(path)
+
+        output, _ = self.assertCompile('Power.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_power_operation_run(self):
+        await self.set_up_contract('Power.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('pow', [10, 3], return_type=int)
+        self.assertEqual(1000, result)
 
-        invokes.append(runner.call_contract(path, 'pow', 10, 3))
-        expected_results.append(1000)
-        invokes.append(runner.call_contract(path, 'pow', 1, 15))
-        expected_results.append(1)
-        invokes.append(runner.call_contract(path, 'pow', -2, 2))
-        expected_results.append(4)
-        invokes.append(runner.call_contract(path, 'pow', 0, 20))
-        expected_results.append(0)
+        result, _ = await self.call('pow', [1, 15], return_type=int)
+        self.assertEqual(1, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('pow', [-2, 2], return_type=int)
+        self.assertEqual(4, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('pow', [0, 20], return_type=int)
+        self.assertEqual(0, result)
 
-        runner.call_contract(path, 'pow', 1, -2)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, '^Invalid shift value')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('pow', [1, -2], return_type=int)
 
-    def test_power_augmented_assignment(self):
+        self.assertRegex(str(context.exception), 'invalid exponent')
+
+    def test_power_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -884,31 +632,21 @@ class TestArithmetic(BoaTest):
             + Opcode.STARG0
             + Opcode.RET
         )
-        path = self.get_contract_path('PowerAugmentedAssignment.py')
-        output = self.compile(path)
+
+        output, _ = self.assertCompile('PowerAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
-    def test_power_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('PowerBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_power_builtin_type(self):
+        await self.set_up_contract('PowerBuiltinType.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.DESERIALIZE_VALUES ** FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY], return_type=int)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES ** FindOptions.VALUES_ONLY, result)
 
     # endregion
 
     # region Sign
 
-    def test_negative_operation(self):
+    def test_negative_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -918,46 +656,28 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('Negative.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('Negative.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_negative_operation_run(self):
+        await self.set_up_contract('Negative.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('minus', [10], return_type=int)
+        self.assertEqual(-10, result)
 
-        invokes.append(runner.call_contract(path, 'minus', 10))
-        expected_results.append(-10)
-        invokes.append(runner.call_contract(path, 'minus', -1))
-        expected_results.append(1)
-        invokes.append(runner.call_contract(path, 'minus', 0))
-        expected_results.append(0)
+        result, _ = await self.call('minus', [-1], return_type=int)
+        self.assertEqual(1, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('minus', [0], return_type=int)
+        self.assertEqual(0, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_negative_builtin_type(self):
+        await self.set_up_contract('NegativeBuiltinType.py')
 
-    def test_negative_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('NegativeBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('minus', [FindOptions.DESERIALIZE_VALUES], return_type=int)
+        self.assertEqual(-FindOptions.DESERIALIZE_VALUES, result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'minus', FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(-FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_positive_operation(self):
+    def test_positive_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -966,48 +686,31 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('Positive.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('Positive.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_positive_operation_run(self):
+        await self.set_up_contract('Positive.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('plus', [10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'plus', 10))
-        expected_results.append(10)
-        invokes.append(runner.call_contract(path, 'plus', -1))
-        expected_results.append(-1)
-        invokes.append(runner.call_contract(path, 'plus', 0))
-        expected_results.append(0)
+        result, _ = await self.call('plus', [-1], return_type=int)
+        self.assertEqual(-1, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('plus', [0], return_type=int)
+        self.assertEqual(0, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_positive_builtin_type(self):
+        await self.set_up_contract('PositiveBuiltinType.py')
 
-    def test_positive_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('PositiveBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'plus', FindOptions.DESERIALIZE_VALUES))
-        expected_results.append(+FindOptions.DESERIALIZE_VALUES)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('plus', [FindOptions.DESERIALIZE_VALUES], return_type=int)
+        self.assertEqual(+FindOptions.DESERIALIZE_VALUES, result)
 
     # endregion
 
     # region StrBytesMultiplication
+
     byte_str_mult = (
         Opcode.PUSHDATA1 + Integer(0).to_byte_array(min_length=1)
         + Opcode.ROT
@@ -1026,7 +729,7 @@ class TestArithmetic(BoaTest):
         + Opcode.DROP
     )
 
-    def test_bytes_multiplication_operation(self):
+    def test_bytes_multiplication_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1034,33 +737,27 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG0
             + Opcode.LDARG1
             + self.byte_str_mult
+            + Opcode.CONVERT + Type.bytes.stack_item
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BytesMultiplication.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytesMultiplication.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bytes_multiplication_operation_run(self):
+        await self.set_up_contract('BytesMultiplication.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('bytes_mult',
+                                    [b'a', 4],
+                                    return_type=bytes)
+        self.assertEqual(b'aaaa', result)
 
-        invokes.append(runner.call_contract(path, 'bytes_mult', b'a', 4,
-                                            expected_result_type=bytes))
-        expected_results.append(b'aaaa')
-        invokes.append(runner.call_contract(path, 'bytes_mult', b'unit', 50,
-                                            expected_result_type=bytes))
-        expected_results.append(b'unit' * 50)
+        result, _ = await self.call('bytes_mult',
+                                    [b'unit', 50],
+                                    return_type=bytes)
+        self.assertEqual(b'unit' * 50, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_multiplication_operation_augmented_assignment(self):
+    def test_bytes_multiplication_operation_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1068,49 +765,30 @@ class TestArithmetic(BoaTest):
             + Opcode.LDARG0
             + Opcode.LDARG1
             + self.byte_str_mult
+            + Opcode.CONVERT + Type.bytes.stack_item
             + Opcode.STARG0
             + Opcode.LDARG0
             + Opcode.RET
         )
 
-        path = self.get_contract_path('BytesMultiplicationAugmentedAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BytesMultiplicationAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bytes_multiplication_operation_augmented_assignment_run(self):
+        await self.set_up_contract('BytesMultiplicationAugmentedAssignment.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [b'unit', 50],
+                                    return_type=bytes)
+        self.assertEqual(b'unit' * 50, result)
 
-        invokes.append(runner.call_contract(path, 'Main', b'unit', 50,
-                                            expected_result_type=bytes))
-        expected_results.append(b'unit' * 50)
+    async def test_bytes_multiplication_builtin_type(self):
+        await self.set_up_contract('BytesMultiplicationBuiltinType.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('bytes_mult', [b'unit test', FindOptions.VALUES_ONLY],
+                                    return_type=bytes)
+        self.assertEqual(b'unit test' * FindOptions.VALUES_ONLY, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bytes_multiplication_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('BytesMultiplicationBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'bytes_mult', b'unit test', FindOptions.VALUES_ONLY,
-                                            expected_result_type=bytes))
-        expected_results.append(b'unit test' * FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_str_multiplication_operation(self):
+    def test_str_multiplication_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1122,28 +800,19 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StringMultiplication.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StringMultiplication.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_str_multiplication_operation_run(self):
+        await self.set_up_contract('StringMultiplication.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('str_mult', ['a', 4], return_type=str)
+        self.assertEqual('aaaa', result)
 
-        invokes.append(runner.call_contract(path, 'str_mult', 'a', 4))
-        expected_results.append('aaaa')
-        invokes.append(runner.call_contract(path, 'str_mult', 'unit', 50))
-        expected_results.append('unit' * 50)
+        result, _ = await self.call('str_mult', ['unit', 50], return_type=str)
+        self.assertEqual('unit' * 50, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_str_multiplication_operation_augmented_assignment(self):
+    def test_str_multiplication_operation_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1157,46 +826,26 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('StringMultiplicationAugmentedAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StringMultiplicationAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_str_multiplication_operation_augmented_assignment_run(self):
+        await self.set_up_contract('StringMultiplicationAugmentedAssignment.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', ['unit', 50], return_type=str)
+        self.assertEqual('unit' * 50, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 'unit', 50))
-        expected_results.append('unit' * 50)
+    async def test_str_multiplication_builtin_type(self):
+        await self.set_up_contract('StringMultiplicationBuiltinType.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_str_multiplication_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('StringMultiplicationBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'str_mult', 'unit test', FindOptions.VALUES_ONLY))
-        expected_results.append('unit test' * FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('str_mult', ['unit test', FindOptions.VALUES_ONLY], return_type=str)
+        self.assertEqual('unit test' * FindOptions.VALUES_ONLY, result)
 
     # endregion
 
     # region Subtraction
 
-    def test_subtraction_operation(self):
+    def test_subtraction_operation_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1207,30 +856,22 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('Subtraction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('Subtraction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_subtraction_operation_run(self):
+        await self.set_up_contract('Subtraction.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('sub', [10, 3], return_type=int)
+        self.assertEqual(7, result)
 
-        invokes.append(runner.call_contract(path, 'sub', 10, 3))
-        expected_results.append(7)
-        invokes.append(runner.call_contract(path, 'sub', -42, -24))
-        expected_results.append(-18)
-        invokes.append(runner.call_contract(path, 'sub', -42, 24))
-        expected_results.append(-66)
+        result, _ = await self.call('sub', [-42, -24], return_type=int)
+        self.assertEqual(-18, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('sub', [-42, 24], return_type=int)
+        self.assertEqual(-66, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_subtraction_augmented_assignment(self):
+    def test_subtraction_augmented_assignment_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -1242,24 +883,13 @@ class TestArithmetic(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('SubtractionAugmentedAssignment.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('SubtractionAugmentedAssignment.py')
         self.assertEqual(expected_output, output)
 
-    def test_subtraction_builtin_type(self):
-        path, _ = self.get_deploy_file_paths('SubtractionBuiltinType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_subtraction_builtin_type(self):
+        await self.set_up_contract('SubtractionBuiltinType.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY))
-        expected_results.append(FindOptions.DESERIALIZE_VALUES - FindOptions.VALUES_ONLY)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [FindOptions.DESERIALIZE_VALUES, FindOptions.VALUES_ONLY], return_type=int)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES - FindOptions.VALUES_ONLY, result)
 
     # endregion

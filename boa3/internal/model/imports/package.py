@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Dict, List, Optional
+from typing import Self
 
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 
@@ -14,13 +12,30 @@ class Package(IdentifiedSymbol):
     :ivar types: a list that stores every property in the package. Empty by default.
     """
 
-    def __init__(self, identifier: str,
-                 properties: List[IdentifiedSymbol] = None,
-                 methods: List[IdentifiedSymbol] = None,
-                 types: List[IdentifiedSymbol] = None,
-                 packages: List[Package] = None,
+    @classmethod
+    def create_package(
+            cls,
+            package_id: str,
+            symbols: dict[str, IdentifiedSymbol] = None,
+    ) -> Self:
+
+        from boa3.internal import constants
+        package_ids = package_id.split(constants.ATTRIBUTE_NAME_SEPARATOR)
+        pkg = Package(identifier=package_ids[-1], other_symbols=symbols)
+        for pkg_id in reversed(package_ids[:-1]):
+            pkg = Package(identifier=pkg_id, packages=[pkg])
+        return pkg
+
+    def __init__(self,
+                 identifier: str,
+                 properties: list[IdentifiedSymbol] = None,
+                 methods: list[IdentifiedSymbol] = None,
+                 types: list[IdentifiedSymbol] = None,
+                 packages: list[Self] = None,
                  other_symbols: dict = None,
-                 import_origin=None
+                 import_origin=None,
+                 deprecated: bool = False,
+                 new_location: str = None
                  ):
         """
         :param packages: a list that stores the inner packages and modules of this package. Empty by default.
@@ -37,7 +52,7 @@ class Package(IdentifiedSymbol):
 
         super().__init__(identifier)
 
-        self._all_symbols: List[IdentifiedSymbol] = []
+        self._all_symbols: list[IdentifiedSymbol] = []
 
         if methods is None:
             methods = []
@@ -70,15 +85,18 @@ class Package(IdentifiedSymbol):
             self._additional_symbols = {}
             self.origin = None
 
-        self._aliases: Dict[str, str] = {}
-        self._parent: Optional[Package] = None
+        self._aliases: dict[str, str] = {}
+        self._parent: Self | None = None
+
+        if deprecated:
+            self.deprecate(new_location)
 
     @property
     def shadowing_name(self) -> str:
         return 'package'
 
     @property
-    def symbols(self) -> Dict[str, IdentifiedSymbol]:
+    def symbols(self) -> dict[str, IdentifiedSymbol]:
         """
         Gets all the symbols in the package.
 
@@ -92,15 +110,41 @@ class Package(IdentifiedSymbol):
         return symbol_map
 
     @property
-    def inner_packages(self) -> Dict[str, Package]:
+    def inner_packages(self) -> dict[str, Self]:
         return {symbol.raw_identifier: symbol for symbol in self._packages}
 
     @property
-    def parent(self) -> Optional[Package]:
+    def parent(self) -> Self | None:
         """
         Get the parent package of this one. None if it's the root package.
         """
         return self._parent
+
+    def deprecate(self, new_location: str = None):
+        if not self._deprecated:
+            from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
+            if new_location is not None:
+                self._new_location = new_location
+            elif self._parent is not None and self._parent.new_location is not None:
+                from boa3.internal import constants
+                self._new_location = constants.ATTRIBUTE_NAME_SEPARATOR.join(
+                    (self._parent.new_location, self.identifier)
+                )
+
+            self._deprecated = True
+            for index, symbol in enumerate(self._all_symbols):
+                deprecated_symbol = symbol.clone()
+                if (self.new_location is not None
+                        and isinstance(deprecated_symbol, IBuiltinCallable)
+                        and deprecated_symbol.new_location is None
+                ):
+                    deprecated_symbol.set_new_location(self.new_location)
+
+                deprecated_symbol.deprecate()
+                self._all_symbols[index] = deprecated_symbol
+
+            for pkg in self._packages:
+                pkg.deprecate()
 
     def include_symbol(self, symbol_id, symbol: IdentifiedSymbol):
         identifier = symbol.raw_identifier if isinstance(symbol, IdentifiedSymbol) else symbol_id
@@ -115,6 +159,8 @@ class Package(IdentifiedSymbol):
                 if symbol._parent is not None:
                     return
                 symbol._parent = self
+                if self.is_deprecated:
+                    symbol.deprecate()
             else:
                 self._all_symbols.append(symbol)
 

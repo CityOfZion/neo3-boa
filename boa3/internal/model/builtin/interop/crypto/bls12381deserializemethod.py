@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibMethod
 from boa3.internal.model.variable import Variable
 
@@ -12,7 +10,7 @@ class Bls12381DeserializeMethod(CryptoLibMethod):
 
         identifier = 'bls12_381_deserialize'
         native_identifier = 'bls12381Deserialize'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'data': Variable(Type.bytes),
         }
         super().__init__(identifier, native_identifier, args, return_type=Bls12381Type.build())

@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import hashlib
-from typing import List, Tuple
+from typing import Self
 
 from boa3.internal.neo3 import contracts
 from boa3.internal.neo3.core import Size as s, serialization, types, utils
@@ -71,7 +69,7 @@ class Version(serialization.ISerializable):
         self.revision = int(revision)
 
     @classmethod
-    def _parse_component(self, c: str) -> Tuple[bool, int]:
+    def _parse_component(self, c: str) -> tuple[bool, int]:
         try:
             r = int(c)
         except ValueError:
@@ -83,7 +81,7 @@ class Version(serialization.ISerializable):
         return True, r
 
     @classmethod
-    def from_string(cls, input: str) -> Version:
+    def from_string(cls, input: str) -> Self:
         """
         Parse an instance out of a string.
 
@@ -121,11 +119,46 @@ class Version(serialization.ISerializable):
         return cls(major, minor, build, revision)
 
 
+class MethodToken(serialization.ISerializable):
+    def __init__(self,
+                 hash: types.UInt160,
+                 method: str,
+                 parameters_count: int,
+                 has_return_value: bool,
+                 call_flags: contracts.CallFlags):
+        self.hash = hash
+        self.method = method
+        self.parameters_count = parameters_count
+        self.has_return_value = has_return_value
+        self.call_flags = call_flags
+
+    def __len__(self):
+        return s.uint160 + utils.get_var_size(self.method) + s.uint16 + s.uint8 + s.uint8
+
+    def serialize(self, writer: serialization.BinaryWriter):
+        writer.write_serializable(self.hash)
+        writer.write_var_string(self.method)
+        writer.write_uint16(self.parameters_count)
+        writer.write_uint8(self.has_return_value)
+        writer.write_uint8(self.call_flags.value)
+
+    def deserialize(self, reader: serialization.BinaryReader):
+        self.hash = reader.read_serializable(types.UInt160)
+        self.method = reader.read_var_string(32)
+        self.parameters_count = reader.read_uint16()
+        self.has_return_value = bool(reader.read_uint8())
+        self.call_flags = contracts.CallFlags(reader.read_uint8())
+
+    @classmethod
+    def _serializable_init(cls):
+        return cls(types.UInt160.zero(), "", 0, False, contracts.CallFlags.NONE)
+
+
 class NEF(serialization.ISerializable):
     def __init__(self,
                  compiler_name: str = None,
                  script: bytes = None,
-                 tokens: List[MethodToken] = None,
+                 tokens: list[MethodToken] = None,
                  source: str = None,
                  _magic: int = 0x3346454E):
         self.magic = _magic
@@ -211,38 +244,3 @@ class NEF(serialization.ISerializable):
         c = cls()
         c._checksum = 0
         return c
-
-
-class MethodToken(serialization.ISerializable):
-    def __init__(self,
-                 hash: types.UInt160,
-                 method: str,
-                 parameters_count: int,
-                 has_return_value: bool,
-                 call_flags: contracts.CallFlags):
-        self.hash = hash
-        self.method = method
-        self.parameters_count = parameters_count
-        self.has_return_value = has_return_value
-        self.call_flags = call_flags
-
-    def __len__(self):
-        return s.uint160 + utils.get_var_size(self.method) + s.uint16 + s.uint8 + s.uint8
-
-    def serialize(self, writer: serialization.BinaryWriter):
-        writer.write_serializable(self.hash)
-        writer.write_var_string(self.method)
-        writer.write_uint16(self.parameters_count)
-        writer.write_uint8(self.has_return_value)
-        writer.write_uint8(self.call_flags.value)
-
-    def deserialize(self, reader: serialization.BinaryReader):
-        self.hash = reader.read_serializable(types.UInt160)
-        self.method = reader.read_var_string(32)
-        self.parameters_count = reader.read_uint16()
-        self.has_return_value = bool(reader.read_uint8())
-        self.call_flags = contracts.CallFlags(reader.read_uint8())
-
-    @classmethod
-    def _serializable_init(cls):
-        return cls(types.UInt160.zero(), "", 0, False, contracts.CallFlags.NONE)

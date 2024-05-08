@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import Dict, List, Optional
 
 from boa3.internal.model.builtin.interop.blockchain import *
 from boa3.internal.model.builtin.interop.contract import *
@@ -39,25 +38,25 @@ class InteropPackage(str, Enum):
 
 class Interop:
     @classmethod
-    def get_symbol(cls, symbol_id: str) -> Optional[IdentifiedSymbol]:
+    def get_symbol(cls, symbol_id: str) -> IdentifiedSymbol | None:
         for pkg_symbols in cls._interop_symbols.values():
             for method in pkg_symbols:
                 if method.identifier == symbol_id:
                     return method
 
     @classmethod
-    def interop_symbols(cls, package: str = None) -> List[IdentifiedSymbol]:
+    def interop_symbols(cls, package: str = None) -> list[IdentifiedSymbol]:
         if package in InteropPackage.__members__.values():
             return cls._interop_symbols[package]
 
-        lst: List[IdentifiedSymbol] = []
+        lst: list[IdentifiedSymbol] = []
         for symbols in cls._interop_symbols.values():
             lst.extend(symbols)
         return lst
 
     @classmethod
-    def interop_events(cls) -> List[Event]:
-        lst: List[Event] = []
+    def interop_events(cls) -> list[Event]:
+        lst: list[Event] = []
         for symbols in cls._interop_symbols.values():
             lst.extend([event for event in symbols if isinstance(event, Event)])
 
@@ -193,8 +192,20 @@ class Interop:
     StorageFind = StorageFindMethod(FindOptionsType)
     StorageGetContext = StorageGetContextMethod(StorageContextType)
     StorageGetReadOnlyContext = StorageGetReadOnlyContextMethod(StorageContextType)
-    StorageGet = StorageGetMethod()
-    StoragePut = StoragePutMethod()
+    StorageGet = StorageGetBytesMethod()
+    StorageGetInt = StorageGetIntMethod()
+    StorageGetBool = StorageGetBoolMethod()
+    StorageGetStr = StorageGetStrMethod()
+    StorageGetUInt160 = StorageGetUInt160Method()
+    StorageGetUInt256 = StorageGetUInt256Method()
+    StorageGetECPoint = StorageGetECPointMethod()
+    StoragePut = StoragePutBytesMethod()
+    StoragePutInt = StoragePutIntMethod()
+    StoragePutBool = StoragePutBoolMethod()
+    StoragePutStr = StoragePutStrMethod()
+    StoragePutUInt160 = StoragePutUInt160Method()
+    StoragePutUInt256 = StoragePutUInt256Method()
+    StoragePutECPoint = StoragePutECPointMethod()
 
     # endregion
 
@@ -428,9 +439,21 @@ class Interop:
                              methods=[StorageDelete,
                                       StorageFind,
                                       StorageGet,
+                                      StorageGetInt,
+                                      StorageGetBool,
+                                      StorageGetStr,
+                                      StorageGetUInt160,
+                                      StorageGetUInt256,
+                                      StorageGetECPoint,
                                       StorageGetContext,
                                       StorageGetReadOnlyContext,
-                                      StoragePut
+                                      StoragePut,
+                                      StoragePutInt,
+                                      StoragePutBool,
+                                      StoragePutStr,
+                                      StoragePutUInt160,
+                                      StoragePutUInt256,
+                                      StoragePutECPoint,
                                       ],
                              packages=[FindOptionsModule,
                                        StorageContextModule,
@@ -440,7 +463,7 @@ class Interop:
 
     # endregion
 
-    package_symbols: List[IdentifiedSymbol] = [
+    package_symbols: list[IdentifiedSymbol] = [
         OracleType,
         BlockchainPackage,
         ContractPackage,
@@ -455,7 +478,7 @@ class Interop:
         StoragePackage
     ]
 
-    _interop_symbols: Dict[InteropPackage, List[IdentifiedSymbol]] = {
+    _interop_symbols: dict[InteropPackage, list[IdentifiedSymbol]] = {
         package.identifier: list(package.symbols.values()) for package in package_symbols if
         isinstance(package, Package)
     }

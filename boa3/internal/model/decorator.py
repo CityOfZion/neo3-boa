@@ -1,6 +1,5 @@
 import ast
 from abc import abstractmethod
-from typing import Optional
 
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
@@ -19,7 +18,7 @@ class IDecorator(Method):
         """
         pass
 
-    def update_args(self, args: ast.arguments, origin: Optional[ISymbol] = None):
+    def update_args(self, args: ast.arguments, origin: ISymbol | None = None):
         """
         Updates the given args object if this decorator has any specific cases.
         If this is not the case, DON'T overwrite this method

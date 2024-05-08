@@ -1,11 +1,10 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.interop import storage, runtime
-from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.runtime import check_witness
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.builtin.type import UInt160
 
 # -------------------------------------------
 # TOKEN SETTINGS
@@ -43,8 +42,8 @@ def manifest_metadata() -> NeoMetadata:
 
 on_transfer = CreateNewEvent(
     [
-        ('from_addr', Union[UInt160, None]),
-        ('to_addr', Union[UInt160, None]),
+        ('from_addr', UInt160 | None),
+        ('to_addr', UInt160 | None),
         ('amount', int)
     ],
     'Transfer'
@@ -74,7 +73,7 @@ def method(account: UInt160):
 
     # now there is a verification to this method
     if check_witness(get_owner()):
-        storage.put(account, type_helper.to_int(storage.get(account)) + 2 * 10 ** 8)
+        storage.put_int(account, storage.get_int(account) + 2 * 10 ** 8)
         on_transfer(None, account, 2 * 10 ** 8)
     # more omitted code
 
@@ -85,11 +84,11 @@ def _deploy(data: Any, update: bool):
     Initializes the storage when the smart contract is deployed. When this smart contract is updated, it should do nothing.
     """
     if not update:
-        container: Transaction = runtime.script_container
+        container = runtime.script_container
 
-        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-        storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
-        storage.put(OWNER_KEY, container.sender)
+        storage.put_int(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+        storage.put_int(container.sender, TOKEN_TOTAL_SUPPLY)
+        storage.put_uint160(OWNER_KEY, container.sender)
         on_transfer(None, container.sender, TOKEN_TOTAL_SUPPLY)
 
 
@@ -99,7 +98,7 @@ def balance_of(account: UInt160) -> int:
     Get the current balance of an address.
     """
     assert len(account) == 20
-    return type_helper.to_int(storage.get(account))
+    return storage.get_int(account)
 
 
 @public
@@ -111,4 +110,4 @@ def get_owner() -> UInt160:
     """
     Gets the script hash of the owner (the account that deployed this smart contract)
     """
-    return UInt160(storage.get(OWNER_KEY))
+    return storage.get_uint160(OWNER_KEY)

@@ -1,12 +1,9 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestNone(BoaTest):
+class TestNone(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/none_test'
 
     def test_variable_none(self):
@@ -19,8 +16,7 @@ class TestNone(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('VariableNone.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('VariableNone.py')
         self.assertEqual(expected_output, output)
 
     def test_none_tuple(self):
@@ -37,11 +33,10 @@ class TestNone(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('NoneTuple.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NoneTuple.py')
         self.assertEqual(expected_output, output)
 
-    def test_none_identity(self):
+    def test_none_identity_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -51,30 +46,22 @@ class TestNone(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('NoneIdentity.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NoneTestNoneIdentity.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_none_identity_run(self):
+        await self.set_up_contract('NoneTestNoneIdentity.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [None], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main', None))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', '5'))
-        expected_results.append(False)
+        result, _ = await self.call('Main', [5], return_type=bool)
+        self.assertEqual(False, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', ['5'], return_type=bool)
+        self.assertEqual(False, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_none_not_identity(self):
+    def test_none_not_identity_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x00'
@@ -85,38 +72,28 @@ class TestNone(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('NoneNotIdentity.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NoneTestNoneNotIdentity.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_none_not_identity_run(self):
+        await self.set_up_contract('NoneTestNoneNotIdentity.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [None], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'Main', None))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', '5'))
-        expected_results.append(True)
+        result, _ = await self.call('Main', [5], return_type=bool)
+        self.assertEqual(True, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', ['5'], return_type=bool)
+        self.assertEqual(True, result)
 
     def test_none_equality(self):
-        path = self.get_contract_path('NoneEquality.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'NoneEquality.py')
 
     def test_mismatched_type_int_operation(self):
-        path = self.get_contract_path('MismatchedTypesInOperation.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedTypesInOperation.py')
 
-    def test_reassign_variable_with_none(self):
+    def test_reassign_variable_with_none_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x02'
@@ -130,26 +107,16 @@ class TestNone(BoaTest):
             + Opcode.RET        # return
         )
 
-        path = self.get_contract_path('ReassignVariableWithNone.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReassignVariableWithNone.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_reassign_variable_with_none_run(self):
+        await self.set_up_contract('ReassignVariableWithNone.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertEqual(None, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_reassign_variable_after_none(self):
+    def test_reassign_variable_after_none_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x02'
@@ -162,25 +129,14 @@ class TestNone(BoaTest):
             + Opcode.STLOC1
             + Opcode.RET        # return
         )
-        path = self.get_contract_path('ReassignVariableAfterNone.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReassignVariableAfterNone.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_reassign_variable_after_none_run(self):
+        await self.set_up_contract('ReassignVariableAfterNone.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertEqual(None, result)
 
     def test_boa2_none_test(self):
-        path = self.get_contract_path('NoneBoa2Test.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'NoneBoa2Test.py')

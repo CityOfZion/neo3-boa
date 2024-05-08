@@ -1,5 +1,3 @@
-from typing import Optional
-
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.interop.nativecontract.Nep17.getnep17scripthashmethod import GetNep17ScriptHashMethod
 
@@ -15,7 +13,7 @@ class GetGasScriptHashMethod(GetNep17ScriptHashMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
 

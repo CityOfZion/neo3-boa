@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -11,8 +11,8 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
 class PopMethod(IBuiltinMethod):
-    def __init__(self, args: Dict[str, Variable] = None,
-                 defaults: List[ast.AST] = None, return_type: IType = None):
+    def __init__(self, args: dict[str, Variable] = None,
+                 defaults: list[ast.AST] = None, return_type: IType = None):
         identifier = 'pop'
 
         super().__init__(identifier, args, defaults=defaults, return_type=return_type)
@@ -76,7 +76,7 @@ class PopMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

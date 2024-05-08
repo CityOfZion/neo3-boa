@@ -1,5 +1,6 @@
-from typing import Any, Dict
+from typing import Any
 
+from boa3.internal.model.type.annotation.ellipsistype import ellipsisType
 from boa3.internal.model.type.annotation.optionaltype import OptionalType
 from boa3.internal.model.type.annotation.uniontype import UnionType
 from boa3.internal.model.type.anytype import anyType
@@ -24,7 +25,7 @@ from boa3.internal.model.type.primitive.strtype import StrType
 
 class Type:
     @classmethod
-    def builtin_types(cls) -> Dict[str, IType]:
+    def builtin_types(cls) -> dict[str, IType]:
         """
         Gets a dictionary that maps each type with its name
 
@@ -46,7 +47,7 @@ class Type:
         return {tpe._identifier: tpe for tpe in builtin_types if isinstance(tpe, IType)}
 
     @classmethod
-    def all_types(cls) -> Dict[str, IType]:
+    def all_types(cls) -> dict[str, IType]:
         return {tpe._identifier: tpe for tpe in vars(cls).values() if isinstance(tpe, IType)}
 
     @classmethod
@@ -122,4 +123,5 @@ class Type:
     # Annotation types
     union = UnionType()
     optional = OptionalType()
+    ellipsis = ellipsisType
     any = anyType

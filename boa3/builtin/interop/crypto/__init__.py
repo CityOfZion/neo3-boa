@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-from typing import Any, List
+from typing import Any
 
 from boa3.builtin.interop.crypto.ibls12381 import IBls12381
 from boa3.builtin.interop.crypto.namedcurve import NamedCurve
@@ -115,7 +115,7 @@ def check_sig(pub_key: ECPoint, signature: bytes) -> bool:
     pass
 
 
-def check_multisig(pubkeys: List[ECPoint], signatures: List[bytes]) -> bool:
+def check_multisig(pubkeys: list[ECPoint], signatures: list[bytes]) -> bool:
     """
     Checks the signatures for the current script container.
 
@@ -125,9 +125,9 @@ def check_multisig(pubkeys: List[ECPoint], signatures: List[bytes]) -> bool:
     False
 
     :param pubkeys: a list of public keys
-    :type pubkeys: List[ECPoint]
+    :type pubkeys: list[ECPoint]
     :param signatures: a list of signatures
-    :type signatures: List[bytes]
+    :type signatures: list[bytes]
     :return: a boolean value that represents whether the signatures were validated
     :rtype: bool
     """

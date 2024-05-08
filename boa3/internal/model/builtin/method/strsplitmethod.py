@@ -1,5 +1,4 @@
 import ast
-from typing import Dict, List
 
 from boa3.internal.model.builtin.interop.nativecontract import StdLibMethod
 from boa3.internal.model.variable import Variable
@@ -11,7 +10,7 @@ class StrSplitMethod(StdLibMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'split'
         syscall = 'stringSplit'
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'self': Variable(Type.str),
             'sep': Variable(Type.str),
             'maxsplit': Variable(Type.int)
@@ -32,7 +31,7 @@ class StrSplitMethod(StdLibMethod):
                          internal_call_args=len(neo_internal_args))
 
     @property
-    def generation_order(self) -> List[int]:
+    def generation_order(self) -> list[int]:
         # the original string must be the top value in the stack
         indexes = list(range(len(self.args)))
         str_index = list(self.args).index('self')
@@ -46,6 +45,7 @@ class StrSplitMethod(StdLibMethod):
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
+        from boa3.internal.model.type.type import Type
 
         code_generator.duplicate_stack_item(3)
         code_generator.swap_reverse_stack_items(2)
@@ -62,14 +62,17 @@ class StrSplitMethod(StdLibMethod):
         code_generator.duplicate_stack_top_item()
 
         #       concat values
+        concat_operation = BinaryOp.Concat.build(Type.bytearray)  # to return buffer
+
         code_generator.duplicate_stack_item(4)
         code_generator.duplicate_stack_item(2)
         code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
-        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.convert_operation(concat_operation, is_internal=True)
         code_generator.duplicate_stack_item(2)
         code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
         code_generator.swap_reverse_stack_items(2)
-        code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
+        code_generator.convert_operation(concat_operation, is_internal=True)
+        code_generator.convert_cast(Type.str, is_internal=True)
         code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
 
         while_condition = code_generator.bytecode_size

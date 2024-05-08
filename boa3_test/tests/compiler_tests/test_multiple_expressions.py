@@ -1,16 +1,13 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestMultipleExpressions(BoaTest):
+class TestMultipleExpressions(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc'
 
-    def test_multiple_arithmetic_expressions(self):
+    def test_multiple_arithmetic_expressions_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x03'
@@ -31,24 +28,15 @@ class TestMultipleExpressions(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiple_arithmetic_expressions(self):
+        await self.set_up_contract('arithmetic_test', 'MultipleExpressionsInLine.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=int)
+        self.assertEqual(3, result)
+        result, _ = await self.call('Main', [5, -7], return_type=int)
+        self.assertEqual(-2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(3)
-        invokes.append(runner.call_contract(path, 'Main', 5, -7))
-        expected_results.append(-2)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_multiple_relational_expressions(self):
+    def test_multiple_relational_expressions_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x03'
@@ -74,26 +62,17 @@ class TestMultipleExpressions(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiple_relational_expressions(self):
+        await self.set_up_contract('relational_test', 'MultipleExpressionsInLine.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1, 2], return_type=bool)
+        self.assertEqual(True, result)
+        result, _ = await self.call('Main', [5, -7], return_type=bool)
+        self.assertEqual(True, result)
+        result, _ = await self.call('Main', [-4, -4], return_type=bool)
+        self.assertEqual(False, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1, 2))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', 5, -7))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'Main', -4, -4))
-        expected_results.append(False)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_multiple_logic_expressions(self):
+    def test_multiple_logic_expressions_compile(self):
         expected_output = (
             Opcode.INITSLOT     # function signature
             + b'\x03'
@@ -119,32 +98,23 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('logical_test', 'MultipleExpressionsInLine.py')
+        path = self.get_contract_path('logical_test', 'LogicMultipleExpressionsInLine.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiple_logic_expressions(self):
+        await self.set_up_contract('logical_test', 'LogicMultipleExpressionsInLine.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True, False, False], return_type=bool)
+        self.assertEqual(False, result)
+        result, _ = await self.call('Main', [False, True, False], return_type=bool)
+        self.assertEqual(False, result)
+        result, _ = await self.call('Main', [False, False, False], return_type=bool)
+        self.assertEqual(False, result)
+        result, _ = await self.call('Main', [True, True, False], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True, False, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', False, True, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', False, False, False))
-        expected_results.append(False)
-        invokes.append(runner.call_contract(path, 'Main', True, True, False))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_multiple_tuple_expressions(self):
+    def test_multiple_tuple_expressions_compile(self):
         a = String('a').to_bytes()
         b = String('b').to_bytes()
         c = String('c').to_bytes()
@@ -182,24 +152,15 @@ class TestMultipleExpressions(BoaTest):
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiple_tuple_expressions(self):
+        await self.set_up_contract('tuple_test', 'MultipleExpressionsInLine.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [[1, 2]], return_type=int)
+        self.assertEqual(5, result)
+        result, _ = await self.call('Main', [[-5, -7]], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', [1, 2]))
-        expected_results.append(5)
-        invokes.append(runner.call_contract(path, 'Main', [-5, -7]))
-        expected_results.append(-1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_multiple_list_expressions(self):
+    def test_multiple_list_expressions_compile(self):
         one = String('1').to_bytes()
         four = String('4').to_bytes()
 
@@ -230,23 +191,15 @@ class TestMultipleExpressions(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('list_test', 'MultipleExpressionsInLine.py')
+        path = self.get_contract_path('list_test', 'ListMultipleExpressionsInLine.py')
         output = self.compile(path)
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiple_list_expressions(self):
+        await self.set_up_contract('list_test', 'ListMultipleExpressionsInLine.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [[2, 1]], return_type=int)
+        self.assertEqual(7, result)
+        result, _ = await self.call('Main', [[-7, 5]], return_type=int)
+        self.assertEqual(-2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', [2, 1]))
-        expected_results.append(7)
-        invokes.append(runner.call_contract(path, 'Main', [-7, 5]))
-        expected_results.append(-2)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)

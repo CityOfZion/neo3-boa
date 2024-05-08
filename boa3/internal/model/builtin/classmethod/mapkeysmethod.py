@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -18,7 +18,7 @@ class MapKeysMethod(IBuiltinMethod):
             return_type = Type.sequence.build_collection(mapping_type.key_type)
 
         identifier = 'keys'
-        args: Dict[str, Variable] = {'self': self_arg}
+        args: dict[str, Variable] = {'self': self_arg}
         super().__init__(identifier, args, return_type=return_type)
 
     @property
@@ -41,7 +41,7 @@ class MapKeysMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
     def build(self, value: Any) -> IBuiltinMethod:

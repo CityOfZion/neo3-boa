@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.variable import Variable
@@ -7,7 +7,7 @@ from boa3.internal.model.variable import Variable
 
 class CountMethod(IBuiltinMethod):
 
-    def __init__(self, args: Dict[str, Variable] = None, defaults: List[ast.AST] = None):
+    def __init__(self, args: dict[str, Variable] = None, defaults: list[ast.AST] = None):
         from boa3.internal.model.type.type import Type
         identifier = 'count'
         super().__init__(identifier, args, defaults=defaults, return_type=Type.int)
@@ -49,7 +49,7 @@ class CountMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

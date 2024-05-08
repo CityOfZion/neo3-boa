@@ -1,9 +1,8 @@
 import abc
-from typing import Dict, List
 
 
 class NeoExpressCommand:
-    def __init__(self, command_id: str, args: List[str] = None, options: Dict[str, str] = None):
+    def __init__(self, command_id: str, args: list[str] = None, options: dict[str, str] = None):
         if not isinstance(args, list):
             args = []
 
@@ -15,7 +14,7 @@ class NeoExpressCommand:
         self._options = options
 
     @abc.abstractmethod
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         import os.path
         options = {}
 

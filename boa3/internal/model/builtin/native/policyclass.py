@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict
+from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import PolicyContract
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
@@ -16,7 +14,7 @@ class PolicyClass(INativeContractClass):
         super().__init__('Policy', PolicyContract)
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
         from boa3.internal.model.builtin.interop.interop import Interop
 
@@ -30,7 +28,7 @@ class PolicyClass(INativeContractClass):
         return super().class_methods
 
     @classmethod
-    def build(cls, value: Any = None) -> PolicyClass:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _Policy
 

@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Any
+from typing import Any
 
 from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.test_drive.neoxp.command import utils
@@ -37,7 +37,7 @@ class TransferAssetCommand(NeoExpressCommand):
 
         super().__init__(command_id, args)
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if self.data is not None:

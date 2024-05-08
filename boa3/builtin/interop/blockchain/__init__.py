@@ -14,8 +14,6 @@ __all__ = [
     'current_index',
 ]
 
-from typing import List, Optional, Union
-
 from boa3.builtin.interop.blockchain.block import Block
 from boa3.builtin.interop.blockchain.signer import Signer
 from boa3.builtin.interop.blockchain.transaction import Transaction
@@ -24,7 +22,7 @@ from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160, UInt256
 
 
-def get_contract(hash: UInt160) -> Optional[Contract]:
+def get_contract(hash: UInt160) -> Contract | None:
     """
     Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will return
     None.
@@ -59,7 +57,7 @@ def get_contract(hash: UInt160) -> Optional[Contract]:
     pass
 
 
-def get_block(index_or_hash: Union[int, UInt256]) -> Optional[Block]:
+def get_block(index_or_hash: int | UInt256) -> Block | None:
     """
     Gets the block with the given index or hash. Will return None if the index or hash is not associated with a Block.
 
@@ -105,7 +103,7 @@ def get_block(index_or_hash: Union[int, UInt256]) -> Optional[Block]:
     pass
 
 
-def get_transaction(hash_: UInt256) -> Optional[Transaction]:
+def get_transaction(hash_: UInt256) -> Transaction | None:
     """
     Gets a transaction with the given hash. Will return None if the hash is not associated with a Transaction.
 
@@ -131,7 +129,7 @@ def get_transaction(hash_: UInt256) -> Optional[Transaction]:
     pass
 
 
-def get_transaction_from_block(block_hash_or_height: Union[UInt256, int], tx_index: int) -> Optional[Transaction]:
+def get_transaction_from_block(block_hash_or_height: UInt256 | int, tx_index: int) -> Transaction | None:
     """
     Gets a transaction from a block. Will return None if the block hash or height is not associated with a Transaction.
 
@@ -194,7 +192,7 @@ def get_transaction_height(hash_: UInt256) -> int:
     pass
 
 
-def get_transaction_signers(hash_: UInt256) -> List[Signer]:
+def get_transaction_signers(hash_: UInt256) -> list[Signer]:
     """
     Gets a list with the signers of a transaction.
 

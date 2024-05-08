@@ -1,168 +1,118 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.core import types
+from neo3.network.payloads import block
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
-from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
-from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.contracts import CallFlags
-from boa3.internal.neo3.core.types import UInt160, UInt256
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_classes.contract.neomanifeststruct import NeoManifestStruct
-from boa3_test.tests.test_drive import neoxp
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import annotation, boatestcase, stackitem
 
 
-class TestBlockchainInterop(BoaTest):
+class TestBlockchainInterop(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/interop_test/blockchain'
 
-    def test_block_constructor(self):
-        path, _ = self.get_deploy_file_paths('Block.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    genesis_block: block.Block
 
-        invoke = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        await super().asyncSetupClass()
 
-        result = invoke.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(10, len(result))
-        for k in range(len(result)):
-            if isinstance(result[k], str):
-                result[k] = String(result[k]).to_bytes()
-        self.assertEqual(UInt256(), UInt256(result[0]))  # hash
-        self.assertEqual(0, result[1])  # version
-        self.assertEqual(UInt256(), UInt256(result[2]))  # previous_hash
-        self.assertEqual(UInt256(), UInt256(result[3]))  # merkle_root
-        self.assertEqual(0, result[4])  # timestamp
-        self.assertEqual(0, result[5])  # nonce
-        self.assertEqual(0, result[6])  # index
-        self.assertEqual(0, result[7])  # primary_index
-        self.assertEqual(UInt160(), UInt160(result[8]))  # next_consensus
-        self.assertEqual(0, result[9])  # transaction_count
+        cls.genesis_block = await cls.get_genesis_block()
 
-    def test_get_contract(self):
-        path, _ = self.get_deploy_file_paths('GetContract.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_block_constructor(self):
+        await self.set_up_contract('Block.py')
 
-        invokes = []
-        expected_results = []
+        zero_uint256 = types.UInt256.zero()
+        expected: annotation.Block = (
+            zero_uint256,  # hash
+            0,  # version
+            zero_uint256,  # previous hash
+            zero_uint256,  # merkle root
+            0,  # timestamp
+            0,  # nonce
+            0,  # index
+            types.UInt160.zero(),  # next consensus
+            0  # tx count
+        )
+        result, _ = await self.call('main', [], return_type=annotation.Block)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
-        invokes.append(runner.call_contract(path, 'main', bytes(20)))
-        expected_results.append(None)
+    async def test_get_contract(self):
+        await self.set_up_contract('GetContract.py')
+
+        invalid_contract = types.UInt160.zero()
+        result, _ = await self.call('main', [invalid_contract], return_type=None)
+        self.assertIsNone(result)
 
         call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        nef, manifest = self.get_bytes_output(call_contract_path)
+        nef, manifest = self.get_serialized_output(call_contract_path)
+        manifest = stackitem.from_manifest(manifest)
 
-        call_contract_path, _ = self.get_deploy_file_paths(call_contract_path)
-        contract = runner.deploy_contract(call_contract_path)
-        runner.update_contracts(export_checkpoint=True)
-        call_hash = contract.script_hash
-
-        invoke = runner.call_contract(path, 'main', call_hash)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        result = invoke.result
+        call_hash = await self.compile_and_deploy(call_contract_path)
+        result, _ = await self.call('main', [call_hash], return_type=annotation.Contract)
         self.assertEqual(5, len(result))
         self.assertEqual(call_hash, result[2])
         self.assertEqual(nef, result[3])
-        manifest_struct = NeoManifestStruct.from_json(manifest)
-        self.assertEqual(manifest_struct, result[4])
+        self.assertEqual(manifest, result[4])
 
-    def test_get_block_by_index(self):
-        path, _ = self.get_deploy_file_paths('GetBlockByIndex.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_block_by_index(self):
+        await self.set_up_contract('GetBlockByIndex.py')
 
-        test_index_0 = 0
-        test_index_10 = 10
-        test_index_nonexistent = 10 ** 5
-        expected_result_size = len(Interop.BlockType.variables)
+        invalid_block_index = 10 ** 5
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [invalid_block_index], return_type=annotation.Block)
 
-        runner.increase_block(test_index_10)
-        get_block_0 = runner.call_contract(path, 'Main', test_index_0)
-        get_block_10 = runner.call_contract(path, 'Main', test_index_10)
-        get_nonexistent_block = runner.call_contract(path, 'Main', test_index_nonexistent)
+        self.assertRegex(str(context.exception), f'no block with index {invalid_block_index}')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        valid_block = self.genesis_block
+        block_index = valid_block.index
+        expected = stackitem.from_block(valid_block)
+        result, _ = await self.call('Main', [block_index], return_type=annotation.Block)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
-        result = get_block_0.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(expected_result_size, len(result))
-        self.assertEqual(test_index_0, result[6])
+        valid_block = await self.get_latest_block()
+        block_index = valid_block.index
+        expected = stackitem.from_block(valid_block)
+        result, _ = await self.call('Main', [block_index], return_type=annotation.Block)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
-        result = get_nonexistent_block.result
+    async def test_get_block_by_hash(self):
+        await self.set_up_contract('GetBlockByHash.py')
+
+        invalid_block_hash = types.UInt256(bytes(range(32)))
+        result, _ = await self.call('Main', [invalid_block_hash], return_type=None)
         self.assertIsNone(result)
 
-        result = get_block_10.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(expected_result_size, len(result))
-        self.assertEqual(test_index_10, result[6])
-
-    def test_get_block_by_hash(self):
-        path, _ = self.get_deploy_file_paths('GetBlockByHash.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        genesis_block = runner.get_genesis_block()
-        expected_result_size = len(Interop.BlockType.variables)
-        nonexistent_block_hash = UInt256.zero().to_array()
-        genesis_hash = genesis_block.hash.to_array()
-
-        get_nonexistent_block = runner.call_contract(path, 'Main', nonexistent_block_hash)
-        get_existent_block = runner.call_contract(path, 'Main', genesis_hash)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        result = get_nonexistent_block.result
-        self.assertIsNone(result)
-
-        result = get_existent_block.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(expected_result_size, len(result))
-
-        self.assertEqual(genesis_hash, result[0])
-        self.assertEqual(genesis_block.timestamp, result[4])
-        self.assertEqual(genesis_block.index, result[6])
+        valid_block = self.genesis_block
+        valid_block_hash = valid_block.hash()
+        expected = stackitem.from_block(valid_block)
+        result, _ = await self.call('Main', [valid_block_hash], return_type=annotation.Block)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
     def test_get_block_mismatched_types(self):
-        path = self.get_contract_path('GetBlockMismatchedTypes.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetBlockMismatchedTypes.py')
 
-    def test_transaction_init(self):
-        path, _ = self.get_deploy_file_paths('Transaction.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_transaction_init(self):
+        await self.set_up_contract('Transaction.py')
 
-        invoke = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected: annotation.Transaction = (
+            types.UInt256.zero(),  # hash
+            0,  # version
+            0,  # nonce
+            types.UInt160.zero(),  # sender
+            0,  # system fee
+            0,  # network fee
+            0,  # valid until block
+            b''  # script
+        )
+        result, _ = await self.call('main', [], return_type=annotation.Transaction)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
-        result = invoke.result
-        self.assertEqual(8, len(result))
-        if isinstance(result[0], str):
-            result[0] = String(result[0]).to_bytes()
-        self.assertEqual(UInt256(), UInt256(result[0]))  # hash
-        self.assertEqual(0, result[1])  # version
-        self.assertEqual(0, result[2])  # nonce
-        if isinstance(result[3], str):
-            result[3] = String(result[3]).to_bytes()
-        self.assertEqual(UInt160(), UInt160(result[3]))  # sender
-        self.assertEqual(0, result[4])  # system_fee
-        self.assertEqual(0, result[5])  # network_fee
-        self.assertEqual(0, result[6])  # valid_until_block
-        if isinstance(result[7], str):
-            result[7] = String(result[7]).to_bytes()
-        self.assertEqual(b'', result[7])  # script
-
-    def test_get_transaction(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getTransaction').to_bytes()
-
+    def test_get_transaction_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'
@@ -170,53 +120,29 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
-        path = self.get_contract_path('GetTransaction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('GetTransaction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_transaction_run(self):
+        await self.set_up_contract('GetTransaction.py')
 
-        sender = neoxp.utils.get_default_account()
-        contract_deploy = runner.deploy_contract(path)
-        runner.update_contracts(export_checkpoint=True)
-
-        hash_ = contract_deploy.tx_id
-        self.assertIsInstance(hash_, UInt256, msg=runner.cli_log)
-
-        tx = runner.get_transaction(hash_)
-        self.assertIsNotNone(tx)
-
-        nonexistent_tx = runner.call_contract(path, 'main', UInt256(bytes(32)).to_array())
-
-        invoke = runner.call_contract(path, 'main', hash_.to_array())
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        result = nonexistent_tx.result
+        invalid_tx = types.UInt256.zero()
+        result, _ = await self.call('main', [invalid_tx], return_type=None, signing_accounts=[self.genesis])
         self.assertIsNone(result)
 
-        result = invoke.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(8, len(result))
+        tx = await self.get_last_tx()
+        self.assertIsNotNone(tx)
+        hash_ = tx.hash()
 
-        self.assertEqual(hash_, UInt256(result[0]))  # hash
-        self.assertEqual(tx.version, result[1])  # version
-        self.assertEqual(tx.nonce, result[2])  # nonce
-        self.assertEqual(sender.script_hash, UInt160(result[3]))  # sender
-        self.assertEqual(tx.system_fee, result[4])  # system_fee
-        self.assertEqual(tx.network_fee, result[5])  # network_fee
-        self.assertEqual(tx.valid_until_block, result[6])  # valid_until_block
-        self.assertEqual(tx.script, result[7])  # script
+        expected = stackitem.from_transaction(tx)
+        result, _ = await self.call('main', [hash_], return_type=annotation.Transaction)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
     def test_get_transaction_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionMismatchedType.py')
 
-    def test_get_transaction_from_block_int(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getTransactionFromBlock').to_bytes()
-
+    def test_get_transaction_from_block_int_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x02'
@@ -225,52 +151,33 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
-        path = self.get_contract_path('GetTransactionFromBlockInt.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('GetTransactionFromBlockInt.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_transaction_from_block_int_run(self):
+        await self.set_up_contract('GetTransactionFromBlockInt.py')
 
-        sender = neoxp.utils.get_default_account()
-        contract_deploy = runner.deploy_contract(path, account=sender)
-        runner.update_contracts(export_checkpoint=True)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main',
+                            [0, 0],
+                            return_type=annotation.Transaction
+                            )
 
-        block = runner.get_latest_block()
-        expected_block_index = block.index
+        self.assertRegex(str(context.exception), 'wrong transaction index')
 
-        hash_ = contract_deploy.tx_id
-        self.assertIsInstance(hash_, UInt256)
+        block_ = await self.get_latest_block()
+        self.assertGreater(len(block_.transactions), 0)
 
-        tx = runner.get_transaction(hash_)
+        expected_block_index = block_.index
+        tx = block_.transactions[0]
         self.assertIsNotNone(tx)
 
-        nonexistent_tx = runner.call_contract(path, 'main', 123456789, 0)
+        expected = stackitem.from_transaction(tx)
+        result, _ = await self.call('main', [expected_block_index, 0], return_type=annotation.Transaction)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
-        invoke = runner.call_contract(path, 'main', expected_block_index, 0)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        result = nonexistent_tx.result
-        self.assertIsNone(result)
-
-        result = invoke.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(8, len(result))
-
-        self.assertEqual(hash_, UInt256(result[0]))  # hash
-        self.assertEqual(tx.version, result[1])  # version
-        self.assertEqual(tx.nonce, result[2])  # nonce
-        self.assertEqual(sender.script_hash, UInt160(result[3]))  # sender
-        self.assertEqual(tx.system_fee, result[4])  # system_fee
-        self.assertEqual(tx.network_fee, result[5])  # network_fee
-        self.assertEqual(tx.valid_until_block, result[6])  # valid_until_block
-        self.assertEqual(tx.script, result[7])  # script
-
-    def test_get_transaction_from_block_uint256(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getTransactionFromBlock').to_bytes()
-
+    def test_get_transaction_from_block_uint256_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x02'
@@ -279,54 +186,36 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
-        path = self.get_contract_path('GetTransactionFromBlockUInt256.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('GetTransactionFromBlockUInt256.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_transaction_from_block_uint256_run(self):
+        await self.set_up_contract('GetTransactionFromBlockUInt256.py')
 
-        runner.deploy_contract(path)  # to have a block with tx
-        runner.update_contracts(export_checkpoint=True)
-        block = runner.get_latest_block()
-        self.assertIsNotNone(block)
-        block_hash = block.hash.to_array()
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main',
+                            [types.UInt256.zero(), 0],
+                            return_type=annotation.Transaction
+                            )
 
-        txs = block.transactions
-        self.assertGreater(len(txs), 0)
-        tx_index = 0
-        expected_tx = txs[tx_index]
+        self.assertRegex(str(context.exception), 'wrong transaction index')
 
-        nonexistent_tx = runner.call_contract(path, 'main', UInt256(bytes(32)).to_array(), 0)
+        block_ = await self.get_latest_block()
+        self.assertGreater(len(block_.transactions), 0)
 
-        invoke = runner.call_contract(path, 'main', block_hash, tx_index)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        expected_block_hash = block_.hash()
+        tx = block_.transactions[0]
+        self.assertIsNotNone(tx)
 
-        result = nonexistent_tx.result
-        self.assertIsNone(result)
-
-        result = invoke.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(8, len(result))
-
-        self.assertEqual(expected_tx.hash, UInt256(result[0]))  # hash
-        self.assertEqual(expected_tx.version, result[1])  # version
-        self.assertEqual(expected_tx.nonce, result[2])  # nonce
-        self.assertEqual(expected_tx.sender.script_hash, UInt160(result[3]))  # sender
-        self.assertEqual(expected_tx.system_fee, result[4])  # system_fee
-        self.assertEqual(expected_tx.network_fee, result[5])  # network_fee
-        self.assertEqual(expected_tx.valid_until_block, result[6])  # valid_until_block
-        self.assertEqual(expected_tx.script, result[7])  # script
+        expected = stackitem.from_transaction(tx)
+        result, _ = await self.call('main', [expected_block_hash, 0], return_type=annotation.Transaction)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
     def test_get_transaction_from_block_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionFromBlockMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionFromBlockMismatchedType.py')
 
-    def test_get_transaction_height(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getTransactionHeight').to_bytes()
-
+    def test_get_transaction_height_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'
@@ -334,43 +223,24 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
-        path = self.get_contract_path('GetTransactionHeight.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('GetTransactionHeight.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_transaction_height_run(self):
+        await self.set_up_contract('GetTransactionHeight.py')
 
-        invokes = []
-        expected_results = []
+        block_ = await self.get_latest_block()
+        self.assertGreater(len(block_.transactions), 0)
+        tx = block_.transactions[0]
 
-        expected_block_index = 10
-        blocks_to_mint = expected_block_index - 1  # mint blocks before running the tx to check
-
-        runner.increase_block(blocks_to_mint)
-        contract_deploy = runner.deploy_contract(path)
-        runner.update_contracts(export_checkpoint=True)
-
-        hash_ = contract_deploy.tx_id
-        self.assertIsInstance(hash_, UInt256)
-
-        invokes.append(runner.call_contract(path, 'main', hash_.to_array()))
-        expected_results.append(expected_block_index)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected = block_.index
+        result, _ = await self.call('main', [tx.hash()], return_type=int)
+        self.assertEqual(expected, result)
 
     def test_get_transaction_height_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionHeightMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionHeightMismatchedType.py')
 
-    def test_get_transaction_signers(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getTransactionSigners').to_bytes()
-
+    def test_get_transaction_signers_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'
@@ -378,47 +248,36 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
-        path = self.get_contract_path('GetTransactionSigners.py')
-        output, manifest = self.get_output(path)
+        output, _ = self.assertCompile('GetTransactionSigners.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_transaction_signers_run(self):
+        await self.set_up_contract('GetTransactionSigners.py')
 
-        expected_block_index = 10
-        blocks_to_mint = expected_block_index - 1  # mint blocks before running the tx to check
+        invalid_tx = types.UInt256.zero()
+        result, _ = await self.call('main',
+                                    [invalid_tx],
+                                    return_type=None,
+                                    signing_accounts=[self.genesis]  # persist to emit a new block
+                                    )
+        self.assertIsNone(result)
 
-        runner.increase_block(blocks_to_mint)
-
-        contract_deploy = runner.deploy_contract(path)
-        runner.update_contracts(export_checkpoint=True)
-
-        hash_ = contract_deploy.tx_id
-        self.assertIsInstance(hash_, UInt256)
-
-        tx = runner.get_transaction(hash_)
+        tx = await self.get_last_tx()
         self.assertIsNotNone(tx)
+        self.assertGreater(len(tx.signers), 0)
+        hash_ = tx.hash()
 
-        invoke = runner.call_contract(path, 'main', hash_.to_array())
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        result = invoke.result
-        self.assertIsInstance(result, list)
-        self.assertEqual(len(result), len(tx.signers))
-
-        self.assertIsInstance(result[0], list)
-        self.assertEqual(len(result[0]), len(Interop.SignerType.variables))
-        self.assertEqual(result[0][0], tx.signers[0].account.to_array())
+        expected: list[annotation.Signer] = [
+            stackitem.from_signer(signer) for signer in tx.signers
+        ]
+        result, _ = await self.call('main', [hash_], return_type=list[annotation.Signer])
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
 
     def test_get_transaction_signers_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionSignersMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionSignersMismatchedType.py')
 
-    def test_get_transaction_vm_state(self):
-        call_flags = Integer(CallFlags.ALL).to_byte_array(signed=True, min_length=1)
-        method = String('getTransactionVMState').to_bytes()
-
+    def test_get_transaction_vm_state_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00\x01'
@@ -426,112 +285,78 @@ class TestBlockchainInterop(BoaTest):
             + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
-        path = self.get_contract_path('GetTransactionVMState.py')
-        output, manifest = self.get_output(path)
+        output, _ = self.assertCompile('GetTransactionVMState.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_transaction_vm_state_run(self):
+        await self.set_up_contract('GetTransactionVMState.py')
 
-        contract_deploy = runner.deploy_contract(path)
-        runner.update_contracts(export_checkpoint=True)
+        hash_ = self.called_tx
+        self.assertIsNotNone(hash_)
 
-        hash_ = contract_deploy.tx_id
-        self.assertIsInstance(hash_, UInt256)
+        native_result, _ = await self.call('getTransactionVMState',
+                                           [hash_],
+                                           return_type=int,
+                                           target_contract=types.UInt160(constants.LEDGER_SCRIPT)
+                                           )
 
-        native_invoke = runner.call_contract(constants.LEDGER_SCRIPT, 'getTransactionVMState', hash_.to_array())
-        contract_invoke = runner.call_contract(path, 'main', hash_.to_array())
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        self.assertEqual(native_invoke.result, contract_invoke.result)
+        contract_invoke, _ = await self.call('main',
+                                             [hash_],
+                                             return_type=int
+                                             )
+        self.assertEqual(native_result, contract_invoke)
 
     def test_get_transaction_vm_state_mismatched_type(self):
-        path = self.get_contract_path('GetTransactionVMStateMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionVMStateMismatchedType.py')
 
-    def test_import_blockchain(self):
-        path, _ = self.get_deploy_file_paths('ImportBlockchain.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_blockchain(self):
+        await self.set_up_contract('ImportBlockchain.py')
 
-        invokes = []
-        expected_results = []
+        invalid_contract = types.UInt160.zero()
+        result, _ = await self.call('main', [invalid_contract], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'main', bytes(20)))
-        expected_results.append(None)
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Subtraction.py')
+        nef, manifest = self.get_serialized_output(call_contract_path)
+        manifest = stackitem.from_manifest(manifest)
 
-        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        nef, manifest = self.get_bytes_output(call_contract_path)
-
-        call_contract_path, _ = self.get_deploy_file_paths(call_contract_path)
-        contract = runner.deploy_contract(call_contract_path)
-        runner.update_contracts(export_checkpoint=True)
-        call_hash = contract.script_hash
-
-        invoke = runner.call_contract(path, 'main', call_hash)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        result = invoke.result
-        self.assertIsInstance(result, list)
+        call_hash = await self.compile_and_deploy(call_contract_path)
+        result, _ = await self.call('main', [call_hash], return_type=annotation.Contract)
         self.assertEqual(5, len(result))
         self.assertEqual(call_hash, result[2])
         self.assertEqual(nef, result[3])
-        manifest_struct = NeoManifestStruct.from_json(manifest)
-        self.assertEqual(manifest_struct, result[4])
+        self.assertEqual(manifest, result[4])
 
-    def test_import_interop_blockchain(self):
-        path, _ = self.get_deploy_file_paths('ImportInteropBlockchain.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_import_interop_blockchain(self):
+        await self.set_up_contract('ImportInteropBlockchain.py')
 
-        invokes = []
-        expected_results = []
+        invalid_contract = types.UInt160.zero()
+        result, _ = await self.call('main', [invalid_contract], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'main', bytes(20)))
-        expected_results.append(None)
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Concatenation.py')
+        nef, manifest = self.get_serialized_output(call_contract_path)
+        manifest = stackitem.from_manifest(manifest)
 
-        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Addition.py')
-        nef, manifest = self.get_bytes_output(call_contract_path)
-
-        call_contract_path, _ = self.get_deploy_file_paths(call_contract_path)
-        contract = runner.deploy_contract(call_contract_path)
-        runner.update_contracts(export_checkpoint=True)
-        call_hash = contract.script_hash
-
-        invoke = runner.call_contract(path, 'main', call_hash)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        result = invoke.result
+        call_hash = await self.compile_and_deploy(call_contract_path)
+        result, _ = await self.call('main', [call_hash], return_type=annotation.Contract)
         self.assertEqual(5, len(result))
         self.assertEqual(call_hash, result[2])
         self.assertEqual(nef, result[3])
-        manifest_struct = NeoManifestStruct.from_json(manifest)
-        self.assertEqual(manifest_struct, result[4])
+        self.assertEqual(manifest, result[4])
 
-    def test_current_hash(self):
-        path, _ = self.get_deploy_file_paths('CurrentHash.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_current_hash(self):
+        await self.set_up_contract('CurrentHash.py')
 
-        invoke = runner.call_contract(path, 'main', expected_result_type=bytes)
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=types.UInt256, signing_accounts=[self.genesis])
+        block_ = await self.get_last_block(self.called_tx)
+        expected = block_.hash()
+        self.assertEqual(expected, result)
 
-        block = runner.get_latest_block()
-        self.assertEqual(block.hash.to_array(), invoke.result)
+    async def test_current_index(self):
+        await self.set_up_contract('CurrentIndex.py')
 
-    def test_current_index(self):
-        path, _ = self.get_deploy_file_paths('CurrentIndex.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invoke = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        block = runner.get_latest_block()
-        self.assertEqual(block.index, invoke.result)
+        result, _ = await self.call('main', [], return_type=int, signing_accounts=[self.genesis])
+        block_ = await self.get_last_block(self.called_tx)
+        expected = block_.index
+        self.assertEqual(expected, result)

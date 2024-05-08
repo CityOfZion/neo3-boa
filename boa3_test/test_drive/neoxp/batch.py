@@ -1,5 +1,5 @@
 import threading
-from typing import List, Union, Any, Type
+from typing import Any
 
 from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.types import UInt160
@@ -18,12 +18,12 @@ _NEOXP_BATCH_LOCK = threading.Lock()
 
 class NeoExpressBatch:
     def __init__(self, neoxp_config):
-        self._instructions: List[NeoExpressCommand] = []
-        self._transaction_submissions: List[int] = []
-        self._transaction_logs: List[str] = []
+        self._instructions: list[NeoExpressCommand] = []
+        self._transaction_submissions: list[int] = []
+        self._transaction_logs: list[str] = []
 
-        self._tx_invokes: List[ITransactionObject] = []
-        self._tx_invokes_pos: List[int] = []
+        self._tx_invokes: list[ITransactionObject] = []
+        self._tx_invokes_pos: list[int] = []
         self._neoxp_config = neoxp_config
 
     def is_empty(self) -> bool:
@@ -53,7 +53,7 @@ class NeoExpressBatch:
         return deployed_contract
 
     def run_contract(self, invoke: NeoInvoke, witness_scope: WitnessScope = None,
-                     expected_result_type: Type = None) -> NeoBatchInvoke:
+                     expected_result_type: type = None) -> NeoBatchInvoke:
         if hasattr(invoke.invoker, 'name') and isinstance(invoke.invoker.name, str):
             invoker_id = invoke.invoker
         else:
@@ -83,8 +83,8 @@ class NeoExpressBatch:
 
         self._instructions.append(neoxp.contract.invoke(invoke_file, invoker_id, witness_scope))
 
-    def transfer_assets(self, sender: Account, receiver: Account, asset: Union[str, UInt160],
-                        quantity: Union[int, float], decimals: int = 0, data: Any = None):
+    def transfer_assets(self, sender: Account, receiver: Account, asset: str | UInt160,
+                        quantity: int | float, decimals: int = 0, data: Any = None):
         if isinstance(asset, UInt160):
             asset = asset.__str__()
 

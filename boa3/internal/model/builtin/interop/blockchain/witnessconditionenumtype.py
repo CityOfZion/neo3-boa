@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict
+from typing import Any, Self
 
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.primitive.inttype import IntType
@@ -21,7 +19,7 @@ class WitnessConditionType(IntType):
         return WitnessCondition.BOOLEAN
 
     @classmethod
-    def build(cls, value: Any = None) -> WitnessConditionType:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _WitnessConditionType
 
@@ -30,7 +28,7 @@ class WitnessConditionType(IntType):
         return isinstance(value, (WitnessCondition, WitnessConditionType))
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         """
         Gets the class symbols of this type
 

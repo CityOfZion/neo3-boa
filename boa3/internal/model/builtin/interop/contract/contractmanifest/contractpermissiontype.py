@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Any, Dict, Optional
+from typing import Any, Self
 
 from boa3.internal.model.method import Method
 from boa3.internal.model.property import Property
@@ -17,41 +15,41 @@ class ContractPermissionType(ClassArrayType):
         super().__init__('ContractPermission')
         from boa3.internal.model.type.type import Type
 
-        self._variables: Dict[str, Variable] = {
+        self._variables: dict[str, Variable] = {
             'contract': Variable(Type.str),
             'methods': Variable(Type.optional.build(Type.list.build_collection([Type.str])))
         }
         self._constructor: Method = None
 
     @property
-    def class_variables(self) -> Dict[str, Variable]:
+    def class_variables(self) -> dict[str, Variable]:
         return {}
 
     @property
-    def instance_variables(self) -> Dict[str, Variable]:
+    def instance_variables(self) -> dict[str, Variable]:
         return self._variables.copy()
 
     @property
-    def properties(self) -> Dict[str, Property]:
+    def properties(self) -> dict[str, Property]:
         return {}
 
     @property
-    def static_methods(self) -> Dict[str, Method]:
+    def static_methods(self) -> dict[str, Method]:
         return {}
 
     @property
-    def class_methods(self) -> Dict[str, Method]:
+    def class_methods(self) -> dict[str, Method]:
         return {}
 
     @property
-    def instance_methods(self) -> Dict[str, Method]:
+    def instance_methods(self) -> dict[str, Method]:
         return {}
 
-    def constructor_method(self) -> Optional[Method]:
+    def constructor_method(self) -> Method | None:
         return self._constructor
 
     @classmethod
-    def build(cls, value: Any = None) -> ContractPermissionType:
+    def build(cls, value: Any = None) -> Self:
         if value is None or cls._is_type_of(value):
             return _ContractPermission
 

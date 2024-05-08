@@ -1,12 +1,11 @@
 from enum import IntEnum
-from typing import Optional, Tuple
 
 from boa3.internal import constants
 from boa3.internal.neo.vm.type.Integer import Integer
 
 
-def get_native_contract_data(token_script: bytes) -> Tuple[Optional[bytes], Optional[int]]:
-    prefix: Optional[NativeContractPrefix] = None
+def get_native_contract_data(token_script: bytes) -> tuple[bytes | None, int | None]:
+    prefix: NativeContractPrefix | None = None
     contract_id: NativeContractId = NativeContractId.NONE
 
     if token_script is constants.NEO_SCRIPT:

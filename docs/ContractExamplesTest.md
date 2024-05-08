@@ -114,12 +114,12 @@
 
 ### Boolean logic operations
 
-- <a href="/boa3_test/test_sc/logical_test/BoolAnd.py">BoolAnd.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/BoolNot.py">BoolNot.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/BoolOr.py">BoolOr.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/BoolOrThreeElements.py">BoolOrThreeElements.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/MixedOperations.py">MixedOperations.py</a>, 
-- <a href="/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolAnd.py">LogicBoolAnd.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolNot.py">LogicBoolNot.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolOr.py">LogicBoolOr.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicBoolOrThreeElements.py">LogicBoolOrThreeElements.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicMixedOperations.py">LogicMixedOperations.py</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicMultipleExpressionsInLine.py">LogicMultipleExpressionsInLine.py</a>
 
 ### Built in function
 
@@ -159,10 +159,10 @@
 - <a href="/boa3_test/test_sc/dict_test/AnyValueDict.py">AnyValueDict.py</a>, 
 - <a href="/boa3_test/test_sc/dict_test/DictOfDict.py">DictOfDict.py</a>, 
 - <a href="/boa3_test/test_sc/dict_test/EmptyDictAssignment.py">EmptyDictAssignment.py</a>, 
-- <a href="/boa3_test/test_sc/dict_test/GetValue.py">GetValue.py</a>, 
+- <a href="/boa3_test/test_sc/dict_test/DictGetValue.py">DictGetValue.py</a>, 
 - <a href="/boa3_test/test_sc/dict_test/IntKeyDict.py">IntKeyDict.py</a>, 
 - <a href="/boa3_test/test_sc/dict_test/KeysDict.py">KeysDict.py</a>, 
-- <a href="/boa3_test/test_sc/dict_test/SetValue.py">SetValue.py</a>, 
+- <a href="/boa3_test/test_sc/dict_test/DictSetValue.py">DictSetValue.py</a>, 
 - <a href="/boa3_test/test_sc/dict_test/StrKeyDict.py">StrKeyDict.py</a>, 
 - <a href="/boa3_test/test_sc/dict_test/TypeHintAssignment.py">TypeHintAssignment.py</a>, 
 - <a href="/boa3_test/test_sc/dict_test/ValuesDict.py">ValuesDict.py</a>, 
@@ -201,14 +201,14 @@
 
 ### If, elif, else statements
 
-- <a href="/boa3_test/test_sc/if_test/ConstantCondition.py">ConstantCondition.py</a>, 
+- <a href="/boa3_test/test_sc/if_test/IfConstantCondition.py">IfConstantCondition.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/IfElif.py">IfElif.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/IfElse.py">IfElse.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/IfExpVariableCondition.py">IfExpVariableCondition.py</a>, 
-- <a href="/boa3_test/test_sc/if_test/MultipleBranches.py">MultipleBranches.py</a>, 
+- <a href="/boa3_test/test_sc/if_test/IfMultipleBranches.py">IfMultipleBranches.py</a>, 
 - <a href="/boa3_test/test_sc/if_test/NestedIf.py">NestedIf.py</a>, 
-- <a href="/boa3_test/test_sc/if_test/RelationalCondition.py">RelationalCondition.py</a>, 
-- <a href="/boa3_test/test_sc/if_test/VariableCondition.py">VariableCondition.py</a>
+- <a href="/boa3_test/test_sc/if_test/IfRelationalCondition.py">IfRelationalCondition.py</a>, 
+- <a href="/boa3_test/test_sc/if_test/IfVariableCondition.py">IfVariableCondition.py</a>
 
 ### Import
 
@@ -225,25 +225,25 @@
 
 ### List type
 
-- <a href="/boa3_test/test_sc/list_test/AppendAnyValue.py">AppendAnyValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/AppendIntValue.py">AppendIntValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/AppendIntWithBuiltin.py">AppendIntWithBuiltin.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListAppendAnyValue.py">ListAppendAnyValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListAppendIntValue.py">ListAppendIntValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListAppendIntWithBuiltin.py">ListAppendIntWithBuiltin.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/BoolList.py">BoolList.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/ClearList.py">ClearList.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/EmptyListAssignment.py">EmptyListAssignment.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/ExtendAnyValue.py">ExtendAnyValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/ExtendTupleValue.py">ExtendTupleValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/ExtendWithBuiltin.py">ExtendWithBuiltin.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/GetValue.py">GetValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/GetValueNegativeIndex.py">GetValueNegativeIndex.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListExtendAnyValue.py">ListExtendAnyValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListExtendTupleValue.py">ListExtendTupleValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListExtendWithBuiltin.py">ListExtendWithBuiltin.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListGetValue.py">ListGetValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListGetValueNegativeIndex.py">ListGetValueNegativeIndex.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/IntList.py">IntList.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/ListOfList.py">ListOfList.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListMultipleExpressionsInLine.py">ListMultipleExpressionsInLine.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/ReverseList.py">ReverseList.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/SetValue.py">SetValue.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/SetValueNegativeIndex.py">SetValueNegativeIndex.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListSetValue.py">ListSetValue.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListSetValueNegativeIndex.py">ListSetValueNegativeIndex.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/StrList.py">StrList.py</a>, 
-- <a href="/boa3_test/test_sc/list_test/TypeHintAssignment.py">TypeHintAssignment.py</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListTypeHintAssignment.py">ListTypeHintAssignment.py</a>, 
 - <a href="/boa3_test/test_sc/list_test/VariableList.py">VariableList.py</a>
 
 ### Local variable declarations and assignments
@@ -261,8 +261,8 @@
 ### Multiple expressions in the same line
 
 - <a href="/boa3_test/test_sc/arithmetic_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Arithmetic)</a>, 
-- <a href="/boa3_test/test_sc/logical_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Logical)</a>, 
-- <a href="/boa3_test/test_sc/list_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (List)</a>, 
+- <a href="/boa3_test/test_sc/logical_test/LogicMultipleExpressionsInLine.py">LogicMultipleExpressionsInLine (Logical)</a>, 
+- <a href="/boa3_test/test_sc/list_test/ListMultipleExpressionsInLine.py">ListMultipleExpressionsInLine (List)</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Tuple)</a>, 
 - <a href="/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine (Relational)</a>
 
@@ -274,8 +274,8 @@
 - <a href="/boa3_test/test_sc/relational_test/MixedInequality.py">MixedInequality.py</a>, 
 - <a href="/boa3_test/test_sc/relational_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>, 
 - <a href="/boa3_test/test_sc/none_test/NoneEquality.py">NoneEquality.py</a>, 
-- <a href="/boa3_test/test_sc/none_test/NoneIdentity.py">NoneIdentity.py</a>, 
-- <a href="/boa3_test/test_sc/none_test/NoneNotIdentity.py">NoneNotIdentity.py</a>, 
+- <a href="/boa3_test/test_sc/none_test/NoneTestNoneIdentity.py">NoneIdentity.py</a>, 
+- <a href="/boa3_test/test_sc/none_test/NoneTestNoneNotIdentity.py">NoneNotIdentity.py</a>, 
 - <a href="/boa3_test/test_sc/relational_test/NumEquality.py">NumEquality.py</a>, 
 - <a href="/boa3_test/test_sc/relational_test/NumGreaterOrEqual.py">NumGreaterOrEqual.py</a>, 
 - <a href="/boa3_test/test_sc/relational_test/NumGreaterThan.py">NumGreaterThan.py</a>, 
@@ -319,7 +319,7 @@
 - <a href="/boa3_test/test_sc/none_test/NoneTuple.py">NoneTuple.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/BoolTuple.py">BoolTuple.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/EmptyTupleAssignment.py">EmptyTupleAssignment.py</a>, 
-- <a href="/boa3_test/test_sc/tuple_test/GetValue.py">GetValue.py</a>, 
+- <a href="/boa3_test/test_sc/tuple_test/TupleGetValue.py">TupleGetValue.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/IntTuple.py">IntTuple.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/MultipleExpressionsInLine.py">MultipleExpressionsInLine.py</a>, 
 - <a href="/boa3_test/test_sc/tuple_test/StrTuple.py">StrTuple.py</a>, 
@@ -335,11 +335,11 @@
 
 ### While statement
 
-- <a href="/boa3_test/test_sc/while_test/ConstantCondition.py">ConstantCondition.py</a>, 
-- <a href="/boa3_test/test_sc/while_test/MultipleRelationalCondition.py">MultipleRelationalCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileConstantCondition.py">ConstantCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileMultipleRelationalCondition.py">MultipleRelationalCondition.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/NestedWhile.py">NestedWhile.py</a>, 
-- <a href="/boa3_test/test_sc/while_test/RelationalCondition.py">RelationalCondition.py</a>, 
-- <a href="/boa3_test/test_sc/while_test/VariableCondition.py">VariableCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileRelationalCondition.py">RelationalCondition.py</a>, 
+- <a href="/boa3_test/test_sc/while_test/WhileVariableCondition.py">VariableCondition.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/WhileBoa2Test.py">WhileBoa2Test.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/WhileBoa2Test1.py">WhileBoa2Test1.py</a>, 
 - <a href="/boa3_test/test_sc/while_test/WhileBoa2Test2.py">WhileBoa2Test2.py</a>, 
@@ -351,7 +351,7 @@
 ## v0.4
 ### Built in function
 
-- <a href="/boa3_test/test_sc/range_test/GetValue.py">GetValue.py</a>,
+- <a href="/boa3_test/test_sc/range_test/RangeGetValue.py">RangeGetValue.py</a>,
 - <a href="/boa3_test/test_sc/range_test/RangeExpectedSequence.py">RangeExpectedSequence.py</a>,
 - <a href="/boa3_test/test_sc/range_test/RangeGivenLen.py">RangeGivenLen.py</a>,
 - <a href="/boa3_test/test_sc/range_test/RangeGivenStart.py">RangeGivenStart.py</a>,
@@ -423,13 +423,13 @@
 
 ### List type
 
-- <a href="/boa3_test/test_sc/list_test/InsertAnyValue.py">InsertAnyValue.py</a>
-- <a href="/boa3_test/test_sc/list_test/InsertIntNegativeIndex.py">InsertIntNegativeIndex.py</a>
-- <a href="/boa3_test/test_sc/list_test/InsertIntValue.py">InsertIntValue.py</a>
-- <a href="/boa3_test/test_sc/list_test/InsertIntWithBuiltin.py">InsertIntWithBuiltin.py</a>
-- <a href="/boa3_test/test_sc/list_test/RemoveIntValue.py">RemoveIntValue.py</a>
-- <a href="/boa3_test/test_sc/list_test/RemoveIntWithBuiltin.py">RemoveIntWithBuiltin.py</a>
-- <a href="/boa3_test/test_sc/list_test/RemoveValue.py">RemoveValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertAnyValue.py">ListInsertAnyValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertIntNegativeIndex.py">ListInsertIntNegativeIndex.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertIntValue.py">ListInsertIntValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListInsertIntWithBuiltin.py">ListInsertIntWithBuiltin.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListRemoveIntValue.py">ListRemoveIntValue.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListRemoveIntWithBuiltin.py">ListRemoveIntWithBuiltin.py</a>
+- <a href="/boa3_test/test_sc/list_test/ListRemoveValue.py">ListRemoveValue.py</a>
 
 ## v0.8
 ### Arithmetic augmented assignment operators
@@ -522,7 +522,7 @@
 - <a href="/boa3_test/test_sc/relational_test/MixedIdentity.py">MixedIdentity.py</a>
 
 #### Bitwise augmented assignment operators
-- <a href="/boa3_test/test_sc/logical_test/AugmentedAssignmentOperators.py">AugmentedAssignmentOperators.py</a>
+- <a href="/boa3_test/test_sc/logical_test/LogicAugmentedAssignmentOperators.py">LogicAugmentedAssignmentOperators.py</a>
 
 #### Built in function
 - <a href="/boa3_test/test_sc/reversed_test/ReversedBytes.py">ReversedBytes.py</a>,

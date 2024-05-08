@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.operation.unary.unaryoperation import UnaryOperation
 from boa3.internal.model.type.type import IType, Type
@@ -14,7 +12,7 @@ class BooleanNot(UnaryOperation):
     :ivar operand: the operand type. Inherited from :class:`UnaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.bool]
+    _valid_types: list[IType] = [Type.bool]
 
     def __init__(self, operand: IType = Type.bool):
         self.operator: Operator = Operator.Not

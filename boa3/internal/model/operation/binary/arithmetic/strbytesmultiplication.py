@@ -1,5 +1,3 @@
-from typing import List
-
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
@@ -15,7 +13,7 @@ class StrBytesMultiplication(BinaryOperation):
     :ivar right: the left operand type. Inherited from :class:`BinaryOperation`
     :ivar result: the result type of the operation.  Inherited from :class:`IOperation`
     """
-    _valid_types: List[IType] = [Type.str, Type.bytes]
+    _valid_types: list[IType] = [Type.str, Type.bytes]
 
     def __init__(self, left: IType = Type.str, right: IType = Type.int):
         self.operator: Operator = Operator.Mult
@@ -66,5 +64,4 @@ class StrBytesMultiplication(BinaryOperation):
         code_generator.remove_stack_top_item()
         code_generator.remove_stack_top_item()
 
-        if Type.str.is_type_of(self.left_type):
-            code_generator.convert_cast(self.left_type, is_internal=True)
+        code_generator.convert_cast(self.left_type, is_internal=True)

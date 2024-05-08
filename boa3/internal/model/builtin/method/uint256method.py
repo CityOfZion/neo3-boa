@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, Optional
+from typing import Any
 
 from boa3.internal import constants
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -18,7 +18,7 @@ class UInt256Method(IBuiltinMethod):
             argument_type = Type.none
 
         identifier = 'UInt256'
-        args: Dict[str, Variable] = {'object': Variable(argument_type)}
+        args: dict[str, Variable] = {'object': Variable(argument_type)}
 
         args_default = ast.parse("{0}".format(Type.int.default_value)
                                  ).body[0].value
@@ -126,7 +126,7 @@ class UInt256Method(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

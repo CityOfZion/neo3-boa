@@ -1,17 +1,14 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestFunction(BoaTest):
+class TestFunction(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/function_test'
 
-    def test_integer_function(self):
+    def test_integer_function_compile(self):
         expected_output = (
             Opcode.INITSLOT  # function signature
             + b'\x00'  # num local variables
@@ -20,29 +17,19 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('IntegerFunction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('IntegerFunction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_integer_function_run(self):
+        await self.set_up_contract('IntegerFunction.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1))
-        expected_results.append(10)
+        result, _ = await self.call('Main', [-1], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', -1))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_string_function(self):
+    def test_string_function_compile(self):
         expected_output = (
             # functions without arguments and local variables don't need initslot
             Opcode.PUSHDATA1  # body
@@ -51,124 +38,63 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('StringFunction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('StringFunction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_string_function_run(self):
+        await self.set_up_contract('StringFunction.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=str)
+        self.assertEqual('42', result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append('42')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_bool_function(self):
+    def test_bool_function_compile(self):
         expected_output = (
             # functions without arguments and local variables don't need initslot
             Opcode.PUSHT  # body
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('BoolFunction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('BoolFunction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_bool_function_run(self):
+        await self.set_up_contract('BoolFunction.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_none_function_pass(self):
-        path = self.get_contract_path('NoneFunctionPass.py')
-        output = self.compile(path)
+    def test_none_function_pass_compile(self):
+        output, _ = self.assertCompile('NoneFunctionPass.py')
         self.assertIn(Opcode.NOP, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_none_function_pass_run(self):
+        await self.set_up_contract('NoneFunctionPass.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [1], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'main', 1))
-        expected_results.append(None)
+    async def test_none_function_return_none(self):
+        await self.set_up_contract('NoneFunctionReturnNone.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=None)
+        self.assertIsNone(result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_none_function_changing_values_with_return(self):
+        await self.set_up_contract('NoneFunctionChangingValuesWithReturn.py')
 
-    def test_none_function_return_none(self):
-        path, _ = self.get_deploy_file_paths('NoneFunctionReturnNone.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [], return_type=list)
+        self.assertEqual([2, 4, 6, 8, 10], result)
 
-        invokes = []
-        expected_results = []
+    async def test_none_function_changing_values_without_return(self):
+        await self.set_up_contract('NoneFunctionChangingValuesWithoutReturn.py')
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_none_function_changing_values_with_return(self):
-        path, _ = self.get_deploy_file_paths('NoneFunctionChangingValuesWithReturn.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append([2, 4, 6, 8, 10])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_none_function_changing_values_without_return(self):
-        path, _ = self.get_deploy_file_paths('NoneFunctionChangingValuesWithoutReturn.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append([2, 4, 6, 8, 10])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=list)
+        self.assertEqual([2, 4, 6, 8, 10], result)
 
     def test_arg_without_type_hint(self):
-        path = self.get_contract_path('ArgWithoutTypeHintFunction.py')
-        self.assertCompilerLogs(CompilerError.TypeHintMissing, path)
+        self.assertCompilerLogs(CompilerError.TypeHintMissing, 'ArgWithoutTypeHintFunction.py')
 
-    def test_no_return_hint_function_with_empty_return_statement(self):
+    def test_no_return_hint_function_with_empty_return_statement_compile(self):
         expected_output = (
             Opcode.INITSLOT  # function signature
             + b'\x00'  # num local variables
@@ -176,64 +102,34 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('EmptyReturnFunction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EmptyReturnFunction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_no_return_hint_function_with_empty_return_statement_run(self):
+        await self.set_up_contract('EmptyReturnFunction.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [5], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(None)
+    async def test_no_return_hint_function_with_condition_empty_return_statement(self):
+        await self.set_up_contract('ConditionEmptyReturnFunction.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [5], return_type=None)
+        self.assertIsNone(result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [50], return_type=None)
+        self.assertIsNone(result)
 
-    def test_no_return_hint_function_with_condition_empty_return_statement(self):
-        path, _ = self.get_deploy_file_paths('ConditionEmptyReturnFunction.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_empty_return_with_optional_return_type(self):
+        await self.set_up_contract('EmptyReturnWithOptionalReturnType.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [5], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(None)
+        result, _ = await self.call('Main', [50], return_type=int)
+        self.assertEqual(25, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 50))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_empty_return_with_optional_return_type(self):
-        path, _ = self.get_deploy_file_paths('EmptyReturnWithOptionalReturnType.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(None)
-
-        invokes.append(runner.call_contract(path, 'Main', 50))
-        expected_results.append(25)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_no_return_hint_function_without_return_statement(self):
+    def test_no_return_hint_function_without_return_statement_compile(self):
         expected_output = (
             Opcode.INITSLOT  # function signature
             + b'\x00'  # num local variables
@@ -242,75 +138,48 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('NoReturnFunction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('NoReturnFunction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_no_return_hint_function_without_return_statement_run(self):
+        await self.set_up_contract('NoReturnFunction.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [5], return_type=None)
+        self.assertIsNone(result)
 
     def test_return_type_hint_function_with_empty_return(self):
-        path = self.get_contract_path('ExpectingReturnFunction.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ExpectingReturnFunction.py')
 
     def test_multiple_return_function(self):
-        path = self.get_contract_path('MultipleReturnFunction.py')
-        self.assertCompilerLogs(CompilerError.TooManyReturns, path)
+        self.assertCompilerLogs(CompilerError.TooManyReturns, 'MultipleReturnFunction.py')
 
     def test_tuple_function(self):
-        path = self.get_contract_path('TupleFunction.py')
-        self.assertCompilerLogs(CompilerError.TooManyReturns, path)
+        self.assertCompilerLogs(CompilerError.TooManyReturns, 'TupleFunction.py')
 
     def test_default_return(self):
-        path = self.get_contract_path('DefaultReturn.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'DefaultReturn.py')
 
-    def test_empty_list_return(self):
+    def test_empty_list_return_compile(self):
         expected_output = (
             Opcode.NEWARRAY0
             + Opcode.RET
         )
 
-        path = self.get_contract_path('EmptyListReturn.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('EmptyListReturn.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_empty_list_return_run(self):
+        await self.set_up_contract('EmptyListReturn.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=list)
 
     def test_mismatched_return_type(self):
-        path = self.get_contract_path('MismatchedReturnType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedReturnType.py')
 
     def test_mismatched_return_type_with_if(self):
-        path = self.get_contract_path('MismatchedReturnTypeWithIf.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MismatchedReturnTypeWithIf.py')
 
-    def test_call_void_function_without_args(self):
+    def test_call_void_function_without_args_compile(self):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -326,26 +195,16 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('CallVoidFunctionWithoutArgs.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallVoidFunctionWithoutArgs.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_void_function_without_args_run(self):
+        await self.set_up_contract('CallVoidFunctionWithoutArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_function_without_args(self):
+    def test_call_function_without_args_compile(self):
         called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -361,26 +220,16 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return 1
         )
 
-        path = self.get_contract_path('CallReturnFunctionWithoutArgs.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallReturnFunctionWithoutArgs.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_function_without_args_run(self):
+        await self.set_up_contract('CallReturnFunctionWithoutArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_void_function_with_literal_args(self):
+    def test_call_void_function_with_literal_args_compile(self):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -400,26 +249,16 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('CallVoidFunctionWithLiteralArgs.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallVoidFunctionWithLiteralArgs.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_void_function_with_literal_args_run(self):
+        await self.set_up_contract('CallVoidFunctionWithLiteralArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_function_with_literal_args(self):
+    def test_call_function_with_literal_args_compile(self):
         called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -442,26 +281,16 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('CallReturnFunctionWithLiteralArgs.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallReturnFunctionWithLiteralArgs.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_function_with_literal_args_run(self):
+        await self.set_up_contract('CallReturnFunctionWithLiteralArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(3)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_void_function_with_variable_args(self):
+    def test_call_void_function_with_variable_args_compile(self):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -488,26 +317,16 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('CallVoidFunctionWithVariableArgs.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallVoidFunctionWithVariableArgs.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_void_function_with_variable_args_run(self):
+        await self.set_up_contract('CallVoidFunctionWithVariableArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_function_with_variable_args(self):
+    def test_call_function_with_variable_args_compile(self):
         called_function_address = Integer(5).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -534,26 +353,16 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('CallReturnFunctionWithVariableArgs.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallReturnFunctionWithVariableArgs.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_function_with_variable_args_run(self):
+        await self.set_up_contract('CallReturnFunctionWithVariableArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('TestAdd', [1, 2], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'TestAdd', 1, 2))
-        expected_results.append(3)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_function_on_return(self):
+    def test_call_function_on_return_compile(self):
         called_function_address = Integer(3).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -578,26 +387,16 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('CallReturnFunctionOnReturn.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallReturnFunctionOnReturn.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_function_on_return_run(self):
+        await self.set_up_contract('CallReturnFunctionOnReturn.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(3)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_function_without_variables(self):
+    def test_call_function_without_variables_compile(self):
         main_to_one_address = Integer(-10).to_byte_array(min_length=1, signed=True)
         main_to_two_address = Integer(5).to_byte_array(min_length=1, signed=True)
         two_to_one_address = Integer(-24).to_byte_array(min_length=1, signed=True)
@@ -634,32 +433,22 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CallFunctionWithoutVariables.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallFunctionWithoutVariables.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_function_without_variables_run(self):
+        await self.set_up_contract('CallFunctionWithoutVariables.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [1], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 1))
-        expected_results.append(1)
+        result, _ = await self.call('Main', [2], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 2))
-        expected_results.append(2)
+        result, _ = await self.call('Main', [3], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 3))
-        expected_results.append(0)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_function_written_before_caller(self):
+    def test_call_function_written_before_caller_compile(self):
         call_address = Integer(-9).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -677,26 +466,16 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('CallFunctionWrittenBefore.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('CallFunctionWrittenBefore.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_function_written_before_caller_run(self):
+        await self.set_up_contract('CallFunctionWrittenBefore.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(3)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_return_void_function(self):
+    def test_return_void_function_compile(self):
         called_function_address = Integer(4).to_byte_array(min_length=1, signed=True)
 
         expected_output = (
@@ -712,87 +491,52 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('ReturnVoidFunction.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReturnVoidFunction.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_return_void_function_run(self):
+        await self.set_up_contract('ReturnVoidFunction.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
     def test_return_void_function_mismatched_type(self):
-        path = self.get_contract_path('ReturnVoidFunctionMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReturnVoidFunctionMismatchedType.py')
 
-    def test_return_inside_if(self):
-        path, _ = self.get_deploy_file_paths('ReturnIf.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_return_inside_if(self):
+        await self.set_up_contract('ReturnIf.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [4], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 4))
-        expected_results.append(3)
+        result, _ = await self.call('Main', [5], return_type=int)
+        self.assertEqual(6, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(6)
-
-        invokes.append(runner.call_contract(path, 'Main', 6))
-        expected_results.append(6)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [6], return_type=int)
+        self.assertEqual(6, result)
 
     def test_missing_return_inside_if(self):
-        path = self.get_contract_path('ReturnIfMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnIfMissing.py')
 
     def test_missing_return_inside_elif(self):
-        path = self.get_contract_path('ReturnElifMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnElifMissing.py')
 
     def test_missing_return_inside_else(self):
-        path = self.get_contract_path('ReturnElseMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnElseMissing.py')
 
-    def test_return_inside_multiple_inner_if(self):
-        path, _ = self.get_deploy_file_paths('ReturnMultipleInnerIf.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_return_inside_multiple_inner_if(self):
+        await self.set_up_contract('ReturnMultipleInnerIf.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'Main', False))
-        expected_results.append(9)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [False], return_type=int)
+        self.assertEqual(9, result)
 
     def test_missing_return_inside_multiple_inner_if(self):
-        path = self.get_contract_path('ReturnMultipleInnerIfMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnMultipleInnerIfMissing.py')
 
-    def test_return_if_expression(self):
+    def test_return_if_expression_compiler(self):
         expected_output = (
             Opcode.INITSLOT  # Main
             + b'\x00'
@@ -807,33 +551,22 @@ class TestFunction(BoaTest):
             + Opcode.RET  # return
         )
 
-        path = self.get_contract_path('ReturnIfExpression.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReturnIfExpression.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_return_if_expression_run(self):
+        await self.set_up_contract('ReturnIfExpression.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [True], return_type=int)
+        self.assertEqual(5, result)
 
-        invokes.append(runner.call_contract(path, 'Main', True))
-        expected_results.append(5)
-
-        invokes.append(runner.call_contract(path, 'Main', False))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [False], return_type=int)
+        self.assertEqual(10, result)
 
     def test_return_if_expression_mismatched_type(self):
-        path = self.get_contract_path('ReturnIfExpressionMismatched.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReturnIfExpressionMismatched.py')
 
-    def test_return_inside_for(self):
+    def test_return_inside_for_compile(self):
         expected_output = (
             Opcode.INITSLOT  # Main
             + b'\x01'
@@ -873,32 +606,22 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ReturnFor.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReturnFor.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_return_inside_for_run(self):
+        await self.set_up_contract('ReturnFor.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [[1, 2, 3]], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3]))
-        expected_results.append(1)
+        result, _ = await self.call('Main', [(2, 5, 7)], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'Main', (2, 5, 7)))
-        expected_results.append(2)
+        result, _ = await self.call('Main', [[]], return_type=int)
+        self.assertEqual(5, result)
 
-        invokes.append(runner.call_contract(path, 'Main', []))
-        expected_results.append(5)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_missing_return_inside_for(self):
+    def test_missing_return_inside_for_compile(self):
         expected_output = (
             Opcode.INITSLOT  # Main
             + b'\x02'
@@ -940,36 +663,25 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ReturnForOnlyOnElse.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReturnForOnlyOnElse.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_missing_return_inside_for_run(self):
+        await self.set_up_contract('ReturnForOnlyOnElse.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [[1, 2, 3]], return_type=int)
+        self.assertEqual(6, result)
 
-        invokes.append(runner.call_contract(path, 'Main', [1, 2, 3]))
-        expected_results.append(6)
+        result, _ = await self.call('Main', [(2, 5, 7)], return_type=int)
+        self.assertEqual(14, result)
 
-        invokes.append(runner.call_contract(path, 'Main', (2, 5, 7)))
-        expected_results.append(14)
-
-        invokes.append(runner.call_contract(path, 'Main', []))
-        expected_results.append(0)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [[]], return_type=int)
+        self.assertEqual(0, result)
 
     def test_missing_return_inside_for_else(self):
-        path = self.get_contract_path('ReturnForElseMissing.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnForElseMissing.py')
 
-    def test_return_inside_while(self):
+    def test_return_inside_while_compile(self):
         expected_output = (
             Opcode.INITSLOT  # Main
             + b'\x01'
@@ -994,35 +706,25 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ReturnWhile.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReturnWhile.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_return_inside_while_run(self):
+        await self.set_up_contract('ReturnWhile.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [5], return_type=int)
+        self.assertEqual(6, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(6)
+        result, _ = await self.call('Main', [3], return_type=int)
+        self.assertEqual(4, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 3))
-        expected_results.append(4)
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
+        result, _ = await self.call('Main', [100], return_type=int)
+        self.assertEqual(100, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 100))
-        expected_results.append(100)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_missing_return_inside_while(self):
+    def test_missing_return_inside_while_compile(self):
         expected_output = (
             Opcode.INITSLOT  # Main
             + b'\x01'
@@ -1045,88 +747,67 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('ReturnWhileOnlyOnElse.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('ReturnWhileOnlyOnElse.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_missing_return_inside_while_run(self):
+        await self.set_up_contract('ReturnWhileOnlyOnElse.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [5], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 5))
-        expected_results.append(10)
+        result, _ = await self.call('Main', [3], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 3))
-        expected_results.append(10)
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(10)
-
-        invokes.append(runner.call_contract(path, 'Main', 100))
-        expected_results.append(100)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [100], return_type=int)
+        self.assertEqual(100, result)
 
     def test_missing_return_inside_while_without_else(self):
-        path = self.get_contract_path('ReturnWhileWithoutElse.py')
-        self.assertCompilerLogs(CompilerError.MissingReturnStatement, path)
+        self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'ReturnWhileWithoutElse.py')
 
-    def test_multiple_function_large_call(self):
-        path, _ = self.get_deploy_file_paths('MultipleFunctionLargeCall.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_multiple_function_large_call(self):
+        await self.set_up_contract('MultipleFunctionLargeCall.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['calculate', [1]], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'main', 'calculate', [1]))
-        expected_results.append(None)
+        result, _ = await self.call('main', ['calc', [1, 2, 3]], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'main', 'calc', [1, 2, 3]))
-        expected_results.append(None)
+        result, _ = await self.call('calculate', [1, [10, 3]], return_type=int)
+        self.assertEqual(13, result)
 
-        invokes.append(runner.call_contract(path, 'calculate', 1, [10, 3]))
-        expected_results.append(13)
+        result, _ = await self.call('main', ['calculate', [1, 10, 3]], return_type=int)
+        self.assertEqual(13, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'calculate', [1, 10, 3]))
-        expected_results.append(13)
+        result, _ = await self.call('calculate', [2, [10, 3]], return_type=int)
+        self.assertEqual(7, result)
 
-        invokes.append(runner.call_contract(path, 'calculate', 2, [10, 3]))
-        expected_results.append(7)
+        result, _ = await self.call('main', ['calculate', [2, 10, 3]], return_type=int)
+        self.assertEqual(7, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'calculate', [2, 10, 3]))
-        expected_results.append(7)
+        result, _ = await self.call('calculate', [3, [10, 3]], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'calculate', 3, [10, 3]))
-        expected_results.append(3)
+        result, _ = await self.call('main', ['calculate', [3, 10, 3]], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'calculate', [3, 10, 3]))
-        expected_results.append(3)
+        result, _ = await self.call('calculate', [4, [10, 3]], return_type=int)
+        self.assertEqual(30, result)
 
-        invokes.append(runner.call_contract(path, 'calculate', 4, [10, 3]))
-        expected_results.append(30)
+        result, _ = await self.call('main', ['calculate', [4, 10, 3]], return_type=int)
+        self.assertEqual(30, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'calculate', [4, 10, 3]))
-        expected_results.append(30)
+        result, _ = await self.call('calculate', [5, [10, 3]], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'calculate', 5, [10, 3]))
-        expected_results.append(1)
+        result, _ = await self.call('main', ['calculate', [5, 10, 3]], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'calculate', [5, 10, 3]))
-        expected_results.append(1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_function_with_default_argument(self):
+    def test_function_with_default_argument_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x02'
@@ -1158,26 +839,16 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FunctionWithDefaultArgument.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FunctionWithDefaultArgument.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_function_with_default_argument_run(self):
+        await self.set_up_contract('FunctionWithDefaultArgument.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([6, 11], result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([6, 11])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_function_with_only_default_arguments(self):
+    def test_function_with_only_default_arguments_compile(self):
         expected_output = (
             Opcode.PUSH0  # defaults
             + Opcode.PUSH0
@@ -1212,464 +883,235 @@ class TestFunction(BoaTest):
             + Opcode.RET
         )
 
-        path = self.get_contract_path('FunctionWithOnlyDefaultArguments.py')
-        output = self.compile(path)
+        output, _ = self.assertCompile('FunctionWithOnlyDefaultArguments.py')
         self.assertEqual(expected_output, output)
 
-        path, _ = self.get_deploy_file_paths(path)
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_function_with_only_default_arguments_run(self):
+        await self.set_up_contract('FunctionWithOnlyDefaultArguments.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append([6, 9, 11, 0])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=list)
+        self.assertEqual([6, 9, 11, 0], result)
 
     def test_function_with_default_argument_between_other_args(self):
         path = self.get_contract_path('FunctionWithDefaultArgumentBetweenArgs.py')
         with self.assertRaises(SyntaxError):
             self.compile(path)
 
-    def test_call_function_with_kwarg(self):
-        path, _ = self.get_deploy_file_paths('CallFunctionWithKwarg.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_function_with_kwarg(self):
+        await self.set_up_contract('CallFunctionWithKwarg.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [10], return_type=int)
+        self.assertEqual(-10, result)
 
-        invokes.append(runner.call_contract(path, 'Main', 10))
-        expected_results.append(-10)
+    async def test_call_function_with_kwargs(self):
+        await self.set_up_contract('CallFunctionWithKwargs.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('positional_order', [], return_type=int)
+        self.assertEqual(1234, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('out_of_order', [], return_type=int)
+        self.assertEqual(2413, result)
 
-    def test_call_function_with_kwargs(self):
-        path, _ = self.get_deploy_file_paths('CallFunctionWithKwargs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('mixed_in_order', [], return_type=int)
+        self.assertEqual(5612, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('mixed_out_of_order', [], return_type=int)
+        self.assertEqual(5621, result)
 
-        invokes.append(runner.call_contract(path, 'positional_order'))
-        expected_results.append(1234)
+    async def test_call_function_with_kwargs_with_default_values(self):
+        await self.set_up_contract('CallFunctionWithKwargsWithDefaultValues.py')
 
-        invokes.append(runner.call_contract(path, 'out_of_order'))
-        expected_results.append(2413)
+        result, _ = await self.call('positional_order', [], return_type=int)
+        self.assertEqual(1234, result)
 
-        invokes.append(runner.call_contract(path, 'mixed_in_order'))
-        expected_results.append(5612)
+        result, _ = await self.call('out_of_order', [], return_type=int)
+        self.assertEqual(2413, result)
 
-        invokes.append(runner.call_contract(path, 'mixed_out_of_order'))
-        expected_results.append(5621)
+        result, _ = await self.call('mixed_in_order', [], return_type=int)
+        self.assertEqual(5612, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('mixed_out_of_order', [], return_type=int)
+        self.assertEqual(5621, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('default_values', [], return_type=int)
+        self.assertEqual(1034, result)
 
-    def test_call_function_with_kwargs_with_default_values(self):
-        path, _ = self.get_deploy_file_paths('CallFunctionWithKwargsWithDefaultValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'positional_order'))
-        expected_results.append(1234)
-
-        invokes.append(runner.call_contract(path, 'out_of_order'))
-        expected_results.append(2413)
-
-        invokes.append(runner.call_contract(path, 'mixed_in_order'))
-        expected_results.append(5612)
-
-        invokes.append(runner.call_contract(path, 'mixed_out_of_order'))
-        expected_results.append(5621)
-
-        invokes.append(runner.call_contract(path, 'default_values'))
-        expected_results.append(1034)
-
-        invokes.append(runner.call_contract(path, 'only_default_values_and_kwargs'))
-        expected_results.append(204)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('only_default_values_and_kwargs', [], return_type=int)
+        self.assertEqual(204, result)
 
     def test_call_function_with_kwargs_only(self):
-        path = self.get_contract_path('CallFunctionWithKwargsOnly.py')
         # TODO: change the test when creating a function that only accepts keywords is implemented #2ewewtz
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CallFunctionWithKwargsOnly.py')
 
     def test_call_function_with_kwargs_self(self):
-        path = self.get_contract_path('CallFunctionWithKwargsSelf.py')
         # TODO: change the test when calling a function using the class is implemented #2ewewtz #2ewexau
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CallFunctionWithKwargsSelf.py')
 
     def test_call_function_with_kwargs_wrong_type(self):
-        path = self.get_contract_path('CallFunctionWithKwargsWrongType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'CallFunctionWithKwargsWrongType.py')
 
     def test_call_function_with_kwargs_too_few_parameters(self):
-        path = self.get_contract_path('CallFunctionWithKwargsTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'CallFunctionWithKwargsTooFewArguments.py')
 
     def test_call_function_with_kwargs_too_many_parameters(self):
-        path = self.get_contract_path('CallFunctionWithKwargsTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CallFunctionWithKwargsTooManyArguments.py')
 
     def test_call_function_with_kwargs_too_many_kw_parameters(self):
-        path = self.get_contract_path('CallFunctionWithKwargsTooManyKwArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'CallFunctionWithKwargsTooManyKwArguments.py')
 
-    def test_boa2_fibonacci_test(self):
-        path, _ = self.get_deploy_file_paths('FibonacciBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_fibonacci_test(self):
+        await self.set_up_contract('FibonacciBoa2Test.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [4], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'main', 4))
-        expected_results.append(3)
+        result, _ = await self.call('main', [5], return_type=int)
+        self.assertEqual(5, result)
 
-        invokes.append(runner.call_contract(path, 'main', 5))
-        expected_results.append(5)
+        result, _ = await self.call('main', [6], return_type=int)
+        self.assertEqual(8, result)
 
-        invokes.append(runner.call_contract(path, 'main', 6))
-        expected_results.append(8)
+        result, _ = await self.call('main', [7], return_type=int)
+        self.assertEqual(13, result)
 
-        invokes.append(runner.call_contract(path, 'main', 7))
-        expected_results.append(13)
+        result, _ = await self.call('main', [11], return_type=int)
+        self.assertEqual(89, result)
 
-        invokes.append(runner.call_contract(path, 'main', 11))
-        expected_results.append(89)
+    async def test_boa2_method_test(self):
+        await self.set_up_contract('MethodBoa2Test.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [1, 2], return_type=int)
+        self.assertEqual(7, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [-3, -100], return_type=int)
+        self.assertEqual(-99, result)
 
-    def test_boa2_method_test(self):
-        path, _ = self.get_deploy_file_paths('MethodBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_method_test2(self):
+        await self.set_up_contract('MethodBoa2Test2.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(26, result)
 
-        invokes.append(runner.call_contract(path, 'main', 1, 2))
-        expected_results.append(7)
+    async def test_boa2_method_test3(self):
+        await self.set_up_contract('MethodBoa2Test3.py')
 
-        invokes.append(runner.call_contract(path, 'main', -3, -100))
-        expected_results.append(-99)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(13, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_method_test4(self):
+        await self.set_up_contract('MethodBoa2Test4.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(63, result)
 
-    def test_boa2_method_test2(self):
-        path, _ = self.get_deploy_file_paths('MethodBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_method_test5(self):
+        await self.set_up_contract('MethodBoa2Test5.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(15, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(26)
+    async def test_boa2_module_method_test1(self):
+        await self.set_up_contract('ModuleMethodBoa2Test1.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_boa2_module_method_test2(self):
+        await self.set_up_contract('ModuleMethodBoa2Test2.py')
 
-    def test_boa2_method_test3(self):
-        path, _ = self.get_deploy_file_paths('MethodBoa2Test3.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(3003, result)
 
-        invokes = []
-        expected_results = []
+    async def test_boa2_module_variable_test(self):
+        await self.set_up_contract('ModuleVariableBoa2Test.py')
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(13)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(1260, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_module_variable_test1(self):
+        await self.set_up_contract('ModuleVariableBoa2Test1.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(8, result)
 
-    def test_boa2_method_test4(self):
-        path, _ = self.get_deploy_file_paths('MethodBoa2Test4.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_call_void_function_with_stared_argument(self):
+        await self.set_up_contract('CallVoidFunctionWithStarredArgument.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=bool)
+        self.assertEqual(True, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(63)
+    async def test_call_return_function_with_stared_argument(self):
+        await self.set_up_contract('CallReturnFunctionWithStarredArgument.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('Main', [], return_type=int)
+        self.assertEqual(sum([1, 2, 3, 4, 5, 6]), result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_return_starred_argument(self):
+        await self.set_up_contract('ReturnStarredArgumentCount.py')
 
-    def test_boa2_method_test5(self):
-        path, _ = self.get_deploy_file_paths('MethodBoa2Test5.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('fun_with_starred', [[1, 2, 3, 4, 5]], return_type=int)
+        self.assertEqual(5, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('fun_with_starred', [[1, 2, 3]], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(15)
+        result, _ = await self.call('main', [[1, 2, 3, 4, 5]], return_type=int)
+        self.assertEqual(5, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [[1, 2, 3]], return_type=int)
+        self.assertEqual(3, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_call_function_with_same_name_in_different_scopes(self):
+        await self.set_up_contract('CallFunctionsWithSameNameInDifferentScopes.py')
 
-    def test_boa2_module_method_test1(self):
-        path, _ = self.get_deploy_file_paths('ModuleMethodBoa2Test1.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_module_method_test2(self):
-        path, _ = self.get_deploy_file_paths('ModuleMethodBoa2Test2.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(3003)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_module_variable_test(self):
-        path, _ = self.get_deploy_file_paths('ModuleVariableBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(1260)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_module_variable_test1(self):
-        path, _ = self.get_deploy_file_paths('ModuleVariableBoa2Test1.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(8)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_void_function_with_stared_argument(self):
-        path, _ = self.get_deploy_file_paths('CallVoidFunctionWithStarredArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(True)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_return_function_with_stared_argument(self):
-        path, _ = self.get_deploy_file_paths('CallReturnFunctionWithStarredArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(sum([1, 2, 3, 4, 5, 6]))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_return_starred_argument(self):
-        path, _ = self.get_deploy_file_paths('ReturnStarredArgumentCount.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'fun_with_starred', [1, 2, 3, 4, 5]))
-        expected_results.append(5)
-
-        invokes.append(runner.call_contract(path, 'fun_with_starred', [1, 2, 3]))
-        expected_results.append(3)
-
-        invokes.append(runner.call_contract(path, 'main', [1, 2, 3, 4, 5]))
-        expected_results.append(5)
-
-        invokes.append(runner.call_contract(path, 'main', [1, 2, 3]))
-        expected_results.append(3)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_function_with_same_name_in_different_scopes(self):
-        path, _ = self.get_deploy_file_paths('CallFunctionsWithSameNameInDifferentScopes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'result'))
-        expected_results.append([10, 20])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('result', [], return_type=list)
+        self.assertEqual([10, 20], result)
 
     def test_function_with_dictionary_unpacking_operator(self):
-        path = self.get_contract_path('FunctionWithDictionaryUnpackingOperator.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'FunctionWithDictionaryUnpackingOperator.py')
 
     def test_functions_with_duplicated_name(self):
-        path = self.get_contract_path('FunctionsWithDuplicatedName.py')
-        self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, path)
+        self.assertCompilerLogs(CompilerError.DuplicatedIdentifier, 'FunctionsWithDuplicatedName.py')
 
-    def test_function_as_arg(self):
-        path, _ = self.get_deploy_file_paths('FunctionAsArg.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_function_as_arg(self):
+        await self.set_up_contract('FunctionAsArg.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [123], return_type=int)
+        self.assertEqual(123, result)
 
-        invokes.append(runner.call_contract(path, 'main', 123))
-        expected_results.append(123)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_function_with_arg_as_arg(self):
-        path, _ = self.get_deploy_file_paths('FunctionWithArgAsArg.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_function_with_arg_as_arg(self):
+        await self.set_up_contract('FunctionWithArgAsArg.py')
 
         list_int = [123, 456, 789]
         value = 123
-        invokes.append(runner.call_contract(path, 'main', list_int, value))
-        expected_results.append(list_int.index(value))
+        result, _ = await self.call('main', [list_int, value], return_type=int)
+        self.assertEqual(list_int.index(value), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_function_with_args_as_arg(self):
-        path, _ = self.get_deploy_file_paths('FunctionWithArgsAsArg.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_function_with_args_as_arg(self):
+        await self.set_up_contract('FunctionWithArgsAsArg.py')
 
         list_int = [123, 456, 789]
         value = 123
         start = 0
         end = 5
-        invokes.append(runner.call_contract(path, 'main', list_int, value, start, end))
-        expected_results.append(list_int.index(value, start, end))
+        result, _ = await self.call('main', [list_int, value, start, end], return_type=int)
+        self.assertEqual(list_int.index(value, start, end), result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_other_contract_call_with_return_none(self):
+        called_contract = await self.compile_and_deploy('NoReturnFunction.py')
+        await self.set_up_contract('CallExternalContractWithReturnNone.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_call_external_contract_with_return_none(self):
-        path, _ = self.get_deploy_file_paths('CallExternalContractWithReturnNone.py')
-        no_return_path, _ = self.get_deploy_file_paths('NoReturnFunction.py')
-
-        runner = BoaTestRunner(runner_id=self.method_name())
-        runner.deploy_contract(no_return_path)
-
-        invoke = runner.call_contract(path, 'main')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(invoke.result, None)
+        result, _ = await self.call('main', [], return_type=None)
+        self.assertIsNone(result)
 
     def test_inner_function(self):
-        path = self.get_contract_path('InnerFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'InnerFunction.py')
 
     def test_lambda_function(self):
-        path = self.get_contract_path('LambdaFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'LambdaFunction.py')
 
     def test_function_custom_decorator_with_global_function(self):
-        path = self.get_contract_path('CustomDecoratorWithGlobalFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CustomDecoratorWithGlobalFunction.py')
 
     def test_function_builtin_function_decorators_with_class(self):
-        path = self.get_contract_path('BuiltinContractDecoratorWithFunction.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'BuiltinContractDecoratorWithFunction.py')

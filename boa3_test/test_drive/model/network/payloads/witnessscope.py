@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import enum
+from typing import Self
 
 
 class WitnessScope(enum.IntEnum):
@@ -31,8 +30,8 @@ class WitnessScope(enum.IntEnum):
         else:
             return self.name
 
-    @staticmethod
-    def get_from_neo_name(neo_name: str) -> WitnessScope:
+    @classmethod
+    def get_from_neo_name(cls, neo_name: str) -> Self:
         if neo_name == 'None':
             return WitnessScope._None
         elif neo_name != WitnessScope._None.name:

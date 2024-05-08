@@ -1,7 +1,8 @@
 import ast
 import logging
 import os
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from collections.abc import Iterable
+from typing import Any
 
 from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
@@ -53,15 +54,15 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: Dict[str, ISymbol],
+    def __init__(self, analyser, symbol_table: dict[str, ISymbol],
                  filename: str = None, root_folder: str = None,
-                 analysed_files: Optional[dict] = None,
-                 import_stack: Optional[List[str]] = None,
+                 analysed_files: dict | None = None,
+                 import_stack: list[str] | None = None,
                  log: bool = False,
                  fail_fast: bool = True):
         super().__init__(analyser.ast_tree, filename, root_folder, log, fail_fast)
-        self.modules: Dict[str, Module] = {}
-        self.symbols: Dict[str, ISymbol] = symbol_table
+        self.modules: dict[str, Module] = {}
+        self.symbols: dict[str, ISymbol] = symbol_table
 
         from boa3.internal.analyser.analyser import Analyser
         if isinstance(analysed_files, dict):
@@ -74,7 +75,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             analysed_files = {}
 
         analysed_files[filename.replace(os.sep, constants.PATH_SEPARATOR)] = analyser
-        self._analysed_files: Dict[str, Analyser] = analysed_files
+        self._analysed_files: dict[str, Analyser] = analysed_files
 
         if isinstance(import_stack, list):
             import_stack = [file_path.replace(os.sep, constants.PATH_SEPARATOR)
@@ -82,24 +83,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                             for file_path in import_stack]
         else:
             import_stack = []
-        self._import_stack: List[str] = import_stack
+        self._import_stack: list[str] = import_stack
 
-        self._builtin_functions_to_visit: Dict[str, IBuiltinMethod] = {}
+        self._builtin_functions_to_visit: dict[str, IBuiltinMethod] = {}
         self._current_module: Module = None
         self._current_class: UserClass = None
         self._current_method: Method = None
         self._current_event: Event = None
 
-        self._deploy_method: Optional[Method] = None
+        self._deploy_method: Method | None = None
 
-        self._annotated_variables: List[str] = []
-        self._global_assigned_variables: List[str] = []
-        self._scope_stack: List[SymbolScope] = []
+        self._annotated_variables: list[str] = []
+        self._global_assigned_variables: list[str] = []
+        self._scope_stack: list[SymbolScope] = []
 
         self._metadata: NeoMetadata = None
         self._metadata_node: ast.AST = ast.parse('')
-        self._manifest_symbols: Dict[Tuple[ManifestSymbol, str, int], Callable] = {}
-        self.imported_nodes: List[ast.AST] = []
+        self._manifest_symbols: dict[tuple[ManifestSymbol, str, int], Callable] = {}
+        self.imported_nodes: list[ast.AST] = []
 
         if self.filename:
             self._tree.filename = self.filename
@@ -108,7 +109,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         analyser.metadata = self._metadata if self._metadata is not None else NeoMetadata()
 
     @property
-    def _current_scope(self) -> Union[Method, Module, UserClass, None]:
+    def _current_scope(self) -> Method | Module | UserClass | None:
         """
         Returns the scope that is currently being analysed
 
@@ -122,20 +123,20 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return self._current_module
 
     @property
-    def _current_symbol_scope(self) -> Optional[SymbolScope]:
+    def _current_symbol_scope(self) -> SymbolScope | None:
         if len(self._scope_stack) > 0:
             return self._scope_stack[-1]
         else:
             return None
 
     @property
-    def global_symbols(self) -> Dict[str, ISymbol]:
+    def global_symbols(self) -> dict[str, ISymbol]:
         """
         Returns the symbols in global scope
 
         :return: the symbol table of the global scope
         """
-        global_symbols: Dict[str, ISymbol] = {}
+        global_symbols: dict[str, ISymbol] = {}
 
         global_symbols.update(self.symbols)
         for mod in self.modules.values():
@@ -144,11 +145,11 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return global_symbols
 
     @property
-    def analysed_files(self) -> Dict[str, Any]:
+    def analysed_files(self) -> dict[str, Any]:
         return self._analysed_files.copy()
 
     def __include_variable(self,
-                           var_id: str, var_type_id: Union[str, IType],
+                           var_id: str, var_type_id: str | IType,
                            source_node: ast.AST,
                            var_enumerate_type: IType = Type.none,
                            assignment: bool = True,
@@ -208,7 +209,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     if isinstance(source_node, ast.Global):
                         var = outer_symbol
                     else:
-                        if isinstance(var_type, SequenceType):
+                        if isinstance(var_type, SequenceType) and not Type.tuple.is_type_of(var_type):
                             var_type = var_type.build_collection(var_enumerate_type)
                         var = Variable(var_type, origin_node=source_node)
 
@@ -270,7 +271,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
     def get_symbol(self, symbol_id: str,
                    is_internal: bool = False,
                    check_raw_id: bool = False,
-                   origin_node: ast.AST = None) -> Optional[ISymbol]:
+                   origin_node: ast.AST = None) -> ISymbol | None:
         for scope in reversed(self._scope_stack):
             if symbol_id in scope.symbols:
                 return scope.symbols[symbol_id]
@@ -298,7 +299,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return super().get_symbol(symbol_id, is_internal, check_raw_id, origin_node)
 
-    def get_annotation(self, value: Any, use_metatype: bool = False, accept_none: bool = False) -> Optional[IType]:
+    def get_annotation(self, value: Any, use_metatype: bool = False, accept_none: bool = False) -> IType | None:
         if not isinstance(value, ast.AST):
             return None
 
@@ -313,7 +314,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return None
         return annotation_type
 
-    def _check_annotation_type(self, node: ast.AST, origin_node: Optional[ast.AST] = None):
+    def _check_annotation_type(self, node: ast.AST, origin_node: ast.AST | None = None):
         if node is None:
             return
 
@@ -360,7 +361,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._log_warning(
                 CompilerWarning.RedeclaredSymbol(
                     line=function.lineno, col=function.col_offset,
-                    symbol_id=Builtin.Metadata.identifier
+                    symbol_id="metadata"
                 )
             )
         # this function must have a return and no arguments
@@ -381,8 +382,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             function.returns = None
             function.decorator_list = []
 
-            imports: List[ast.AST] = []
-            other_instructions: List[ast.AST] = []
+            imports: list[ast.AST] = []
+            other_instructions: list[ast.AST] = []
             for node in self._tree.body:
                 if node == function:
                     # metadata function must be right after all the imports, so it executes correctly
@@ -454,7 +455,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 return
 
             # validates the metadata attributes types
-            attributes: Dict[str, Any] = {attr: value
+            attributes: dict[str, Any] = {attr: value
                                           for attr, value in dict(obj.__dict__).items()
                                           if attr in Builtin.metadata_fields}
             if any(not isinstance(value, Builtin.metadata_fields[attr]) for attr, value in attributes.items()):
@@ -493,10 +494,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         self._log_import(import_from.module)
         analyser = self._analyse_module_to_import(import_from, import_from.module)
         if analyser is not None:
-            import_alias: Dict[str] = \
+            import_alias: dict[str] = \
                 {alias.name: alias.asname if alias.asname is not None else alias.name for alias in import_from.names}
 
-            new_symbols: Dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
+            new_symbols: dict[str, ISymbol] = analyser.export_symbols(list(import_alias.keys()))
 
             # check if the wildcard is used and filter the symbols
             if constants.IMPORT_WILDCARD in import_alias:
@@ -523,14 +524,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param import_node:
         """
-        import_alias: Dict[str] = \
+        import_alias: dict[str] = \
             {alias.name: alias.asname if alias.asname is not None else alias.name for alias in import_node.names}
 
         for target, alias in import_alias.items():
             self._log_import(target)
             analyser = self._analyse_module_to_import(import_node, target)
             if analyser is not None:
-                new_symbols: Dict[str, ISymbol] = analyser.export_symbols()
+                new_symbols: dict[str, ISymbol] = analyser.export_symbols()
                 for symbol in [symbol for symbol in analyser.symbols if symbol not in new_symbols]:
                     # if there's a symbol that couldn't be loaded, log a compiler error
                     self._log_unresolved_import(import_node, '{0}.{1}'.format(target, symbol))
@@ -540,14 +541,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def _build_import(self, origin: str, syntax_tree: ast.AST,
                       import_analyser: ImportAnalyser,
-                      imported_symbols: Dict[str, ISymbol] = None) -> Import:
+                      imported_symbols: dict[str, ISymbol] = None) -> Import:
 
         if import_analyser.is_builtin_import:
             return BuiltinImport(origin, syntax_tree, import_analyser, imported_symbols)
 
         return Import(origin, syntax_tree, import_analyser, imported_symbols)
 
-    def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> Optional[ImportAnalyser]:
+    def _analyse_module_to_import(self, origin_node: ast.AST, target: str) -> ImportAnalyser | None:
         already_imported = {imported.origin: imported.analyser
                             for imported in self._current_module.symbols.values()
                             if isinstance(imported, Import) and imported.analyser is not None
@@ -585,6 +586,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     self._log_unresolved_import(origin_node, target)
 
             else:
+                if analyser.is_import_deprecated:
+                    location_tip = analyser._package.new_location if analyser._package is not None else None
+                    self._log_warning(
+                        CompilerWarning.DeprecatedSymbol(
+                            origin_node.lineno,
+                            origin_node.col_offset,
+                            analyser._import_identifier,
+                            location_tip
+                        )
+                    )
                 analyser.update_external_analysed_files(self._analysed_files)
                 return analyser
 
@@ -632,7 +643,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         for stmt in function_stmts:
             result = self.visit(stmt)
             # don't evaluate the metadata function in the following analysers
-            if result is Builtin.Metadata:
+            if result is MetadataTypeSingleton:
                 module.body.remove(stmt)
 
         self.modules['main'] = mod
@@ -687,7 +698,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
 
         # TODO: change when class decorators are implemented #2ewf04r
-        class_decorators: List[Method] = self._get_decorators(class_node)
+        class_decorators: list[Method] = self._get_decorators(class_node)
         if not all(isinstance(decorator, IBuiltinDecorator) and decorator.is_class_decorator
                    for decorator in class_decorators):
             # only builtin decorator are currently accepted
@@ -733,16 +744,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         :param function:
         """
-        fun_decorators: List[Method] = self._get_decorators(function)
-        if Builtin.Metadata in fun_decorators:
-            self._log_warning(
-                CompilerWarning.DeprecatedSymbol(
-                    function.lineno, function.col_offset,
-                    symbol_id=Builtin.Metadata.identifier
-                )
-            )
-            self._read_metadata_object(function)
-            return Builtin.Metadata
+        fun_decorators: list[Method] = self._get_decorators(function)
 
         if any(decorator is None for decorator in fun_decorators):
             self._log_error(
@@ -752,7 +754,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             )
 
-        valid_decorators: List[IDecorator] = []
+        valid_decorators: list[IDecorator] = []
         for decorator in fun_decorators:
             if isinstance(decorator, IDecorator):
                 if not decorator.is_function_decorator:
@@ -846,7 +848,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             symbol = self.get_symbol(fun_rtype_symbol, origin_node=function.returns)
             if symbol is MetadataTypeSingleton:
                 self._read_metadata_object(function)
-                return Builtin.Metadata
+                return symbol
 
             fun_rtype_symbol = self.get_type(symbol)
 
@@ -909,7 +911,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._annotated_variables.clear()
 
-    def _get_decorators(self, node: ast.AST) -> List[Method]:
+    def _get_decorators(self, node: ast.AST) -> list[Method]:
         """
         Gets a list of the symbols used to decorate the given node
 
@@ -966,20 +968,20 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         fun_args = FunctionArguments()
 
         for arg in arguments.args:
-            var_id, var = self.visit_arg(arg)  # Tuple[str, Variable]
+            var_id, var = self.visit_arg(arg)  # tuple[str, Variable]
             fun_args.add_arg(var_id, var)
 
         if arguments.vararg is not None:
-            var_id, var = self.visit_arg(arguments.vararg)  # Tuple[str, Variable]
+            var_id, var = self.visit_arg(arguments.vararg)  # tuple[str, Variable]
             fun_args.set_vararg(var_id, var)
 
         if arguments.kwarg is not None:
-            var_id, var = self.visit_arg(arguments.kwarg)  # Tuple[str, Variable]
+            var_id, var = self.visit_arg(arguments.kwarg)  # tuple[str, Variable]
             fun_args.add_kwarg(var_id, var)
 
         return fun_args
 
-    def visit_arg(self, arg: ast.arg) -> Tuple[str, Variable]:
+    def visit_arg(self, arg: ast.arg) -> tuple[str, Variable]:
         """
         Visitor of a function argument node
 
@@ -1017,7 +1019,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if ret.value is not None:
             self.__set_source_origin(ret.value)
 
-    def visit_type(self, target: ast.AST) -> Optional[IType]:
+    def visit_type(self, target: ast.AST) -> IType | None:
         """
         Gets the type by its identifier
 
@@ -1123,7 +1125,16 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         self._check_annotation_type(ann_assign.annotation, ann_assign)
 
-        # TODO: check if the annotated type and the value type are the same #86a1ctmwy
+        if isinstance(ann_assign.value, ast.Constant):
+            annotation_type = self.get_type(ann_assign.value)
+            if not var_type.is_type_of(annotation_type):
+                self._log_error(
+                    CompilerError.MismatchedTypes(line=ann_assign.value.lineno,
+                                                  col=ann_assign.value.col_offset,
+                                                  expected_type_id=var_type.identifier,
+                                                  actual_type_id=annotation_type.identifier)
+                )
+
         return self.assign_value(var_id, var_type,
                                  source_node=ann_assign,
                                  assignment=ann_assign.value is not None,
@@ -1191,7 +1202,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     CompilerError.UnresolvedReference(expr.value.lineno, expr.value.col_offset, value)
                 )
 
-    def visit_Subscript(self, subscript: ast.Subscript) -> Union[str, IType]:
+    def visit_Subscript(self, subscript: ast.Subscript) -> str | IType:
         """
         Verifies if it is the types in the subscription are valid
 
@@ -1206,9 +1217,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if isinstance(subscript.ctx, ast.Load):
             if (isinstance(symbol, (Collection, MetaType))
                     and isinstance(subscript.value, (ast.Name, ast.NameConstant, ast.Attribute))):
-                # for evaluating names like List[str], Dict[int, bool], etc
-                value = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
-                values_type: Iterable[IType] = self.get_values_type(value)
+                # for evaluating names like list[str], dict[int, bool], etc
+                values_type: Iterable[IType] = self.get_values_type(subscript.slice)
                 if isinstance(symbol, Collection):
                     return symbol.build_collection(*values_type)
                 else:
@@ -1221,11 +1231,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             if isinstance(symbol, UnionType) or isinstance(symbol_type, UnionType):
                 if not isinstance(symbol_type, UnionType):
                     symbol_type = symbol
-                index = subscript.slice.value if isinstance(subscript.slice, ast.Index) else subscript.slice
-                if isinstance(index, ast.Tuple):
-                    union_types = [self.get_type(value) for value in index.elts]
+                if isinstance(subscript.slice, ast.Tuple):
+                    union_types = [self.get_type(value) for value in subscript.slice.elts]
                 else:
-                    union_types = self.get_type(index)
+                    union_types = self.get_type(subscript.slice)
                 return symbol_type.build(union_types)
 
             if isinstance(symbol_type, Collection):
@@ -1233,22 +1242,22 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return value
 
-    def get_values_type(self, value: ast.AST) -> Iterable[Optional[IType]]:
+    def get_values_type(self, value: ast.AST) -> Iterable[IType | None]:
         """
         Verifies if it is a multiple assignments statement
 
         :param value: the python ast subscription node
         """
-        value_type: Optional[IType] = None
+        value_type: IType | None = None
 
-        if isinstance(value, (ast.Subscript, ast.Attribute, ast.Tuple)):
+        if isinstance(value, (ast.Subscript, ast.Attribute, ast.Tuple, ast.BinOp)):
             # index is another subscription
             value_type = self.visit(value)
         elif isinstance(value, ast.Name):
             # index is an identifier
             value_type = self.get_symbol(value.id)
 
-        types: Iterable[Optional[IType]] = value_type if isinstance(value_type, Iterable) else [value_type]
+        types: Iterable[IType | None] = value_type if isinstance(value_type, Iterable) else [value_type]
         for tpe in types:
             if not isinstance(tpe, IType):
                 # type hint not using identifiers or using identifiers that are not types
@@ -1260,7 +1269,26 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         return types
 
-    def visit_Call(self, call: ast.Call) -> Optional[IType]:
+    def visit_BinOp(self, bin_op: ast.BinOp) -> IType | None:
+        left = self.visit(bin_op.left)
+        if isinstance(left, str):
+            left = self.get_symbol(left)
+        elif isinstance(bin_op.left, ast.Constant) and left is None:
+            left = self.get_type(left)
+
+        right = self.visit(bin_op.right)
+        if isinstance(right, str):
+            right = self.get_symbol(right)
+        elif isinstance(bin_op.right, ast.Constant) and right is None:
+            right = self.get_type(right)
+
+        # only validate type1 | type2, other binary operations are evaluated on TypeAnalyser
+        if isinstance(bin_op.op, ast.BitOr) and isinstance(left, IType) and isinstance(right, IType):
+            return left.union_type(right)
+
+        return self.generic_visit(bin_op)
+
+    def visit_Call(self, call: ast.Call) -> IType | None:
         """
         Visitor of a function call node
 
@@ -1320,25 +1348,24 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             )
         elif len(event_args) > 0:
             args_type = self.get_type(event_args[0])
+            expected_type = Builtin.NewEvent.arguments_type
             if not Type.list.is_type_of(args_type):
                 self._log_error(
                     CompilerError.MismatchedTypes(line=event_args[0].lineno,
                                                   col=event_args[0].col_offset,
-                                                  expected_type_id=Type.list.identifier,
+                                                  expected_type_id=expected_type.identifier,
                                                   actual_type_id=args_type.identifier)
                 )
             else:
+                expected_type = expected_type.value_type
                 for value in event_args[0].elts:
-                    if not isinstance(value, ast.Tuple):
-                        CompilerError.MismatchedTypes(line=value.lineno,
-                                                      col=value.col_offset,
-                                                      expected_type_id=Type.tuple.identifier,
-                                                      actual_type_id=self.get_type(value).identifier)
-                    elif len(value.elts) < 2:
+                    if not isinstance(value, ast.Tuple) or len(value.elts) < 2:
+                        actual_type = self.get_type(value)
                         self._log_error(
-                            CompilerError.UnfilledArgument(line=value.lineno,
-                                                           col=value.col_offset,
-                                                           param=list(Builtin.NewEvent.args)[0])
+                            CompilerError.MismatchedTypes(line=value.lineno,
+                                                          col=value.col_offset,
+                                                          expected_type_id=expected_type.identifier,
+                                                          actual_type_id=actual_type.identifier)
                         )
                     else:
                         event_arg_name, event_arg_type = value.elts
@@ -1366,7 +1393,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                             self._log_error(
                                 CompilerError.MismatchedTypes(line=value.lineno,
                                                               col=value.col_offset,
-                                                              expected_type_id=Type.tuple.identifier,
+                                                              expected_type_id=expected_type.identifier,
                                                               actual_type_id=self.get_type(value).identifier)
                             )
                         else:
@@ -1392,7 +1419,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         event._origin_node = create_call
         return event
 
-    def visit_Attribute(self, attribute: ast.Attribute) -> Union[ISymbol, str]:
+    def visit_Attribute(self, attribute: ast.Attribute) -> ISymbol | str:
         """
         Gets the attribute inside the ast node
 
@@ -1405,16 +1432,31 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if isinstance(value, Variable):
             value = value.type
+
+        attribute_symbol = None
         if hasattr(value, 'symbols') and attribute.attr in value.symbols:
-            return value.symbols[attribute.attr]
+            attribute_symbol = value.symbols[attribute.attr]
         elif isinstance(value, Package) and attribute.attr in value.inner_packages:
-            return value.inner_packages[attribute.attr]
+            attribute_symbol = value.inner_packages[attribute.attr]
         elif Builtin.get_symbol(attribute.attr) is not None:
-            return Builtin.get_symbol(attribute.attr)
+            attribute_symbol = Builtin.get_symbol(attribute.attr)
         elif isinstance(value, UndefinedType):
-            return value
+            attribute_symbol = value
+
+        attribute_id = '{0}.{1}'.format(value_id, attribute.attr)
+        if attribute_symbol is not None:
+            if attribute_symbol.is_deprecated:
+                self._log_warning(
+                    CompilerWarning.DeprecatedSymbol(
+                        attribute.lineno,
+                        attribute.col_offset,
+                        attribute_id,
+                        attribute_symbol.new_location if hasattr(attribute_symbol, 'new_location') else None
+                    )
+                )
+            return attribute_symbol
         else:
-            return '{0}.{1}'.format(value_id, attribute.attr)
+            return attribute_id
 
     def visit_For(self, for_node: ast.For):
         """
@@ -1544,7 +1586,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return btes.s
 
-    def visit_Tuple(self, tup_node: ast.Tuple) -> Optional[Tuple[Any, ...]]:
+    def visit_Tuple(self, tup_node: ast.Tuple) -> tuple | None:
         """
         Visitor of literal tuple node
 
@@ -1558,7 +1600,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return None
         return tuple(result)
 
-    def visit_List(self, list_node: ast.List) -> Optional[List[Any]]:
+    def visit_List(self, list_node: ast.List) -> list[Any] | None:
         """
         Visitor of literal list node
 
@@ -1571,7 +1613,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             return None
         return result
 
-    def visit_Dict(self, dict_node: ast.Dict) -> Optional[Dict[Any, Any]]:
+    def visit_Dict(self, dict_node: ast.Dict) -> dict[Any, Any] | None:
         """
         Visitor of literal dict node
 

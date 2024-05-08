@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 import ast
-from typing import Any, Optional, Union
+from typing import Any, Self
 
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.itype import IType
@@ -14,21 +12,25 @@ class Variable(IExpression):
     :ivar var_type: the type of the variable.
     """
 
-    def __init__(self, var_type: Optional[IType], origin_node: Optional[ast.AST] = None):
-        super().__init__(origin_node)
+    def __init__(self,
+                 var_type: IType | None,
+                 origin_node: ast.AST | None = None,
+                 deprecated: bool = False
+                 ):
+        super().__init__(origin_node, deprecated)
         self.defined_by_entry = True
 
         from boa3.internal.analyser.model.optimizer import Undefined, UndefinedType
         if var_type is None:
             var_type = Undefined
 
-        self._var_type: Union[IType, UndefinedType] = var_type
+        self._var_type: IType | UndefinedType = var_type
 
         self.is_reassigned = False
-        self._origin_variable: Optional[Variable] = None
+        self._origin_variable: Variable | None = None
         self._first_assign_value: Any = Undefined
 
-    def copy(self) -> Variable:
+    def copy(self) -> Self:
         var = Variable(self._var_type, self._origin_node)
         var.is_reassigned = self.is_reassigned
         var._first_assign_value = self._first_assign_value

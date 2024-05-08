@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import List, Dict, Any, Union, Optional
+from typing import Any, Self
 
 from boa3.internal.neo import from_hex_str, utils
 from boa3.internal.neo3.core.types import UInt256
@@ -14,16 +12,16 @@ from boa3_test.test_drive.testrunner.blockchain.notification import TestRunnerNo
 
 
 class TestTransaction:
-    def __init__(self, tx_hash: Union[UInt256, bytes], script: bytes, signers: List[Signer] = None, witnesses: List[Witness] = None):
+    def __init__(self, tx_hash: UInt256 | bytes, script: bytes, signers: list[Signer] = None, witnesses: list[Witness] = None):
         if isinstance(tx_hash, bytes):
             tx_hash = UInt256(tx_hash)
 
         self._hash: UInt256 = tx_hash
         self._script: bytes = script
 
-        self._signers: List[Signer] = signers if signers is not None else []
-        self._witnesses: List[Witness] = witnesses if witnesses is not None else []
-        self._attributes: List[TransactionAttribute] = []
+        self._signers: list[Signer] = signers if signers is not None else []
+        self._witnesses: list[Witness] = witnesses if witnesses is not None else []
+        self._attributes: list[TransactionAttribute] = []
 
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)
@@ -32,7 +30,7 @@ class TestTransaction:
     def hash(self) -> UInt256:
         return self._hash
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         import base64
         from boa3.internal.neo.vm.type.String import String
         return {
@@ -44,7 +42,7 @@ class TestTransaction:
         }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], *args, **kwargs) -> TestTransaction:
+    def from_json(cls, json: dict[str, Any], *args, **kwargs) -> Self:
         import base64
 
         if 'hash' in json and isinstance(json['hash'], str):
@@ -93,7 +91,7 @@ class TransactionExecution:
         self._gas_consumed: int = 0
         self._exception: str = None
         self._stack = []
-        self._notifications: List[Notification] = []
+        self._notifications: list[Notification] = []
 
     @property
     def trigger(self) -> TriggerType:
@@ -104,7 +102,7 @@ class TransactionExecution:
         return self._vm_state
 
     @property
-    def exception(self) -> Optional[str]:
+    def exception(self) -> str | None:
         return self._exception
 
     @property
@@ -116,11 +114,11 @@ class TransactionExecution:
         return self._stack.copy()
 
     @property
-    def notifications(self) -> List[Notification]:
+    def notifications(self) -> list[Notification]:
         return self._notifications.copy()
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any], contract_collection: ContractCollection = None) -> TransactionExecution:
+    def from_json(cls, json: dict[str, Any], contract_collection: ContractCollection = None) -> Self:
         tx_exec = cls()
 
         tx_exec._trigger = TriggerType[json['trigger']]

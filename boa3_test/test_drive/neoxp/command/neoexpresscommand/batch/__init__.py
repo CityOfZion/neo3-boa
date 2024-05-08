@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3_test.test_drive.neoxp.command.neoexpresscommand.neoexpresscommand import NeoExpressCommand
 
 __all__ = ['BatchCommand']
@@ -8,7 +6,7 @@ __all__ = ['BatchCommand']
 class BatchCommand(NeoExpressCommand):
     def __init__(self, file_name: str,
                  reset: bool = False,
-                 check_point_file: Optional[str] = None,
+                 check_point_file: str | None = None,
                  trace: bool = False,
                  neo_express_data_file: str = None):
 
@@ -21,7 +19,7 @@ class BatchCommand(NeoExpressCommand):
         command_id = 'batch'
         super().__init__(command_id, [file_name])
 
-    def _get_options(self) -> Dict[str, str]:
+    def _get_options(self) -> dict[str, str]:
         options = super()._get_options()
 
         if self.reset or isinstance(self.check_point_file, str):

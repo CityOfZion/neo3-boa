@@ -1,5 +1,4 @@
 import re
-from typing import Dict, List
 
 from boa3.internal.analyser import supportedstandard
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -16,13 +15,13 @@ class StandardAnalyser(IAstAnalyser):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: Dict[str, ISymbol],
+    def __init__(self, analyser, symbol_table: dict[str, ISymbol],
                  log: bool = False, fail_fast: bool = True):
         from boa3.builtin.compile_time import NeoMetadata
 
         super().__init__(analyser.ast_tree, analyser.filename, analyser.root, log=log, fail_fast=fail_fast)
 
-        self.symbols: Dict[str, ISymbol] = symbol_table
+        self.symbols: dict[str, ISymbol] = symbol_table
 
         if isinstance(analyser.metadata, NeoMetadata):
             # filter only strings
@@ -32,7 +31,7 @@ class StandardAnalyser(IAstAnalyser):
         else:
             standards = []
 
-        self.standards: List[str] = standards
+        self.standards: list[str] = standards
         self._analyser = analyser
         self._filter_standards_names()
         self._validate_standards()
@@ -56,7 +55,7 @@ class StandardAnalyser(IAstAnalyser):
         self.standards.clear()
         self.standards.extend(filtered_standards)
 
-    def get_methods_by_display_name(self, method_id: str) -> List[Method]:
+    def get_methods_by_display_name(self, method_id: str) -> list[Method]:
         methods = []
         for symbol_id, symbol in self.symbols.items():
             if isinstance(symbol, Method) and symbol.is_public:

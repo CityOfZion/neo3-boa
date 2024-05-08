@@ -1,5 +1,4 @@
 import ast
-from typing import Dict
 
 from boa3.internal.analyser.importanalyser import ImportAnalyser
 from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
@@ -18,8 +17,12 @@ class Import(ISymbol):
     :ivar types: a dictionary that maps each type with its name. Empty by default.
     """
 
-    def __init__(self, origin: str, syntax_tree: ast.AST, import_analyser: ImportAnalyser,
-                 imported_symbols: Dict[str, ISymbol] = None):
+    def __init__(self,
+                 origin: str,
+                 syntax_tree: ast.AST,
+                 import_analyser: ImportAnalyser,
+                 imported_symbols: dict[str, ISymbol] = None
+                 ):
         if imported_symbols is None:
             symbols = import_analyser.symbols
         else:
@@ -49,7 +52,7 @@ class Import(ISymbol):
         return 'module'
 
     @property
-    def symbols(self) -> Dict[str, ISymbol]:
+    def symbols(self) -> dict[str, ISymbol]:
         symbol = {}
         symbol.update(self.variables)
         symbol.update(self.methods)
@@ -59,10 +62,17 @@ class Import(ISymbol):
         return symbol
 
     @property
-    def all_symbols(self) -> Dict[str, ISymbol]:
+    def all_symbols(self) -> dict[str, ISymbol]:
         symbol = self.symbols.copy()
         symbol.update(self._symbols_not_imported)
         return symbol
+
+    @property
+    def is_deprecated(self) -> bool:
+        return False
+
+    def deprecate(self, new_location: str = None):
+        return
 
 
 class BuiltinImport(Import):

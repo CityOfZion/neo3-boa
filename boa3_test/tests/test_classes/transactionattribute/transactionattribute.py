@@ -1,23 +1,22 @@
-from __future__ import annotations
-
 import abc
-from typing import Any, Dict
+from typing import Any, Self
 
-from boa3_test.tests.test_classes import transactionattribute
+from boa3_test.tests.test_classes.transactionattribute import transactionattributetype
 
 
 class TransactionAttribute(abc.ABC):
 
-    def __init__(self, _type: transactionattribute.TransactionAttributeType):
-        self._type: transactionattribute.TransactionAttributeType = _type
+    def __init__(self, _type: transactionattributetype.TransactionAttributeType):
+        self._type: transactionattributetype.TransactionAttributeType = _type
 
-    def to_json(self) -> Dict[str, Any]:
+    def to_json(self) -> dict[str, Any]:
         return {
             'type': self._type.name
         }
 
     @classmethod
-    def from_json(cls, json: Dict[str, Any]) -> TransactionAttribute:
+    @abc.abstractmethod
+    def from_json(cls, json: dict[str, Any]) -> Self:
         tx_type = json['type']
         pass
 

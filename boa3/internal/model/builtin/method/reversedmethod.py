@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterable, Optional
+from collections.abc import Iterable
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.type.collection.sequence.sequencetype import SequenceType
@@ -13,7 +14,7 @@ class ReversedMethod(IBuiltinMethod):
         if not isinstance(args_type, SequenceType):
             args_type = Type.sequence
 
-        args: Dict[str, Variable] = {'sequence': Variable(args_type)}
+        args: dict[str, Variable] = {'sequence': Variable(args_type)}
 
         super().__init__(identifier, args, return_type=Type.reversed)
 
@@ -41,7 +42,7 @@ class ReversedMethod(IBuiltinMethod):
         return ReversedMethod(value)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def generate_internal_opcodes(self, code_generator):

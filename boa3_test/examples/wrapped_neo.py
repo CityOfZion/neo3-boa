@@ -1,13 +1,12 @@
-from typing import Any, Union
+from typing import Any
 
 from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
 from boa3.builtin.contract import Nep17TransferEvent, abort
 from boa3.builtin.interop import runtime, storage
-from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
 from boa3.builtin.nativecontract.contractmanagement import ContractManagement
 from boa3.builtin.nativecontract.neo import NEO as NEO_TOKEN
-from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.builtin.type import UInt160
 
 
 # -------------------------------------------
@@ -107,7 +106,7 @@ def total_supply() -> int:
 
     :return: the total token supply deployed in the system.
     """
-    return type_helper.to_int(storage.get(SUPPLY_KEY))
+    return storage.get_int(SUPPLY_KEY)
 
 
 @public(name='balanceOf', safe=True)
@@ -121,7 +120,7 @@ def balance_of(account: UInt160) -> int:
     :type account: bytes
     """
     assert len(account) == 20
-    return type_helper.to_int(storage.get(account))
+    return storage.get_int(account)
 
 
 @public
@@ -150,7 +149,7 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = type_helper.to_int(storage.get(from_address))
+    from_balance = storage.get_int(from_address)
     if from_balance < amount:
         return False
 
@@ -166,10 +165,10 @@ def transfer(from_address: UInt160, to_address: UInt160, amount: int, data: Any)
         if from_balance == amount:
             storage.delete(from_address)
         else:
-            storage.put(from_address, from_balance - amount)
+            storage.put_int(from_address, from_balance - amount)
 
-        to_balance = type_helper.to_int(storage.get(to_address))
-        storage.put(to_address, to_balance + amount)
+        to_balance = storage.get_int(to_address)
+        storage.put_int(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -208,7 +207,7 @@ def transfer_from(spender: UInt160, from_address: UInt160, to_address: UInt160, 
     assert amount >= 0
 
     # The function MUST return false if the from account balance does not have enough tokens to spend.
-    from_balance = type_helper.to_int(storage.get(from_address))
+    from_balance = storage.get_int(from_address)
     if from_balance < amount:
         return False
 
@@ -227,17 +226,17 @@ def transfer_from(spender: UInt160, from_address: UInt160, to_address: UInt160, 
     if allowed == amount:
         storage.delete(ALLOWANCE_PREFIX + from_address + spender)
     else:
-        storage.put(ALLOWANCE_PREFIX + from_address + spender, allowed - amount)
+        storage.put_int(ALLOWANCE_PREFIX + from_address + spender, allowed - amount)
 
     # skip balance changes if transferring to yourself or transferring 0 cryptocurrency
     if from_address != to_address and amount != 0:
         if from_balance == amount:
             storage.delete(from_address)
         else:
-            storage.put(from_address, from_balance - amount)
+            storage.put_int(from_address, from_balance - amount)
 
-        to_balance = type_helper.to_int(storage.get(to_address))
-        storage.put(to_address, to_balance + amount)
+        to_balance = storage.get_int(to_address)
+        storage.put_int(to_address, to_balance + amount)
 
     # if the method succeeds, it must fire the transfer event
     on_transfer(from_address, to_address, amount)
@@ -269,7 +268,7 @@ def approve(owner: UInt160, spender: UInt160, amount: int) -> bool:
         return False
 
     if balance_of(owner) >= amount:
-        storage.put(ALLOWANCE_PREFIX + owner + spender, amount)
+        storage.put_int(ALLOWANCE_PREFIX + owner + spender, amount)
         on_approval(owner, spender, amount)
         return True
     return False
@@ -285,10 +284,10 @@ def allowance(owner: UInt160, spender: UInt160) -> int:
     :param spender: the address that can spend zNEO from the owner's account
     :type spender: UInt160
     """
-    return type_helper.to_int(storage.get(ALLOWANCE_PREFIX + owner + spender))
+    return storage.get_int(ALLOWANCE_PREFIX + owner + spender)
 
 
-def post_transfer(from_address: Union[UInt160, None], to_address: Union[UInt160, None], amount: int, data: Any,
+def post_transfer(from_address: UInt160 | None, to_address: UInt160 | None, amount: int, data: Any,
                   call_onPayment: bool):
     """
     Checks if the one receiving NEP17 tokens is a smart contract and if it's one the onPayment method will be called.
@@ -326,8 +325,8 @@ def mint(account: UInt160, amount: int):
         current_total_supply = total_supply()
         account_balance = balance_of(account)
 
-        storage.put(SUPPLY_KEY, current_total_supply + amount)
-        storage.put(account, account_balance + amount)
+        storage.put_int(SUPPLY_KEY, current_total_supply + amount)
+        storage.put_int(account, account_balance + amount)
 
         on_transfer(None, account, amount)
         post_transfer(None, account, amount, None, True)
@@ -354,12 +353,12 @@ def burn(account: UInt160, amount: int):
 
             assert account_balance >= amount
 
-            storage.put(SUPPLY_KEY, current_total_supply - amount)
+            storage.put_int(SUPPLY_KEY, current_total_supply - amount)
 
             if account_balance == amount:
                 storage.delete(account)
             else:
-                storage.put(account, account_balance - amount)
+                storage.put_int(account, account_balance - amount)
 
             on_transfer(account, None, amount)
             post_transfer(account, None, amount, None, False)
@@ -387,11 +386,11 @@ def _deploy(data: Any, update: bool):
     :return: whether the deploy was successful. This method must return True only during the smart contract's deploy.
     """
     if not update:
-        container: Transaction = runtime.script_container
+        container = runtime.script_container
 
-        storage.put(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
-        storage.put(container.sender, TOKEN_TOTAL_SUPPLY)
-        storage.put(OWNER_KEY, container.sender)
+        storage.put_int(SUPPLY_KEY, TOKEN_TOTAL_SUPPLY)
+        storage.put_int(container.sender, TOKEN_TOTAL_SUPPLY)
+        storage.put_uint160(OWNER_KEY, container.sender)
 
         on_transfer(None, container.sender, TOKEN_TOTAL_SUPPLY)
 
@@ -422,4 +421,4 @@ def get_owner() -> UInt160:
     """
     Gets the script hash of the owner (the account that deployed this smart contract)
     """
-    return UInt160(storage.get(OWNER_KEY))
+    return storage.get_uint160(OWNER_KEY)

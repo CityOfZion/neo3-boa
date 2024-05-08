@@ -1,5 +1,5 @@
 import ast
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
@@ -10,7 +10,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 class RangeMethod(IBuiltinMethod):
 
-    def __init__(self, values_types: List[IType] = None):
+    def __init__(self, values_types: list[IType] = None):
         from boa3.internal.model.type.type import Type
         identifier = 'range'
         if not isinstance(values_types, list) or len(values_types) < 1:
@@ -22,7 +22,7 @@ class RangeMethod(IBuiltinMethod):
             start = Variable(Type.int)
             step = Variable(Type.int)
 
-        args: Dict[str, Variable] = {
+        args: dict[str, Variable] = {
             'stop': stop,
             'start': start,
             'step': step
@@ -52,14 +52,14 @@ class RangeMethod(IBuiltinMethod):
             # swap start and stop default positions
             arguments[0], arguments[1] = arguments[1], arguments[0]
 
-    def validate_parameters(self, *params: Union[IExpression, IType]) -> bool:
+    def validate_parameters(self, *params: IExpression | IType) -> bool:
         if len(params) < 1 or len(params) > 3:
             return False
 
         if any(not isinstance(param, (IExpression, IType)) for param in params):
             return False
 
-        params_type: List[IType] = [param if isinstance(param, IType) else param.type for param in params]
+        params_type: list[IType] = [param if isinstance(param, IType) else param.type for param in params]
         from boa3.internal.model.type.type import Type
         return all(param is Type.int for param in params_type)
 
@@ -126,7 +126,7 @@ class RangeMethod(IBuiltinMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return
 
     def build(self, value: Any) -> IBuiltinMethod:

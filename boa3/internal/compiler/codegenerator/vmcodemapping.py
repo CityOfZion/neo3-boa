@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-from typing import Dict, List, Optional, Union
+from typing import Self
 
 from boa3.internal.compiler.codegenerator.methodtokencollection import MethodTokenCollection
 from boa3.internal.compiler.codegenerator.vmcodemap import VMCodeMap
@@ -16,7 +14,7 @@ class VMCodeMapping:
     """
     This class is responsible for managing the Neo VM instruction during the bytecode generation.
     """
-    _instance: VMCodeMapping = None
+    _instance: Self = None
 
     @classmethod
     def instance(cls):
@@ -40,7 +38,7 @@ class VMCodeMapping:
             cls._instance._code_map.clear()
             cls._instance._method_tokens.clear()
 
-    def add_method_token(self, method: IBuiltinMethod, call_flag: CallFlags) -> Optional[int]:
+    def add_method_token(self, method: IBuiltinMethod, call_flag: CallFlags) -> int | None:
         """
         Creates a new method token if the method call another contract and return its id.
         Otherwise, returns None
@@ -59,7 +57,7 @@ class VMCodeMapping:
         return self._method_tokens[method_token_id]
 
     @property
-    def codes(self) -> List[VMCode]:
+    def codes(self) -> list[VMCode]:
         """
         Gets a list with the included vm codes
 
@@ -68,7 +66,7 @@ class VMCodeMapping:
         return self._code_map.get_code_list()
 
     @property
-    def code_map(self) -> Dict[int, VMCode]:
+    def code_map(self) -> dict[int, VMCode]:
         """
         Gets a dictionary that maps each vm code with its address.
 
@@ -76,7 +74,7 @@ class VMCodeMapping:
         """
         return self._code_map.get_code_map()
 
-    def targeted_address(self) -> Dict[int, List[int]]:
+    def targeted_address(self) -> dict[int, list[int]]:
         """
         Gets a dictionary that maps each address to the opcodes that targets it
 
@@ -123,7 +121,7 @@ class VMCodeMapping:
     def insert_code(self, vm_code: VMCode):
         return self._code_map.insert_code(vm_code, has_target=OpcodeHelper.has_target(vm_code.opcode))
 
-    def get_code(self, address: int) -> Optional[VMCode]:
+    def get_code(self, address: int) -> VMCode | None:
         """
         Gets the VM Opcode at the given position
 
@@ -133,7 +131,7 @@ class VMCodeMapping:
         """
         return self._code_map.get_code(address)
 
-    def get_addresses(self, start_address: int, end_address: int) -> List[int]:
+    def get_addresses(self, start_address: int, end_address: int) -> list[int]:
         return self._code_map.get_addresses(start_address, end_address)
 
     def get_start_address(self, vm_code: VMCode) -> int:
@@ -154,7 +152,7 @@ class VMCodeMapping:
         """
         return self._code_map.get_end_address(vm_code)
 
-    def get_opcodes(self, addresses: List[int]) -> List[VMCode]:
+    def get_opcodes(self, addresses: list[int]) -> list[VMCode]:
         return self._code_map.get_opcodes(addresses)
 
     def update_vm_code(self, vm_code: VMCode, opcode: OpcodeInformation, data: bytes = bytes()):
@@ -221,7 +219,7 @@ class VMCodeMapping:
                         instr_with_small_codes.remove(code)
             current_size = self.bytecode_size
 
-    def _validate_targets(self, code_or_address: Union[int, VMCode]):
+    def _validate_targets(self, code_or_address: int | VMCode):
         if isinstance(code_or_address, int):
             address = code_or_address
             code = self.get_code(address)
@@ -260,7 +258,7 @@ class VMCodeMapping:
             self._validate_targets(address)
         return self._code_map.remove_opcodes_by_addresses(addresses_to_remove)
 
-    def remove_opcodes_by_code(self, codes: List[VMCode]):
+    def remove_opcodes_by_code(self, codes: list[VMCode]):
         addresses_to_remove = self._code_map.get_addresses_from_codes(codes)
         for address in addresses_to_remove:
             self._validate_targets(address)

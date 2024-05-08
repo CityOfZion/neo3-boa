@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.interop.blockchain.transactiontype import TransactionType
 from boa3.internal.model.builtin.interop.nativecontract import LedgerMethod
 from boa3.internal.model.variable import Variable
@@ -13,5 +11,5 @@ class GetTransactionMethod(LedgerMethod):
 
         identifier = 'get_transaction'
         syscall = 'getTransaction'
-        args: Dict[str, Variable] = {'hash_': Variable(UInt256Type.build())}
+        args: dict[str, Variable] = {'hash_': Variable(UInt256Type.build())}
         super().__init__(identifier, syscall, args, return_type=Type.optional.build(transaction_type))

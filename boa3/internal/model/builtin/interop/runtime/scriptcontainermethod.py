@@ -1,5 +1,3 @@
-from typing import Dict
-
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
 from boa3.internal.model.variable import Variable
@@ -7,11 +5,11 @@ from boa3.internal.model.variable import Variable
 
 class ScriptContainerMethod(InteropMethod):
     def __init__(self):
-        from boa3.internal.model.type.type import Type
         identifier = '-get_script_container'
         syscall = 'System.Runtime.GetScriptContainer'
-        args: Dict[str, Variable] = {}
-        super().__init__(identifier, syscall, args, return_type=Type.any)
+        args: dict[str, Variable] = {}
+        from boa3.internal.model.builtin.interop.blockchain import TransactionType
+        super().__init__(identifier, syscall, args, return_type=TransactionType.build())
 
 
 class ScriptContainerProperty(IBuiltinProperty):

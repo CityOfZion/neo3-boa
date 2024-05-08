@@ -7,4 +7,4 @@ from boa3.builtin.interop.runtime import script_container
 
 @public
 def main() -> Transaction:
-    return cast(Transaction, script_container)
+    return script_container

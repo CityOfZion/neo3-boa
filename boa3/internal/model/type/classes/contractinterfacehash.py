@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
 from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
@@ -9,7 +7,7 @@ from boa3.internal.model.variable import Variable
 class ContractInterfaceGetScriptHashMethod(ContractGetHashMethod):
     def __init__(self, identifier: str, contract_script: bytes):
         identifier = f'-get_{identifier}'
-        args: Dict[str, Variable] = {}
+        args: dict[str, Variable] = {}
         super().__init__(contract_script, identifier, args, return_type=UInt160Type.build())
 
     @property
@@ -17,7 +15,7 @@ class ContractInterfaceGetScriptHashMethod(ContractGetHashMethod):
         return len(self.args)
 
     @property
-    def _body(self) -> Optional[str]:
+    def _body(self) -> str | None:
         return None
 
 

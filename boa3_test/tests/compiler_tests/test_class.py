@@ -1,115 +1,57 @@
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
+from neo3.core import types
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.exception.NotLoadedException import NotLoadedException
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestClass(BoaTest):
+class TestClass(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/class_test'
 
-    def test_notification_get_variables(self):
-        path, _ = self.get_deploy_file_paths('NotificationGetVariables.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_notification_get_variables(self):
+        await self.set_up_contract('NotificationGetVariables.py')
 
-        invokes = []
-        expected_results = []
+        script = self.contract_hash
+        result, _ = await self.call('event_name', [[]], return_type=str)
+        self.assertEqual('', result)
 
-        contract_invoke = runner.call_contract(path, 'script_hash', [],
-                                               expected_result_type=bytes)
-        invokes.append(contract_invoke)
-        expected_results.append(bytes(20))
+        result, _ = await self.call('state', [[]], return_type=list)
+        self.assertEqual([], result)
 
-        runner.update_contracts(export_checkpoint=True)
-        script = contract_invoke.invoke.contract.script_hash
+        result, events = await self.call('script_hash', [[1]], return_type=types.UInt160)
+        self.assertEqual(script, result)
+        self.assertEqual(len(events), 1)
 
-        invokes.append(runner.call_contract(path, 'event_name', []))
-        expected_results.append('')
+        result, events = await self.call('event_name', [[1]], return_type=str)
+        self.assertEqual('notify', result)
+        self.assertEqual(len(events), 1)
 
-        invokes.append(runner.call_contract(path, 'state', []))
-        expected_results.append([])
+        result, events = await self.call('state', [[1]], return_type=list)
+        self.assertEqual([1], result)
+        self.assertEqual(len(events), 1)
 
-        invokes.append(runner.call_contract(path, 'script_hash', [1]))
-        expected_results.append(script)
+        result, events = await self.call('state', [['1']], return_type=list[str])
+        self.assertEqual(['1'], result)
+        self.assertEqual(len(events), 1)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_notification_set_variables(self):
+        await self.set_up_contract('NotificationSetVariables.py')
 
-        contract_notifications = runner.get_events(origin=script)
-        self.assertEqual(len(contract_notifications), 1)
+        script = self.contract_hash
+        result, _ = await self.call('script_hash', [script], return_type=types.UInt160)
+        self.assertEqual(script, result)
 
-        invokes.append(runner.call_contract(path, 'event_name', [1]))
-        expected_results.append('notify')
+        result, _ = await self.call('event_name', ['unit test'], return_type=str)
+        self.assertEqual('unit test', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('state', [(1, 2, 3)], return_type=list)
+        self.assertEqual([1, 2, 3], result)
 
-        contract_notifications = runner.get_events(origin=script)
-        self.assertEqual(len(contract_notifications), 1)
+    async def test_contract_constructor(self):
+        await self.set_up_contract('ContractConstructor.py')
 
-        invokes.append(runner.call_contract(path, 'state', [1]))
-        expected_results.append([1])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        contract_notifications = runner.get_events(origin=script)
-        self.assertEqual(len(contract_notifications), 1)
-
-        invokes.append(runner.call_contract(path, 'state', ['1']))
-        expected_results.append(['1'])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        contract_notifications = runner.get_events(origin=script)
-        self.assertEqual(len(contract_notifications), 1)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_notification_set_variables(self):
-        path, _ = self.get_deploy_file_paths('NotificationSetVariables.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        contract_invoke = runner.call_contract(path, 'script_hash', b'',
-                                               expected_result_type=bytes)
-        invokes.append(contract_invoke)
-        expected_results.append(b'')
-
-        runner.update_contracts(export_checkpoint=True)
-        script = contract_invoke.invoke.contract.script_hash
-
-        invokes.append(runner.call_contract(path, 'script_hash', script,
-                                            expected_result_type=bytes))
-        expected_results.append(script)
-
-        invokes.append(runner.call_contract(path, 'event_name', 'unit test'))
-        expected_results.append('unit test')
-
-        invokes.append(runner.call_contract(path, 'state', (1, 2, 3)))
-        expected_results.append([1, 2, 3])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_contract_constructor(self):
-        path, _ = self.get_deploy_file_paths('ContractConstructor.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invoke = runner.call_contract(path, 'new_contract')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        result = invoke.result
+        result, _ = await self.call('new_contract', return_type=list)
         self.assertEqual(5, len(result))
 
         if isinstance(result[2], str):
@@ -133,763 +75,387 @@ class TestClass(BoaTest):
 
         self.assertTrue(e.exception.empty_script)
 
-    def test_user_class_with_static_method_from_class(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodFromClass.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_static_method_from_class(self):
+        await self.set_up_contract('UserClassWithStaticMethodFromClass.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('call_by_class_name', [], return_type=int)
+        self.assertEqual(42, result)
 
-        invokes.append(runner.call_contract(path, 'call_by_class_name'))
-        expected_results.append(42)
+    async def test_user_class_with_static_method_from_class_with_same_method_name(self):
+        await self.set_up_contract('UserClassWithStaticMethodFromClassWithSameNameMethod.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_static_method_from_class_with_same_method_name(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodFromClassWithSameNameMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name'))
-        expected_results.append(42)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('call_by_class_name', [], return_type=int)
+        self.assertEqual(42, result)
 
     def test_user_class_with_static_method_from_object(self):
-        path = self.get_contract_path('UserClassWithStaticMethodFromObject.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithStaticMethodFromObject.py')
 
-    def test_user_class_with_static_method_with_args(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodWithArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_static_method_with_args(self):
+        await self.set_up_contract('UserClassWithStaticMethodWithArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('call_by_class_name', [10, 10], return_type=int)
+        self.assertEqual(30, result)
 
-        invokes.append(runner.call_contract(path, 'call_by_class_name', 10, 10))
-        expected_results.append(30)
+        result, _ = await self.call('call_by_class_name', [30, -30], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes.append(runner.call_contract(path, 'call_by_class_name', 30, -30))
-        expected_results.append(10)
+        result, _ = await self.call('call_by_class_name', [-5, -10], return_type=int)
+        self.assertEqual(-5, result)
 
-        invokes.append(runner.call_contract(path, 'call_by_class_name', -5, -10))
-        expected_results.append(-5)
+    async def test_user_class_with_static_method_with_vararg(self):
+        await self.set_up_contract('UserClassWithStaticMethodWithVararg.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_static_method_with_vararg(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodWithVararg.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name', []))
-        expected_results.append(42)
+        result, _ = await self.call('call_by_class_name', [[]], return_type=int)
+        self.assertEqual(42, result)
 
         args = [1, 2, 3]
-        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
-        expected_results.append(args[0])
+        result, _ = await self.call('call_by_class_name', [args], return_type=int)
+        self.assertEqual(args[0], result)
 
         args = [4, 3, 2, 1]
-        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
-        expected_results.append(args[0])
+        result, _ = await self.call('call_by_class_name', [args], return_type=int)
+        self.assertEqual(args[0], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_user_class_with_static_method_not_class_method(self):
+        await self.set_up_contract('UserClassWithStaticMethodNotClassMethod.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('call_by_class_name', [42], return_type=int)
+        self.assertEqual(42, result)
 
-    def test_user_class_with_static_method_not_class_method(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithStaticMethodNotClassMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_class_method_called_from_class_name(self):
+        await self.set_up_contract('UserClassWithClassMethodFromClass.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('call_by_class_name', [], return_type=int)
+        self.assertEqual(42, result)
 
-        invokes.append(runner.call_contract(path, 'call_by_class_name', 42))
-        expected_results.append(42)
+    async def test_user_class_with_class_method_called_from_object(self):
+        await self.set_up_contract('UserClassWithClassMethodFromObject.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('call_by_class_name', [], return_type=int)
+        self.assertEqual(42, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_user_class_with_class_method_called_from_variable(self):
+        await self.set_up_contract('UserClassWithClassMethodFromVariable.py')
 
-    def test_user_class_with_class_method_called_from_class_name(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromClass.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('call_by_class_name', [], return_type=int)
+        self.assertEqual(42, result)
 
-        invokes = []
-        expected_results = []
+    async def test_user_class_with_class_method_with_args(self):
+        await self.set_up_contract('UserClassWithClassMethodWithArgs.py')
 
-        invokes.append(runner.call_contract(path, 'call_by_class_name'))
-        expected_results.append(42)
+        result, _ = await self.call('call_by_class_name', [42], return_type=int)
+        self.assertEqual(42, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('call_by_class_name', [1], return_type=int)
+        self.assertEqual(1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('call_by_class_name', [-10], return_type=int)
+        self.assertEqual(-10, result)
 
-    def test_user_class_with_class_method_called_from_object(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromObject.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_class_method_with_vararg(self):
+        await self.set_up_contract('UserClassWithClassMethodWithVararg.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name'))
-        expected_results.append(42)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_class_method_called_from_variable(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodFromVariable.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name'))
-        expected_results.append(42)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_class_method_with_args(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodWithArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name', 42))
-        expected_results.append(42)
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name', 1))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name', -10))
-        expected_results.append(-10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_class_method_with_vararg(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassMethodWithVararg.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name', []))
-        expected_results.append(42)
+        result, _ = await self.call('call_by_class_name', [[]], return_type=int)
+        self.assertEqual(42, result)
 
         args = [1, 2, 3]
-        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
-        expected_results.append(args[0])
+        result, _ = await self.call('call_by_class_name', [args], return_type=int)
+        self.assertEqual(args[0], result)
 
         args = [4, 3, 2, 1]
-        invokes.append(runner.call_contract(path, 'call_by_class_name', args))
-        expected_results.append(args[0])
+        result, _ = await self.call('call_by_class_name', [args], return_type=int)
+        self.assertEqual(args[0], result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_user_class_with_class_variable_from_class(self):
+        await self.set_up_contract('UserClassWithClassVariableFromClass.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_val1', [], return_type=int)
+        self.assertEqual(1, result)
 
-    def test_user_class_with_class_variable_from_class(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromClass.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('get_val2', [], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes = []
-        expected_results = []
+    async def test_user_class_with_class_variable_from_object(self):
+        await self.set_up_contract('UserClassWithClassVariableFromObject.py')
 
-        invokes.append(runner.call_contract(path, 'get_val1'))
-        expected_results.append(1)
+        result, _ = await self.call('get_val1', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'get_val2'))
-        expected_results.append(2)
+        result, _ = await self.call('get_val2', [], return_type=int)
+        self.assertEqual(2, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_user_class_with_class_variable_from_variable(self):
+        await self.set_up_contract('UserClassWithClassVariableFromVariable.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_val1', [], return_type=int)
+        self.assertEqual(1, result)
 
-    def test_user_class_with_class_variable_from_object(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromObject.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_val1'))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'get_val2'))
-        expected_results.append(2)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_class_variable_from_variable(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableFromVariable.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_val1'))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'get_val2'))
-        expected_results.append(2)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_val2', [], return_type=int)
+        self.assertEqual(2, result)
 
     def test_user_class_update_class_variable(self):
-        path = self.get_contract_path('UserClassUpdateClassVariable.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassUpdateClassVariable.py')
 
     def test_user_class_update_instance_variable_on_init(self):
-        path = self.get_contract_path('UserClassUpdateClassVariableOnInit.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassUpdateClassVariableOnInit.py')
 
-    def test_user_class_with_class_variable_and_class_method(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithClassVariableAndClassMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_class_variable_and_class_method(self):
+        await self.set_up_contract('UserClassWithClassVariableAndClassMethod.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('get_val1', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'get_val1'))
-        expected_results.append(1)
+        result, _ = await self.call('get_foo', [], return_type=int)
+        self.assertEqual(42, result)
 
-        invokes.append(runner.call_contract(path, 'get_foo'))
-        expected_results.append(42)
+    async def test_user_class_with_init(self):
+        await self.set_up_contract('UserClassWithInit.py')
+        from boa3_test.test_sc.class_test.UserClassWithInit import Example
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('build_example_object', [], return_type=list)
+        self.assertObjectEqual(Example(), result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_user_class_with_init_with_args(self):
+        await self.set_up_contract('UserClassWithInitWithArgs.py')
+        from boa3_test.test_sc.class_test.UserClassWithInitWithArgs import Example
 
-    def test_user_class_with_init(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithInit.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('build_example_object', [], return_type=list)
+        self.assertObjectEqual(Example(42, '42'), result)
 
-        invokes = []
-        expected_results = []
+    async def test_user_class_with_instance_method(self):
+        await self.set_up_contract('UserClassWithInstanceMethod.py')
 
-        invokes.append(runner.call_contract(path, 'build_example_object'))
-        expected_results.append([])
+        result, _ = await self.call('call_by_class_name', [], return_type=int)
+        self.assertEqual(42, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_user_class_with_instance_method_from_variable(self):
+        await self.set_up_contract('UserClassWithInstanceMethodFromVariable.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_init_with_args(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithInitWithArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'build_example_object'))
-        expected_results.append([])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_instance_method(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithInstanceMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name'))
-        expected_results.append(42)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_instance_method_from_variable(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithInstanceMethodFromVariable.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'call_by_class_name'))
-        expected_results.append(42)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('call_by_class_name', [], return_type=int)
+        self.assertEqual(42, result)
 
     def test_user_class_with_instance_method_from_class(self):
-        path = self.get_contract_path('UserClassWithInstanceMethodFromClass.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithInstanceMethodFromClass.py')
 
     def test_user_class_with_instance_variable_from_class(self):
-        path = self.get_contract_path('UserClassWithInstanceVariableFromClass.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithInstanceVariableFromClass.py')
 
-    def test_user_class_with_instance_variable_from_object(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithInstanceVariableFromObject.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_instance_variable_from_object(self):
+        await self.set_up_contract('UserClassWithInstanceVariableFromObject.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('get_val1', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'get_val1'))
-        expected_results.append(1)
+        result, _ = await self.call('get_val2', [], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'get_val2'))
-        expected_results.append(2)
+    async def test_user_class_with_instance_variable_from_variable(self):
+        await self.set_up_contract('UserClassWithInstanceVariableFromVariable.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('get_val1', [], return_type=int)
+        self.assertEqual(1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_val2', [], return_type=int)
+        self.assertEqual(2, result)
 
-    def test_user_class_with_instance_variable_from_variable(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithInstanceVariableFromVariable.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_update_instance_variable(self):
+        await self.set_up_contract('UserClassUpdateInstanceVariable.py')
+        from boa3_test.test_sc.class_test.UserClassUpdateInstanceVariable import Example
 
-        invokes = []
-        expected_results = []
+        expected_result = Example()
+        expected_result.val1 = 10
+        result, _ = await self.call('get_val', [10], return_type=list)
+        self.assertObjectEqual(expected_result, result)
 
-        invokes.append(runner.call_contract(path, 'get_val1'))
-        expected_results.append(1)
+        expected_result.val1 = 40
+        result, _ = await self.call('get_val', [40], return_type=list)
+        self.assertObjectEqual(expected_result, result)
 
-        invokes.append(runner.call_contract(path, 'get_val2'))
-        expected_results.append(2)
+    async def test_user_class_access_variable_on_init(self):
+        await self.set_up_contract('UserClassAccessInstanceVariableOnInit.py')
+        from boa3_test.test_sc.class_test.UserClassAccessInstanceVariableOnInit import Example
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('get_obj', [], return_type=list)
+        self.assertObjectEqual(Example(), result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_user_class_access_variable_on_method(self):
+        await self.set_up_contract('UserClassAccessInstanceVariableOnMethod.py')
 
-    def test_user_class_update_instance_variable(self):
-        path, _ = self.get_deploy_file_paths('UserClassUpdateInstanceVariable.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('get_val1', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_val', 10))
-        expected_results.append([10, 10, 2])
-
-        invokes.append(runner.call_contract(path, 'get_val', 40))
-        expected_results.append([10, 40, 2])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_access_variable_on_init(self):
-        path, _ = self.get_deploy_file_paths('UserClassAccessInstanceVariableOnInit.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_obj'))
-        expected_results.append([2, 4])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_access_variable_on_method(self):
-        path, _ = self.get_deploy_file_paths('UserClassAccessInstanceVariableOnMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_val1'))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'get_val2'))
-        expected_results.append(4)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_val2', [], return_type=int)
+        self.assertEqual(4, result)
 
     def test_user_class_with_base(self):
-        path = self.get_contract_path('UserClassWithBuiltinBase.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithBuiltinBase.py')
 
-    def test_user_class_with_created_base(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBase.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_created_base(self):
+        await self.set_up_contract('UserClassWithCreatedBase.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('implemented_method', [], return_type=int)
+        self.assertEqual(42, result)
 
-        invokes.append(runner.call_contract(path, 'implemented_method'))
-        expected_results.append(42)
+        result, _ = await self.call('inherited_method', [], return_type=int)
+        self.assertEqual(42, result)
 
-        invokes.append(runner.call_contract(path, 'inherited_method'))
-        expected_results.append(42)
+    async def test_user_class_with_cascated_created_base(self):
+        await self.set_up_contract('UserClassWithCascadeCreatedBase.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('implemented_method', [], return_type=int)
+        self.assertEqual(42, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('inherited_method', [], return_type=int)
+        self.assertEqual(42, result)
 
-    def test_user_class_with_cascated_created_base(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithCascadeCreatedBase.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_created_base_with_variable(self):
+        await self.set_up_contract('UserClassWithCreatedBaseWithVariables.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('implemented_variable', [], return_type=int)
+        self.assertEqual(42, result)
 
-        invokes.append(runner.call_contract(path, 'implemented_method'))
-        expected_results.append(42)
-
-        invokes.append(runner.call_contract(path, 'inherited_method'))
-        expected_results.append(42)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_created_base_with_variable(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithVariables.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'implemented_variable'))
-        expected_results.append(42)
-
-        invokes.append(runner.call_contract(path, 'inherited_variable'))
-        expected_results.append(42)
+        result, _ = await self.call('inherited_variable', [], return_type=int)
+        self.assertEqual(42, result)
 
         new_value = 10
-        invokes.append(runner.call_contract(path, 'update_variable', new_value))
-        expected_results.append(new_value)
+        result, _ = await self.call('update_variable', [new_value], return_type=int)
+        self.assertEqual(new_value, result)
 
         new_value = -10
-        invokes.append(runner.call_contract(path, 'update_variable', new_value))
-        expected_results.append(new_value)
+        result, _ = await self.call('update_variable', [new_value], return_type=int)
+        self.assertEqual(new_value, result)
 
         new_value = 10_000_000
-        invokes.append(runner.call_contract(path, 'update_variable', new_value))
-        expected_results.append(new_value)
+        result, _ = await self.call('update_variable', [new_value], return_type=int)
+        self.assertEqual(new_value, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_created_base_with_args(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_user_class_with_created_base_with_args(self):
+        await self.set_up_contract('UserClassWithCreatedBaseWithArgs.py')
 
         init_value = 42
-        invokes.append(runner.call_contract(path, 'implemented_var', init_value))
-        expected_results.append(init_value)
+        result, _ = await self.call('implemented_var', [init_value], return_type=int)
+        self.assertEqual(init_value, result)
 
-        invokes.append(runner.call_contract(path, 'inherited_var', init_value))
-        expected_results.append(init_value)
+        result, _ = await self.call('inherited_var', [init_value], return_type=int)
+        self.assertEqual(init_value, result)
 
         init_value = -42
-        invokes.append(runner.call_contract(path, 'implemented_var', init_value))
-        expected_results.append(init_value)
+        result, _ = await self.call('implemented_var', [init_value], return_type=int)
+        self.assertEqual(init_value, result)
 
-        invokes.append(runner.call_contract(path, 'inherited_var', init_value))
-        expected_results.append(init_value)
+        result, _ = await self.call('inherited_var', [init_value], return_type=int)
+        self.assertEqual(init_value, result)
 
         init_value = 10_000_000
-        invokes.append(runner.call_contract(path, 'implemented_var', init_value))
-        expected_results.append(init_value)
+        result, _ = await self.call('implemented_var', [init_value], return_type=int)
+        self.assertEqual(init_value, result)
 
-        invokes.append(runner.call_contract(path, 'inherited_var', init_value))
-        expected_results.append(init_value)
+        result, _ = await self.call('inherited_var', [init_value], return_type=int)
+        self.assertEqual(init_value, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_created_base_with_init(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithInit.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_user_class_with_created_base_with_init(self):
+        await self.set_up_contract('UserClassWithCreatedBaseWithInit.py')
 
         expected_result = 42
-        invokes.append(runner.call_contract(path, 'inherited_var'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('inherited_var', [], return_type=int)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_created_base_with_init_with_args(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithInitWithArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_user_class_with_created_base_with_init_with_args(self):
+        await self.set_up_contract('UserClassWithCreatedBaseWithInitWithArgs.py')
 
         expected_result = -10
-        invokes.append(runner.call_contract(path, 'inherited_var'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('inherited_var', [], return_type=int)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_user_class_with_created_base_with_more_variables(self):
+        await self.set_up_contract('UserClassWithCreatedBaseWithMoreVariables.py')
+        from boa3_test.test_sc.class_test.UserClassWithCreatedBaseWithMoreVariables import Example
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_created_base_with_more_variables(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithCreatedBaseWithMoreVariables.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        expected_result = [42, 10, 20]
-        invokes.append(runner.call_contract(path, 'get_full_object'))
-        expected_results.append(expected_result)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        expected_result = Example()
+        result, _ = await self.call('get_full_object', [], return_type=list)
+        self.assertObjectEqual(expected_result, result)
 
     def test_user_class_with_created_base_with_more_variables_without_super_init(self):
-        path = self.get_contract_path('UserClassWithCreatedBaseWithMoreVariablesWithoutSuperInit.py')
-        self.assertCompilerLogs(CompilerError.MissingInitCall, path)
+        self.assertCompilerLogs(CompilerError.MissingInitCall, 'UserClassWithCreatedBaseWithMoreVariablesWithoutSuperInit.py')
 
     def test_user_class_with_multiple_bases(self):
-        path = self.get_contract_path('UserClassWithMultipleBases.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithMultipleBases.py')
 
     def test_user_class_with_keyword_base(self):
-        path = self.get_contract_path('UserClassWithKeywordBase.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithKeywordBase.py')
 
     def test_user_class_with_decorator(self):
-        path = self.get_contract_path('UserClassWithDecorator.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'UserClassWithDecorator.py')
 
-    def test_user_class_with_property_from_object(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithPropertyFromObject.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_property_from_object(self):
+        await self.set_up_contract('UserClassWithPropertyFromObject.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('get_property', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'get_property'))
-        expected_results.append(1)
+    async def test_user_class_with_property_using_instance_variables_from_object(self):
+        await self.set_up_contract('UserClassWithPropertyUsingInstanceVariablesFromObject.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('get_property', [], return_type=int)
+        self.assertEqual(10, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_user_class_with_property_using_class_variables_from_object(self):
+        await self.set_up_contract('UserClassWithPropertyUsingClassVariablesFromObject.py')
 
-    def test_user_class_with_property_using_instance_variables_from_object(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingInstanceVariablesFromObject.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('get_property', [], return_type=int)
+        self.assertEqual(10, result)
 
-        invokes = []
-        expected_results = []
+    async def test_user_class_with_property_using_variables_from_object(self):
+        await self.set_up_contract('UserClassWithPropertyUsingVariablesFromObject.py')
 
-        invokes.append(runner.call_contract(path, 'get_property'))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_property_using_class_variables_from_object(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingClassVariablesFromObject.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_property'))
-        expected_results.append(10)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_property_using_variables_from_object(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithPropertyUsingVariablesFromObject.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_property'))
-        expected_results.append(47)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_property', [], return_type=int)
+        self.assertEqual(47, result)
 
     def test_user_class_with_property_from_class(self):
-        path = self.get_contract_path('UserClassWithPropertyFromClass.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithPropertyFromClass.py')
 
     def test_user_class_with_property_using_arguments(self):
-        path = self.get_contract_path('UserClassWithPropertyUsingArguments.py')
-        self.assertCompilerLogs(CompilerError.UnresolvedReference, path)
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'UserClassWithPropertyUsingArguments.py')
 
     def test_user_class_with_property_mismatched_type(self):
-        path = self.get_contract_path('UserClassWithPropertyMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'UserClassWithPropertyMismatchedType.py')
 
     def test_user_class_with_property_without_self(self):
-        path = self.get_contract_path('UserClassWithPropertyWithoutSelf.py')
-        self.assertCompilerLogs(CompilerError.SelfArgumentError, path)
+        self.assertCompilerLogs(CompilerError.SelfArgumentError, 'UserClassWithPropertyWithoutSelf.py')
 
-    def test_user_class_with_augmented_assignment_operator_with_variable(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_user_class_with_augmented_assignment_operator_with_variable(self):
+        await self.set_up_contract('UserClassWithAugmentedAssignmentOperatorWithVariable.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('add', [], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'add'))
-        expected_results.append(2)
+        result, _ = await self.call('sub', [], return_type=int)
+        self.assertEqual(-2, result)
 
-        invokes.append(runner.call_contract(path, 'sub'))
-        expected_results.append(-2)
+        result, _ = await self.call('mult', [], return_type=int)
+        self.assertEqual(16, result)
 
-        invokes.append(runner.call_contract(path, 'mult'))
-        expected_results.append(16)
+        result, _ = await self.call('div', [], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'div'))
-        expected_results.append(2)
+        result, _ = await self.call('mod', [], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'mod'))
-        expected_results.append(1)
+        result, _ = await self.call('mix', [], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'mix'))
-        expected_results.append(0)
+    async def test_user_class_with_deploy_method(self):
+        await self.set_up_contract('UserClassWithDeployMethod.py')
+        from boa3_test.test_sc.class_test.UserClassWithDeployMethod import Example
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_user_class_with_deploy_method(self):
-        path, _ = self.get_deploy_file_paths('UserClassWithDeployMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'get_obj'))
-        expected_results.append([1, 2])
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('get_obj', [], return_type=list)
+        self.assertObjectEqual(Example(), result)
 
     def test_del_class(self):
-        path = self.get_contract_path('DelClass.py')
-        self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'DelClass.py')
 
-    def test_class_property_and_parameter_with_same_name(self):
-        path, _ = self.get_deploy_file_paths('ClassPropertyAndParameterWithSameName.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_class_property_and_parameter_with_same_name(self):
+        await self.set_up_contract('ClassPropertyAndParameterWithSameName.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', 'unit test'))
-        expected_results.append('unit test')
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['unit test'], return_type=str)
+        self.assertEqual('unit test', result)

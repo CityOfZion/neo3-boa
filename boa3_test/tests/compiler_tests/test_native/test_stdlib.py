@@ -1,51 +1,34 @@
 import json
 
-from boa3_test.tests.boa_test import BoaTest  # needs to be the first import to avoid circular imports
-
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
+from boa3_test.tests import boatestcase
 
 
-class TestStdlibClass(BoaTest):
+class TestStdlibClass(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/native_test/stdlib'
+    INVALID_FORMAT_MSG = 'invalid format'
+    INVALID_BASE_MSG = 'invalid base'
 
-    def test_get_hash(self):
-        path, _ = self.get_deploy_file_paths('GetHash.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_get_hash(self):
+        await self.set_up_contract('GetHash.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [], return_type=bytes)
+        self.assertEqual(constants.STD_LIB_SCRIPT, result)
 
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(constants.STD_LIB_SCRIPT)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_base64_encode(self):
+    async def test_base64_encode(self):
         import base64
-        path, _ = self.get_deploy_file_paths('Base64Encode.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('Base64Encode.py')
 
         expected_result = base64.b64encode(b'unit test')
-        invokes.append(runner.call_contract(path, 'Main', b'unit test',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('Main', [b'unit test'], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         expected_result = base64.b64encode(b'')
-        invokes.append(runner.call_contract(path, 'Main', b'',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('Main', [b''], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         long_byte_string = (b'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
                             b'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
@@ -56,37 +39,23 @@ class TestStdlibClass(BoaTest):
                             b'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                             b'est enim dictum massa, id aliquet justo magna in purus.')
         expected_result = base64.b64encode(long_byte_string)
-        invokes.append(runner.call_contract(path, 'Main', long_byte_string,
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [long_byte_string], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
     def test_base64_encode_mismatched_type(self):
-        path = self.get_contract_path('Base64EncodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base64EncodeMismatchedType.py')
 
-    def test_base64_decode(self):
+    async def test_base64_decode(self):
         import base64
-        path, _ = self.get_deploy_file_paths('Base64Decode.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('Base64Decode.py')
 
         arg = String.from_bytes(base64.b64encode(b'unit test'))
-        invokes.append(runner.call_contract(path, 'Main', arg,
-                                            expected_result_type=bytes))
-        expected_results.append(b'unit test')
+        result, _ = await self.call('Main', [arg], return_type=bytes)
+        self.assertEqual(b'unit test', result)
 
         arg = String.from_bytes(base64.b64encode(b''))
-        invokes.append(runner.call_contract(path, 'Main', arg,
-                                            expected_result_type=bytes))
-        expected_results.append(b'')
+        result, _ = await self.call('Main', [arg], return_type=bytes)
+        self.assertEqual(b'', result)
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
                        'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
@@ -97,37 +66,23 @@ class TestStdlibClass(BoaTest):
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
         arg = String.from_bytes(base64.b64encode(String(long_string).to_bytes()))
-        invokes.append(runner.call_contract(path, 'Main', arg,
-                                            expected_result_type=bytes))
-        expected_results.append(String(long_string).to_bytes())
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [arg], return_type=bytes)
+        self.assertEqual(String(long_string).to_bytes(), result)
 
     def test_base64_decode_mismatched_type(self):
-        path = self.get_contract_path('Base64DecodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base64DecodeMismatchedType.py')
 
-    def test_base58_encode(self):
+    async def test_base58_encode(self):
         import base58
-        path, _ = self.get_deploy_file_paths('Base58Encode.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('Base58Encode.py')
 
         expected_result = base58.b58encode('unit test')
-        invokes.append(runner.call_contract(path, 'Main', 'unit test',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('Main', ['unit test'], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         expected_result = base58.b58encode('')
-        invokes.append(runner.call_contract(path, 'Main', '',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('Main', [''], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
                        'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
@@ -138,35 +93,25 @@ class TestStdlibClass(BoaTest):
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
         expected_result = base58.b58encode(long_string)
-        invokes.append(runner.call_contract(path, 'Main', long_string,
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [long_string], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
     def test_base58_encode_mismatched_type(self):
-        path = self.get_contract_path('Base58EncodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58EncodeMismatchedType.py')
 
-    def test_base58_decode(self):
+    async def test_base58_decode(self):
         import base58
-        path, _ = self.get_deploy_file_paths('Base58Decode.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('Base58Decode.py')
 
         arg = base58.b58encode('unit test')
-        invokes.append(runner.call_contract(path, 'Main', arg))
-        expected_results.append('unit test')
+        result, _ = await self.call('Main', [arg], return_type=str)
+        self.assertEqual('unit test', result)
 
         arg = base58.b58encode('')
-        invokes.append(runner.call_contract(path, 'Main', arg))
-        expected_results.append('')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('Main', [arg], return_type=str)
+
+        self.assertRegex(str(context.exception), 'zero length string')
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
                        'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
@@ -177,34 +122,25 @@ class TestStdlibClass(BoaTest):
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
         arg = base58.b58encode(long_string)
-        invokes.append(runner.call_contract(path, 'Main', arg))
-        expected_results.append(long_string)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [arg], return_type=str)
+        self.assertEqual(long_string, result)
 
     def test_base58_decode_mismatched_type(self):
-        path = self.get_contract_path('Base58DecodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58DecodeMismatchedType.py')
 
-    def test_base58_check_decode(self):
+    async def test_base58_check_decode(self):
         import base58
-        path, _ = self.get_deploy_file_paths('Base58CheckDecode.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('Base58CheckDecode.py')
 
         arg = base58.b58encode_check('unit test'.encode('utf-8'))
-        invokes.append(runner.call_contract(path, 'main', arg))
-        expected_results.append('unit test')
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual('unit test', result)
 
         arg = base58.b58encode_check(''.encode('utf-8'))
-        invokes.append(runner.call_contract(path, 'main', arg))
-        expected_results.append('')
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [arg], return_type=str)
+
+        self.assertRegex(str(context.exception), 'missing checksum')
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
                        'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
@@ -215,36 +151,23 @@ class TestStdlibClass(BoaTest):
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
         arg = base58.b58encode_check(long_string.encode('utf-8'))
-        invokes.append(runner.call_contract(path, 'main', arg))
-        expected_results.append(long_string)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(long_string, result)
 
     def test_base58_check_decode_mismatched_type(self):
-        path = self.get_contract_path('Base58CheckDecodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58CheckDecodeMismatchedType.py')
 
-    def test_base58_check_encode(self):
+    async def test_base58_check_encode(self):
         import base58
-        path, _ = self.get_deploy_file_paths('Base58CheckEncode.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+        await self.set_up_contract('Base58CheckEncode.py')
 
         expected_result = base58.b58encode_check('unit test'.encode('utf-8'))
-        invokes.append(runner.call_contract(path, 'main', 'unit test',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', ['unit test'], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         expected_result = base58.b58encode_check(''.encode('utf-8'))
-        invokes.append(runner.call_contract(path, 'main', '',
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [''], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         long_string = ('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam accumsan magna eu massa '
                        'vulputate bibendum. Aliquam commodo euismod tristique. Sed purus erat, pretium ut interdum '
@@ -255,716 +178,443 @@ class TestStdlibClass(BoaTest):
                        'dolor sit amet, consectetur adipiscing elit. Ut tincidunt, nisi in ullamcorper ornare, '
                        'est enim dictum massa, id aliquet justo magna in purus.')
         expected_result = base58.b58encode_check(long_string.encode('utf-8'))
-        invokes.append(runner.call_contract(path, 'main', long_string,
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [long_string], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
     def test_base58_check_encode_mismatched_type(self):
-        path = self.get_contract_path('Base58CheckEncodeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Base58CheckEncodeMismatchedType.py')
 
-    def test_serialize_int(self):
-        path, _ = self.get_deploy_file_paths('SerializeInt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_serialize_int(self):
+        await self.set_up_contract('SerializeInt.py')
 
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'serialize_int',
-                                            expected_result_type=bytes))
         expected_result = serialize(42)
-        expected_results.append(expected_result)
+        result, _ = await self.call('serialize_int', [], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_serialize_bool(self):
+        await self.set_up_contract('SerializeBool.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_serialize_bool(self):
-        path, _ = self.get_deploy_file_paths('SerializeBool.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'serialize_bool',
-                                            expected_result_type=bytes))
         expected_result = serialize(True)
-        expected_results.append(expected_result)
+        result, _ = await self.call('serialize_bool', [], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_serialize_str(self):
+        await self.set_up_contract('SerializeStr.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_serialize_str(self):
-        path, _ = self.get_deploy_file_paths('SerializeStr.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'serialize_str',
-                                            expected_result_type=bytes))
         expected_result = serialize('42')
-        expected_results.append(expected_result)
+        result, _ = await self.call('serialize_str', [], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_serialize_sequence(self):
+        await self.set_up_contract('SerializeSequence.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_serialize_sequence(self):
-        path, _ = self.get_deploy_file_paths('SerializeSequence.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'serialize_sequence',
-                                            expected_result_type=bytes))
         expected_result = serialize([2, 3, 5, 7])
-        expected_results.append(expected_result)
+        result, _ = await self.call('serialize_sequence', [], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_serialize_dict(self):
+        await self.set_up_contract('SerializeDict.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_serialize_dict(self):
-        path, _ = self.get_deploy_file_paths('SerializeDict.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'serialize_dict',
-                                            expected_result_type=bytes))
         expected_result = serialize({1: 1, 2: 1, 3: 2})
-        expected_results.append(expected_result)
+        result, _ = await self.call('serialize_dict', [], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_deserialize(self):
-        path, _ = self.get_deploy_file_paths('Deserialize.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_deserialize(self):
+        await self.set_up_contract('Deserialize.py')
 
         expected_result = 42
         value = serialize(expected_result)
-        invokes.append(runner.call_contract(path, 'deserialize_arg', value,
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('deserialize_arg', [value], return_type=int)
+        self.assertEqual(expected_result, result)
 
         expected_result = True
         value = serialize(expected_result)
-        invokes.append(runner.call_contract(path, 'deserialize_arg', value))
-        expected_results.append(expected_result)
+        result, _ = await self.call('deserialize_arg', [value], return_type=bool)
+        self.assertEqual(expected_result, result)
 
         value = StackItemType.Boolean + value[1:]
-        invokes.append(runner.call_contract(path, 'deserialize_arg', value))
-        expected_results.append(expected_result)
+        result, _ = await self.call('deserialize_arg', [value], return_type=bool)
+        self.assertEqual(expected_result, result)
 
         expected_result = '42'
         value = serialize(expected_result)
-        invokes.append(runner.call_contract(path, 'deserialize_arg', value))
-        expected_results.append(expected_result)
+        result, _ = await self.call('deserialize_arg', [value], return_type=str)
+        self.assertEqual(expected_result, result)
 
         expected_result = b'42'
         value = serialize(expected_result)
-        invokes.append(runner.call_contract(path, 'deserialize_arg', value,
-                                            expected_result_type=bytes))
-        expected_results.append(expected_result)
+        result, _ = await self.call('deserialize_arg', [value], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
         expected_result = [1, '2', b'3']
         value = serialize(expected_result)
-        invokes.append(runner.call_contract(path, 'deserialize_arg', value))
         expected_result[2] = String.from_bytes(expected_result[2])
-        expected_results.append(expected_result)
+        result, _ = await self.call('deserialize_arg', [value], return_type=list)
+        self.assertEqual(expected_result, result)
 
         expected_result = {'int': 1, 'str': '2', 'bytes': b'3'}
         value = serialize(expected_result)
-        invokes.append(runner.call_contract(path, 'deserialize_arg', value))
         expected_result['bytes'] = String.from_bytes(expected_result['bytes'])
-        expected_results.append(expected_result)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('deserialize_arg', [value], return_type=dict[str, str])
+        self.assertEqual(expected_result, result)
 
     def test_deserialize_mismatched_type(self):
-        path = self.get_contract_path('DeserializeMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'DeserializeMismatchedType.py')
 
-    def test_json_serialize(self):
-        path, _ = self.get_deploy_file_paths('JsonSerialize.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_json_serialize(self):
+        await self.set_up_contract('JsonSerialize.py')
 
         test_input = {"one": 1, "two": 2, "three": 3}
         expected_result = json.dumps(test_input, separators=(',', ':'))
-        invokes.append(runner.call_contract(path, 'main', test_input))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [test_input], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_json_serialize_int(self):
-        path, _ = self.get_deploy_file_paths('JsonSerializeInt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_json_serialize_int(self):
+        await self.set_up_contract('JsonSerializeInt.py')
 
         expected_result = json.dumps(10)
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_json_serialize_bool(self):
-        path, _ = self.get_deploy_file_paths('JsonSerializeBool.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_json_serialize_bool(self):
+        await self.set_up_contract('JsonSerializeBool.py')
 
         expected_result = json.dumps(True)
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_json_serialize_str(self):
-        path, _ = self.get_deploy_file_paths('JsonSerializeStr.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_json_serialize_str(self):
+        await self.set_up_contract('JsonSerializeStr.py')
 
         expected_result = json.dumps('unit test')
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_json_serialize_bytes(self):
-        path, _ = self.get_deploy_file_paths('JsonSerializeBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_json_serialize_bytes(self):
+        await self.set_up_contract('JsonSerializeBytes.py')
 
         # Python does not accept bytes as parameter for json.dumps() method, since string and bytes ends up being the
         # same on Neo, it's being converted to string, before using dumps
         expected_result = json.dumps(String().from_bytes(b'unit test'))
-        invokes.append(runner.call_contract(path, 'main'))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_json_deserialize(self):
-        path, _ = self.get_deploy_file_paths('JsonDeserialize.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_json_deserialize(self):
+        await self.set_up_contract('JsonDeserialize.py')
 
         test_input = json.dumps(12345)
         expected_result = json.loads(test_input)
-        invokes.append(runner.call_contract(path, 'main', test_input))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [test_input], return_type=int)
+        self.assertEqual(expected_result, result)
 
         test_input = json.dumps('unit test')
         expected_result = json.loads(test_input)
-        invokes.append(runner.call_contract(path, 'main', test_input))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [test_input], return_type=str)
+        self.assertEqual(expected_result, result)
 
         test_input = json.dumps(True)
         expected_result = json.loads(test_input)
-        invokes.append(runner.call_contract(path, 'main', test_input))
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [test_input], return_type=bool)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_serialization_test1(self):
+        await self.set_up_contract('SerializationBoa2Test.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_serialization_test1(self):
-        path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', 1, expected_result_type=bytes))
         expected_result = serialize(['a', 3, ['j', 3, 5], 'jk', 'lmnopqr'])
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [1], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_serialization_test2(self):
+        await self.set_up_contract('SerializationBoa2Test.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-    def test_boa2_serialization_test2(self):
-        path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', 2, expected_result_type=bytes))
         expected_result = serialize(['a', 3, ['j', 3, 5], 'jk', 'lmnopqr'])
-        expected_results.append(expected_result)
+        result, _ = await self.call('main', [2], return_type=bytes)
+        self.assertEqual(expected_result, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_boa2_serialization_test3(self):
+        await self.set_up_contract('SerializationBoa2Test.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [3], return_type=list)
+        self.assertEqual(['a', 3, ['j', 3, 5], 'jk', 'lmnopqr'], result)
 
-    def test_boa2_serialization_test3(self):
-        path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_boa2_serialization_test4(self):
+        await self.set_up_contract('SerializationBoa2Test.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [4], return_type=list)
+        self.assertEqual(['j', 3, 5], result)
 
-        invokes.append(runner.call_contract(path, 'main', 3))
-        expected_results.append(['a', 3, ['j', 3, 5], 'jk', 'lmnopqr'])
+    async def test_atoi(self):
+        await self.set_up_contract('Atoi.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', ['10', 10], return_type=int)
+        self.assertEqual(10, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['10', 16], return_type=int)
+        self.assertEqual(16, result)
 
-    def test_boa2_serialization_test4(self):
-        path, _ = self.get_deploy_file_paths('SerializationBoa2Test.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', ['123', 10], return_type=int)
+        self.assertEqual(123, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['123', 16], return_type=int)
+        self.assertEqual(291, result)
 
-        invokes.append(runner.call_contract(path, 'main', 4))
-        expected_results.append(['j', 3, 5])
+        result, _ = await self.call('main', ['1f', 16], return_type=int)
+        self.assertEqual(31, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', ['ff', 16], return_type=int)
+        self.assertEqual(-1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['string', 10], return_type=int)
 
-    def test_atoi(self):
-        path, _ = self.get_deploy_file_paths('Atoi.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        self.assertRegex(str(context.exception), self.INVALID_FORMAT_MSG)
 
-        invokes = []
-        expected_results = []
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['string', 16], return_type=int)
 
-        invokes.append(runner.call_contract(path, 'main', '10', 10))
-        expected_results.append(10)
+        self.assertRegex(str(context.exception), self.INVALID_FORMAT_MSG)
 
-        invokes.append(runner.call_contract(path, 'main', '10', 16))
-        expected_results.append(16)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['abc', 10], return_type=int)
 
-        invokes.append(runner.call_contract(path, 'main', '123', 10))
-        expected_results.append(123)
+        self.assertRegex(str(context.exception), self.INVALID_FORMAT_MSG)
 
-        invokes.append(runner.call_contract(path, 'main', '123', 16))
-        expected_results.append(291)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['10', 2], return_type=int)
 
-        invokes.append(runner.call_contract(path, 'main', '1f', 16))
-        expected_results.append(31)
+        self.assertRegex(str(context.exception), self.INVALID_BASE_MSG)
 
-        invokes.append(runner.call_contract(path, 'main', 'ff', 16))
-        expected_results.append(-1)
+    async def test_atoi_default(self):
+        await self.set_up_contract('AtoiDefault.py')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', ['10'], return_type=int)
+        self.assertEqual(10, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', ['123'], return_type=int)
+        self.assertEqual(123, result)
 
-        runner.call_contract(path, 'main', 'string', 10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', ['string'], return_type=int)
 
-        runner.call_contract(path, 'main', 'string', 16)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
-
-        runner.call_contract(path, 'main', 'abc', 10)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
-
-        runner.call_contract(path, 'main', '10', 2)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
-
-    def test_atoi_default(self):
-        path, _ = self.get_deploy_file_paths('AtoiDefault.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'main', '10'))
-        expected_results.append(10)
-
-        invokes.append(runner.call_contract(path, 'main', '123'))
-        expected_results.append(123)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        runner.call_contract(path, 'main', 'string')
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, self.CANT_PARSE_VALUE_MSG)
+        self.assertRegex(str(context.exception), self.INVALID_FORMAT_MSG)
 
     def test_atoi_too_few_parameters(self):
-        path = self.get_contract_path('AtoiTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'AtoiTooFewArguments.py')
 
     def test_atoi_too_many_parameters(self):
-        path = self.get_contract_path('AtoiTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'AtoiTooManyArguments.py')
 
     def test_atoi_mismatched_type(self):
-        path = self.get_contract_path('AtoiMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'AtoiMismatchedType.py')
 
-    def test_itoa(self):
-        path, _ = self.get_deploy_file_paths('Itoa')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_itoa(self):
+        await self.set_up_contract('Itoa')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [10, 10], return_type=str)
+        self.assertEqual('10', result)
 
-        invokes.append(runner.call_contract(path, 'main', 10, 10))
-        expected_results.append('10')
-        invokes.append(runner.call_contract(path, 'main', 16, 16))
-        expected_results.append('10')
-        invokes.append(runner.call_contract(path, 'main', -1, 10))
-        expected_results.append('-1')
-        invokes.append(runner.call_contract(path, 'main', -1, 16))
-        expected_results.append('f')
-        invokes.append(runner.call_contract(path, 'main', 15, 16))
-        expected_results.append('0f')
+        result, _ = await self.call('main', [16, 16], return_type=str)
+        self.assertEqual('10', result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [-1, 10], return_type=str)
+        self.assertEqual('-1', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [-1, 16], return_type=str)
+        self.assertEqual('f', result)
 
-        runner.call_contract(path, 'main', 10, 2)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
+        result, _ = await self.call('main', [15, 16], return_type=str)
+        self.assertEqual('0f', result)
 
-    def test_itoa_default(self):
-        path, _ = self.get_deploy_file_paths('ItoaDefault')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [10, 2], return_type=int)
 
-        invokes = []
-        expected_results = []
+        self.assertRegex(str(context.exception), self.INVALID_BASE_MSG)
 
-        invokes.append(runner.call_contract(path, 'main', 10))
-        expected_results.append('10')
-        invokes.append(runner.call_contract(path, 'main', -1))
-        expected_results.append('-1')
+    async def test_itoa_default(self):
+        await self.set_up_contract('ItoaDefault')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [10], return_type=str)
+        self.assertEqual('10', result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [-1], return_type=str)
+        self.assertEqual('-1', result)
 
     def test_itoa_too_few_arguments(self):
-        path = self.get_contract_path('ItoaTooFewArguments')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ItoaTooFewArguments')
 
     def test_itoa_too_many_arguments(self):
-        path = self.get_contract_path('ItoaTooManyArguments')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'ItoaTooManyArguments')
 
     def test_itoa_mismatched_type(self):
-        path = self.get_contract_path('ItoaMismatchedType')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ItoaMismatchedType')
 
-    def test_memory_search(self):
-        path, _ = self.get_deploy_file_paths('MemorySearch')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_memory_search(self):
+        await self.set_up_contract('MemorySearch')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['abcde', 'a', 0, False], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'abcde', 'a', 0, False))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'abcde', b'a', 0, False], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'a', 0, False))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'abcde', b'b', 0, False], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'b', 0, False))
-        expected_results.append(1)
+        result, _ = await self.call('main', [b'abcde', b'c', 0, False], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'c', 0, False))
-        expected_results.append(2)
+        result, _ = await self.call('main', [b'abcde', b'd', 0, False], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'd', 0, False))
-        expected_results.append(3)
+        result, _ = await self.call('main', [b'abcde', b'e', 0, False], return_type=int)
+        self.assertEqual(4, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'e', 0, False))
-        expected_results.append(4)
+        result, _ = await self.call('main', [b'abcde', b'a', 1, False], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'a', 1, False))
-        expected_results.append(-1)
+        result, _ = await self.call('main', [b'abcde', b'cd', 0, False], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'cd', 0, False))
-        expected_results.append(2)
+        result, _ = await self.call('main', [b'abcde', b'abe', 0, False], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'abe', 0, False))
-        expected_results.append(-1)
+        result, _ = await self.call('main', [b'aaaaa', b'a', 0, False], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'aaaaa', b'a', 0, False))
-        expected_results.append(0)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [b'abcde', b'a', 20, False], return_type=int)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        self.assertRegex(str(context.exception), 'slice bounds out of range')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+    async def test_memory_search_backward(self):
+        await self.set_up_contract('MemorySearch')
 
-        runner.call_contract(path, 'main', b'abcde', b'a', 20, False)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
+        result, _ = await self.call('main', ['abcde', 'a', 5, True], return_type=int)
+        self.assertEqual(0, result)
 
-    def test_memory_search_backward(self):
-        path, _ = self.get_deploy_file_paths('MemorySearch')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [b'abcde', b'a', 5, True], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [b'abcde', b'b', 5, True], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'abcde', 'a', 5, True))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'abcde', b'c', 5, True], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'a', 5, True))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'abcde', b'd', 5, True], return_type=int)
+        self.assertEqual(3, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'b', 5, True))
-        expected_results.append(1)
+        result, _ = await self.call('main', [b'abcde', b'e', 5, True], return_type=int)
+        self.assertEqual(4, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'c', 5, True))
-        expected_results.append(2)
+        result, _ = await self.call('main', [b'abcde', b'a', 0, True], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'd', 5, True))
-        expected_results.append(3)
+        result, _ = await self.call('main', [b'abcde', b'cd', 5, True], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'e', 5, True))
-        expected_results.append(4)
+        result, _ = await self.call('main', [b'abcde', b'abe', 5, True], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'a', 0, True))
-        expected_results.append(-1)
+        result, _ = await self.call('main', [b'aaaaa', b'a', 5, True], return_type=int)
+        self.assertEqual(4, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'cd', 5, True))
-        expected_results.append(2)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [b'abcde', b'a', 20, True], return_type=int)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'abe', 5, True))
-        expected_results.append(-1)
+        self.assertRegex(str(context.exception), 'invalid start index')
 
-        invokes.append(runner.call_contract(path, 'main', b'aaaaa', b'a', 5, True))
-        expected_results.append(4)
+    async def test_memory_search_start(self):
+        await self.set_up_contract('MemorySearchStart')
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', ['abcde', 'a', 0], return_type=int)
+        self.assertEqual(0, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [b'abcde', b'a', 0], return_type=int)
+        self.assertEqual(0, result)
 
-        runner.call_contract(path, 'main', b'abcde', b'a', 20, True)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
+        result, _ = await self.call('main', [b'abcde', b'e', 0], return_type=int)
+        self.assertEqual(4, result)
 
-    def test_memory_search_start(self):
-        path, _ = self.get_deploy_file_paths('MemorySearchStart')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [b'abcde', b'a', 1], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [b'abcde', b'cd', 0], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'abcde', 'a', 0))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'abcde', b'abe', 0], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'a', 0))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'aaaaa', b'a', 0], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'e', 0))
-        expected_results.append(4)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [b'abcde', b'a', 20], return_type=int)
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'a', 1))
-        expected_results.append(-1)
+        self.assertRegex(str(context.exception), 'slice bounds out of range')
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'cd', 0))
-        expected_results.append(2)
+    async def test_memory_search_default_values(self):
+        await self.set_up_contract('MemorySearchDefault')
 
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'abe', 0))
-        expected_results.append(-1)
+        result, _ = await self.call('main', ['abcde', 'a'], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'aaaaa', b'a', 0))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'abcde', b'a'], return_type=int)
+        self.assertEqual(0, result)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+        result, _ = await self.call('main', [b'abcde', b'b'], return_type=int)
+        self.assertEqual(1, result)
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [b'abcde', b'c'], return_type=int)
+        self.assertEqual(2, result)
 
-        runner.call_contract(path, 'main', b'abcde', b'a', 20)
-        runner.execute()
-        self.assertEqual(VMState.FAULT, runner.vm_state, msg=runner.cli_log)
-        self.assertRegex(runner.error, f'^{self.ARGUMENT_OUT_OF_RANGE_MSG_PREFIX}')
+        result, _ = await self.call('main', [b'abcde', b'd'], return_type=int)
+        self.assertEqual(3, result)
 
-    def test_memory_search_default_values(self):
-        path, _ = self.get_deploy_file_paths('MemorySearchDefault')
-        runner = BoaTestRunner(runner_id=self.method_name())
+        result, _ = await self.call('main', [b'abcde', b'e'], return_type=int)
+        self.assertEqual(4, result)
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', [b'abcde', b'cd'], return_type=int)
+        self.assertEqual(2, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'abcde', 'a'))
-        expected_results.append(0)
-
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'a'))
-        expected_results.append(0)
-
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'b'))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'c'))
-        expected_results.append(2)
-
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'd'))
-        expected_results.append(3)
-
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'e'))
-        expected_results.append(4)
-
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'cd'))
-        expected_results.append(2)
-
-        invokes.append(runner.call_contract(path, 'main', b'abcde', b'aa'))
-        expected_results.append(-1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [b'abcde', b'aa'], return_type=int)
+        self.assertEqual(-1, result)
 
     def test_memory_search_mismatched_type(self):
-        path = self.get_contract_path('MemorySearchMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MemorySearchMismatchedType.py')
 
     def test_memory_search_too_few_parameters(self):
-        path = self.get_contract_path('MemorySearchTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'MemorySearchTooFewArguments.py')
 
     def test_memory_search_too_many_parameters(self):
-        path = self.get_contract_path('MemorySearchTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'MemorySearchTooManyArguments.py')
 
-    def test_memory_compare(self):
-        path, _ = self.get_deploy_file_paths('MemoryCompare')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_memory_compare(self):
+        await self.set_up_contract('MemoryCompare')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('main', ['abc', 'abc'], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'abc', 'abc'))
-        expected_results.append(0)
+        result, _ = await self.call('main', ['abc', 'ABC'], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'abc', 'ABC'))
-        expected_results.append(1)
+        result, _ = await self.call('main', ['ABC', 'abc'], return_type=int)
+        self.assertEqual(-1, result)
 
-        invokes.append(runner.call_contract(path, 'main', 'ABC', 'abc'))
-        expected_results.append(-1)
+        result, _ = await self.call('main', [b'abc', b'abc'], return_type=int)
+        self.assertEqual(0, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abc', b'abc'))
-        expected_results.append(0)
+        result, _ = await self.call('main', [b'abc', b'ABC'], return_type=int)
+        self.assertEqual(1, result)
 
-        invokes.append(runner.call_contract(path, 'main', b'abc', b'ABC'))
-        expected_results.append(1)
-
-        invokes.append(runner.call_contract(path, 'main', b'ABC', b'abc'))
-        expected_results.append(-1)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('main', [b'ABC', b'abc'], return_type=int)
+        self.assertEqual(-1, result)
 
     def test_memory_compare_too_few_parameters(self):
-        path = self.get_contract_path('MemoryCompareTooFewArguments.py')
-        self.assertCompilerLogs(CompilerError.UnfilledArgument, path)
+        self.assertCompilerLogs(CompilerError.UnfilledArgument, 'MemoryCompareTooFewArguments.py')
 
     def test_memory_compare_too_many_parameters(self):
-        path = self.get_contract_path('MemoryCompareTooManyArguments.py')
-        self.assertCompilerLogs(CompilerError.UnexpectedArgument, path)
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'MemoryCompareTooManyArguments.py')
 
     def test_memory_compare_mismatched_type(self):
-        path = self.get_contract_path('MemoryCompareMismatchedType.py')
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, path)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MemoryCompareMismatchedType.py')

@@ -18,7 +18,7 @@ If applicable, add screenshots to help explain your problem and the solution or 
 
 **Platform:**
  - OS: [e.g. Windows 10 x64]
- - Python version: [e.g. Python 3.10]
+ - Python version: [e.g. Python 3.11]
 
 **(Optional) Additional context**
 Add any other context about the problem here. 
