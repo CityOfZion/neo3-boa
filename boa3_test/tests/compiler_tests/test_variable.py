@@ -26,7 +26,7 @@ class TestVariable(boatestcase.BoaTestCase):
             + Opcode.RET        # return
         )
 
-        from boa3_test.tests.boa_test import _COMPILER_LOCK as LOCK
+        from boa3_test.tests.boatestcase import _COMPILER_LOCK as LOCK
         with LOCK:
             compiler_output = compiler.compile(path)
             main_symbol_table: dict[str, ISymbol] = self.get_compiler_analyser(compiler).symbol_table
