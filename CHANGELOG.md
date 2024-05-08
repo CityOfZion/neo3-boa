@@ -15,10 +15,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Removed
-- Dropped support to Python 3.10
 
 
 ### Fixed
+
+
+## [1.2.0] - 2024-05-08
+### Added
+- Included `boa-test-constructor` to the installation.
+  - Install it by using `pip install neo3-boa[test]` 
+- Support to type union annotations using `|` operator
+
+### Changed
+- Changed all unit tests to use `boa-test-constructor` in place of `NeoTestRunner`
+- Raise deprecated warning when using deprecated typing aliases and removed their uses from the compiler code
+  Deprecated symbols from `typing`:
+  - `List`, `Dict`, `Tuple` (use the builtins instead)
+  - `Collection`, `Mapping`, `MutableSequence`, `Sequence` (import from `collections.abc` instead)
+- Changed `NeoMetadata.add_permission` function signature to be more intuitive to add multiple methods permissions
+
+### Removed
+- Dropped support to Python 3.10
+- Removed `@metadata` decorator to identify metadata function. Use `NeoMetadata` as function return instead.
+
+### Fixed
+- Fixed `tuple` annotation behavior
+- `runtime.script_container` returns a `Transaction` instead of `Any`
+- Removed empty lines that were logged when compiling a smart contract
 
 
 ## [1.1.1] - 2024-02-01
