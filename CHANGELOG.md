@@ -44,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed empty lines that were logged when compiling a smart contract
 
 
-## [1.1.1] - 2024-02-01
+## [1.1.1] - 2024-02-02
 ### Added
 - Support to Python 3.12
 - Included `Nep17Contract` interface
@@ -578,6 +578,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Unreleased]: https://github.com/CityOfZion/neo3-boa/compare/master...staging
+[1.2.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.2.0
 [1.1.1]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.1.1
 [1.1.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.1.0
 [1.0.0]: https://github.com/CityOfZion/neo3-boa/releases/tag/v1.0.0
