@@ -469,7 +469,7 @@ class TestMetadata(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [], return_type=int)
         self.assertEqual(result, 100_000_000)    # NEO total supply
 
-    async def test_metadata_info_permissions_wildcard_list_single_element(self):
+    def test_metadata_info_permissions_wildcard_list_single_element(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcardListSingleElement.py')
         output, manifest = self.compile_and_save(path)
 
@@ -478,7 +478,7 @@ class TestMetadata(boatestcase.BoaTestCase):
         self.assertEqual(len(manifest['permissions']), 1)
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
 
-    async def test_metadata_info_permissions_wildcard_list(self):
+    def test_metadata_info_permissions_wildcard_list(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcardList.py')
         output, manifest = self.compile_and_save(path)
 
@@ -487,7 +487,7 @@ class TestMetadata(boatestcase.BoaTestCase):
         self.assertEqual(len(manifest['permissions']), 1)
         self.assertIn({"contract": "*", "methods": "*"}, manifest['permissions'])
 
-    async def test_metadata_info_permissions_wildcard_tuple(self):
+    def test_metadata_info_permissions_wildcard_tuple(self):
         path = self.get_contract_path('MetadataInfoPermissionsWildcardTuple.py')
         output, manifest = self.compile_and_save(path)
 

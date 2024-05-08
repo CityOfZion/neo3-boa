@@ -139,7 +139,7 @@ class TestNativeContracts(boatestcase.BoaTestCase):
         from boa3_test.tests.test_drive import neoxp
         from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
-        path, _ = self.get_deploy_file_paths('OracleRequestCall.py', compile_if_found=True)
+        path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
         runner = BoaTestRunner(runner_id=self.method_name())
 
         invokes = []

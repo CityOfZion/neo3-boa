@@ -39,10 +39,9 @@ if __name__ == '__main__':
         test_discover = unittest.loader.defaultTestLoader.discover(discover_path,
                                                                    top_level_dir=env.PROJECT_ROOT_DIRECTORY,
                                                                    )
-        from boaconstructor import SmartContractTestCase
 
         for test in list_of_tests_gen(test_discover):
-            if isinstance(test, SmartContractTestCase):
+            if isinstance(test, boatestcase.SmartContractTestCase):
                 default_suite.addTest(test)
             else:
                 suite.addTest(test)
