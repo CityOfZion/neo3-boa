@@ -12,7 +12,6 @@ from boa3.builtin.interop.contract import CallFlags, call_contract, destroy_cont
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.json import json_deserialize
 from boa3.builtin.interop.runtime import check_witness, get_network, script_container
-from boa3.builtin.interop.stdlib import deserialize, serialize
 from boa3.builtin.type import UInt160, helper as type_helper
 from boa3.sc import storage
 from boa3.sc.types import FindOptions
@@ -380,8 +379,7 @@ def internal_deploy(owner: UInt160):
 
     auth: list[UInt160] = []
     auth.append(owner)
-    serialized = serialize(auth)
-    storage.put(AUTH_ADDRESSES, serialized)
+    storage.put_list(AUTH_ADDRESSES, auth)
 
 
 @public(name='onNEP11Payment')
@@ -510,8 +508,7 @@ def getAuthorizedAddress() -> list[UInt160]:
     :return: whether the transaction signature is correct
     :raise AssertionError: raised if witness is not verified.
     """
-    serialized = storage.get(AUTH_ADDRESSES, storage.get_read_only_context())
-    auth = cast(list[UInt160], deserialize(serialized))
+    auth = cast(list[UInt160], storage.get_list(AUTH_ADDRESSES, storage.get_read_only_context()))
 
     return auth
 
@@ -536,8 +533,7 @@ def setAuthorizedAddress(address: UInt160, authorized: bool):
     expect(verified, '`account` is not allowed for setAuthorizedAddress')
     expect(validateAddress(address), "Not a valid address")
     expect(isinstance(authorized, bool), "authorized has to be of type bool")
-    serialized = storage.get(AUTH_ADDRESSES, storage.get_read_only_context())
-    auth = cast(list[UInt160], deserialize(serialized))
+    auth = cast(list[UInt160], storage.get_list(AUTH_ADDRESSES, storage.get_read_only_context()))
 
     if authorized:
         found = False
@@ -549,11 +545,11 @@ def setAuthorizedAddress(address: UInt160, authorized: bool):
         if not found:
             auth.append(address)
 
-        storage.put(AUTH_ADDRESSES, serialize(auth))
+        storage.put_list(AUTH_ADDRESSES, auth)
         on_auth(address, 0, True)
     else:
         auth.remove(address)
-        storage.put(AUTH_ADDRESSES, serialize(auth))
+        storage.put_list(AUTH_ADDRESSES, auth)
         on_auth(address, 0, False)
 
 
@@ -601,8 +597,7 @@ def verify() -> bool:
 
     :return: whether the transaction signature is correct
     """
-    serialized = storage.get(AUTH_ADDRESSES, storage.get_read_only_context())
-    auth = cast(list[UInt160], deserialize(serialized))
+    auth = cast(list[UInt160], storage.get_list(AUTH_ADDRESSES, storage.get_read_only_context()))
     tx = script_container
     for addr in auth:
         if check_witness(addr):

@@ -6,6 +6,9 @@ __all__ = [
     'get_int',
     'get_bool',
     'get_str',
+    'get_list',
+    'get_dict',
+    'get_object',
     'get_uint160',
     'get_uint256',
     'get_ecpoint',
@@ -13,6 +16,9 @@ __all__ = [
     'try_get_int',
     'try_get_bool',
     'try_get_str',
+    'try_get_list',
+    'try_get_dict',
+    'try_get_object',
     'try_get_uint160',
     'try_get_uint256',
     'try_get_ecpoint',
@@ -22,12 +28,17 @@ __all__ = [
     'put_int',
     'put_bool',
     'put_str',
+    'put_list',
+    'put_dict',
+    'put_object',
     'put_uint160',
     'put_uint256',
     'put_ecpoint',
     'delete',
     'find',
 ]
+
+from typing import Any
 
 from deprecation import deprecated
 
@@ -57,7 +68,7 @@ def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
 
-    >>> put(b'unit', 'test')
+    >>> put(b'unit', b'test')
     ... get(b'unit')
     b'test'
 
@@ -79,7 +90,7 @@ def try_get(key: bytes, context: StorageContext = get_context()) -> tuple[bytes,
     """
     Gets a value from the persistent store based on the given key and returns whether the value is stored.
 
-    >>> put(b'unit', 'test')
+    >>> put(b'unit', b'test')
     ... try_get(b'unit')
     (b'test', True)
 
@@ -227,6 +238,144 @@ def try_get_str(key: bytes, context: StorageContext = get_context()) -> tuple[st
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[str, bool]
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def get_list(key: bytes, context: StorageContext = get_context()) -> list:
+    """
+    Gets a value as list from the persistent store based on the given key.
+    It's equivalent to boa3.builtin.nativecontract.stdlib.StdLib.deserialize(get(key, context))
+
+    >>> put_list(b'unit', [1, 2, '3'])
+    ... get_list(b'unit')
+    [1, 2, '3']
+
+    >>> get_list(b'fake_key')
+    []
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context
+    :rtype: list
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def try_get_list(key: bytes, context: StorageContext = get_context()) -> tuple[list, bool]:
+    """
+    Gets a value as list from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_list(b'unit', [1, 2, '3'])
+    ... try_get_list(b'unit')
+    ([1, 2, '3'], True)
+
+    >>> get_list(b'fake_key')
+    ([], False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[list, bool]
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def get_dict(key: bytes, context: StorageContext = get_context()) -> dict:
+    """
+    Gets a value as dict from the persistent store based on the given key.
+    It's equivalent to boa3.builtin.nativecontract.stdlib.StdLib.deserialize(get(key, context))
+
+    >>> put_dict(b'unit', {'example': 1, 'other_example': 2})
+    ... get_dict(b'unit')
+    {'example': 1, 'other_example': 2}
+
+    >>> get_dict(b'fake_key')
+    {}
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context
+    :rtype: dict
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def try_get_dict(key: bytes, context: StorageContext = get_context()) -> tuple[dict, bool]:
+    """
+    Gets a value as dict from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> put_dict(b'unit', {'example': 1, 'other_example': 2})
+    ... get_dict(b'unit')
+    ({'example': 1, 'other_example': 2}, True)
+
+    >>> get_dict(b'fake_key')
+    ({}, False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[dict, bool]
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def get_object(key: bytes, context: StorageContext = get_context()) -> Any:
+    """
+    Gets a value as object from the persistent store based on the given key.
+    It's equivalent to boa3.builtin.nativecontract.stdlib.StdLib.deserialize(get(key, context))
+    Returns an empty struct if not found.
+
+    >>> example = SomeClass()
+    >>> put_object(b'unit', example)
+    ... get_object(b'unit')
+    SomeClass
+
+    >>> get_object(b'fake_key')
+    object
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context
+    :rtype: Any
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def try_get_object(key: bytes, context: StorageContext = get_context()) -> tuple[Any, bool]:
+    """
+    Gets a value as dict from the persistent store based on the given key and returns whether the value is stored.
+
+    >>> example = SomeClass()
+    >>> put_object(b'unit', example)
+    ... try_get_object(b'unit')
+    (SomeClass, True)
+
+    >>> get_object(b'fake_key')
+    (object, False)
+
+    :param key: value identifier in the store
+    :type key: bytes
+    :param context: storage context to be used
+    :type context: StorageContext
+    :return: the value corresponding to given key for current storage context and whether it was actually stored
+    :rtype: tuple[Any, bool]
     """
     pass
 
@@ -449,6 +598,64 @@ def put_str(key: bytes, value: str, context: StorageContext = get_context()):
     :type key: bytes
     :param value: value to be stored
     :type value: str
+    :param context: storage context to be used
+    :type context: StorageContext
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def put_list(key: bytes, value: list, context: StorageContext = get_context()):
+    """
+    Inserts a given list value in the key-value format into the persistent storage.
+    It's equivalent to put(key, boa3.builtin.nativecontract.stdlib.serialize(value), context)
+
+    >>> put_list(b'unit', [1, 2, '3'])
+    None
+
+    :param key: the identifier in the store for the new value
+    :type key: bytes
+    :param value: value to be stored
+    :type value: list
+    :param context: storage context to be used
+    :type context: StorageContext
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def put_dict(key: bytes, value: dict, context: StorageContext = get_context()):
+    """
+    Inserts a given dict value in the key-value format into the persistent storage.
+    It's equivalent to put(key, boa3.builtin.nativecontract.stdlib.serialize(value), context)
+
+    >>> put_dict(b'unit', {'example': 1, 'other_example': 2})
+    None
+
+    :param key: the identifier in the store for the new value
+    :type key: bytes
+    :param value: value to be stored
+    :type value: dict
+    :param context: storage context to be used
+    :type context: StorageContext
+    """
+    pass
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+def put_object(key: bytes, value: object, context: StorageContext = get_context()):
+    """
+    Inserts a given object value in the key-value format into the persistent storage.
+    It's equivalent to put(key, boa3.builtin.nativecontract.stdlib.serialize(value), context)
+
+    >>> example = SomeClass()
+    >>> put_object(b'unit', example)
+    None
+
+    :param key: the identifier in the store for the new value
+    :type key: bytes
+    :param value: value to be stored
+    :type value: dict
     :param context: storage context to be used
     :type context: StorageContext
     """

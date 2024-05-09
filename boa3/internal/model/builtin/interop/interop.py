@@ -196,6 +196,9 @@ class Interop:
     StorageGetInt = StorageGetIntMethod()
     StorageGetBool = StorageGetBoolMethod()
     StorageGetStr = StorageGetStrMethod()
+    StorageGetList = StorageGetListMethod()
+    StorageGetDict = StorageGetDictMethod()
+    StorageGetObject = StorageGetObjectMethod()
     StorageGetUInt160 = StorageGetUInt160Method()
     StorageGetUInt256 = StorageGetUInt256Method()
     StorageGetECPoint = StorageGetECPointMethod()
@@ -203,6 +206,9 @@ class Interop:
     StorageGetCheckInt = StorageTryGetIntMethod()
     StorageGetCheckBool = StorageTryGetBoolMethod()
     StorageGetCheckStr = StorageTryGetStrMethod()
+    StorageGetCheckList = StorageTryGetListMethod()
+    StorageGetCheckDict = StorageTryGetDictMethod()
+    StorageGetCheckObject = StorageTryGetObjectMethod()
     StorageGetCheckUInt160 = StorageTryGetUInt160Method()
     StorageGetCheckUInt256 = StorageTryGetUInt256Method()
     StorageGetCheckECPoint = StorageTryGetECPointMethod()
@@ -210,6 +216,9 @@ class Interop:
     StoragePutInt = StoragePutIntMethod()
     StoragePutBool = StoragePutBoolMethod()
     StoragePutStr = StoragePutStrMethod()
+    StoragePutList = StoragePutListMethod()
+    StoragePutDict = StoragePutDictMethod()
+    StoragePutObject = StoragePutObjectMethod()
     StoragePutUInt160 = StoragePutUInt160Method()
     StoragePutUInt256 = StoragePutUInt256Method()
     StoragePutECPoint = StoragePutECPointMethod()
@@ -457,6 +466,9 @@ class Interop:
                                       StorageGetInt,
                                       StorageGetBool,
                                       StorageGetStr,
+                                      StorageGetList,
+                                      StorageGetDict,
+                                      StorageGetObject,
                                       StorageGetUInt160,
                                       StorageGetUInt256,
                                       StorageGetECPoint,
@@ -464,6 +476,9 @@ class Interop:
                                       StorageGetCheckInt,
                                       StorageGetCheckBool,
                                       StorageGetCheckStr,
+                                      StorageGetCheckList,
+                                      StorageGetCheckDict,
+                                      StorageGetCheckObject,
                                       StorageGetCheckUInt160,
                                       StorageGetCheckUInt256,
                                       StorageGetCheckECPoint,
@@ -473,6 +488,9 @@ class Interop:
                                       StoragePutInt,
                                       StoragePutBool,
                                       StoragePutStr,
+                                      StoragePutList,
+                                      StoragePutDict,
+                                      StoragePutObject,
                                       StoragePutUInt160,
                                       StoragePutUInt256,
                                       StoragePutECPoint,
