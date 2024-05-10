@@ -4,7 +4,7 @@ from boa3.builtin.compile_time import public
 from boa3.builtin.interop.contract import GAS, NEO
 from boa3.builtin.interop.runtime import executing_script_hash, notify
 from boa3.builtin.type import UInt160, helper as type_helper
-from boa3.sc.storage import find, get, get_context, put
+from boa3.sc.storage import find, get_uint160, get_context, put_uint160
 
 FEE_RECEIVER_KEY = b'FEE_RECEIVER'
 
@@ -14,7 +14,7 @@ feesMap = get_context().create_map(b'feesMap')
 @public
 def test_end_while_jump() -> bool:
     iterator = find(b'feesMap')
-    fee_receiver = get(FEE_RECEIVER_KEY)
+    fee_receiver = get_uint160(FEE_RECEIVER_KEY)
     while iterator.next():
         token_bytes = cast(bytes, iterator.value[0])
         token_bytes = token_bytes[7:]  # cut 'feesMap' at the beginning of the bytes
@@ -28,7 +28,7 @@ def test_end_while_jump() -> bool:
 @public
 def _deploy(data: Any, update: bool):
     # placeholders for testing
-    put(FEE_RECEIVER_KEY, UInt160())
+    put_uint160(FEE_RECEIVER_KEY, UInt160())
 
     feesMap.put(GAS, 10)
     feesMap.put(NEO, 20)

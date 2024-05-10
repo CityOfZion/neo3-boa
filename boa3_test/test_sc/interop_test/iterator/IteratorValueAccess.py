@@ -7,8 +7,7 @@ from boa3.sc import storage
 
 @public
 def store(prefix: bytes, value: Any):
-    serialized_value = StdLib.serialize(value)
-    storage.put(prefix, serialized_value)
+    storage.put_object(prefix, value)
 
 
 @public

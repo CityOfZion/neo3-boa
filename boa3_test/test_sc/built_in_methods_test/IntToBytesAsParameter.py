@@ -1,5 +1,4 @@
 from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import serialize
 from boa3.builtin.type.helper import to_bytes
 from boa3.sc import storage
 
@@ -20,4 +19,4 @@ class Example:
 
 
 def set_value(token_id: bytes, example_class: Example):
-    storage.put(b'00' + token_id, serialize(example_class))
+    storage.put_object(b'00' + token_id, example_class)

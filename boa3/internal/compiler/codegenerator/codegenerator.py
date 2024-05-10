@@ -1202,19 +1202,20 @@ class CodeGenerator:
         self.__insert1(OpcodeInfo.NEWMAP)
         self._stack_append(map_type)
 
-    def convert_new_empty_array(self, length: int, array_type: IType):
+    def convert_new_empty_array(self, length: int, array_type: IType, *, as_struct: bool = False):
         """
         Converts the creation of a new empty array
 
         :param length: the size of the new array
         :param array_type: the Neo Boa type of the array
+        :param as_struct: convert as struct instead of array
         """
         if length <= 0:
-            self.__insert1(OpcodeInfo.NEWARRAY0)
+            self.__insert1(OpcodeInfo.NEWARRAY0 if not as_struct else OpcodeInfo.NEWSTRUCT0)
         else:
             self.convert_literal(length)
             self._stack_pop()
-            self.__insert1(OpcodeInfo.NEWARRAY)
+            self.__insert1(OpcodeInfo.NEWARRAY if not as_struct else OpcodeInfo.NEWSTRUCT)
         self._stack_append(array_type)
 
     def convert_new_array(self, length: int, array_type: IType = Type.list):
