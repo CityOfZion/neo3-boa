@@ -1,5 +1,5 @@
-from boa3.sc.compiletime import public
 from boa3.sc import runtime
+from boa3.sc.compiletime import public
 
 
 @public

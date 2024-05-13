@@ -1,7 +1,7 @@
 import json
 
-from boa3_test.tests import boatestcase
 from boa3.internal.exception import CompilerWarning
+from boa3_test.tests import boatestcase
 
 
 class TestJsonInterop(boatestcase.BoaTestCase):

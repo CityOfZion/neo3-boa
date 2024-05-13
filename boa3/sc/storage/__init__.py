@@ -39,10 +39,10 @@ __all__ = [
 
 from typing import Any
 
-from boa3.sc.utils.iterator import Iterator
 from boa3.sc.storage.storagecontext import StorageContext
 from boa3.sc.storage.storagemap import StorageMap
 from boa3.sc.types import FindOptions, UInt256, ECPoint, UInt160
+from boa3.sc.utils.iterator import Iterator
 
 
 def get_context() -> StorageContext:

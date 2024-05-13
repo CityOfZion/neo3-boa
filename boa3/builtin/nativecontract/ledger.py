@@ -4,7 +4,6 @@ __all__ = [
 
 from deprecation import deprecated
 
-
 from boa3.builtin.interop.blockchain import Block, Signer, Transaction, VMState
 from boa3.builtin.type import UInt256, UInt160
 

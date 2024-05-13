@@ -4,9 +4,9 @@ __all__ = [
     'Iterator',
 ]
 
-from deprecation import deprecated
-
 from typing import Any
+
+from deprecation import deprecated
 
 
 @deprecated(details='This module is deprecated. Use boa3.sc.utils instead')

@@ -47,14 +47,14 @@ from typing import Any
 
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
+from boa3.internal.neo3.contracts import CallFlags
+from boa3.internal.neo3.contracts import TriggerType
+from boa3.internal.neo3.contracts.findoptions import FindOptions
 from boa3.internal.neo3.contracts.namedcurve import NamedCurve
 from boa3.internal.neo3.contracts.native import Role
-from boa3.internal.neo3.network.payloads.verification import WitnessScope, WitnessRuleAction, WitnessConditionType
-from boa3.internal.neo3.contracts.findoptions import FindOptions
-from boa3.internal.neo3.contracts import TriggerType
-from boa3.internal.neo3.vm import VMState
-from boa3.internal.neo3.contracts import CallFlags
 from boa3.internal.neo3.network.payloads import OracleResponseCode
+from boa3.internal.neo3.network.payloads.verification import WitnessScope, WitnessRuleAction, WitnessConditionType
+from boa3.internal.neo3.vm import VMState
 
 
 class UInt160(bytes):

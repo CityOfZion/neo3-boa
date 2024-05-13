@@ -1,6 +1,6 @@
 from boa3.sc.compiletime import public
-from boa3.sc.utils.iterator import Iterator
 from boa3.sc.storage import find, get_context, put
+from boa3.sc.utils.iterator import Iterator
 
 
 @public

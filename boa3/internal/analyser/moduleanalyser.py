@@ -4,7 +4,6 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
-from boa3.sc.compiletime import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.analyser import asthelper
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -41,6 +40,7 @@ from boa3.internal.model.type.collection.sequence.sequencetype import SequenceTy
 from boa3.internal.model.type.primitive.primitivetype import PrimitiveType
 from boa3.internal.model.type.type import IType, Type
 from boa3.internal.model.variable import Variable
+from boa3.sc.compiletime import NeoMetadata
 
 
 class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):

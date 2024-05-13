@@ -1,6 +1,6 @@
 from boa3.sc.compiletime import public
-from boa3.sc.utils import check_multisig
 from boa3.sc.types import ECPoint
+from boa3.sc.utils import check_multisig
 
 
 @public

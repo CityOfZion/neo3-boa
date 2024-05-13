@@ -1,5 +1,5 @@
-from boa3.sc.compiletime import public
 from boa3.builtin.interop import crypto
+from boa3.sc.compiletime import public
 
 
 @public

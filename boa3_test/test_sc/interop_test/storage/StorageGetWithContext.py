@@ -1,7 +1,7 @@
 from typing import Any
 
-from boa3.sc.compiletime import public
 from boa3.sc import storage
+from boa3.sc.compiletime import public
 from boa3.sc.storage import get, get_context
 
 

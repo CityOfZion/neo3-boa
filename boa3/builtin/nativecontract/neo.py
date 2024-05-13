@@ -2,9 +2,9 @@ __all__ = [
     'NEO',
 ]
 
-from deprecation import deprecated
-
 from typing import Any
+
+from deprecation import deprecated
 
 from boa3.builtin.contract import NeoAccountState
 from boa3.builtin.interop.iterator import Iterator

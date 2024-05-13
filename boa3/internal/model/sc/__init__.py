@@ -1,7 +1,7 @@
 from enum import Enum
 
-from boa3.internal.model.builtin.compile_time import NeoMetadataType
 from boa3.internal.model.builtin.builtin import Builtin
+from boa3.internal.model.builtin.compile_time import NeoMetadataType
 from boa3.internal.model.builtin.interop.contract.contractmanifest import *
 from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.native.nativecontract import NativeContract

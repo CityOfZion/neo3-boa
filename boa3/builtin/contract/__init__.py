@@ -8,9 +8,9 @@ __all__ = [
     'to_script_hash',
 ]
 
-from deprecation import deprecated
-
 from typing import Any
+
+from deprecation import deprecated
 
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.contract.Nep17Contract import Nep17Contract

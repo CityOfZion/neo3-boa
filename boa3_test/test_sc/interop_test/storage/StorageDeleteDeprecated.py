@@ -1,8 +1,8 @@
 from typing import Any
 
-from boa3.sc.compiletime import public
 from boa3.builtin.interop import storage
 from boa3.builtin.interop.storage import delete
+from boa3.sc.compiletime import public
 
 
 @public

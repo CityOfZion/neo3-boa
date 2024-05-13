@@ -3,9 +3,9 @@ __all__ = [
     'json_deserialize',
 ]
 
-from deprecation import deprecated
-
 from typing import Any
+
+from deprecation import deprecated
 
 
 @deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')

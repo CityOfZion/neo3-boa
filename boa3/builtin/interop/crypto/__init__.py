@@ -17,9 +17,9 @@ __all__ = [
     'bls12_381_serialize',
 ]
 
-from deprecation import deprecated
-
 from typing import Any
+
+from deprecation import deprecated
 
 from boa3.builtin.interop.crypto.ibls12381 import IBls12381
 from boa3.builtin.interop.crypto.namedcurve import NamedCurve

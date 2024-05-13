@@ -2,9 +2,9 @@ __all__ = [
     'Oracle',
 ]
 
-from deprecation import deprecated
-
 from typing import Any
+
+from deprecation import deprecated
 
 from boa3.builtin.type import UInt160
 

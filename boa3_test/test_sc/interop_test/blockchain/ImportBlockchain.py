@@ -1,5 +1,5 @@
-from boa3.sc.compiletime import public
 from boa3.builtin.interop import blockchain
+from boa3.sc.compiletime import public
 from boa3.sc.types import UInt160, Contract
 
 

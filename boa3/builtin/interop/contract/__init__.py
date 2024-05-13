@@ -14,10 +14,10 @@ __all__ = [
     'GAS',
 ]
 
-from deprecation import deprecated
-
 from collections.abc import Sequence
 from typing import Any
+
+from deprecation import deprecated
 
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract

@@ -1,10 +1,10 @@
 from typing import Any, cast
 
+from boa3.sc import runtime, storage
 from boa3.sc.compiletime import NeoMetadata, public
-from boa3.sc.utils import Nep17TransferEvent, abort, call_contract
 from boa3.sc.contracts import ContractManagement, NeoToken, GasToken
 from boa3.sc.types import UInt160
-from boa3.sc import storage, runtime
+from boa3.sc.utils import Nep17TransferEvent, abort, call_contract
 
 
 # -------------------------------------------

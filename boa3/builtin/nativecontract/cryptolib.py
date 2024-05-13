@@ -4,9 +4,9 @@ __all__ = [
     'IBls12381'
 ]
 
-from deprecation import deprecated
-
 from typing import Any
+
+from deprecation import deprecated
 
 from boa3.builtin.interop.crypto import NamedCurve, IBls12381
 from boa3.builtin.type import ECPoint, UInt160

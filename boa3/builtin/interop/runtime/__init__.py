@@ -21,10 +21,10 @@ __all__ = [
     'script_container',
 ]
 
-from deprecation import deprecated
-
 from collections.abc import Sequence
 from typing import Any
+
+from deprecation import deprecated
 
 from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract.callflagstype import CallFlags

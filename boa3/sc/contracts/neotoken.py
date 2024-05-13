@@ -5,8 +5,8 @@ __all__ = [
 
 from typing import Any
 
-from boa3.sc.utils.iterator import Iterator
 from boa3.sc.types import ECPoint, UInt160, NeoAccountState
+from boa3.sc.utils.iterator import Iterator
 
 
 class NeoToken:

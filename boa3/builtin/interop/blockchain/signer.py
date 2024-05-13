@@ -6,8 +6,8 @@ __all__ = [
     "WitnessRuleAction",
     "WitnessScope",
 ]
-from deprecation import deprecated
 
+from deprecation import deprecated
 
 from boa3.builtin.type import UInt160
 from boa3.internal.neo3.network.payloads.verification import WitnessConditionType, WitnessRuleAction, WitnessScope

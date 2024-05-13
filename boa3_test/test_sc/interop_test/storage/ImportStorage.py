@@ -1,6 +1,6 @@
+from boa3.sc import storage
 from boa3.sc.compiletime import public
 from boa3.sc.utils.iterator import Iterator
-from boa3.sc import storage
 
 
 @public
