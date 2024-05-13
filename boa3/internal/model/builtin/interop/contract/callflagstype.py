@@ -48,8 +48,6 @@ class CallFlagsType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        from boa3.sc.types import CallFlags
-
         if symbol_id in self.symbols and symbol_id in CallFlags.__members__:
             return CallFlags.__members__[symbol_id]
 

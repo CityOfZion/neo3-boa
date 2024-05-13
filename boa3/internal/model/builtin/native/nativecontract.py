@@ -24,17 +24,6 @@ class NativeContract:
     oracle_name = 'Oracle'
     policy_name = 'Policy'
 
-    GAS_ = GAS.clone()
-    GAS_._identifier = gas_name
-    Ledger_ = Ledger.clone()
-    Ledger_._identifier = ledger_name
-    NEO_ = NEO.clone()
-    NEO_._identifier = neo_name
-    Oracle_ = Oracle.clone()
-    Oracle_._identifier = oracle_name
-    Policy_ = Policy.clone()
-    Policy_._identifier = policy_name
-
     # region Packages
 
     ContractManagementModule = Package(deprecated=True,
@@ -54,31 +43,41 @@ class NativeContract:
     GasModule = Package(deprecated=True,
                         new_location='boa3.sc.contracts',
                         identifier=gas_name.lower(),
-                        types=[GAS_]
+                        other_symbols={
+                            gas_name: GAS
+                        }
                         )
 
     LedgerModule = Package(deprecated=True,
                            new_location='boa3.sc.contracts',
                            identifier=ledger_name.lower(),
-                           types=[Ledger_]
+                           other_symbols={
+                               ledger_name: Ledger
+                           }
                            )
 
     NeoModule = Package(deprecated=True,
                         new_location='boa3.sc.contracts',
                         identifier=neo_name.lower(),
-                        types=[NEO_]
+                        other_symbols={
+                            neo_name: NEO
+                        }
                         )
 
     OracleModule = Package(deprecated=True,
                            new_location='boa3.sc.contracts',
                            identifier=oracle_name.lower(),
-                           types=[Oracle_]
+                           other_symbols={
+                               oracle_name: Oracle
+                           }
                            )
 
     PolicyModule = Package(deprecated=True,
                            new_location='boa3.sc.contracts',
                            identifier=policy_name.lower(),
-                           types=[Policy_]
+                           other_symbols={
+                               policy_name: Policy
+                           }
                            )
 
     RoleManagementModule = Package(deprecated=True,
