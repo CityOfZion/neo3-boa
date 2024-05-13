@@ -1,5 +1,5 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.contract import to_script_hash
+from boa3.sc.compiletime import public
+from boa3.sc.utils import to_script_hash
 
 
 @public

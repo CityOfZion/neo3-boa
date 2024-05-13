@@ -1,7 +1,8 @@
 from typing import Any
 
-from boa3.builtin.compile_time import NeoMetadata, public
-from boa3.builtin.interop.contract import NEO, call_contract
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.contracts import NeoToken
+from boa3.sc.utils import call_contract
 
 
 def permissions_manifest() -> NeoMetadata:
@@ -14,4 +15,4 @@ def permissions_manifest() -> NeoMetadata:
 
 @public
 def main() -> Any:
-    return call_contract(NEO, 'transfer', [NEO, NEO, 1, None])
+    return call_contract(NeoToken.hash, 'transfer', [NeoToken.hash, NeoToken.hash, 1, None])

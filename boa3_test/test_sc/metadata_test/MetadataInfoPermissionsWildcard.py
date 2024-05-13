@@ -1,10 +1,10 @@
-from boa3.builtin.compile_time import NeoMetadata, public
-from boa3.builtin.nativecontract.neo import NEO
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.contracts import NeoToken
 
 
 @public
 def main() -> int:
-    return NEO.totalSupply()
+    return NeoToken.totalSupply()
 
 
 def permissions_manifest() -> NeoMetadata:

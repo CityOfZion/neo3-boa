@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.nativecontract.contractmanagement import ContractManagement
+from boa3.sc.contracts import ContractManagement
 
 
 def Main(script: bytes, manifest: bytes, data: Any, arg0: Any):

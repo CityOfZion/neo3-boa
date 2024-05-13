@@ -1,4 +1,4 @@
-from boa3.builtin.nativecontract.cryptolib import CryptoLib
+from boa3.sc.contracts import CryptoLib
 
 
 def Main() -> bytes:

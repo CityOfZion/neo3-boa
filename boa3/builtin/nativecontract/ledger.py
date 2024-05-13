@@ -2,10 +2,14 @@ __all__ = [
     'Ledger',
 ]
 
+from deprecation import deprecated
+
+
 from boa3.builtin.interop.blockchain import Block, Signer, Transaction, VMState
 from boa3.builtin.type import UInt256, UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
 class Ledger:
     """
     A class used to represent the Ledger native contract.

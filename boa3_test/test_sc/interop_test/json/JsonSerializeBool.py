@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.json import json_serialize
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 
 
 @public
 def main() -> str:
-    return json_serialize(True)
+    return StdLib.json_serialize(True)

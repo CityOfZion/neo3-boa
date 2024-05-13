@@ -1,9 +1,9 @@
 from typing import Any, cast
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop import runtime
-from boa3.builtin.type import UInt160
-from boa3.builtin.type.helper import to_str
+from boa3.sc import runtime
+from boa3.sc.compiletime import public
+from boa3.sc.types import UInt160
+from boa3.sc.utils import to_str
 
 TEST_AMOUNT_1 = 10
 TEST_AMOUNT_2 = 2

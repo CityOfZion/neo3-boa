@@ -1,5 +1,5 @@
-from boa3.builtin.interop.contract import update_contract
+from boa3.sc.contracts import ContractManagement
 
 
 def Main(script: bytes):
-    update_contract(script)
+    ContractManagement.update(script)

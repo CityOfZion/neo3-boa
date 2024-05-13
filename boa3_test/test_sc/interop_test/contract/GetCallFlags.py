@@ -1,5 +1,6 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.contract import CallFlags, get_call_flags
+from boa3.sc.compiletime import public
+from boa3.sc.types import CallFlags
+from boa3.sc.utils import get_call_flags
 
 
 @public

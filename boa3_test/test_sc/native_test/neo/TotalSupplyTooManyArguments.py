@@ -1,5 +1,5 @@
-from boa3.builtin.nativecontract.neo import NEO
+from boa3.sc.contracts import NeoToken
 
 
 def main() -> int:
-    return NEO.totalSupply('arg')
+    return NeoToken.totalSupply('arg')

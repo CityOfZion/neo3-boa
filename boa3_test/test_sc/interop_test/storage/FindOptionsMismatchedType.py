@@ -1,4 +1,4 @@
-from boa3.sc.types.findoptions import FindOptions
+from boa3.sc.types import FindOptions
 
 
 def main(option: FindOptions) -> FindOptions:

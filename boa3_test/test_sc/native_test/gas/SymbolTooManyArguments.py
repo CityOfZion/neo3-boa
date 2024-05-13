@@ -1,5 +1,5 @@
-from boa3.builtin.nativecontract.gas import GAS
+from boa3.sc.contracts import GasToken
 
 
 def main() -> str:
-    return GAS.symbol('arg')
+    return GasToken.symbol('arg')

@@ -1,9 +1,9 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.blockchain import get_contract
-from boa3.builtin.interop.contract.contract import Contract
-from boa3.builtin.interop.runtime import executing_script_hash
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import ContractManagement
+from boa3.sc.runtime import executing_script_hash
+from boa3.sc.types import Contract
 
 
 @public
@@ -13,5 +13,5 @@ def is_contract(value: Any) -> bool:
 
 @public
 def is_get_contract_a_contract() -> bool:
-    contract = get_contract(executing_script_hash)
+    contract = ContractManagement.get_contract(executing_script_hash)
     return is_contract(contract)

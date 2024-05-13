@@ -11,7 +11,7 @@ class LedgerClass(INativeContractClass):
     """
 
     def __init__(self):
-        super().__init__('Ledger', LedgerContract)
+        super().__init__('LedgerContract', LedgerContract)
 
     @property
     def class_methods(self) -> dict[str, Method]:

@@ -21,6 +21,7 @@ __all__ = [
     'script_container',
 ]
 
+from deprecation import deprecated
 
 from collections.abc import Sequence
 from typing import Any
@@ -32,6 +33,7 @@ from boa3.builtin.interop.runtime.triggertype import TriggerType
 from boa3.builtin.type import ECPoint, UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def check_witness(hash_or_pubkey: UInt160 | ECPoint) -> bool:
     """
     Verifies that the transactions or block of the calling contract has validated the required script hash.
@@ -50,6 +52,7 @@ def check_witness(hash_or_pubkey: UInt160 | ECPoint) -> bool:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def notify(state: Any, notification_name: str = None):
     """
     Notifies the client from the executing smart contract.
@@ -70,6 +73,7 @@ def notify(state: Any, notification_name: str = None):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def log(message: str):
     """
     Show log messages to the client from the executing smart contract.
@@ -83,6 +87,7 @@ def log(message: str):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def get_trigger() -> TriggerType:
     """
     Return the smart contract trigger type.
@@ -96,6 +101,7 @@ def get_trigger() -> TriggerType:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def get_notifications(script_hash: UInt160 = UInt160()) -> list[Notification]:
     """
     This method gets current invocation notifications from specific 'script_hash'.
@@ -129,6 +135,7 @@ def get_notifications(script_hash: UInt160 = UInt160()) -> list[Notification]:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def get_network() -> int:
     """
     Gets the magic number of the current network.
@@ -142,6 +149,7 @@ def get_network() -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def burn_gas(gas: int):
     """
     Burns GAS to benefit the NEO ecosystem.
@@ -157,6 +165,7 @@ def burn_gas(gas: int):
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def get_random() -> int:
     """
     Gets the next random number.
@@ -176,6 +185,7 @@ def get_random() -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
 def load_script(script: bytes, args: Sequence = (), flags: CallFlags = CallFlags.NONE) -> Any:
     """
     Loads a script at runtime.

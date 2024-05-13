@@ -1,5 +1,5 @@
-from boa3.builtin.nativecontract.policy import Policy
+from boa3.sc.contracts import PolicyContract
 
 
 def main() -> int:
-    return Policy.get_storage_price(123)
+    return PolicyContract.get_storage_price(123)

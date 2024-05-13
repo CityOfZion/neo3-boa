@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.policy import get_storage_price
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import PolicyContract
 
 
 @public
 def main() -> int:
-    return get_storage_price()
+    return PolicyContract.get_storage_price()

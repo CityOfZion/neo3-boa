@@ -1,5 +1,5 @@
-from boa3.builtin.interop.blockchain import get_transaction_signers
+from boa3.sc.contracts import LedgerContract
 
 
 def main() -> list:
-    return get_transaction_signers(123)
+    return LedgerContract.get_transaction_signers(123)

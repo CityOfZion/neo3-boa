@@ -1,5 +1,5 @@
-from boa3.builtin.interop.stdlib import base64_decode
+from boa3.sc.contracts import StdLib
 
 
 def Main(key: int) -> str:
-    return base64_decode(key)
+    return StdLib.base64_decode(key)

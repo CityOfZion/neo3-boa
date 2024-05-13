@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import serialize
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 
 
 @public
 def serialize_dict() -> bytes:
-    return serialize({1: 1, 2: 1, 3: 2})
+    return StdLib.serialize({1: 1, 2: 1, 3: 2})

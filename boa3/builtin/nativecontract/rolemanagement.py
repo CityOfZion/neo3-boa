@@ -3,11 +3,13 @@ __all__ = [
     'Role',
 ]
 
+from deprecation import deprecated
 
 from boa3.builtin.interop.role.roletype import Role
 from boa3.builtin.type import ECPoint, UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
 class RoleManagement:
     """
     A class used to represent the RoleManagement native contract.

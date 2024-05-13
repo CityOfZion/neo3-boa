@@ -2,7 +2,7 @@ from neo3.core import types
 from neo3.network.payloads import block
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests import annotation, boatestcase, stackitem
 
@@ -310,6 +310,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'GetTransactionVMStateMismatchedType.py')
 
     async def test_import_blockchain(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportBlockchain.py')
         await self.set_up_contract('ImportBlockchain.py')
 
         invalid_contract = types.UInt160.zero()
@@ -328,6 +329,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
         self.assertEqual(manifest, result[4])
 
     async def test_import_interop_blockchain(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropBlockchain.py')
         await self.set_up_contract('ImportInteropBlockchain.py')
 
         invalid_contract = types.UInt160.zero()

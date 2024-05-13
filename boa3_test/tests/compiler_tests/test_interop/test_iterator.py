@@ -2,7 +2,7 @@ from typing import cast
 
 from boaconstructor import storage
 
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
 
@@ -72,6 +72,7 @@ class TestIteratorInterop(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
 
     async def test_import_interop_iterator(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropIterator.py')
         await self.set_up_contract('ImportInteropIterator.py')
 
         # TODO: #86drqwhx0 neo-go in the current version of boa-test-constructor is not configured to return Iterators

@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import public, contract
+from boa3.sc.compiletime import public, contract
 
 
 @public

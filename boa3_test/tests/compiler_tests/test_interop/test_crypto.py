@@ -1,6 +1,6 @@
 import hashlib
 
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -300,6 +300,7 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1MismatchedType.py')
 
     async def test_import_crypto(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportCrypto.py')
         await self.set_up_contract('ImportCrypto.py')
 
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
@@ -307,6 +308,7 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result, result)
 
     async def test_import_interop_crypto(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropCrypto.py')
         await self.set_up_contract('ImportInteropCrypto.py')
 
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()

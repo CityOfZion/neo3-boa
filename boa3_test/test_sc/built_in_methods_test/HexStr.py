@@ -1,5 +1,5 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.contract import to_hex_str
+from boa3.sc.compiletime import public
+from boa3.sc.utils import to_hex_str
 
 
 @public

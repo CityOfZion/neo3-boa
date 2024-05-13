@@ -12,7 +12,7 @@ class NeoClass(INativeContractClass):
     """
 
     def __init__(self):
-        super().__init__('NEO', NeoToken)
+        super().__init__('NeoToken', NeoToken)
 
     @property
     def class_methods(self) -> dict[str, Method]:

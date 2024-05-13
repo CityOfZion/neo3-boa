@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import contract, public
+from boa3.sc.compiletime import contract, public
 
 
 @contract('0x939e2bd39b8b5d1e7d77b64ea32c6ecbbbed578a')

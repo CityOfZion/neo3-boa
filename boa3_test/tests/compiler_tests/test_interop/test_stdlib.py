@@ -1,4 +1,4 @@
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
@@ -404,6 +404,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ItoaMismatchedType')
 
     async def test_import_stdlib(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportStdlib.py')
         await self.set_up_contract('ImportStdlib')
 
         result, _ = await self.call('main', ['10', 10], return_type=int)
@@ -413,6 +414,7 @@ class TestStdlibInterop(boatestcase.BoaTestCase):
         self.assertEqual(16, result)
 
     async def test_import_interop_binary(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropStdlib.py')
         await self.set_up_contract('ImportInteropStdlib')
 
         result, _ = await self.call('main', ['10', 10], return_type=int)

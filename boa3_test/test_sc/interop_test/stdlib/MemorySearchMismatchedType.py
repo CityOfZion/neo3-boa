@@ -1,5 +1,5 @@
-from boa3.builtin.interop.stdlib import memory_search
+from boa3.sc.contracts import StdLib
 
 
 def main() -> int:
-    return memory_search(1, 1, 1, 1)
+    return StdLib.memory_search(1, 1, 1, 1)

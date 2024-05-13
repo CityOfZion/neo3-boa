@@ -5,16 +5,14 @@
 
 from typing import Any, cast
 
-from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
-from boa3.builtin.contract import abort
-from boa3.builtin.interop.blockchain import get_contract
-from boa3.builtin.interop.contract import CallFlags, call_contract, destroy_contract, get_call_flags, update_contract
-from boa3.builtin.interop.iterator import Iterator
-from boa3.builtin.interop.json import json_deserialize
-from boa3.builtin.interop.runtime import check_witness, get_network, script_container
-from boa3.builtin.type import UInt160, helper as type_helper
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.utils import CreateNewEvent, abort, call_contract, get_call_flags
+from boa3.sc.contracts import ContractManagement, StdLib
+from boa3.sc.utils.iterator import Iterator
+from boa3.sc.runtime import check_witness, get_network, script_container
 from boa3.sc import storage
-from boa3.sc.types import FindOptions
+from boa3.sc.types import FindOptions, UInt160, CallFlags
+from boa3.sc.utils import to_bytes
 
 
 # -------------------------------------------
@@ -268,7 +266,7 @@ def post_transfer(token_owner: UInt160 | None, to: UInt160 | None, tokenId: byte
     """
     on_transfer(token_owner, to, 1, tokenId)
     if to is not None:
-        contract = get_contract(to)
+        contract = ContractManagement.get_contract(to)
         if contract is not None:
             call_contract(to, 'onNEP11Payment', [token_owner, 1, tokenId, data])
             pass
@@ -317,7 +315,7 @@ def properties(tokenId: bytes) -> dict[Any, Any]:
     """
     metaBytes = cast(str, get_meta(tokenId))
     expect(len(metaBytes) != 0, 'No metadata available for token')
-    metaObject = cast(dict[str, str], json_deserialize(metaBytes))
+    metaObject = cast(dict[str, str], StdLib.json_deserialize(metaBytes))
 
     return metaObject
 
@@ -621,7 +619,7 @@ def update(script: bytes, manifest: bytes):
     """
     verified: bool = verify()
     expect(verified, '`account` is not allowed for update')
-    update_contract(script, manifest)
+    ContractManagement.update(script, manifest)
     debug(['update called and done'])
 
 
@@ -635,7 +633,7 @@ def destroy():
     verified: bool = verify()
     expect(verified, '`account` is not allowed for destroy')
     debug(['destroy called and done'])
-    destroy_contract()
+    ContractManagement.destroy()
 
 
 def internal_burn(tokenId: bytes) -> bool:
@@ -683,7 +681,7 @@ def internal_mint(account: UInt160, meta: str, lockedContent: str, royalties: st
 
     tokenId = storage.get_int(TOKEN_COUNT, storage.get_read_only_context()) + 1
     storage.put_int(TOKEN_COUNT, tokenId)
-    tokenIdBytes = type_helper.to_bytes(tokenId)
+    tokenIdBytes = to_bytes(tokenId)
 
     set_owner_of(tokenIdBytes, account)
     set_balance(account, 1)

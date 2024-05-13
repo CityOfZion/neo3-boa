@@ -1,14 +1,15 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.contract import NEO, call_contract
-from boa3.builtin.interop.runtime import executing_script_hash, notify
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import NeoToken
+from boa3.sc.utils import call_contract
+from boa3.sc.runtime import executing_script_hash, notify
 from boa3.sc.storage import get_int, put_int
 
 
 @public
 def call_another_contract() -> Any:
-    return call_contract(NEO, 'balanceOf', [executing_script_hash])
+    return call_contract(NeoToken.hash, 'balanceOf', [executing_script_hash])
 
 
 @public

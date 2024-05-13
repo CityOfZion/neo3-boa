@@ -1,9 +1,8 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.contract import NeoAccountState
-from boa3.builtin.nativecontract.neo import NEO
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import NeoToken
+from boa3.sc.types import UInt160, NeoAccountState
 
 
 @public
 def main(account: UInt160) -> NeoAccountState:
-    return NEO.get_account_state(account)
+    return NeoToken.get_account_state(account)

@@ -1,5 +1,5 @@
-from boa3.builtin.interop.contract import create_contract
+from boa3.sc.contracts import ContractManagement
 
 
 def Main(scripthash: bytes):
-    create_contract(scripthash)
+    ContractManagement.deploy(scripthash)

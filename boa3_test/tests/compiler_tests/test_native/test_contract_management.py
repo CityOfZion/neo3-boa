@@ -5,7 +5,7 @@ from neo3.core import types
 from neo3.wallet import account
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import annotation, boatestcase, event, stackitem
 
@@ -27,6 +27,14 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
+
+        expected = types.UInt160(constants.MANAGEMENT_SCRIPT)
+        result, _ = await self.call('main', [], return_type=types.UInt160)
+        self.assertEqual(expected, result)
+
+    async def test_get_hash_deprecated(self):
+        await self.set_up_contract('GetHashDeprecated.py')
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         expected = types.UInt160(constants.MANAGEMENT_SCRIPT)
         result, _ = await self.call('main', [], return_type=types.UInt160)

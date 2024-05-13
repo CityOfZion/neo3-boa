@@ -1,4 +1,4 @@
-from boa3.builtin.contract import to_hex_str
+from boa3.sc.utils import to_hex_str
 
 
 def Main() -> str:

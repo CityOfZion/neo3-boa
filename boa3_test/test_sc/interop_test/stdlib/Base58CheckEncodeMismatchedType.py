@@ -1,5 +1,5 @@
-from boa3.builtin.interop.stdlib import base58_check_encode
+from boa3.sc.contracts import StdLib
 
 
 def main(key: int) -> str:
-    return base58_check_encode(key)
+    return StdLib.base58_check_encode(key)

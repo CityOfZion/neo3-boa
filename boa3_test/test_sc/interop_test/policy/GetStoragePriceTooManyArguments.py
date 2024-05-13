@@ -1,5 +1,5 @@
-from boa3.builtin.interop.policy import get_storage_price
+from boa3.sc.contracts import PolicyContract
 
 
 def main() -> int:
-    return get_storage_price(123)
+    return PolicyContract.get_storage_price(123)

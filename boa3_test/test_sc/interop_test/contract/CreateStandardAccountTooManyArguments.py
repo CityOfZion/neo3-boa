@@ -1,7 +1,7 @@
 from typing import Any
 
-from boa3.builtin.interop.contract import create_standard_account
-from boa3.builtin.type import ECPoint, UInt160
+from boa3.sc.utils import create_standard_account
+from boa3.sc.types import ECPoint, UInt160
 
 
 def main(public_key: bytes, arg1: Any) -> UInt160:

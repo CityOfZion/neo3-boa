@@ -1,7 +1,7 @@
 import ast
 from typing import Self
 
-from boa3.builtin.compile_time import NeoMetadata
+from boa3.sc.compiletime import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.analyser.astoptimizer import AstOptimizer

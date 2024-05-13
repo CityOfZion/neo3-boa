@@ -1,9 +1,8 @@
 from typing import cast
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.contract import CallFlags
-from boa3.builtin.interop.runtime import load_script
-from boa3.builtin.vm import Opcode
+from boa3.sc.compiletime import public
+from boa3.sc.runtime import load_script
+from boa3.sc.types import Opcode, CallFlags
 
 
 @public

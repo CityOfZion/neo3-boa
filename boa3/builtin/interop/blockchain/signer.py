@@ -6,11 +6,14 @@ __all__ = [
     "WitnessRuleAction",
     "WitnessScope",
 ]
+from deprecation import deprecated
+
 
 from boa3.builtin.type import UInt160
 from boa3.internal.neo3.network.payloads.verification import WitnessConditionType, WitnessRuleAction, WitnessScope
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
 class Signer:
     """
     Represents a signer.
@@ -38,6 +41,7 @@ class Signer:
         self.rules: list[WitnessRule] = []
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
 class WitnessRule:
     """
     Represents a witness rule.
@@ -56,6 +60,7 @@ class WitnessRule:
         self.condition: WitnessCondition = WitnessCondition()
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
 class WitnessCondition:
     """
     Represents a witness condition.

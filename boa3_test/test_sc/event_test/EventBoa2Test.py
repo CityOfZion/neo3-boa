@@ -1,5 +1,6 @@
 # tested
-from boa3.builtin.compile_time import public, CreateNewEvent
+from boa3.sc.compiletime import public
+from boa3.sc.utils import CreateNewEvent
 
 Transfer = CreateNewEvent([('from', int), ('to', int), ('amount', int)], 'transfer_test')
 

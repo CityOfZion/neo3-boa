@@ -509,6 +509,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(CallFlags.ALLOW_NOTIFY, result)
 
     async def test_import_contract(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportContract.py')
         await self.set_up_contract('ImportContract.py')
         call_hash = await self.compile_and_deploy('test_sc/arithmetic_test', 'Addition.py')
 
@@ -521,6 +522,7 @@ class TestContractInterop(boatestcase.BoaTestCase):
         self.assertEqual(CallFlags.ALL, result)
 
     async def test_import_interop_contract(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropContract.py')
         await self.set_up_contract('ImportInteropContract.py')
         call_hash = await self.compile_and_deploy('test_sc/arithmetic_test', 'Addition.py')
 

@@ -17,6 +17,7 @@ __all__ = [
     'bls12_381_serialize',
 ]
 
+from deprecation import deprecated
 
 from typing import Any
 
@@ -25,6 +26,7 @@ from boa3.builtin.interop.crypto.namedcurve import NamedCurve
 from boa3.builtin.type import ECPoint
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def sha256(key: Any) -> bytes:
     """
     Encrypts a key using SHA-256.
@@ -43,6 +45,7 @@ def sha256(key: Any) -> bytes:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def ripemd160(key: Any) -> bytes:
     """
     Encrypts a key using RIPEMD-160.
@@ -61,6 +64,7 @@ def ripemd160(key: Any) -> bytes:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
 def hash160(key: Any) -> bytes:
     """
     Encrypts a key using HASH160.
@@ -79,6 +83,7 @@ def hash160(key: Any) -> bytes:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
 def hash256(key: Any) -> bytes:
     """
     Encrypts a key using HASH256.
@@ -97,6 +102,7 @@ def hash256(key: Any) -> bytes:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
 def check_sig(pub_key: ECPoint, signature: bytes) -> bool:
     """
     Checks the signature for the current script container.
@@ -115,6 +121,7 @@ def check_sig(pub_key: ECPoint, signature: bytes) -> bool:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
 def check_multisig(pubkeys: list[ECPoint], signatures: list[bytes]) -> bool:
     """
     Checks the signatures for the current script container.
@@ -134,6 +141,7 @@ def check_multisig(pubkeys: list[ECPoint], signatures: list[bytes]) -> bool:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def verify_with_ecdsa(message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurve) -> bool:
     """
     Using the elliptic curve, it checks if the signature of the message was originally produced by the public key.
@@ -156,6 +164,7 @@ def verify_with_ecdsa(message: bytes, pubkey: ECPoint, signature: bytes, curve: 
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def murmur32(data: bytes, seed: int) -> bytes:
     """
     Computes the hash value for the specified byte array using the murmur32 algorithm.
@@ -173,6 +182,7 @@ def murmur32(data: bytes, seed: int) -> bytes:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def bls12_381_add(x: IBls12381, y: IBls12381) -> IBls12381:
     """
     Add operation of two bls12381 points.
@@ -187,6 +197,7 @@ def bls12_381_add(x: IBls12381, y: IBls12381) -> IBls12381:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def bls12_381_deserialize(data: bytes) -> IBls12381:
     """
     Deserialize a bls12381 point.
@@ -199,6 +210,7 @@ def bls12_381_deserialize(data: bytes) -> IBls12381:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def bls12_381_equal(x: IBls12381, y: IBls12381) -> bool:
     """
     Determines whether the specified points are equal.
@@ -213,6 +225,7 @@ def bls12_381_equal(x: IBls12381, y: IBls12381) -> bool:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def bls12_381_mul(x: IBls12381, mul: bytes, neg: bool) -> IBls12381:
     """
     Mul operation of gt point and multiplier.
@@ -229,6 +242,7 @@ def bls12_381_mul(x: IBls12381, mul: bytes, neg: bool) -> IBls12381:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def bls12_381_pairing(g1: IBls12381, g2: IBls12381) -> IBls12381:
     """
     Pairing operation of g1 and g2.
@@ -243,6 +257,7 @@ def bls12_381_pairing(g1: IBls12381, g2: IBls12381) -> IBls12381:
     pass
 
 
+@deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
 def bls12_381_serialize(g: IBls12381) -> bytes:
     """
     Serialize a bls12381 point.

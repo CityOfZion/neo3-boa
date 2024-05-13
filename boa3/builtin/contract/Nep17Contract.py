@@ -1,9 +1,12 @@
+from deprecation import deprecated
+
 from typing import Any
 
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
 class Nep17Contract(Contract):
     def symbol(self) -> str:
         pass

@@ -3,11 +3,13 @@ __all__ = [
     'get_designated_by_role',
 ]
 
+from deprecation import deprecated
 
 from boa3.builtin.interop.role.roletype import Role
 from boa3.builtin.type import ECPoint
 
 
+@deprecated(details='This module is deprecated. Use RoleManagement from boa3.sc.contracts instead')
 def get_designated_by_role(role: Role, index: int) -> ECPoint:
     """
     Gets the list of nodes for the specified role.

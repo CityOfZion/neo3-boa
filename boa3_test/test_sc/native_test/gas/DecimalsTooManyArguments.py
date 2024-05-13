@@ -1,5 +1,5 @@
-from boa3.builtin.nativecontract.gas import GAS
+from boa3.sc.contracts import GasToken
 
 
 def main() -> int:
-    return GAS.decimals('arg')
+    return GasToken.decimals('arg')

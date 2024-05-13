@@ -1,6 +1,6 @@
-from boa3.builtin.nativecontract.neo import NEO
-from boa3.builtin.type import UInt160
+from boa3.sc.contracts import NeoToken
+from boa3.sc.types import UInt160
 
 
 def main(from_address: UInt160, to_address: UInt160) -> int:
-    return NEO.transfer(from_address, to_address)
+    return NeoToken.transfer(from_address, to_address)

@@ -1,13 +1,14 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.nativecontract.stdlib import StdLib
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 from boa3.sc import storage
 
 
 @public
 def store(prefix: bytes, value: Any):
-    storage.put_object(prefix, value)
+    serialized_value = StdLib.serialize(value)
+    storage.put(prefix, serialized_value)
 
 
 @public

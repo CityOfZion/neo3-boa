@@ -3,6 +3,8 @@ from typing import Any
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.primitive.inttype import IntType
+from boa3.internal.neo3.contracts.native import Role
+from boa3.internal.neo3.network.payloads import OracleResponseCode
 
 
 class OracleResponseCodeType(IntType):
@@ -21,7 +23,6 @@ class OracleResponseCodeType(IntType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        from boa3.builtin.interop.oracle.oracleresponsecode import OracleResponseCode
         return isinstance(value, (OracleResponseCode, OracleResponseCodeType))
 
     @property
@@ -31,7 +32,6 @@ class OracleResponseCodeType(IntType):
 
         :return: a dictionary that maps each symbol in the module with its name
         """
-        from boa3.builtin.interop.role.roletype import Role
         from boa3.internal.model.variable import Variable
 
         _symbols = super().symbols
@@ -45,8 +45,6 @@ class OracleResponseCodeType(IntType):
 
         :return: the value if this type has this symbol. None otherwise
         """
-        from boa3.builtin.interop.oracle.oracleresponsecode import OracleResponseCode
-
         if symbol_id in self.symbols and symbol_id in OracleResponseCode.__members__:
             return OracleResponseCode.__members__[symbol_id]
 

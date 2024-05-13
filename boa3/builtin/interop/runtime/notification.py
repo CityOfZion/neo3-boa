@@ -1,9 +1,11 @@
 __all__ = ['Notification']
 
+from deprecation import deprecated
 
 from boa3.builtin.type import UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
 class Notification:
     """
     Represents a notification.

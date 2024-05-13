@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.nativecontract.neo import NEO
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import NeoToken
 
 
 @public
 def un_vote() -> bool:
-    return NEO.un_vote()
+    return NeoToken.un_vote()

@@ -12,7 +12,7 @@ class GasClass(INativeContractClass):
     """
 
     def __init__(self):
-        super().__init__('GAS', GasToken)
+        super().__init__('GasToken', GasToken)
 
     @property
     def class_methods(self) -> dict[str, Method]:

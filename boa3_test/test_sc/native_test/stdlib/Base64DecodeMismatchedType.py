@@ -1,4 +1,4 @@
-from boa3.builtin.nativecontract.stdlib import StdLib
+from boa3.sc.contracts import StdLib
 
 
 def Main(key: int) -> str:

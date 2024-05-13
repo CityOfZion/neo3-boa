@@ -1,9 +1,8 @@
-from typing import Any
-
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import bls12_381_mul, IBls12381
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import CryptoLib
+from boa3.sc.types import IBls12381
 
 
 @public
 def main(g: IBls12381, mul: bytes) -> IBls12381:
-    return bls12_381_mul(g, mul, True)
+    return CryptoLib.bls12_381_mul(g, mul, True)

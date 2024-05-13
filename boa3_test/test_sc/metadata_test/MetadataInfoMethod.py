@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import NeoMetadata, public
+from boa3.sc.compiletime import NeoMetadata, public
 
 
 @public
@@ -7,5 +7,5 @@ def Main() -> int:
 
 
 def manifest() -> NeoMetadata:
-    from boa3.builtin.compile_time import NeoMetadata
+    from boa3.sc.compiletime import NeoMetadata
     return NeoMetadata()

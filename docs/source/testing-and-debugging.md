@@ -71,7 +71,8 @@ for your test case.
 Your Python Script should look something like this:
 
 ```python
-from boa3.builtin.interop.blockchain.vmstate import VMState
+
+from boa3.sc.types import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 
 
@@ -91,7 +92,8 @@ Alternatively you can change the value of `env.NEO_EXPRESS_INSTANCE_DIRECTORY` t
 data file:
 
 ```python
-from boa3.builtin.interop.blockchain.vmstate import VMState
+
+from boa3.sc.types import VMState
 from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
 from boa3.internal import env
 
