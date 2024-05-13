@@ -1,5 +1,5 @@
-from boa3.builtin.nativecontract.neo import NEO
+from boa3.sc.contracts import NeoToken
 
 
 def main() -> str:
-    return NEO.symbol('arg')
+    return NeoToken.symbol('arg')

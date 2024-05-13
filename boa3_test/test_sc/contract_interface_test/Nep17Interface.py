@@ -1,7 +1,7 @@
 from typing import Any
 
-from boa3.builtin.compile_time import contract, display_name, public
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import contract, display_name, public
+from boa3.sc.types import UInt160
 
 
 @contract('0x327f3bb13088dbf9fb01b28b8b53a24e37ae9043')

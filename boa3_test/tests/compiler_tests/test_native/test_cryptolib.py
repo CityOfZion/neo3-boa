@@ -1,7 +1,7 @@
 import hashlib
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -28,6 +28,13 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
+
+        result, _ = await self.call('main', [], return_type=bytes)
+        self.assertEqual(constants.CRYPTO_SCRIPT, result)
+
+    async def test_get_hash_deprecated(self):
+        await self.set_up_contract('GetHashDeprecated.py')
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         result, _ = await self.call('main', [], return_type=bytes)
         self.assertEqual(constants.CRYPTO_SCRIPT, result)

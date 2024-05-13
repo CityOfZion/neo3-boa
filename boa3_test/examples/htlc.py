@@ -1,12 +1,10 @@
 from typing import Any
 
-from boa3.builtin.compile_time import NeoMetadata, public
-from boa3.builtin.contract import abort
-from boa3.builtin.interop import runtime
-from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, call_contract
-from boa3.builtin.interop.crypto import hash160
-from boa3.builtin.type import UInt160
-from boa3.sc import storage
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.utils import abort, call_contract, hash160
+from boa3.sc.contracts import GasToken
+from boa3.sc.types import UInt160
+from boa3.sc import storage, runtime
 
 
 # -------------------------------------------
@@ -140,7 +138,7 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
         assert len(from_address) == 20
 
     # this validation will verify if Neo is trying to mint GAS to this smart contract
-    if from_address is None and runtime.calling_script_hash == GAS_SCRIPT:
+    if from_address is None and runtime.calling_script_hash == GasToken.hash:
         return
 
     if not storage.get_bool(NOT_INITIALIZED):

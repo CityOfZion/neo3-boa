@@ -1,8 +1,8 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.iterator import Iterator
+from boa3.sc.compiletime import public
 from boa3.sc.storage import find
+from boa3.sc.utils.iterator import Iterator
 
 
 @public

@@ -1,7 +1,6 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.runtime import address_version
-from boa3.builtin.type.helper import to_bytes
-
+from boa3.sc.compiletime import public
+from boa3.sc.runtime import address_version
+from boa3.sc.utils import to_bytes
 
 VALUE1 = b'value1'
 VALUE2 = b'value2'

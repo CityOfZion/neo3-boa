@@ -1,6 +1,6 @@
-from boa3.builtin.interop.role import Role, get_designated_by_role
-from boa3.builtin.type import ECPoint
+from boa3.sc.contracts import RoleManagement
+from boa3.sc.types import ECPoint, Role
 
 
 def main(role: Role) -> ECPoint:
-    return get_designated_by_role(role)
+    return RoleManagement.get_designated_by_role(role)

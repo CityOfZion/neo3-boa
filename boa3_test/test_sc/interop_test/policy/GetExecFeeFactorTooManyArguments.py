@@ -1,5 +1,5 @@
-from boa3.builtin.interop.policy import get_exec_fee_factor
+from boa3.sc.contracts import PolicyContract
 
 
 def main() -> int:
-    return get_exec_fee_factor(10)
+    return PolicyContract.get_exec_fee_factor(10)

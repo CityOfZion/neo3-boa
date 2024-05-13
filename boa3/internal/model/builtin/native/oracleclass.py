@@ -11,7 +11,7 @@ class OracleClass(INativeContractClass):
     """
 
     def __init__(self):
-        super().__init__('Oracle', OracleContract)
+        super().__init__('OracleContract', OracleContract)
 
     @property
     def class_methods(self) -> dict[str, Method]:

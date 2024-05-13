@@ -1,12 +1,10 @@
 from typing import Any, cast
 
-from boa3.builtin.compile_time import NeoMetadata, public
-from boa3.builtin.contract import Nep17TransferEvent, abort
-from boa3.builtin.interop import runtime
-from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
-from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.type import UInt160
-from boa3.sc import storage
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.utils import Nep17TransferEvent, abort, call_contract
+from boa3.sc.contracts import ContractManagement, NeoToken, GasToken
+from boa3.sc.types import UInt160
+from boa3.sc import storage, runtime
 
 
 # -------------------------------------------
@@ -264,10 +262,10 @@ def onNEP17Payment(from_address: UInt160 | None, amount: int, data: Any):
         return
     from_addr = cast(UInt160, from_address)
     # Use calling_script_hash to identify if the incoming token is NEO or GAS
-    if runtime.calling_script_hash == NEO_SCRIPT:
+    if runtime.calling_script_hash == NeoToken.hash:
         corresponding_amount = amount * AMOUNT_PER_NEO
         mint(from_addr, corresponding_amount)
-    elif runtime.calling_script_hash == GAS_SCRIPT:
+    elif runtime.calling_script_hash == GasToken.hash:
         corresponding_amount = amount * AMOUNT_PER_GAS
         mint(from_addr, corresponding_amount)
     else:

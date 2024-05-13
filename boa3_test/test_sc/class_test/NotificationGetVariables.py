@@ -1,7 +1,8 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.runtime import Notification, executing_script_hash, get_notifications, notify
+from boa3.sc.compiletime import public
+from boa3.sc.runtime import executing_script_hash, get_notifications, notify
+from boa3.sc.types import Notification
 
 
 @public

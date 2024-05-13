@@ -1,5 +1,5 @@
-from boa3.builtin.nativecontract.policy import Policy
+from boa3.sc.contracts import PolicyContract
 
 
 def main() -> int:
-    return Policy.is_blocked(True)
+    return PolicyContract.is_blocked(True)

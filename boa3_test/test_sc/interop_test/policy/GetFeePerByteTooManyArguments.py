@@ -1,5 +1,5 @@
-from boa3.builtin.interop.policy import get_fee_per_byte
+from boa3.sc.contracts import PolicyContract
 
 
 def main() -> int:
-    return get_fee_per_byte(10)
+    return PolicyContract.get_fee_per_byte(10)

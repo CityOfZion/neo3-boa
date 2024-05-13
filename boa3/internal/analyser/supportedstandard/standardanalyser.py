@@ -17,7 +17,7 @@ class StandardAnalyser(IAstAnalyser):
 
     def __init__(self, analyser, symbol_table: dict[str, ISymbol],
                  log: bool = False, fail_fast: bool = True):
-        from boa3.builtin.compile_time import NeoMetadata
+        from boa3.sc.compiletime import NeoMetadata
 
         super().__init__(analyser.ast_tree, analyser.filename, analyser.root, log=log, fail_fast=fail_fast)
 

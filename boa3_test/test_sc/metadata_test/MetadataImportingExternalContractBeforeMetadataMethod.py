@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import NeoMetadata, public
+from boa3.sc.compiletime import NeoMetadata, public
 from boa3_test.test_sc.metadata_test.aux_package.internal_package.external_contract import ExternalContract
 
 

@@ -11,7 +11,7 @@ class PolicyClass(INativeContractClass):
     """
 
     def __init__(self):
-        super().__init__('Policy', PolicyContract)
+        super().__init__('PolicyContract', PolicyContract)
 
     @property
     def class_methods(self) -> dict[str, Method]:

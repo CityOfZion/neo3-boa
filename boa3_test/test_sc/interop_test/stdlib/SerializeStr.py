@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import serialize
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 
 
 @public
 def serialize_str() -> bytes:
-    return serialize('42')
+    return StdLib.serialize('42')

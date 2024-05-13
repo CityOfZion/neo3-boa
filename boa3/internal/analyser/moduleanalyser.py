@@ -4,7 +4,7 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
-from boa3.builtin.compile_time import NeoMetadata
+from boa3.sc.compiletime import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.analyser import asthelper
 from boa3.internal.analyser.astanalyser import IAstAnalyser

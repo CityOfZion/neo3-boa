@@ -13,7 +13,10 @@ __all__ = [
     'TransactionId',
 ]
 
+from deprecation import deprecated
 
+
+@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
 class Event:
     """
     Describes an action that happened in the blockchain.

@@ -1,7 +1,7 @@
 from typing import Any, cast
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import deserialize, serialize
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 from boa3.sc.storage import get, put
 
 
@@ -12,7 +12,7 @@ def main(operation: int) -> Any:
     stuff = ['a', 3, ['j', 3, 5], 'jk', 'lmnopqr']
 
     # serialize it
-    to_save = serialize(stuff)
+    to_save = StdLib.serialize(stuff)
     put(b'serialized', to_save)
 
     if operation == 1:
@@ -25,13 +25,13 @@ def main(operation: int) -> Any:
     elif operation == 3:
 
         to_retrieve = get(b'serialized')
-        deserialized = deserialize(to_retrieve)
+        deserialized = StdLib.deserialize(to_retrieve)
         return deserialized
 
     elif operation == 4:
 
         to_retrieve = get(b'serialized')
-        deserialized = deserialize(to_retrieve)
+        deserialized = StdLib.deserialize(to_retrieve)
         return cast(list, deserialized)[2]
 
     return False

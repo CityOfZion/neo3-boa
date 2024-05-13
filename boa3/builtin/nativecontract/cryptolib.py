@@ -4,12 +4,15 @@ __all__ = [
     'IBls12381'
 ]
 
+from deprecation import deprecated
+
 from typing import Any
 
 from boa3.builtin.interop.crypto import NamedCurve, IBls12381
 from boa3.builtin.type import ECPoint, UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
 class CryptoLib:
     """
     A class used to represent the CryptoLib native contract.

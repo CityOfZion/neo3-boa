@@ -27,7 +27,7 @@ class Nep17InterfaceMethod(IBuiltinMethod):
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.interop.interop import Interop
         from boa3.internal.model.type.type import Type
-        from boa3.builtin.interop.contract import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
 
         if len(self.args) != 1:
             code_generator.swap_reverse_stack_items(len(self.args))

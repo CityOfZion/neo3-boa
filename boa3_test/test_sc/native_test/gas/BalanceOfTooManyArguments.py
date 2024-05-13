@@ -1,6 +1,6 @@
-from boa3.builtin.nativecontract.gas import GAS
-from boa3.builtin.type import UInt160
+from boa3.sc.contracts import GasToken
+from boa3.sc.types import UInt160
 
 
 def main(account: UInt160) -> int:
-    return GAS.balanceOf(account, 'arg')
+    return GasToken.balanceOf(account, 'arg')

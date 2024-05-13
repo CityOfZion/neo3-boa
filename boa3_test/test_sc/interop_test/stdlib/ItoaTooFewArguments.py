@@ -1,5 +1,5 @@
-from boa3.builtin.interop.stdlib import itoa
+from boa3.sc.contracts import StdLib
 
 
 def main():
-    itoa()
+    StdLib.itoa()

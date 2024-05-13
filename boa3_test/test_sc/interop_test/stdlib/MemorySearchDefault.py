@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import memory_search
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 
 
 @public
 def main(mem: str | bytes, value: str | bytes) -> int:
-    return memory_search(mem, value)
+    return StdLib.memory_search(mem, value)

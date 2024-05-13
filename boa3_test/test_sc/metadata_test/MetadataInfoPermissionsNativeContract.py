@@ -1,5 +1,5 @@
-from boa3.builtin.compile_time import NeoMetadata, public
-from boa3.builtin.nativecontract.contractmanagement import ContractManagement
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.contracts import ContractManagement
 
 
 def permissions_manifest() -> NeoMetadata:

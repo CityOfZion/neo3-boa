@@ -1,6 +1,6 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.contract import Nep11TransferEvent
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import public
+from boa3.sc.types import UInt160
+from boa3.sc.utils import Nep11TransferEvent
 
 transfer = Nep11TransferEvent
 

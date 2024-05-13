@@ -1,6 +1,7 @@
 import json
 
 from boa3_test.tests import boatestcase
+from boa3.internal.exception import CompilerWarning
 
 
 class TestJsonInterop(boatestcase.BoaTestCase):
@@ -63,6 +64,7 @@ class TestJsonInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result, result)
 
     async def test_import_json(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportJson.py')
         await self.set_up_contract('ImportJson.py')
 
         value = 123
@@ -73,6 +75,7 @@ class TestJsonInterop(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [value], return_type=str)
 
     async def test_import_interop_json(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropJson.py')
         await self.set_up_contract('ImportInteropJson.py')
 
         value = 123

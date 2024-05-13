@@ -1,5 +1,5 @@
-from boa3.builtin.interop.contract import create_multisig_account
-from boa3.builtin.type import UInt160
+from boa3.sc.utils import create_multisig_account
+from boa3.sc.types import UInt160
 
 
 def main(minimum_sigs: int) -> UInt160:

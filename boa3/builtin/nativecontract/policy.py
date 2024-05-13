@@ -2,10 +2,12 @@ __all__ = [
     'Policy',
 ]
 
+from deprecation import deprecated
 
 from boa3.builtin.type import UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
 class Policy:
     """
     A class used to represent the Policy native contract.

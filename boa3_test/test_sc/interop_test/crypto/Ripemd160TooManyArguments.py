@@ -1,5 +1,5 @@
-from boa3.builtin.interop.crypto import ripemd160
+from boa3.sc.contracts import CryptoLib
 
 
 def Main() -> bytes:
-    return ripemd160('arg', 'arg')
+    return CryptoLib.ripemd160('arg', 'arg')

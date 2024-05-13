@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import NeoMetadata, public
+from boa3.sc.compiletime import NeoMetadata, public
 
 
 @public
@@ -7,7 +7,7 @@ def Main() -> int:
 
 
 def manifest_func1() -> NeoMetadata:
-    from boa3.builtin.compile_time import NeoMetadata
+    from boa3.sc.compiletime import NeoMetadata
     meta = NeoMetadata()
     meta.description = 'func1'
     return meta
@@ -15,7 +15,7 @@ def manifest_func1() -> NeoMetadata:
 
 # this function will be ignored by the compiler
 def manifest_func2() -> NeoMetadata:
-    from boa3.builtin.compile_time import NeoMetadata
+    from boa3.sc.compiletime import NeoMetadata
     meta = NeoMetadata()
     meta.description = 'func2'
     return meta

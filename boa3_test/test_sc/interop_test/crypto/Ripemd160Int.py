@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import ripemd160
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import CryptoLib
 
 
 @public
 def Main() -> bytes:
-    return ripemd160(10)
+    return CryptoLib.ripemd160(10)

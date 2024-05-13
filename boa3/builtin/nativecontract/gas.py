@@ -2,12 +2,14 @@ __all__ = [
     'GAS',
 ]
 
+from deprecation import deprecated
 
 from typing import Any
 
 from boa3.builtin.type import UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
 class GAS:
     """
     A class used to represent the GAS native contract.

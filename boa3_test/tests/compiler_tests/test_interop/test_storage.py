@@ -736,6 +736,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual({}, contract_storage)
 
     async def test_import_interop_storage(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropStorage.py')
         await self.set_up_contract('ImportInteropStorage.py')
 
         prefix = b'unit'

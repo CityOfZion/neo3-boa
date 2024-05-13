@@ -3,10 +3,12 @@ __all__ = [
     'json_deserialize',
 ]
 
+from deprecation import deprecated
 
 from typing import Any
 
 
+@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
 def json_serialize(item: Any) -> str:
     """
     Serializes an item into a json.
@@ -25,6 +27,7 @@ def json_serialize(item: Any) -> str:
     pass
 
 
+@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
 def json_deserialize(json: str) -> Any:
     """
     Deserializes a json into some valid type.

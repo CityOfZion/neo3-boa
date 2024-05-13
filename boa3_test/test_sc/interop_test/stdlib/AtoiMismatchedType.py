@@ -1,5 +1,5 @@
-from boa3.builtin.interop.stdlib import atoi
+from boa3.sc.contracts import StdLib
 
 
 def main():
-    atoi(10, 10)
+    StdLib.atoi(10, 10)

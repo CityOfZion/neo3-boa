@@ -202,7 +202,9 @@ class Builtin:
     BuiltinMathCeil = DecimalCeilingMethod()
     BuiltinMathFloor = DecimalFloorMethod()
 
-    MathModule = Package(identifier='math',
+    MathModule = Package(deprecated=True,
+                         new_location='boa3.sc.math',
+                         identifier='math',
                          methods=[Math.Sqrt,
                                   BuiltinMathCeil,
                                   BuiltinMathFloor])
@@ -257,7 +259,9 @@ class Builtin:
                                      ScriptHashType_,
                                      ScriptHashLittleEndian,
                                      TransactionId,
-                                     Package(identifier=BoaPackage.TypeHelper,
+                                     Package(deprecated=True,
+                                             new_location='boa3.sc.utils',
+                                             identifier=BoaPackage.TypeHelper,
                                              methods=[ConvertToBool,
                                                       ConvertToBytes,
                                                       ConvertToInt,

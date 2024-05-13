@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import sha256
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import CryptoLib
 
 
 @public
 def Main() -> bytes:
-    return sha256(b'unit test')
+    return CryptoLib.sha256(b'unit test')

@@ -845,6 +845,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         self.assertGreater(result, 0)
 
     async def test_import_interop_runtime(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropRuntime.py')
         await self.set_up_contract('ImportInteropRuntime.py')
 
         result, _ = await self.call('main', [], return_type=int)

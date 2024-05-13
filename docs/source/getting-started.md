@@ -45,18 +45,19 @@ so let's import both the `public` decorator and the `storage` package.
 
 ```python
 # hello_world.py
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 from boa3.sc import storage
 
 
-@public     # the public decorator will make this method callable
-def save_hello_world():             # an empty return type indicates that the return is None
-    storage.put_str(b"first script", "Hello World")  # the put method will store the "Hello World" value with the "first script" key
+@public  # the public decorator will make this method callable
+def save_hello_world():  # an empty return type indicates that the return is None
+    storage.put_str(b"first script",
+                    "Hello World")  # the put method will store the "Hello World" value with the "first script" key
 
 
-@public     # the public decorator will make this method callable too
-def get_hello_world() -> str:       # this method will return a string, so it needs to specify it
-    return storage.get_str(b"first script")               # the get method will return the value associated with "first script" key
+@public  # the public decorator will make this method callable too
+def get_hello_world() -> str:  # this method will return a string, so it needs to specify it
+    return storage.get_str(b"first script")  # the get method will return the value associated with "first script" key
 ```
 
 ### Neo Methods
@@ -64,7 +65,8 @@ Neo currently has 2 special methods: `_deploy` and `verify`:
 
 ```python
 from typing import Any
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
+
 
 @public
 def _deploy(data: Any, update: bool):
@@ -72,6 +74,7 @@ def _deploy(data: Any, update: bool):
     This method will automatically be called when the smart contract is deployed or updated.
     """
     pass
+
 
 @public
 def verify() -> bool:
@@ -92,22 +95,23 @@ another method to save a given string you could do the following:
 # hello_world_with_deploy.py
 from typing import Any
 
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 from boa3.sc import storage
 
 
 @public
-def _deploy(data: Any, update: bool):               # the _deploy function needs to have this signature
-    storage.put_str(b"second script", "Hello World")  # "Hello World" will be stored when this smart contract is deployed
+def _deploy(data: Any, update: bool):  # the _deploy function needs to have this signature
+    storage.put_str(b"second script",
+                    "Hello World")  # "Hello World" will be stored when this smart contract is deployed
 
 
 @public
-def get_message() -> str:                       # this method will still try to get the value saved on the blockchain
-    return storage.get_str(b"second script")            
+def get_message() -> str:  # this method will still try to get the value saved on the blockchain
+    return storage.get_str(b"second script")
 
 
 @public
-def set_message(new_message: str):              # now this method will overwrite a new string on the blockchain
+def set_message(new_message: str):  # now this method will overwrite a new string on the blockchain
     storage.put_str(b"second script", new_message)
 ```
 

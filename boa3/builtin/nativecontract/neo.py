@@ -2,6 +2,7 @@ __all__ = [
     'NEO',
 ]
 
+from deprecation import deprecated
 
 from typing import Any
 
@@ -10,6 +11,7 @@ from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.type import ECPoint, UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
 class NEO:
     """
     A class used to represent the NEO native contract.

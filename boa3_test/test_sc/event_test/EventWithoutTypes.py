@@ -1,5 +1,4 @@
-from boa3.builtin.compile_time import CreateNewEvent
-
+from boa3.sc.utils import CreateNewEvent
 
 Event = CreateNewEvent([('a',)])
 

@@ -14,6 +14,8 @@ __all__ = [
     'current_index',
 ]
 
+from deprecation import deprecated
+
 from boa3.builtin.interop.blockchain.block import Block
 from boa3.builtin.interop.blockchain.signer import Signer
 from boa3.builtin.interop.blockchain.transaction import Transaction
@@ -22,6 +24,7 @@ from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160, UInt256
 
 
+@deprecated(details='This module is deprecated. Use ContractManagement from boa3.sc.contracts instead')
 def get_contract(hash: UInt160) -> Contract | None:
     """
     Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will return
@@ -57,6 +60,7 @@ def get_contract(hash: UInt160) -> Contract | None:
     pass
 
 
+@deprecated(details='This module is deprecated. Use LedgerContract from boa3.sc.contracts instead')
 def get_block(index_or_hash: int | UInt256) -> Block | None:
     """
     Gets the block with the given index or hash. Will return None if the index or hash is not associated with a Block.
@@ -103,6 +107,7 @@ def get_block(index_or_hash: int | UInt256) -> Block | None:
     pass
 
 
+@deprecated(details='This module is deprecated. Use LedgerContract from boa3.sc.contracts instead')
 def get_transaction(hash_: UInt256) -> Transaction | None:
     """
     Gets a transaction with the given hash. Will return None if the hash is not associated with a Transaction.
@@ -129,6 +134,7 @@ def get_transaction(hash_: UInt256) -> Transaction | None:
     pass
 
 
+@deprecated(details='This module is deprecated. Use LedgerContract from boa3.sc.contracts instead')
 def get_transaction_from_block(block_hash_or_height: UInt256 | int, tx_index: int) -> Transaction | None:
     """
     Gets a transaction from a block. Will return None if the block hash or height is not associated with a Transaction.
@@ -172,6 +178,7 @@ def get_transaction_from_block(block_hash_or_height: UInt256 | int, tx_index: in
     pass
 
 
+@deprecated(details='This module is deprecated. Use LedgerContract from boa3.sc.contracts instead')
 def get_transaction_height(hash_: UInt256) -> int:
     """
     Gets the height of a transaction. Will return -1 if the hash is not associated with a Transaction.
@@ -192,6 +199,7 @@ def get_transaction_height(hash_: UInt256) -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use LedgerContract from boa3.sc.contracts instead')
 def get_transaction_signers(hash_: UInt256) -> list[Signer]:
     """
     Gets a list with the signers of a transaction.
@@ -214,6 +222,7 @@ def get_transaction_signers(hash_: UInt256) -> list[Signer]:
     pass
 
 
+@deprecated(details='This module is deprecated. Use LedgerContract from boa3.sc.contracts instead')
 def get_transaction_vm_state(hash_: UInt256) -> VMState:
     """
     Gets the VM state of a transaction.

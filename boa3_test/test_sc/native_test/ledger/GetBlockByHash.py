@@ -1,9 +1,8 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.blockchain import Block
-from boa3.builtin.nativecontract.ledger import Ledger
-from boa3.builtin.type import UInt256
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import LedgerContract
+from boa3.sc.types import UInt256, Block
 
 
 @public
 def Main(block_hash: UInt256) -> Block | None:
-    return Ledger.get_block(block_hash)
+    return LedgerContract.get_block(block_hash)

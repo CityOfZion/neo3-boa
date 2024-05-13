@@ -227,11 +227,15 @@ class Interop:
 
     # region Packages
 
-    BlockModule = Package(identifier=BlockType.identifier.lower(),
+    BlockModule = Package(deprecated=True,
+                          new_location='boa3.sc.types',
+                          identifier=BlockType.identifier.lower(),
                           types=[BlockType]
                           )
 
-    SignerModule = Package(identifier=SignerType.identifier.lower(),
+    SignerModule = Package(deprecated=True,
+                           new_location='boa3.sc.types',
+                           identifier=SignerType.identifier.lower(),
                            types=[SignerType,
                                   WitnessConditionType,
                                   WitnessCondition,
@@ -241,15 +245,21 @@ class Interop:
                                   ]
                            )
 
-    TransactionModule = Package(identifier=TransactionType.identifier.lower(),
+    TransactionModule = Package(deprecated=True,
+                                new_location='boa3.sc.types',
+                                identifier=TransactionType.identifier.lower(),
                                 types=[TransactionType]
                                 )
 
-    VMStateModule = Package(identifier=VMStateType.identifier.lower(),
+    VMStateModule = Package(deprecated=True,
+                            new_location='boa3.sc.types',
+                            identifier=VMStateType.identifier.lower(),
                             types=[VMStateType]
                             )
 
-    BlockchainPackage = Package(identifier=InteropPackage.Blockchain,
+    BlockchainPackage = Package(deprecated=True,
+                                new_location='boa3.sc.contracts and boa3.sc.types',
+                                identifier=InteropPackage.Blockchain,
                                 types=[BlockType,
                                        SignerType,
                                        TransactionType,
@@ -272,15 +282,21 @@ class Interop:
                                           ]
                                 )
 
-    CallFlagsTypeModule = Package(identifier=f'{CallFlagsType.identifier.lower()}type',
+    CallFlagsTypeModule = Package(deprecated=True,
+                                  new_location='boa3.sc.types',
+                                  identifier=f'{CallFlagsType.identifier.lower()}type',
                                   types=[CallFlagsType]
                                   )
 
-    ContractModule = Package(identifier=ContractType.identifier.lower(),
+    ContractModule = Package(deprecated=True,
+                             new_location='boa3.sc.types',
+                             identifier=ContractType.identifier.lower(),
                              types=[ContractType]
                              )
 
-    ContractManifestModule = Package(identifier=ContractManifestType.identifier.lower(),
+    ContractManifestModule = Package(deprecated=True,
+                                     new_location='boa3.sc.types',
+                                     identifier=ContractManifestType.identifier.lower(),
                                      types=[ContractAbiType.build(),
                                             ContractEventDescriptorType.build(),
                                             ContractGroupType.build(),
@@ -293,7 +309,9 @@ class Interop:
                                             ]
                                      )
 
-    ContractPackage = Package(identifier=InteropPackage.Contract,
+    ContractPackage = Package(deprecated=True,
+                              new_location='boa3.sc.contracts, boa3.sc.utils and boa3.sc.types',
+                              identifier=InteropPackage.Contract,
                               types=[CallFlagsType,
                                      ContractManifestType,
                                      ContractType
@@ -316,7 +334,9 @@ class Interop:
                                         ]
                               )
 
-    CryptoPackage = Package(identifier=InteropPackage.Crypto,
+    CryptoPackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts, boa3.sc.utils and boa3.sc.types',
+                            identifier=InteropPackage.Crypto,
                             types=[NamedCurveType,
                                    Bls12381Type
                                    ],
@@ -337,29 +357,41 @@ class Interop:
                                      ]
                             )
 
-    IteratorPackage = Package(identifier=InteropPackage.Iterator,
+    IteratorPackage = Package(deprecated=True,
+                              new_location='boa3.sc.utils',
+                              identifier=InteropPackage.Iterator,
                               types=[Iterator],
                               )
 
-    JsonPackage = Package(identifier=InteropPackage.Json,
+    JsonPackage = Package(deprecated=True,
+                          new_location='boa3.sc.contracts',
+                          identifier=InteropPackage.Json,
                           methods=[JsonDeserialize,
                                    JsonSerialize
                                    ]
                           )
 
-    NotificationModule = Package(identifier=NotificationType.identifier.lower(),
+    NotificationModule = Package(deprecated=True,
+                                 new_location='boa3.sc.types',
+                                 identifier=NotificationType.identifier.lower(),
                                  types=[NotificationType]
                                  )
 
-    OracleResponseCodeModule = Package(identifier=OracleResponseCode.identifier.lower(),
+    OracleResponseCodeModule = Package(deprecated=True,
+                                       new_location='boa3.sc.types',
+                                       identifier=OracleResponseCode.identifier.lower(),
                                        types=[OracleResponseCode]
                                        )
 
-    OracleModule = Package(identifier=OracleType.identifier.lower(),
+    OracleModule = Package(deprecated=True,
+                           new_location='boa3.sc.contracts',
+                           identifier=OracleType.identifier.lower(),
                            types=[OracleType]
                            )
 
-    OraclePackage = Package(identifier=InteropPackage.Oracle,
+    OraclePackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts and boa3.sc.types',
+                            identifier=InteropPackage.Oracle,
                             types=[OracleResponseCode,
                                    OracleType
                                    ],
@@ -368,11 +400,15 @@ class Interop:
                                       ]
                             )
 
-    TriggerTypeModule = Package(identifier=TriggerType.identifier.lower(),
+    TriggerTypeModule = Package(deprecated=True,
+                                new_location='boa3.sc.types',
+                                identifier=TriggerType.identifier.lower(),
                                 types=[TriggerType]
                                 )
 
-    PolicyPackage = Package(identifier=InteropPackage.Policy,
+    PolicyPackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts',
+                            identifier=InteropPackage.Policy,
                             methods=[GetExecFeeFactor,
                                      GetFeePerByte,
                                      GetStoragePrice,
@@ -380,17 +416,23 @@ class Interop:
                                      ]
                             )
 
-    RoleTypeModule = Package(identifier=RoleType.identifier.lower(),
+    RoleTypeModule = Package(deprecated=True,
+                             new_location='boa3.sc.types',
+                             identifier=RoleType.identifier.lower(),
                              types=[RoleType]
                              )
 
-    RolePackage = Package(identifier=InteropPackage.Role,
+    RolePackage = Package(deprecated=True,
+                          new_location='boa3.sc.contracts',
+                          identifier=InteropPackage.Role,
                           types=[RoleType],
                           methods=[GetDesignatedByRole],
                           packages=[RoleTypeModule]
                           )
 
-    RuntimePackage = Package(identifier=InteropPackage.Runtime,
+    RuntimePackage = Package(deprecated=True,
+                             new_location='boa3.sc.runtime and boa3.sc.types',
+                             identifier=InteropPackage.Runtime,
                              types=[NotificationType,
                                     TriggerType
                                     ],
@@ -425,7 +467,9 @@ class Interop:
                                 types=[FindOptionsType]
                                 )
 
-    StdlibPackage = Package(identifier=InteropPackage.Stdlib,
+    StdlibPackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts',
+                            identifier=InteropPackage.Stdlib,
                             methods=[Atoi,
                                      Base58CheckDecode,
                                      Base58CheckEncode,

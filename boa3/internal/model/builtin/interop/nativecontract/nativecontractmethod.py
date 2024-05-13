@@ -22,7 +22,7 @@ class NativeContractMethod(InteropMethod):
 
         self.internal_call_args = internal_call_args
 
-        from boa3.internal.neo3.contracts.contracttypes import CallFlags
+        from boa3.internal.neo3.contracts import CallFlags
         self._call_flags_default = CallFlags.ALL
         self._added_to_permissions = False
         self._pack_arguments = None   # defined during compilation

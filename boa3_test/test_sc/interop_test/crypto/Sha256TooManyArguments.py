@@ -1,5 +1,5 @@
-from boa3.builtin.interop.crypto import sha256
+from boa3.sc.contracts import CryptoLib
 
 
 def Main() -> bytes:
-    return sha256('arg', 'arg')
+    return CryptoLib.sha256('arg', 'arg')

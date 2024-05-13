@@ -39,11 +39,10 @@ __all__ = [
 
 from typing import Any
 
-from boa3.builtin.interop.iterator import Iterator
-from boa3.builtin.type import UInt160, UInt256, ECPoint
+from boa3.sc.utils.iterator import Iterator
 from boa3.sc.storage.storagecontext import StorageContext
 from boa3.sc.storage.storagemap import StorageMap
-from boa3.sc.types import FindOptions
+from boa3.sc.types import FindOptions, UInt256, ECPoint, UInt160
 
 
 def get_context() -> StorageContext:
@@ -104,7 +103,7 @@ def try_get(key: bytes, context: StorageContext = get_context()) -> tuple[bytes,
 def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     """
     Gets a value as integer from the persistent store based on the given key.
-    It's equivalent to boa3.builtin.type.helper.to_int(get(key, context))
+    It's equivalent to boa3.sc.utils.to_int(get(key, context))
 
     >>> put_int(b'unit', 5)
     ... get_int(b'unit')
@@ -147,7 +146,7 @@ def try_get_int(key: bytes, context: StorageContext = get_context()) -> tuple[in
 def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     """
     Gets a value as boolean from the persistent store based on the given key.
-    It's equivalent to boa3.builtin.type.helper.to_bool(get(key, context))
+    It's equivalent to boa3.sc.utils.to_bool(get(key, context))
 
     >>> put_bool(b'unit', True)
     ... get_bool(b'unit')
@@ -190,7 +189,7 @@ def try_get_bool(key: bytes, context: StorageContext = get_context()) -> tuple[b
 def get_str(key: bytes, context: StorageContext = get_context()) -> str:
     """
     Gets a value as string from the persistent store based on the given key.
-    It's equivalent to boa3.builtin.type.helper.to_str(get(key, context))
+    It's equivalent to boa3.sc.utils.to_str(get(key, context))
 
     >>> put_str(b'unit', 'test')
     ... get_str(b'unit')
@@ -233,7 +232,7 @@ def try_get_str(key: bytes, context: StorageContext = get_context()) -> tuple[st
 def get_list(key: bytes, context: StorageContext = get_context()) -> list:
     """
     Gets a value as list from the persistent store based on the given key.
-    It's equivalent to boa3.builtin.nativecontract.stdlib.StdLib.deserialize(get(key, context))
+    It's equivalent to boa3.sc.contracts.stdlib.StdLib.deserialize(get(key, context))
 
     >>> put_list(b'unit', [1, 2, '3'])
     ... get_list(b'unit')
@@ -276,7 +275,7 @@ def try_get_list(key: bytes, context: StorageContext = get_context()) -> tuple[l
 def get_dict(key: bytes, context: StorageContext = get_context()) -> dict:
     """
     Gets a value as dict from the persistent store based on the given key.
-    It's equivalent to boa3.builtin.nativecontract.stdlib.StdLib.deserialize(get(key, context))
+    It's equivalent to boa3.sc.contracts.stdlib.StdLib.deserialize(get(key, context))
 
     >>> put_dict(b'unit', {'example': 1, 'other_example': 2})
     ... get_dict(b'unit')
@@ -319,7 +318,7 @@ def try_get_dict(key: bytes, context: StorageContext = get_context()) -> tuple[d
 def get_object(key: bytes, context: StorageContext = get_context()) -> Any:
     """
     Gets a value as object from the persistent store based on the given key.
-    It's equivalent to boa3.builtin.nativecontract.stdlib.StdLib.deserialize(get(key, context))
+    It's equivalent to boa3.sc.contracts.stdlib.StdLib.deserialize(get(key, context))
     Returns an empty struct if not found.
 
     >>> example = SomeClass()
@@ -524,7 +523,7 @@ def put(key: bytes, value: bytes, context: StorageContext = get_context()):
 def put_int(key: bytes, value: int, context: StorageContext = get_context()):
     """
     Inserts a given integer value in the key-value format into the persistent storage.
-    It's equivalent to put(key, boa3.builtin.type.helper.to_int(value), context)
+    It's equivalent to put(key, boa3.sc.utils.to_int(value), context)
 
     >>> put_int(b'unit', 5)
     None
@@ -542,7 +541,7 @@ def put_int(key: bytes, value: int, context: StorageContext = get_context()):
 def put_bool(key: bytes, value: bool, context: StorageContext = get_context()):
     """
     Inserts a given boolean value in the key-value format into the persistent storage.
-    It's equivalent to put(key, boa3.builtin.type.helper.to_bool(value), context)
+    It's equivalent to put(key, boa3.sc.utils.to_bool(value), context)
 
     >>> put_bool(b'unit', True)
     None
@@ -560,7 +559,7 @@ def put_bool(key: bytes, value: bool, context: StorageContext = get_context()):
 def put_str(key: bytes, value: str, context: StorageContext = get_context()):
     """
     Inserts a given str value in the key-value format into the persistent storage.
-    It's equivalent to put(key, boa3.builtin.type.helper.to_str(value), context)
+    It's equivalent to put(key, boa3.sc.utils.to_str(value), context)
 
     >>> put_str(b'unit', 'test')
     None
@@ -578,7 +577,7 @@ def put_str(key: bytes, value: str, context: StorageContext = get_context()):
 def put_list(key: bytes, value: list, context: StorageContext = get_context()):
     """
     Inserts a given list value in the key-value format into the persistent storage.
-    It's equivalent to put(key, boa3.builtin.nativecontract.stdlib.serialize(value), context)
+    It's equivalent to put(key, boa3.sc.contracts.stdlib.StdLib.serialize(value), context)
 
     >>> put_list(b'unit', [1, 2, '3'])
     None
@@ -596,7 +595,7 @@ def put_list(key: bytes, value: list, context: StorageContext = get_context()):
 def put_dict(key: bytes, value: dict, context: StorageContext = get_context()):
     """
     Inserts a given dict value in the key-value format into the persistent storage.
-    It's equivalent to put(key, boa3.builtin.nativecontract.stdlib.serialize(value), context)
+    It's equivalent to put(key, boa3.sc.contracts.stdlib.StdLib.serialize(value), context)
 
     >>> put_dict(b'unit', {'example': 1, 'other_example': 2})
     None
@@ -614,7 +613,7 @@ def put_dict(key: bytes, value: dict, context: StorageContext = get_context()):
 def put_object(key: bytes, value: object, context: StorageContext = get_context()):
     """
     Inserts a given object value in the key-value format into the persistent storage.
-    It's equivalent to put(key, boa3.builtin.nativecontract.stdlib.serialize(value), context)
+    It's equivalent to put(key, boa3.sc.contracts.stdlib.StdLib.serialize(value), context)
 
     >>> example = SomeClass()
     >>> put_object(b'unit', example)

@@ -1,8 +1,8 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.blockchain import Transaction, get_transaction
-from boa3.builtin.type import UInt256
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import LedgerContract
+from boa3.sc.types import UInt256, Transaction
 
 
 @public
@@ -12,5 +12,5 @@ def is_tx(value: Any) -> bool:
 
 @public
 def get_transaction_is_tx(hash_: UInt256) -> bool:
-    tx = get_transaction(hash_)
+    tx = LedgerContract.get_transaction(hash_)
     return is_tx(tx)

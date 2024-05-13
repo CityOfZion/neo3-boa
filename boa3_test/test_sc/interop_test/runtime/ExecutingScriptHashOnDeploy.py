@@ -1,9 +1,7 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop import runtime
-from boa3.builtin.type import UInt160
-from boa3.sc import storage
+from boa3.sc.compiletime import public
+from boa3.sc import storage, runtime
 
 
 @public
@@ -13,5 +11,5 @@ def _deploy(data: Any, update: bool):
 
 
 @public
-def get_script() -> UInt160:
-    return storage.get_uint160(b'testKey')
+def get_script() -> bytes:
+    return storage.get(b'testKey')

@@ -1,8 +1,6 @@
-from typing import cast
-
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.blockchain import Transaction
-from boa3.builtin.interop.runtime import script_container
+from boa3.sc.compiletime import public
+from boa3.sc.types import Transaction
+from boa3.sc.runtime import script_container
 
 
 @public

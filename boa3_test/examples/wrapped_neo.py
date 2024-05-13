@@ -1,13 +1,10 @@
 from typing import Any
 
-from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
-from boa3.builtin.contract import Nep17TransferEvent, abort
-from boa3.builtin.interop import runtime
-from boa3.builtin.interop.contract import GAS as GAS_SCRIPT, NEO as NEO_SCRIPT, call_contract
-from boa3.builtin.nativecontract.contractmanagement import ContractManagement
-from boa3.builtin.nativecontract.neo import NEO as NEO_TOKEN
-from boa3.builtin.type import UInt160
-from boa3.sc import storage
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.utils import CreateNewEvent, Nep17TransferEvent, abort, call_contract
+from boa3.sc.contracts import ContractManagement, NeoToken, GasToken
+from boa3.sc.types import UInt160
+from boa3.sc import storage, runtime
 
 
 # -------------------------------------------
@@ -364,7 +361,7 @@ def burn(account: UInt160, amount: int):
             on_transfer(account, None, amount)
             post_transfer(account, None, amount, None, False)
 
-            NEO_TOKEN.transfer(runtime.executing_script_hash, account, amount)
+            NeoToken.transfer(runtime.executing_script_hash, account, amount)
 
 
 @public
@@ -409,9 +406,9 @@ def onNEP17Payment(from_address: UInt160, amount: int, data: Any):
     :type data: Any
     """
     # Use calling_script_hash to identify if the incoming token is NEO
-    if runtime.calling_script_hash == NEO_SCRIPT:
+    if runtime.calling_script_hash == NeoToken.hash:
         mint(from_address, amount)
-    elif runtime.calling_script_hash == GAS_SCRIPT:
+    elif runtime.calling_script_hash == GasToken.hash:
         # GAS is minted when transferring NEO
         return
     else:

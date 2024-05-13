@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 from boa3_test.test_sc.variable_test.ListGlobalAssignment import get_from_global
 
 a = 42  # same name of a variable in a imported package

@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import base58_decode
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 
 
 @public
 def Main(key: str) -> bytes:
-    return base58_decode(key)
+    return StdLib.base58_decode(key)

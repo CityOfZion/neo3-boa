@@ -1,8 +1,8 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.nativecontract.policy import Policy
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import PolicyContract
+from boa3.sc.types import UInt160
 
 
 @public
 def main(account: UInt160) -> int:
-    return Policy.is_blocked(account)
+    return PolicyContract.is_blocked(account)

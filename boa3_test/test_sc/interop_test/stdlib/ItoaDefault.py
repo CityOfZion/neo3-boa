@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import itoa
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 
 
 @public
 def main(value: int) -> str:
-    return itoa(value)
+    return StdLib.itoa(value)

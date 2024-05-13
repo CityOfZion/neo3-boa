@@ -1,7 +1,6 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.role import Role
-from boa3.builtin.nativecontract.rolemanagement import RoleManagement
-from boa3.builtin.type import ECPoint
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import RoleManagement
+from boa3.sc.types import ECPoint, Role
 
 
 @public

@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 from boa3_test.test_sc.import_test.FromImportTyping import EmptyList as RootImportedFunction
 from package_with_import.Module import EmptyList as FileDirImportedFunction
 

@@ -1,7 +1,6 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import NamedCurve
-from boa3.builtin.nativecontract.cryptolib import CryptoLib
-from boa3.builtin.type import ECPoint
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import CryptoLib
+from boa3.sc.types import ECPoint, NamedCurve
 
 
 @public

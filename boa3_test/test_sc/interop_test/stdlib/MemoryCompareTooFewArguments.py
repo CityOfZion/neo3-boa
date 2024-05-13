@@ -1,5 +1,5 @@
-from boa3.builtin.interop.stdlib import memory_compare
+from boa3.sc.contracts import StdLib
 
 
 def main(mem1: bytes) -> int:
-    return memory_compare(mem1)
+    return StdLib.memory_compare(mem1)

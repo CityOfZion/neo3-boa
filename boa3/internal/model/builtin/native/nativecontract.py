@@ -17,43 +17,80 @@ class NativeContract:
     RoleManagement = RoleManagementClass.build()
     StdLib = StdLibClass.build()
 
+    # Deprecated Native Contract Names
+    gas_name = 'GAS'
+    ledger_name = 'Ledger'
+    neo_name = 'NEO'
+    oracle_name = 'Oracle'
+    policy_name = 'Policy'
+
+    GAS_ = GAS.clone()
+    GAS_._identifier = gas_name
+    Ledger_ = Ledger.clone()
+    Ledger_._identifier = ledger_name
+    NEO_ = NEO.clone()
+    NEO_._identifier = neo_name
+    Oracle_ = Oracle.clone()
+    Oracle_._identifier = oracle_name
+    Policy_ = Policy.clone()
+    Policy_._identifier = policy_name
+
     # region Packages
 
-    ContractManagementModule = Package(identifier=ContractManagement.identifier.lower(),
+    ContractManagementModule = Package(deprecated=True,
+                                       new_location='boa3.sc.contracts',
+
+                                       identifier=ContractManagement.identifier.lower(),
                                        types=[ContractManagement,
                                               Interop.ContractType])
 
-    CryptoLibModule = Package(identifier=CryptoLib.identifier.lower(),
+    CryptoLibModule = Package(deprecated=True,
+                              new_location='boa3.sc.contracts',
+                              identifier=CryptoLib.identifier.lower(),
                               types=[CryptoLib,
                                      Interop.NamedCurveType,
                                      Interop.Bls12381Type])
 
-    GasModule = Package(identifier=GAS.identifier.lower(),
-                        types=[GAS]
+    GasModule = Package(deprecated=True,
+                        new_location='boa3.sc.contracts',
+                        identifier=gas_name.lower(),
+                        types=[GAS_]
                         )
 
-    LedgerModule = Package(identifier=Ledger.identifier.lower(),
-                           types=[Ledger]
+    LedgerModule = Package(deprecated=True,
+                           new_location='boa3.sc.contracts',
+                           identifier=ledger_name.lower(),
+                           types=[Ledger_]
                            )
 
-    NeoModule = Package(identifier=NEO.identifier.lower(),
-                        types=[NEO]
+    NeoModule = Package(deprecated=True,
+                        new_location='boa3.sc.contracts',
+                        identifier=neo_name.lower(),
+                        types=[NEO_]
                         )
 
-    OracleModule = Package(identifier=Oracle.identifier.lower(),
-                           types=[Oracle]
+    OracleModule = Package(deprecated=True,
+                           new_location='boa3.sc.contracts',
+                           identifier=oracle_name.lower(),
+                           types=[Oracle_]
                            )
 
-    PolicyModule = Package(identifier=Policy.identifier.lower(),
-                           types=[Policy]
+    PolicyModule = Package(deprecated=True,
+                           new_location='boa3.sc.contracts',
+                           identifier=policy_name.lower(),
+                           types=[Policy_]
                            )
 
-    RoleManagementModule = Package(identifier=RoleManagement.identifier.lower(),
+    RoleManagementModule = Package(deprecated=True,
+                                   new_location='boa3.sc.contracts',
+                                   identifier=RoleManagement.identifier.lower(),
                                    types=[RoleManagement,
                                           Interop.RoleType]
                                    )
 
-    StdLibModule = Package(identifier=StdLib.identifier.lower(),
+    StdLibModule = Package(deprecated=True,
+                           new_location='boa3.sc.contracts',
+                           identifier=StdLib.identifier.lower(),
                            types=[StdLib]
                            )
 

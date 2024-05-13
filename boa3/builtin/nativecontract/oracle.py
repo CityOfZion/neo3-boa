@@ -2,12 +2,14 @@ __all__ = [
     'Oracle',
 ]
 
+from deprecation import deprecated
 
 from typing import Any
 
 from boa3.builtin.type import UInt160
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
 class Oracle:
     """
     Neo Oracle Service is an out-of-chain data access service built into Neo N3. It allows users to request the external

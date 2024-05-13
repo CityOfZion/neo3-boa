@@ -1,5 +1,5 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.runtime import platform
+from boa3.sc.compiletime import public
+from boa3.sc.runtime import platform
 
 
 @public

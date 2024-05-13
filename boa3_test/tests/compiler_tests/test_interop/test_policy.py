@@ -1,4 +1,4 @@
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3_test.tests import boatestcase
 
 
@@ -52,12 +52,14 @@ class TestPolicyInterop(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, 'IsBlockedTooFewArguments.py')
 
     async def test_import_policy(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportPolicy.py')
         await self.set_up_contract('ImportPolicy.py')
 
         result, _ = await self.call('main', [], return_type=int)
         self.assertIsInstance(result, int)
 
     async def test_import_interop_policy(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropPolicy.py')
         await self.set_up_contract('ImportInteropPolicy.py')
 
         result, _ = await self.call('main', [], return_type=int)

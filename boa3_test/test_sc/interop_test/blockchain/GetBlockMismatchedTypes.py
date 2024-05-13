@@ -1,7 +1,8 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.blockchain import Block, get_block
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import LedgerContract
+from boa3.sc.types import Block
 
 
 @public
 def Main(index: str) -> Block:
-    return get_block(index)
+    return LedgerContract.get_block(index)

@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.nativecontract.neo import NEO
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import NeoToken
 
 
 @public
 def main() -> int:
-    return NEO.decimals()
+    return NeoToken.decimals()

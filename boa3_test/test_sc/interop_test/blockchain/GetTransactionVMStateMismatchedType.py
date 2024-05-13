@@ -1,5 +1,6 @@
-from boa3.builtin.interop.blockchain import VMState, get_transaction_vm_state
+from boa3.sc.contracts import LedgerContract
+from boa3.sc.types import VMState
 
 
 def main() -> VMState:
-    return get_transaction_vm_state(123)
+    return LedgerContract.get_transaction_vm_state(123)

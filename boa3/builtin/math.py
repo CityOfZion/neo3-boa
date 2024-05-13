@@ -1,3 +1,7 @@
+from deprecation import deprecated
+
+
+@deprecated(details='This module is deprecated. Use boa3.sc.math instead')
 def ceil(x: int, decimals: int) -> int:
     """
     Return the ceiling of x given the amount of decimals.
@@ -18,6 +22,7 @@ def ceil(x: int, decimals: int) -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.math instead')
 def floor(x: int, decimals: int) -> int:
     """
     Return the floor of x given the amount of decimals.
@@ -38,6 +43,7 @@ def floor(x: int, decimals: int) -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use boa3.sc.math instead')
 def sqrt(x: int) -> int:
     """
     Gets the square root of a number.

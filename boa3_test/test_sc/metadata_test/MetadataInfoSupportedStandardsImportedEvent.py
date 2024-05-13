@@ -1,8 +1,8 @@
 from typing import Any
 
 import boa3_test.examples.nep17 as nep17
-from boa3.builtin.compile_time import NeoMetadata, public
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.types import UInt160
 
 
 def standards_manifest() -> NeoMetadata:

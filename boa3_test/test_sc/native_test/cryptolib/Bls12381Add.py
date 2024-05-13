@@ -1,6 +1,6 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import IBls12381
-from boa3.builtin.nativecontract.cryptolib import CryptoLib
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import CryptoLib
+from boa3.sc.types import IBls12381
 
 
 @public
