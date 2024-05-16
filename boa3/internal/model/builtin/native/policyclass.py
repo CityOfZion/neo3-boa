@@ -23,7 +23,9 @@ class PolicyClass(INativeContractClass):
                 'get_fee_per_byte': Interop.GetFeePerByte,
                 'get_exec_fee_factor': Interop.GetExecFeeFactor,
                 'get_storage_price': Interop.GetStoragePrice,
-                'is_blocked': Interop.IsBlocked
+                'get_attribute_fee': Interop.GetAttributeFee,
+                'is_blocked': Interop.IsBlocked,
+                'set_attribute_fee': Interop.SetAttributeFee,
             }
         return super().class_methods
 

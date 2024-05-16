@@ -277,7 +277,8 @@ class ContractImports:
             Interop.VMStateType,
             Interop.CallFlagsType,
             Interop.OracleResponseCode,
-            Builtin.NeoAccountState
+            Builtin.NeoAccountState,
+            Interop.TransactionAttributeType,
         ],
     )
     # endregion

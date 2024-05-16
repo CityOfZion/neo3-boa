@@ -2,6 +2,7 @@ __all__ = [
     'PolicyContract',
 ]
 
+from boa3.internal.neo3.network.payloads.transactionattributetype import TransactionAttributeType
 from boa3.sc.types import UInt160
 
 
@@ -50,7 +51,20 @@ class PolicyContract:
         >>> PolicyContract.get_storage_price()
         100000
 
-        :return: the snapshot used to read data
+        :return: the storage price
+        :rtype: int
+        """
+        pass
+
+    @classmethod
+    def get_attribute_fee(cls, attribute_type: TransactionAttributeType) -> int:
+        """
+        Gets the fee for attribute.
+
+        >>> PolicyContract.get_attribute_fee(TransactionAttributeType.HIGH_PRIORITY)
+        0
+
+        :return: the fee for attribute
         :rtype: int
         """
         pass
@@ -68,5 +82,16 @@ class PolicyContract:
 
         :return: whether the account is blocked or not
         :rtype: bool
+        """
+        pass
+
+    @classmethod
+    def set_attribute_fee(cls, attribute_type: TransactionAttributeType, value: int) -> None:
+        """
+        Sets the fee for attribute. You need to sign the transaction using a committee member, otherwise, this function
+        will throw an error.
+
+        >>> PolicyContract.set_attribute_fee(TransactionAttributeType.HIGH_PRIORITY, 10)
+        None
         """
         pass
