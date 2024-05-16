@@ -4,5 +4,5 @@ from boa3.sc.runtime import notify
 
 
 @public
-def Main():
-    notify(10, 'unit_test')
+def Main(notify_name: str):
+    notify(10, notify_name)

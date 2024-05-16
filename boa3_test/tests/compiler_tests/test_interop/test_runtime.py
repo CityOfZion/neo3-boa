@@ -260,13 +260,16 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         self.assertEqual(1, len(event_notifications))
         self.assertEqual(([2, 3, 5, 7],), event_notifications[0].state)
 
+    async def test_notify_with_dynamic_name_run(self):
+        self.assertCompilerLogs(CompilerError.InvalidUsage, 'NotifyWithDynamicName.py')
+
     def test_notify_with_name_compile(self):
         from boa3.internal.model.builtin.interop.interop import Interop
+        unit_test = String('unit_test').to_bytes()
 
         expected_output = (
-            Opcode.INITSLOT
-            + b'\x00\x01'
-            + Opcode.LDARG0
+            Opcode.PUSHDATA1  # 'unit_test
+            + Integer(len(unit_test)).to_byte_array() + unit_test
             + Opcode.PUSH10
             + Opcode.PUSH1
             + Opcode.PACK
@@ -283,7 +286,7 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         await self.set_up_contract('NotifyWithName.py')
 
         event_name = 'unit_test'
-        result, notifications = await self.call('Main', [event_name], return_type=None)
+        result, notifications = await self.call('Main', [], return_type=None)
         self.assertIsNone(result)
 
         event_notifications = self.filter_events(notifications,
