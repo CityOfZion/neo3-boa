@@ -32,7 +32,7 @@ __all__ = [
     'Nep17Contract',
     'Opcode',
     'FindOptions',
-    'NamedCurve',
+    'NamedCurveHash',
     'IBls12381',
     'Role',
     'Notification',
@@ -50,7 +50,7 @@ from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterTyp
 from boa3.internal.neo3.contracts import CallFlags
 from boa3.internal.neo3.contracts import TriggerType
 from boa3.internal.neo3.contracts.findoptions import FindOptions
-from boa3.internal.neo3.contracts.namedcurve import NamedCurve
+from boa3.internal.neo3.contracts.namedcurvehash import NamedCurveHash
 from boa3.internal.neo3.contracts.native import Role
 from boa3.internal.neo3.network.payloads import OracleResponseCode
 from boa3.internal.neo3.network.payloads.verification import WitnessScope, WitnessRuleAction, WitnessConditionType

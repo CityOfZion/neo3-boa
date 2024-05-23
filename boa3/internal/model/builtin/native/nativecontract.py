@@ -37,7 +37,7 @@ class NativeContract:
                               new_location='boa3.sc.contracts',
                               identifier=CryptoLib.identifier.lower(),
                               types=[CryptoLib,
-                                     Interop.NamedCurveType,
+                                     Interop.NamedCurveHashType,
                                      Interop.Bls12381Type])
 
     GasModule = Package(deprecated=True,

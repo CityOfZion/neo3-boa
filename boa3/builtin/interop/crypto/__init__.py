@@ -1,5 +1,5 @@
 __all__ = [
-    'NamedCurve',
+    'NamedCurveHash',
     'IBls12381',
     'sha256',
     'ripemd160',
@@ -22,7 +22,7 @@ from typing import Any
 from deprecation import deprecated
 
 from boa3.builtin.interop.crypto.ibls12381 import IBls12381
-from boa3.builtin.interop.crypto.namedcurve import NamedCurve
+from boa3.builtin.interop.crypto.namedcurve import NamedCurveHash
 from boa3.builtin.type import ECPoint
 
 
@@ -142,12 +142,12 @@ def check_multisig(pubkeys: list[ECPoint], signatures: list[bytes]) -> bool:
 
 
 @deprecated(details='This module is deprecated. Use CryptoLib from boa3.sc.contracts instead')
-def verify_with_ecdsa(message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurve) -> bool:
+def verify_with_ecdsa(message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurveHash) -> bool:
     """
     Using the elliptic curve, it checks if the signature of the message was originally produced by the public key.
 
     >>> verify_with_ecdsa(b'unit test', ECPoint(b'\\x03\\x5a\\x92\\x8f\\x20\\x16\\x39\\x20\\x4e\\x06\\xb4\\x36\\x8b\\x1a\\x93\\x36\\x54\\x62\\xa8\\xeb\\xbf\\xf0\\xb8\\x81\\x81\\x51\\xb7\\x4f\\xaa\\xb3\\xa2\\xb6\\x1a'),
-    ...                   b'wrong_signature', NamedCurve.SECP256R1)
+    ...                   b'wrong_signature', NamedCurveHash.SECP256R1SHA256)
     False
 
     :param message: the encrypted message
@@ -157,7 +157,7 @@ def verify_with_ecdsa(message: bytes, pubkey: ECPoint, signature: bytes, curve: 
     :param signature: the signature of the item
     :type signature: bytes
     :param curve: the curve that will be used by the ecdsa
-    :type curve: NamedCurve
+    :type curve: NamedCurveHash
     :return: a boolean value that represents whether the signature is valid
     :rtype: bool
     """

@@ -72,7 +72,7 @@ class Interop:
     ContractType = ContractType.build()
     FindOptionsType = FindOptionsType()
     Iterator = IteratorType.build()
-    NamedCurveType = NamedCurveType()
+    NamedCurveHashType = NamedCurveHashType()
     NotificationType = NotificationType.build()
     OracleResponseCode = OracleResponseCodeType.build()
     OracleType = OracleClass.build()
@@ -130,6 +130,7 @@ class Interop:
     CheckSig = CheckSigMethod()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
+    Keccak256 = Keccak256Method()
     Murmur32 = Murmur32Method()
     Ripemd160 = Ripemd160Method()
     Sha256 = Sha256Method()
@@ -337,7 +338,7 @@ class Interop:
     CryptoPackage = Package(deprecated=True,
                             new_location='boa3.sc.contracts, boa3.sc.utils and boa3.sc.types',
                             identifier=InteropPackage.Crypto,
-                            types=[NamedCurveType,
+                            types=[NamedCurveHashType,
                                    Bls12381Type
                                    ],
                             methods=[Bls12381Add,

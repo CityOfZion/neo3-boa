@@ -3,17 +3,17 @@ from typing import Any
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.primitive.inttype import IntType
-from boa3.internal.neo3.contracts.namedcurve import NamedCurve
+from boa3.internal.neo3.contracts.namedcurvehash import NamedCurveHash
 
 
-class NamedCurveType(IntType):
+class NamedCurveHashType(IntType):
     """
-    A class used to represent Neo NamedCurve type
+    A class used to represent Neo NamedCurveHash type
     """
 
     def __init__(self):
         super().__init__()
-        self._identifier = 'NamedCurve'
+        self._identifier = 'NamedCurveHash'
 
     @classmethod
     def build(cls, value: Any = None) -> IType:
@@ -22,7 +22,7 @@ class NamedCurveType(IntType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, (NamedCurve, NamedCurveType))
+        return isinstance(value, (NamedCurveHash, NamedCurveHashType))
 
     @property
     def symbols(self) -> dict[str, ISymbol]:
@@ -34,7 +34,7 @@ class NamedCurveType(IntType):
         from boa3.internal.model.variable import Variable
 
         _symbols = super().symbols
-        _symbols.update({name: Variable(self) for name in NamedCurve.__members__.keys()})
+        _symbols.update({name: Variable(self) for name in NamedCurveHash.__members__.keys()})
 
         return _symbols
 
@@ -44,10 +44,10 @@ class NamedCurveType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        if symbol_id in self.symbols and symbol_id in NamedCurve.__members__:
-            return NamedCurve.__members__[symbol_id]
+        if symbol_id in self.symbols and symbol_id in NamedCurveHash.__members__:
+            return NamedCurveHash.__members__[symbol_id]
 
         return None
 
 
-_NamedCurve = NamedCurveType()
+_NamedCurve = NamedCurveHashType()
