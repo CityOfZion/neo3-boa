@@ -19,12 +19,12 @@ class NeoClass(INativeContractClass):
         # avoid recursive import
         from boa3.internal.model.builtin.native.nep17_methods import (BalanceOfMethod, DecimalsMethod, SymbolMethod,
                                                                       TotalSupplyMethod, TransferMethod)
-        from boa3.internal.model.builtin.native.neo_contract_methods import (GetAccountStateMethod, GetAllCandidatesMethod,
-                                                                             GetCandidatesMethod, GetCandidateVoteMethod,
-                                                                             GetCommitteeMethod, GetGasPerBlockMethod,
-                                                                             GetNextBlockValidatorsMethod,
-                                                                             RegisterCandidateMethod, UnclaimedGasMethod,
-                                                                             UnregisterCandidateMethod, UnVoteMethod, VoteMethod)
+        from boa3.internal.model.builtin.native.neo_contract_methods import (
+            GetAccountStateMethod, GetAllCandidatesMethod, GetCandidatesMethod, GetCandidateVoteMethod,
+            GetCommitteeMethod, GetGasPerBlockMethod, GetNextBlockValidatorsMethod, GetRegisterPriceMethod,
+            RegisterCandidateMethod, UnclaimedGasMethod, UnregisterCandidateMethod, UnVoteMethod, VoteMethod,
+            GetCommitteeAddressMethod
+        )
         from boa3.internal.model.builtin.contract import NeoAccountStateType
 
         if len(self._class_methods) == 0:
@@ -40,8 +40,10 @@ class NeoClass(INativeContractClass):
                 'get_candidates': GetCandidatesMethod(),
                 'get_candidate_vote': GetCandidateVoteMethod(),
                 'get_committee': GetCommitteeMethod(),
+                'get_committee_address': GetCommitteeAddressMethod(),
                 'get_gas_per_block': GetGasPerBlockMethod(),
                 'get_next_block_validators': GetNextBlockValidatorsMethod(),
+                'get_register_price': GetRegisterPriceMethod(),
                 'register_candidate': RegisterCandidateMethod(),
                 'unclaimed_gas': UnclaimedGasMethod(),
                 'unregister_candidate': UnregisterCandidateMethod(),

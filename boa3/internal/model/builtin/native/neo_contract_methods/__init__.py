@@ -3,8 +3,10 @@ __all__ = ['GetAccountStateMethod',
            'GetCandidatesMethod',
            'GetCandidateVoteMethod',
            'GetCommitteeMethod',
+           'GetCommitteeAddressMethod',
            'GetGasPerBlockMethod',
            'GetNextBlockValidatorsMethod',
+           'GetRegisterPriceMethod',
            'RegisterCandidateMethod',
            'UnclaimedGasMethod',
            'UnregisterCandidateMethod',
@@ -17,8 +19,10 @@ from boa3.internal.model.builtin.native.neo_contract_methods.getallcandidatesmet
 from boa3.internal.model.builtin.native.neo_contract_methods.getcandidatesmethod import GetCandidatesMethod
 from boa3.internal.model.builtin.native.neo_contract_methods.getcandidatevotemethod import GetCandidateVoteMethod
 from boa3.internal.model.builtin.native.neo_contract_methods.getcommitteemethod import GetCommitteeMethod
+from boa3.internal.model.builtin.native.neo_contract_methods.getcommitteeaddressmethod import GetCommitteeAddressMethod
 from boa3.internal.model.builtin.native.neo_contract_methods.getgasperblockmethod import GetGasPerBlockMethod
 from boa3.internal.model.builtin.native.neo_contract_methods.getnextblockvalidators import GetNextBlockValidatorsMethod
+from boa3.internal.model.builtin.native.neo_contract_methods.getregisterpricemethod import GetRegisterPriceMethod
 from boa3.internal.model.builtin.native.neo_contract_methods.registercandidatemethod import RegisterCandidateMethod
 from boa3.internal.model.builtin.native.neo_contract_methods.unclaimedgasmethod import UnclaimedGasMethod
 from boa3.internal.model.builtin.native.neo_contract_methods.unregistercandidatemethod import UnregisterCandidateMethod
