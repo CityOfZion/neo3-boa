@@ -17,6 +17,7 @@ from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.compile_time.neometadatatype import MetadataTypeSingleton
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+from boa3.internal.model.builtin.interop.runtime import NotifyMethod
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.decorator import IDecorator
@@ -1332,6 +1333,18 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if updated_symbol.identifier != func_id:
                     self.__include_callable(updated_symbol.identifier, updated_symbol)
                     return self.get_type(updated_symbol)
+        elif isinstance(func_symbol, NotifyMethod) and len(call.args) == 2:
+            if isinstance(call.args[1], ast.Constant):
+                notification_name = self.visit(call.args[1])
+                named_notification = Event(notification_name, {'state': Variable(Type.any)})
+                named_notification.add_call_origin(call)
+                self._current_module.include_symbol(named_notification.identifier, named_notification)
+            else:
+                self._log_error(
+                    CompilerError.InvalidUsage(
+                        call.args[1].lineno, call.args[1].col_offset,
+                        'The notification name should be a constant, otherwise it won\'t be added to the manifest')
+                )
 
         return self.get_type(call.func)
 
