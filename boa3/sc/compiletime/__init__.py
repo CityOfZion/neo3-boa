@@ -8,7 +8,7 @@ __all__ = [
 from typing import Any
 
 
-def public(name: str = None, safe: bool = True, *args, **kwargs):
+def public(name: str = None, safe: bool = False, *args, **kwargs):
     """
     This decorator identifies which methods should be included in the abi file. Adding this decorator to a function
     means it could be called externally.
