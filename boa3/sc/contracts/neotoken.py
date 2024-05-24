@@ -260,6 +260,32 @@ class NeoToken:
         pass
 
     @classmethod
+    def get_committee_address(cls) -> UInt160:
+        """
+        Gets the address of the committee.
+
+        >>> NeoToken.get_committee_address()
+        UInt160(0x9273d3c792bce5eab4daac1c3ffdc1e83c4237f7)
+
+        :return: the address of the committee
+        :rtype: UInt160
+        """
+        pass
+
+    @classmethod
+    def get_register_price(cls) -> int:
+        """
+        Gets the fees to be paid to register as a candidate.
+
+        >>> NeoToken.get_register_price()
+        100000000000
+
+        :return: the amount of the fees
+        :rtype: int
+        """
+        pass
+
+    @classmethod
     def get_next_block_validators(cls) -> list[ECPoint]:
         """
         Gets validators list of the next block.
