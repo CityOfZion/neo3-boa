@@ -81,6 +81,7 @@ class Interop:
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
+    TransactionAttributeType = TransactionAttributeType()
     TriggerType = TriggerType()
     VMStateType = VMStateType.build()
     WitnessCondition = WitnessConditionType.build()
@@ -149,7 +150,9 @@ class Interop:
     GetExecFeeFactor = GetExecFeeFactorMethod()
     GetFeePerByte = GetFeePerByteMethod()
     GetStoragePrice = GetStoragePriceMethod()
+    GetAttributeFee = GetAttributeFeeMethod(TransactionAttributeType)
     IsBlocked = IsBlockedMethod()
+    SetAttributeFee = SetAttributeFeeMethod(TransactionAttributeType)
 
     # Role Interops
     GetDesignatedByRole = GetDesignatedByRoleMethod()
