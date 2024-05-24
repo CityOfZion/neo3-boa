@@ -269,7 +269,7 @@ class ContractImports:
             Builtin.Nep17Contract,
             Builtin.Opcode,
             Interop.FindOptionsType,
-            Interop.NamedCurveType,
+            Interop.NamedCurveHashType,
             Interop.Bls12381Type,
             Interop.RoleType,
             Interop.NotificationType,

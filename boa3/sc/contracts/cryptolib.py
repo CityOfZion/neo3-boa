@@ -4,7 +4,7 @@ __all__ = [
 
 from typing import Any
 
-from boa3.sc.types import ECPoint, UInt160, NamedCurve, IBls12381
+from boa3.sc.types import ECPoint, UInt160, NamedCurveHash, IBls12381
 
 
 class CryptoLib:
@@ -71,12 +71,27 @@ class CryptoLib:
         pass
 
     @classmethod
-    def verify_with_ecdsa(cls, message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurve) -> bool:
+    def keccak256(cls, data: bytes) -> bytes:
+        """
+        Computes the hash value for the specified byte array using the keccak256 algorithm.
+
+        >>> CryptoLib.keccak256(b'unit test')
+        b'\\xe5\\x26\\x91\\x5a\\xff\\x6f\\x5e\\x35\\x9d\\x64\\xa3\\xce\\xf0\\x6e\\xf3\\xdb\\x9f\\x4a\\x89\\x0e\\x20\\xd1\\xa5\\x19\\x5e\\x3a\\x24\\x29\\x78\\x7e\\xec\\xb7'
+
+        :param data: the input to compute the hash code for
+        :type data: bytes
+        :return: computed hash
+        :rtype: bytes
+        """
+        pass
+
+    @classmethod
+    def verify_with_ecdsa(cls, message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurveHash) -> bool:
         """
         Using the elliptic curve, it checks if the signature of the message was originally produced by the public key.
 
         >>> CryptoLib.verify_with_ecdsa(b'unit test', ECPoint(b'\\x03\\x5a\\x92\\x8f\\x20\\x16\\x39\\x20\\x4e\\x06\\xb4\\x36\\x8b\\x1a\\x93\\x36\\x54\\x62\\xa8\\xeb\\xbf\\xf0\\xb8\\x81\\x81\\x51\\xb7\\x4f\\xaa\\xb3\\xa2\\xb6\\x1a'),
-        ...                             b'wrong_signature', NamedCurve.SECP256R1)
+        ...                             b'wrong_signature', NamedCurveHash.SECP256R1SHA256)
         False
 
         :param message: the encrypted message
@@ -86,7 +101,7 @@ class CryptoLib:
         :param signature: the signature of the item
         :type signature: bytes
         :param curve: the curve that will be used by the ecdsa
-        :type curve: NamedCurve
+        :type curve: NamedCurveHash
         :return: a boolean value that represents whether the signature is valid
         :rtype: bool
         """
