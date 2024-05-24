@@ -278,3 +278,11 @@ class TestLedgerContract(boatestcase.BoaTestCase):
         block_ = await self.get_last_block(self.called_tx)
         expected = block_.index
         self.assertEqual(expected, result)
+
+    async def test_get_current_hash(self):
+        await self.set_up_contract('GetCurrentHash.py')
+
+        result, _ = await self.call('main', [], return_type=types.UInt256, signing_accounts=[self.genesis])
+        block_ = await self.get_last_block(self.called_tx)
+        expected = block_.hash()
+        self.assertEqual(expected, result)
