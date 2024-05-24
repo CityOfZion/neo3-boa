@@ -85,6 +85,19 @@ class Ledger:
         pass
 
     @classmethod
+    def get_current_hash(cls) -> UInt256:
+        """
+        Gets the hash of the current block.
+
+        >>> Ledger.get_current_hash()
+        b'\\x3e\\x65\\xe5\\x4d\\x75\\x5a\\x94\\x90\\xd6\\x98\\x3a\\x77\\xe4\\x82\\xaf\\x7a\\x38\\xc9\\x8c\\x1a\\xc6\\xd9\\xda\\x48\\xbd\\x7c\\x22\\xb3\\x2a\\x9e\\x34\\xea'
+
+        :return: the hash of the current block
+        :rtype: UInt256
+        """
+        pass
+
+    @classmethod
     def get_transaction(cls, hash_: UInt256) -> Transaction | None:
         """
         Gets a transaction with the given hash.
