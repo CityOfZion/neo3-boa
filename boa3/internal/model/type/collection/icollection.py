@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import Any, Self
 
+from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.annotation.uniontype import UnionType
 from boa3.internal.model.type.classes.pythonclass import PythonClass
 from boa3.internal.model.type.itype import IType
@@ -73,7 +74,11 @@ class ICollectionType(PythonClass, ABC):
         if not isinstance(value, Iterable):
             value = {value}
 
-        types: set[IType] = {val if isinstance(val, IType) else Type.get_type(val) for val in value}
+        types: set[IType] = {
+            val if isinstance(val, IType)
+            else Type.get_type(val.type if isinstance(val, IExpression) else val)
+            for val in value
+        }
         return cls.filter_types(types)
 
     def get_item_type(self, index: tuple):

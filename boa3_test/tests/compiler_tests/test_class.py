@@ -459,3 +459,33 @@ class TestClass(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', ['unit test'], return_type=str)
         self.assertEqual('unit test', result)
+
+    async def test_return_dict_with_class_attributes(self):
+        await self.set_up_contract('ReturnDictWithClassAttributes.py')
+
+        expected_result = {
+            'shape': 'Rectangle',
+            'color': 'Blue',
+            'background': 'Black',
+            'size': 'Small'
+        }
+        result, _ = await self.call('test_only_values', [], return_type=dict[str,str])
+        self.assertEqual(expected_result, result)
+
+        expected_result = {
+            'Rectangle': 'shape',
+            'Blue': 'color',
+            'Black': 'background',
+            'Small': 'size'
+        }
+        result, _ = await self.call('test_only_keys', [], return_type=dict[str,str])
+        self.assertEqual(expected_result, result)
+
+        expected_result = {
+            'Rectangle': 'Rectangle',
+            'Blue': 'Blue',
+            'Black': 'Black',
+            'Small': 'Small'
+        }
+        result, _ = await self.call('test_pair', [], return_type=dict[str,str])
+        self.assertEqual(expected_result, result)
