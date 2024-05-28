@@ -769,18 +769,12 @@ class TestFileGeneration(boatestcase.BoaTestCase):
         with self.assertRaises(NotLoadedException):
             self.compile_and_save(path)
 
-    def test_generation_with_recursive_function(self):
-        path, _ = self.get_deploy_file_paths('test_sc/function_test', 'RecursiveFunction.py')
-
-        from boa3.internal.neo3.vm import VMState
-        from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_generation_with_recursive_function(self):
+        await self.set_up_contract('test_sc/function_test', 'RecursiveFunction.py')
 
         expected = self.fact(57)
-        invoke = runner.call_contract(path, 'main')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.cli_log)
-        self.assertEqual(expected, invoke.result)
+        result, _ = await self.call('main', return_type=int)
+        self.assertEqual(expected, result)
 
     def fact(self, f: int) -> int:
         if f <= 1:

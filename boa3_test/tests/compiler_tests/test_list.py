@@ -3,9 +3,7 @@ from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestList(boatestcase.BoaTestCase):
@@ -1100,16 +1098,11 @@ class TestList(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('PopList.py')
         self.assertEqual(expected_output, output)
 
-    def test_list_pop(self):
-        path, _ = self.get_deploy_file_paths('PopList.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_list_pop(self):
+        await self.set_up_contract('PopList.py')
 
-        invoke = (runner.call_contract(path, 'pop_test'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual([1, 2, 3, 4, 5].pop(), invoke.result)
+        result, _ = await self.call('pop_test', [], return_type=int)
+        self.assertEqual([1, 2, 3, 4, 5].pop(), result)
 
     def test_list_pop_without_assignment_compile(self):
         expected_output = (
@@ -1147,18 +1140,13 @@ class TestList(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('PopListWithoutAssignment.py')
         self.assertEqual(expected_output, output)
 
-    def test_list_pop_without_assignment(self):
-        path, _ = self.get_deploy_file_paths('PopListWithoutAssignment.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invoke = (runner.call_contract(path, 'pop_test'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_list_pop_without_assignment(self):
+        await self.set_up_contract('PopListWithoutAssignment.py')
 
         list_ = [1, 2, 3, 4, 5]
         list_.pop()
-        self.assertEqual(list_, invoke.result)
+        result, _ = await self.call('pop_test', [], return_type=list[int])
+        self.assertEqual(list_, result)
 
     def test_list_pop_literal_argument_compile(self):
         expected_output = (
@@ -1196,16 +1184,12 @@ class TestList(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('PopListLiteralArgument.py')
         self.assertEqual(expected_output, output)
 
-    def test_list_pop_literal_argument(self):
-        path, _ = self.get_deploy_file_paths('PopListLiteralArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_list_pop_literal_argument(self):
+        await self.set_up_contract('PopListLiteralArgument.py')
 
-        invoke = (runner.call_contract(path, 'pop_test'))
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual([1, 2, 3, 4, 5].pop(2), invoke.result)
+        result, _ = await self.call('pop_test', [], return_type=int)
+        self.assertEqual([1, 2, 3, 4, 5].pop(2), result)
 
     def test_list_pop_literal_negative_argument_compile(self):
         expected_output = (
@@ -1244,16 +1228,11 @@ class TestList(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('PopListLiteralNegativeArgument.py')
         self.assertEqual(expected_output, output)
 
-    def test_list_pop_literal_negative_argument(self):
-        path, _ = self.get_deploy_file_paths('PopListLiteralNegativeArgument.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_list_pop_literal_negative_argument(self):
+        await self.set_up_contract('PopListLiteralNegativeArgument.py')
 
-        invoke = (runner.call_contract(path, 'pop_test'))
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual([1, 2, 3, 4, 5].pop(-2), invoke.result)
+        result, _ = await self.call('pop_test', [], return_type=int)
+        self.assertEqual([1, 2, 3, 4, 5].pop(-2), result)
 
     def test_list_pop_literal_variable_argument_compile(self):
         expected_output = (
