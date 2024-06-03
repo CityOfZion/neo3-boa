@@ -2,7 +2,7 @@
 name = 'neo3-boa'
 description = 'A Python compiler for the Neo3 Virtual Machine'
 readme = 'README.md'
-requires-python = '>= 3.11,<= 3.12'
+requires-python = '>= 3.11,< 3.13'
 license = {file = 'LICENSE' }
 keywords = ['compiler', 'NEO', '.nef', 'blockchain', 'smartcontract', 'development', 'dApp']
 classifiers = [
@@ -30,7 +30,7 @@ dev = [
     'twine>=1.10.0',
 ]
 test = [
-    'boa-test-constructor==0.3.0',
+    'boa-test-constructor==0.3.1',
 ]
 docs = [
     'myst-parser==1.0.0',
