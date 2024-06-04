@@ -205,7 +205,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         for stmt in function_stmts:
             self.visit(stmt)
 
-        if self.generator.initialize_static_fields():
+        has_static_fields, can_initialize_static_fields = self.generator.initialize_static_fields()
+        if can_initialize_static_fields:
             last_symbols = self.symbols  # save to revert in the end and not compromise consequent visits
             class_non_static_stmts = []
 
@@ -243,23 +244,24 @@ class VisitorCodeGenerator(IAstAnalyser):
                         class_non_static_stmts.append(cls_fun)
                     self.symbols = last_symbols  # don't use inner scopes to evaluate the other globals
 
-            # to generate the 'initialize' method for Neo
-            self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")
-            self._is_generating_initialize = True
-            for stmt in global_stmts:
-                cur_tree = self._tree
-                cur_filename = self.filename
-                if hasattr(stmt, 'origin'):
-                    if hasattr(stmt.origin, 'filename'):
-                        self.set_filename(stmt.origin.filename)
-                    self._tree = stmt.origin
+            if has_static_fields:
+                # to generate the 'initialize' method for Neo
+                self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")
+                self._is_generating_initialize = True
+                for stmt in global_stmts:
+                    cur_tree = self._tree
+                    cur_filename = self.filename
+                    if hasattr(stmt, 'origin'):
+                        if hasattr(stmt.origin, 'filename'):
+                            self.set_filename(stmt.origin.filename)
+                        self._tree = stmt.origin
 
-                self.visit(stmt)
-                self.filename = cur_filename
-                self._tree = cur_tree
+                    self.visit(stmt)
+                    self.filename = cur_filename
+                    self._tree = cur_tree
 
-            self._is_generating_initialize = False
-            self.generator.end_initialize()
+                self._is_generating_initialize = False
+                self.generator.end_initialize()
 
             # generate any symbol inside classes that's not variables AFTER generating 'initialize' method
             for stmt in class_non_static_stmts:

@@ -522,19 +522,25 @@ class CodeGenerator:
             return found_id, found_symbol
         return identifier, Type.none
 
-    def initialize_static_fields(self) -> bool:
+    def initialize_static_fields(self) -> tuple[bool, bool]:
         """
         Converts the signature of the method
 
-        :return: whether there are static fields to be initialized
+        :return: whether there are static fields to be initialized and if they can be generated already
         """
+        can_init_static_fields = False
+        has_static_fields = False
+        default_result = (has_static_fields, can_init_static_fields)
+
         if not self.can_init_static_fields:
-            return False
+            return default_result
         if self.initialized_static_fields:
-            return False
+            return default_result
 
         num_static_fields = len(self._statics)
-        if num_static_fields > 0:
+        has_static_fields = num_static_fields > 0
+        can_init_static_fields = True
+        if has_static_fields:
             init_data = bytearray([num_static_fields])
             self.__insert1(OpcodeInfo.INITSSLOT, init_data)
 
@@ -548,7 +554,7 @@ class CodeGenerator:
             init_method.init_bytecode = self.last_code
             self.symbol_table[constants.INITIALIZE_METHOD_ID] = init_method
 
-        return num_static_fields > 0
+        return has_static_fields, can_init_static_fields
 
     def end_initialize(self):
         """
