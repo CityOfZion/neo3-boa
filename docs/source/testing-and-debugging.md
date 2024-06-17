@@ -43,71 +43,79 @@ from boa3.boa3 import Boa3
 Boa3.compile_and_save('path/to/your/file.py', debug=True)
 ```
 
-## Neo Test Runner
+## boa test constructor
 
 ### Downloading
 
-Install [Neo-Express](https://github.com/neo-project/neo-express#installation) and [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner).
+Install [boa-test-constructor](https://pypi.org/project/boa-test-constructor/) with pip. We use this extension to run an isolated
+test environment for smart contracts with a neo-go node. When installing boa-test-constructor, [neo-mamba](https://dojo.coz.io/neo3/mamba/index.html)
+will be installed too.
 
 ### Testing
 
-Before writing your tests, make sure you have a Neo-Express network for local tests.
-If you do not yet have a local network, open a terminal and run `neoxp create`.
-Please refer to [Neo-Express documentation](https://github.com/neo-project/neo-express/blob/master/docs/command-reference.md#neoxp-create)
-for more details of how to configure your local network. 
+Create a Python Script, import the `SmartContractTestCase` class, and create a test class that inherits it. To set up
+the test environment, you'll need to override the `setUpClass` method from `SmartContractTestCase`. This method is 
+synchronous, so if you need to set up asynchronous tasks, you can create another async method and use it int the 
+`asyncio.run` method from `asyncio`. Common operations would be: creating accounts, deploying the smart contract, 
+selecting your "main" smart contract, and transferring GAS to the new accounts.
 
-Create a Python Script, import the NeoTestRunner class, and define a function to test your smart contract. In this
-function you'll need a NeoTestRunner object, which takes the path of your Neo-Express network configuration file as an
-argument to set up the test environment.
+Then, create functions to test the expected behavior of your smart contract. To invoke or test invoke your smart 
+contract, use the `call` method from `SmartContractTestCase`. The two positional parameters are the name of the method 
+you want to invoke and a list of its arguments. The keyword parameters are the return type, a list of signing accounts,
+a list of signers, and the smart contract you want to invoke. If you get an error when calling a smart contract, then an
+error will be raised.
 
-You'll have to call the method `call_contract()` to interact with your smart contract. Its parameters are the path of
-the compiled smart contract, the smart contract's method, and the arguments if necessary. 
-This call doesn't return the result directly, but includes it in a queue of invocations. To execute all the invocations
-set up, call the method `execute()`. Then assert the result of your invoke to see if it's correct.
-
-Note that `invoke.result` won't be set if the execution fails, so you should also assert if `runner.vm_state` is valid 
-for your test case.
+To persist an invocation, use the `signing_accounts` parameter to pass a list of signing accounts when calling the 
+smart contract. If you don't pass it, then it will always be a test invoke. The `signers` parameter can be used 
+alongside the `signing_accounts` if you want to change the witness scope of the invocation, or by itself if you want to
+test invoke but also define the signers of the transaction.
 
 Your Python Script should look something like this:
 
 ```python
+import asyncio
+from boaconstructor import SmartContractTestCase
+from neo3.core import types
+from neo3.wallet.account import Account
+from neo3.contracts.contract import CONTRACT_HASHES
 
-from boa3.sc.types import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
+GAS = CONTRACT_HASHES.GAS_TOKEN
 
+class SmartContractTest(SmartContractTestCase):
+    genesis: Account
+    user1: Account
+    
+    # if this variable is set, then this contract hash will be called whenever you don't use the `target_contract` parameter on the `call` method
+    contract_hash: types.UInt160
 
-def test_hello_world_main():
-    neoxp_config_file = '{path-to-neo-express-config-file}'
-    project_root_folder = '{path-to-project-root-folder}'
-    path = f'{project_root_folder}/boa3_test/examples/hello_world.nef'
-    runner = NeoTestRunner(neoxp_config_file)
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        # you can name the account whatever you want, but the password needs to be "123"
+        cls.user1 = cls.node.wallet.account_new("123", "alice")
+        cls.genesis = cls.node.wallet.account_get_by_label("committee")
 
-    invoke = runner.call_contract(path, 'main')
-    runner.execute()
-    assert runner.vm_state is VMState.HALT
-    assert invoke.result is None
+        asyncio.run(cls.asyncSetupClass())
+
+    @classmethod
+    async def asyncSetupClass(cls) -> None:
+        # this `transfer` method already uses the correct amount of decimals for the token
+        await cls.transfer(GAS, cls.genesis.script_hash, cls.user1.script_hash, 100)
+        
+        # the smart contract I'm deploying is hello_world_with_deploy.py from the "Neo Methods" https://dojo.coz.io/neo3/boa/getting-started.html#neo-methods 
+        cls.contract_hash = await cls.deploy("./smart_contract.nef", cls.genesis)
+
+    async def test_message(self):
+        expected = "Hello World"
+        result, _ = await self.call("get_message", return_type=str)
+        self.assertEqual(expected, result)
+
+        new_message = "New Message"
+        # since we want this change to persist, we need to pass the signing account
+        result, _ = await self.call("set_message", [new_message], return_type=None,
+                                    signing_accounts=[self.user1])
+        self.assertIsNone(result)
+
+        result, _ = await self.call("get_message", return_type=str)
+        self.assertEqual(new_message, result)
 ```
-
-Alternatively you can change the value of `env.NEO_EXPRESS_INSTANCE_DIRECTORY` to the path of your .neo-express 
-data file:
-
-```python
-
-from boa3.sc.types import VMState
-from boa3_test.test_drive.testrunner.neo_test_runner import NeoTestRunner
-from boa3.internal import env
-
-env.NEO_EXPRESS_INSTANCE_DIRECTORY = '{path-to-neo-express-config-file}'
-
-
-def test_hello_world_main():
-    root_folder = '{path-to-project-root-folder}'
-    path = f'{root_folder}/boa3_test/examples/hello_world.nef'
-    runner = NeoTestRunner()  # the default path to the Neo-Express is the one on env.NEO_EXPRESS_INSTANCE_DIRECTORY
-
-    invoke = runner.call_contract(path, 'main')
-    runner.execute()
-    assert runner.vm_state is VMState.HALT
-    assert invoke.result is None
-```
-
