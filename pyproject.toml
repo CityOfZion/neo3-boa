@@ -34,6 +34,7 @@ test = [
     'boa-test-constructor>=0.3.1',
 ]
 docs = [
+    'autodocsumm>=0.2.12',
     'myst-parser==1.0.0',
     'Sphinx==5.0.0',
     'sphinx-rtd-theme==1.2.1',

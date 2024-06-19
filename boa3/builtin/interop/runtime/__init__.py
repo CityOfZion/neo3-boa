@@ -24,16 +24,15 @@ __all__ = [
 from collections.abc import Sequence
 from typing import Any
 
-from deprecation import deprecated
-
 from boa3.builtin.interop.blockchain import Transaction
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
 from boa3.builtin.type import ECPoint, UInt160
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def check_witness(hash_or_pubkey: UInt160 | ECPoint) -> bool:
     """
     Verifies that the transactions or block of the calling contract has validated the required script hash.
@@ -45,14 +44,14 @@ def check_witness(hash_or_pubkey: UInt160 | ECPoint) -> bool:
     False
 
     :param hash_or_pubkey: script hash or public key to validate
-    :type hash_or_pubkey: UInt160 or ECPoint
+    :type hash_or_pubkey: boa3.builtin.type.UInt160 or boa3.builtin.type.ECPoint
     :return: a boolean value that represents whether the script hash was verified
     :rtype: bool
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def notify(state: Any, notification_name: str = None):
     """
     Notifies the client from the executing smart contract.
@@ -73,7 +72,7 @@ def notify(state: Any, notification_name: str = None):
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def log(message: str):
     """
     Show log messages to the client from the executing smart contract.
@@ -87,7 +86,7 @@ def log(message: str):
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def get_trigger() -> TriggerType:
     """
     Return the smart contract trigger type.
@@ -96,12 +95,12 @@ def get_trigger() -> TriggerType:
     TriggerType.APPLICATION
 
     :return: a value that represents the contract trigger type
-    :rtype: TriggerType
+    :rtype: boa3.builtin.interop.runtime.triggertype.TriggerType
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def get_notifications(script_hash: UInt160 = UInt160()) -> list[Notification]:
     """
     This method gets current invocation notifications from specific 'script_hash'.
@@ -128,14 +127,14 @@ def get_notifications(script_hash: UInt160 = UInt160()) -> list[Notification]:
 
     :param script_hash: must have 20 bytes, but if it's all zero 0000...0000 it refers to all existing notifications
         (like a * wildcard)
-    :type script_hash: UInt160
+    :type script_hash: boa3.builtin.type.UInt160
     :return: It will return an array of all matched notifications
-    :rtype: list[Notification]
+    :rtype: list[boa3.builtin.interop.runtime.notification.Notification]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def get_network() -> int:
     """
     Gets the magic number of the current network.
@@ -149,7 +148,7 @@ def get_network() -> int:
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def burn_gas(gas: int):
     """
     Burns GAS to benefit the NEO ecosystem.
@@ -165,7 +164,7 @@ def burn_gas(gas: int):
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def get_random() -> int:
     """
     Gets the next random number.
@@ -185,7 +184,7 @@ def get_random() -> int:
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.runtime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.runtime` instead')
 def load_script(script: bytes, args: Sequence = (), flags: CallFlags = CallFlags.NONE) -> Any:
     """
     Loads a script at runtime.

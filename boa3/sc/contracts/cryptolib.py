@@ -97,11 +97,11 @@ class CryptoLib:
         :param message: the encrypted message
         :type message: bytes
         :param pubkey: the public key that might have created the item
-        :type pubkey: ECPoint
+        :type pubkey: boa3.sc.types.ECPoint
         :param signature: the signature of the item
         :type signature: bytes
         :param curve: the curve that will be used by the ecdsa
-        :type curve: NamedCurveHash
+        :type curve: boa3.sc.type.NamedCurveHash
         :return: a boolean value that represents whether the signature is valid
         :rtype: bool
         """

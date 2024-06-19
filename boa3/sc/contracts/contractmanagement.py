@@ -59,7 +59,7 @@ class ContractManagement:
         :param script_hash: a smart contract hash
         :type script_hash: boa3.sc.types.UInt160
         :return: a contract
-        :rtype: Contract
+        :rtype: boa3.sc.type.Contract
 
         :raise Exception: raised if hash length isn't 20 bytes.
         """
@@ -83,7 +83,7 @@ class ContractManagement:
         False
 
         :param hash: The hash of the deployed contract
-        :type hash: UInt160
+        :type hash: boa3.sc.types.UInt160
         :param method: The name of the method
         :type method: str
         :param parameter_count: The number of parameters
@@ -126,7 +126,7 @@ class ContractManagement:
         :type data: Any
 
         :return: the contract that was created
-        :rtype: Contract
+        :rtype: boa3.sc.type.Contract
 
         :raise Exception: raised if the nef or the manifest are not a valid smart contract.
         """

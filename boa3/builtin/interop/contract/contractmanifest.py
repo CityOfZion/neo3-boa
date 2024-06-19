@@ -10,13 +10,12 @@ __all__ = [
     'ContractParameterType',
 ]
 
-from deprecation import deprecated
-
 from boa3.builtin.type import ECPoint, UInt160
+from boa3.internal.deprecation import deprecated
 from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractManifest:
     """
     Represents the manifest of a smart contract.
@@ -59,7 +58,7 @@ class ContractManifest:
         self.extras: str = ''
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractPermission:
     """
     Represents a permission of a contract. It describes which contracts may be invoked and which methods are called.
@@ -91,15 +90,15 @@ class ContractPermission:
         self.methods: list[str] | None = None
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractPermissionDescriptor:
     """
     Indicates which contracts are authorized to be called.
 
     :ivar hash: The hash of the contract.
-    :vartype hash: UInt160 or None
+    :vartype hash: boa3.builtin.type.UInt160 or None
     :ivar group: The group of the contracts.
-    :vartype group: ECPoint or None
+    :vartype group: boa3.builtin.type.ECPoint or None
     """
 
     def __init__(self):
@@ -107,7 +106,7 @@ class ContractPermissionDescriptor:
         self.group: ECPoint | None = None
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractGroup:
     """
     Represents a set of mutually trusted contracts.
@@ -119,7 +118,7 @@ class ContractGroup:
     the contract is indeed included in the group.
 
     :ivar pubkey: The public key of the group.
-    :vartype pubkey: ECPoint
+    :vartype pubkey: boa3.builtin.type.ECPoint
     :ivar signature: The signature of the contract hash which can be verified by `pubkey`.
     :vartype signature: bytes
     """
@@ -129,7 +128,7 @@ class ContractGroup:
         self.signature: bytes = b''
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractAbi:
     """
     Represents the ABI of a smart contract.
@@ -148,7 +147,7 @@ class ContractAbi:
         self.events: list[ContractEventDescriptor] = []
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractMethodDescriptor:
     """
     Represents a method in a smart contract ABI.
@@ -178,7 +177,7 @@ class ContractMethodDescriptor:
         self.safe: bool = False
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractEventDescriptor:
     """
     Represents an event in a smart contract ABI.
@@ -194,7 +193,7 @@ class ContractEventDescriptor:
         self.parameters: list[ContractParameterDefinition] = []
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.types instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class ContractParameterDefinition:
     """
     Represents a parameter of an event or method in ABI.

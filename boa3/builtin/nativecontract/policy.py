@@ -2,12 +2,11 @@ __all__ = [
     'Policy',
 ]
 
-from deprecation import deprecated
-
 from boa3.builtin.type import UInt160
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class Policy:
     """
     A class used to represent the Policy native contract.
@@ -67,7 +66,7 @@ class Policy:
         False
 
         :param account: the account to be checked
-        :type account: UInt160
+        :type account: boa3.builtin.type.UInt160
 
         :return: whether the account is blocked or not
         :rtype: bool

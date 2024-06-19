@@ -40,16 +40,15 @@ __all__ = [
 
 from typing import Any
 
-from deprecation import deprecated
-
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.interop.storage.findoptions import FindOptions
 from boa3.builtin.interop.storage.storagecontext import StorageContext
 from boa3.builtin.interop.storage.storagemap import StorageMap
 from boa3.builtin.type import UInt160, UInt256, ECPoint
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_context() -> StorageContext:
     """
     Gets current storage context.
@@ -58,12 +57,12 @@ def get_context() -> StorageContext:
     _InteropInterface
 
     :return: the current storage context
-    :rtype: StorageContext
+    :rtype: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     """
     Gets a value from the persistent store based on the given key.
@@ -78,14 +77,14 @@ def get(key: bytes, context: StorageContext = get_context()) -> bytes:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: bytes
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get(key: bytes, context: StorageContext = get_context()) -> tuple[bytes, bool]:
     """
     Gets a value from the persistent store based on the given key and returns whether the value is stored.
@@ -100,14 +99,14 @@ def try_get(key: bytes, context: StorageContext = get_context()) -> tuple[bytes,
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[bytes, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     """
     Gets a value as integer from the persistent store based on the given key.
@@ -123,14 +122,14 @@ def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: int
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_int(key: bytes, context: StorageContext = get_context()) -> tuple[int, bool]:
     """
     Gets a value as integer from the persistent store based on the given key and returns whether the value is stored.
@@ -145,14 +144,14 @@ def try_get_int(key: bytes, context: StorageContext = get_context()) -> tuple[in
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[int, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     """
     Gets a value as boolean from the persistent store based on the given key.
@@ -168,14 +167,14 @@ def get_bool(key: bytes, context: StorageContext = get_context()) -> bool:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: bool
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_bool(key: bytes, context: StorageContext = get_context()) -> tuple[bool, bool]:
     """
     Gets a value as boolean from the persistent store based on the given key and returns whether the value is stored.
@@ -190,14 +189,14 @@ def try_get_bool(key: bytes, context: StorageContext = get_context()) -> tuple[b
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[bool, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_str(key: bytes, context: StorageContext = get_context()) -> str:
     """
     Gets a value as string from the persistent store based on the given key.
@@ -213,14 +212,14 @@ def get_str(key: bytes, context: StorageContext = get_context()) -> str:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: str
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_str(key: bytes, context: StorageContext = get_context()) -> tuple[str, bool]:
     """
     Gets a value as string from the persistent store based on the given key and returns whether the value is stored.
@@ -235,14 +234,14 @@ def try_get_str(key: bytes, context: StorageContext = get_context()) -> tuple[st
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[str, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_list(key: bytes, context: StorageContext = get_context()) -> list:
     """
     Gets a value as list from the persistent store based on the given key.
@@ -258,14 +257,14 @@ def get_list(key: bytes, context: StorageContext = get_context()) -> list:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: list
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_list(key: bytes, context: StorageContext = get_context()) -> tuple[list, bool]:
     """
     Gets a value as list from the persistent store based on the given key and returns whether the value is stored.
@@ -280,14 +279,14 @@ def try_get_list(key: bytes, context: StorageContext = get_context()) -> tuple[l
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[list, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_dict(key: bytes, context: StorageContext = get_context()) -> dict:
     """
     Gets a value as dict from the persistent store based on the given key.
@@ -303,14 +302,14 @@ def get_dict(key: bytes, context: StorageContext = get_context()) -> dict:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: dict
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_dict(key: bytes, context: StorageContext = get_context()) -> tuple[dict, bool]:
     """
     Gets a value as dict from the persistent store based on the given key and returns whether the value is stored.
@@ -325,14 +324,14 @@ def try_get_dict(key: bytes, context: StorageContext = get_context()) -> tuple[d
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[dict, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_object(key: bytes, context: StorageContext = get_context()) -> Any:
     """
     Gets a value as object from the persistent store based on the given key.
@@ -350,14 +349,14 @@ def get_object(key: bytes, context: StorageContext = get_context()) -> Any:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
     :rtype: Any
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_object(key: bytes, context: StorageContext = get_context()) -> tuple[Any, bool]:
     """
     Gets a value as dict from the persistent store based on the given key and returns whether the value is stored.
@@ -373,14 +372,14 @@ def try_get_object(key: bytes, context: StorageContext = get_context()) -> tuple
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
     :rtype: tuple[Any, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     """
     Gets a value as UInt160 from the persistent store based on the given key.
@@ -396,14 +395,14 @@ def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
-    :rtype: UInt160
+    :rtype: boa3.builtin.type.UInt160
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_uint160(key: bytes, context: StorageContext = get_context()) -> tuple[UInt160, bool]:
     """
     Gets a value as UInt160 from the persistent store based on the given key and returns whether the value is stored.
@@ -418,14 +417,14 @@ def try_get_uint160(key: bytes, context: StorageContext = get_context()) -> tupl
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
-    :rtype: tuple[UInt160, bool]
+    :rtype: tuple[boa3.builtin.type.UInt160, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     """
     Gets a value as UInt256 from the persistent store based on the given key.
@@ -441,14 +440,14 @@ def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
-    :rtype: UInt256
+    :rtype: boa3.builtin.type.UInt256
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_uint256(key: bytes, context: StorageContext = get_context()) -> tuple[UInt256, bool]:
     """
     Gets a value as UInt256 from the persistent store based on the given key and returns whether the value is stored.
@@ -463,14 +462,14 @@ def try_get_uint256(key: bytes, context: StorageContext = get_context()) -> tupl
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
-    :rtype: tuple[UInt256, bool]
+    :rtype: tuple[boa3.builtin.type.UInt256, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     """
     Gets a value as ECPoint from the persistent store based on the given key.
@@ -486,14 +485,14 @@ def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context
-    :rtype: ECPoint
+    :rtype: boa3.builtin.type.ECPoint
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def try_get_ecpoint(key: bytes, context: StorageContext = get_context()) -> tuple[ECPoint, bool]:
     """
     Gets a value as ECPoint from the persistent store based on the given key and returns whether the value is stored.
@@ -508,14 +507,14 @@ def try_get_ecpoint(key: bytes, context: StorageContext = get_context()) -> tupl
     :param key: value identifier in the store
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
-    :rtype: tuple[ECPoint, bool]
+    :rtype: tuple[boa3.builtin.type.ECPoint, bool]
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def get_read_only_context() -> StorageContext:
     """
     Gets current read only storage context.
@@ -524,12 +523,12 @@ def get_read_only_context() -> StorageContext:
     _InteropInterface
 
     :return: the current read only storage context
-    :rtype: StorageContext
+    :rtype: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put(key: bytes, value: bytes, context: StorageContext = get_context()):
     """
     Inserts a given bytes value in the key-value format into the persistent storage.
@@ -542,12 +541,12 @@ def put(key: bytes, value: bytes, context: StorageContext = get_context()):
     :param value: value to be stored
     :type value: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_int(key: bytes, value: int, context: StorageContext = get_context()):
     """
     Inserts a given integer value in the key-value format into the persistent storage.
@@ -561,12 +560,12 @@ def put_int(key: bytes, value: int, context: StorageContext = get_context()):
     :param value: value to be stored
     :type value: int
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_bool(key: bytes, value: bool, context: StorageContext = get_context()):
     """
     Inserts a given boolean value in the key-value format into the persistent storage.
@@ -580,12 +579,12 @@ def put_bool(key: bytes, value: bool, context: StorageContext = get_context()):
     :param value: value to be stored
     :type value: bool
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_str(key: bytes, value: str, context: StorageContext = get_context()):
     """
     Inserts a given str value in the key-value format into the persistent storage.
@@ -599,12 +598,12 @@ def put_str(key: bytes, value: str, context: StorageContext = get_context()):
     :param value: value to be stored
     :type value: str
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_list(key: bytes, value: list, context: StorageContext = get_context()):
     """
     Inserts a given list value in the key-value format into the persistent storage.
@@ -618,12 +617,12 @@ def put_list(key: bytes, value: list, context: StorageContext = get_context()):
     :param value: value to be stored
     :type value: list
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_dict(key: bytes, value: dict, context: StorageContext = get_context()):
     """
     Inserts a given dict value in the key-value format into the persistent storage.
@@ -637,12 +636,12 @@ def put_dict(key: bytes, value: dict, context: StorageContext = get_context()):
     :param value: value to be stored
     :type value: dict
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_object(key: bytes, value: object, context: StorageContext = get_context()):
     """
     Inserts a given object value in the key-value format into the persistent storage.
@@ -657,12 +656,12 @@ def put_object(key: bytes, value: object, context: StorageContext = get_context(
     :param value: value to be stored
     :type value: dict
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_uint160(key: bytes, value: UInt160, context: StorageContext = get_context()):
     """
     Inserts a given UInt160 value in the key-value format into the persistent storage.
@@ -674,14 +673,14 @@ def put_uint160(key: bytes, value: UInt160, context: StorageContext = get_contex
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param value: value to be stored
-    :type value: UInt160
+    :type value: boa3.builtin.type.UInt160
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_uint256(key: bytes, value: UInt256, context: StorageContext = get_context()):
     """
     Inserts a given UInt256 value in the key-value format into the persistent storage.
@@ -693,14 +692,14 @@ def put_uint256(key: bytes, value: UInt256, context: StorageContext = get_contex
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param value: value to be stored
-    :type value: UInt256
+    :type value: boa3.builtin.type.UInt256
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def put_ecpoint(key: bytes, value: ECPoint, context: StorageContext = get_context()):
     """
     Inserts a given ECPoint value in the key-value format into the persistent storage.
@@ -712,14 +711,14 @@ def put_ecpoint(key: bytes, value: ECPoint, context: StorageContext = get_contex
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param value: value to be stored
-    :type value: ECPoint
+    :type value: boa3.builtin.type.ECPoint
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def delete(key: bytes, context: StorageContext = get_context()):
     """
     Removes a given key from the persistent storage if exists.
@@ -732,12 +731,12 @@ def delete(key: bytes, context: StorageContext = get_context()):
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.storage instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 def find(prefix: bytes,
          context: StorageContext = get_context(),
          options: FindOptions = FindOptions.NONE) -> Iterator:
@@ -758,10 +757,10 @@ def find(prefix: bytes,
     :param prefix: prefix to find the storage keys
     :type prefix: bytes
     :param context: storage context to be used
-    :type context: StorageContext
+    :type context: boa3.builtin.interop.storage.storagecontext.StorageContext
     :param options: the options of the search
-    :type options: FindOptions
+    :type options: boa3.builtin.interop.storage.findoptions.FindOptions.FindOptions
     :return: an iterator with the search results
-    :rtype: Iterator
+    :rtype: boa3.builtin.interop.iterator.Iterator
     """
     pass

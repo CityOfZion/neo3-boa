@@ -18,12 +18,12 @@ class Contract:
     :ivar update_counter: the number of times the contract was updated
     :vartype update_counter: int
     :ivar hash: the hash of the contract
-    :vartype hash: UInt160
+    :vartype hash: boa3.builtin.type.UInt160
     :ivar nef: the serialized Neo Executable Format (NEF) object holding of the smart contract code and compiler
         information
     :vartype nef: bytes
     :ivar manifest: the manifest of the contract
-    :vartype manifest: ContractManifest
+    :vartype manifest: boa3.builtin.interop.contract.ContractManifest
     """
 
     def __init__(self):

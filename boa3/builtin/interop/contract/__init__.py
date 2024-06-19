@@ -17,15 +17,14 @@ __all__ = [
 from collections.abc import Sequence
 from typing import Any
 
-from deprecation import deprecated
-
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.contract.contract import Contract
 from boa3.builtin.interop.contract.contractmanifest import ContractManifest
 from boa3.builtin.type import ECPoint, UInt160
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_flags: CallFlags = CallFlags.ALL) -> Any:
     """
     Calls a smart contract given the method and the arguments. Since the return is type Any, you'll probably need to
@@ -35,13 +34,13 @@ def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_f
     100
 
     :param script_hash: the target smart contract's script hash
-    :type script_hash: UInt160
+    :type script_hash: boa3.builtin.type.UInt160
     :param method: the name of the method to be executed
     :type method: str
     :param args: the specified method's arguments
     :type args: Sequence[Any]
     :param call_flags: the CallFlags to be used to call the contract
-    :type call_flags: CallFlags
+    :type call_flags: boa3.builtin.interop.contract.callflagstype.CallFlags
 
     :return: the result of the specified method
     :rtype: Any
@@ -52,7 +51,7 @@ def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_f
     pass
 
 
-@deprecated(details='This module is deprecated. Use ContractManagement from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`ContractManagement` from :mod:`boa3.sc.contracts` instead')
 def create_contract(nef_file: bytes, manifest: bytes, data: Any = None) -> Contract:
     """
     Creates a smart contract given the script and the manifest.
@@ -83,14 +82,14 @@ def create_contract(nef_file: bytes, manifest: bytes, data: Any = None) -> Contr
     :type data: Any
 
     :return: the contract that was created
-    :rtype: Contract
+    :rtype: boa3.builtin.interop.contract.contract.Contract
 
     :raise Exception: raised if the nef or the manifest are not a valid smart contract.
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use ContractManagement from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`ContractManagement` from :mod:`boa3.sc.contracts` instead')
 def update_contract(nef_file: bytes, manifest: bytes, data: Any = None):
     """
     Updates the executing smart contract given the script and the manifest.
@@ -112,7 +111,7 @@ def update_contract(nef_file: bytes, manifest: bytes, data: Any = None):
     pass
 
 
-@deprecated(details='This module is deprecated. Use ContractManagement from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`ContractManagement` from :mod:`boa3.sc.contracts` instead')
 def destroy_contract():
     """
     Destroy the executing smart contract.
@@ -124,7 +123,7 @@ def destroy_contract():
     pass
 
 
-@deprecated(details='This module is deprecated. Use ContractManagement from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`ContractManagement` from :mod:`boa3.sc.contracts` instead')
 def get_minimum_deployment_fee() -> int:
     """
     Gets the minimum fee of contract deployment.
@@ -137,7 +136,7 @@ def get_minimum_deployment_fee() -> int:
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def get_call_flags() -> CallFlags:
     """
     Gets the CallFlags in the current context.
@@ -148,7 +147,7 @@ def get_call_flags() -> CallFlags:
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def create_standard_account(pub_key: ECPoint) -> UInt160:
     """
     Calculates the script hash from a public key.
@@ -157,15 +156,15 @@ def create_standard_account(pub_key: ECPoint) -> UInt160:
     b'\\r\\xa9g\\xa4\\x00C+\\xf2\\x7f\\x8e\\x8e\\xb4o\\xe8\\xace\\x9e\\xcc\\xde\\x04'
 
     :param pub_key: the given public key
-    :type pub_key: ECPoint
+    :type pub_key: boa3.builtin.type.ECPoint
 
     :return: the corresponding script hash of the public key
-    :rtype: UInt160
+    :rtype: boa3.builtin.type.UInt160
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def create_multisig_account(m: int, pub_keys: list[ECPoint]) -> UInt160:
     """
     Calculates corresponding multisig account script hash for the given public keys.
@@ -176,10 +175,10 @@ def create_multisig_account(m: int, pub_keys: list[ECPoint]) -> UInt160:
     :param m: the minimum number of correct signatures need to be provided in order for the verification to pass.
     :type m: int
     :param pub_keys: the public keys of the account
-    :type pub_keys: list[ECPoint]
+    :type pub_keys: list[boa3.builtin.type.ECPoint]
 
     :return: the hash of the corresponding account
-    :rtype: UInt160
+    :rtype: boa3.builtin.type.UInt160
     """
     pass
 

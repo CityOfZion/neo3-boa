@@ -6,13 +6,12 @@ __all__ = [
     'NeoMetadata',
 ]
 
-from deprecation import deprecated
-
 from boa3.builtin.type import Event
+from boa3.internal.deprecation import deprecated
 from boa3.sc.compiletime import NeoMetadata
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def CreateNewEvent(arguments: list[tuple[str, type]] = [], event_name: str = '') -> Event:
     """
     Creates a new Event.
@@ -33,12 +32,12 @@ def CreateNewEvent(arguments: list[tuple[str, type]] = [], event_name: str = '')
     :param event_name: custom name of the event. It's filled with the variable name if not specified
     :type event_name: str
     :return: the new event
-    :rtype: Event
+    :rtype: boa3.builtin.type.Event
     """
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.compiletime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.compiletime` instead')
 def public(name: str = None, safe: bool = False, *args, **kwargs):
     """
     This decorator identifies which methods should be included in the abi file. Adding this decorator to a function
@@ -88,7 +87,7 @@ def public(name: str = None, safe: bool = False, *args, **kwargs):
     return decorator_wrapper
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.compiletime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.compiletime` instead')
 def contract(script_hash: str | bytes):
     """
     This decorator identifies a class that should be interpreted as an interface to an existing contract.
@@ -129,7 +128,7 @@ def contract(script_hash: str | bytes):
     return decorator_wrapper
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.compiletime instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.compiletime` instead')
 def display_name(name: str):
     """
     This decorator identifies which methods from a contract interface should have a different identifier from the one

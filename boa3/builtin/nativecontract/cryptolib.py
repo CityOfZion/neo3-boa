@@ -6,13 +6,12 @@ __all__ = [
 
 from typing import Any
 
-from deprecation import deprecated
-
 from boa3.builtin.interop.crypto import NamedCurveHash, IBls12381
 from boa3.builtin.type import ECPoint, UInt160
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class CryptoLib:
     """
     A class used to represent the CryptoLib native contract.
@@ -88,11 +87,11 @@ class CryptoLib:
         :param message: the encrypted message
         :type message: bytes
         :param pubkey: the public key that might have created the item
-        :type pubkey: ECPoint
+        :type pubkey: boa3.builtin.type.ECPoint
         :param signature: the signature of the item
         :type signature: bytes
         :param curve: the curve that will be used by the ecdsa
-        :type curve: NamedCurveHash
+        :type curve: boa3.builtin.interop.crypto.namedcurveNamedCurveHash
         :return: a boolean value that represents whether the signature is valid
         :rtype: bool
         """
