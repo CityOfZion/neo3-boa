@@ -115,6 +115,19 @@ def set_message(new_message: str):  # now this method will overwrite a new strin
     storage.put_str(b"second script", new_message)
 ```
 
+### How to make a Token smart contract
+For a smart contract to be a fungible token on the Neo blockchain, it needs to adhere to the [NEP-17](https://docs.neo.org/docs/en-us/develop/write/nep17.html) standard, which requires the implementation of a few specific methods:
+- `symbol` - Returns the symbol of the token.
+- `decimals` - Returns the number of decimals used by the token.
+- `totalSupply` - Returns the total supply of the token.
+- `balanceOf` - Returns the balance of the specified account.
+- `transfer` - Transfers tokens from one account to another.
+
+And must also implement and trigger a `Transfer` event whenever tokens are transferred, minted or burned. 
+
+Here's a [simple example](https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/examples/simple_nep17.py) of a Token contract following the NEP-17 standard.
+>Note: The NEP-17 standard also has requirements on how each method must be implemented. Be sure to check the [full documentation](https://docs.neo.org/docs/en-us/develop/write/nep17.html) on the NEP-17 standard to ensure the implementation is correct.
+
 ## Compiling your Smart Contract
 
 ### Using CLI
