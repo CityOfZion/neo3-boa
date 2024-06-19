@@ -125,8 +125,33 @@ For a smart contract to be a fungible token on the Neo blockchain, it needs to a
 
 And must also implement and trigger a `Transfer` event whenever tokens are transferred, minted or burned. 
 
-Here's a [simple example](https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/examples/simple_nep17.py) of a Token contract following the NEP-17 standard.
+Here's a [simple example](../../boa3_test/examples/simple_nep17.py) of a Token contract following the NEP-17 standard.
 >Note: The NEP-17 standard also has requirements on how each method must be implemented. Be sure to check the [full documentation](https://docs.neo.org/docs/en-us/develop/write/nep17.html) on the NEP-17 standard to ensure the implementation is correct.
+
+### How to make a Non-Fungible (NFT) Token smart contract
+Just like the fungible token, for a contract to be a non-fungible token (NFT) in the Neo blockchain, it needs to adhere to the [NEP-11](https://docs.neo.org/docs/en-us/develop/write/nep11.html) standard by implementing a few methods and events:
+- `symbol` - Returns the symbol of the token.
+- `decimals` - Returns the number of decimals used by the token.
+- `totalSupply` - Returns the total supply of the token.
+- `tokensOf` = Returns the IDs of all NFTs owned by the specified account.
+
+In addition, an NFT contract may be either *non-divisible* or *divisible*. The remaining methods have the same name, but different **signatures** for each, and different returns:
+- For **non-divisible** NFT contracts:
+  - `balanceOf` - Returns the total amount of NFTs of the specified account.
+  - `transfer` - Transfers tokens to a specified account.
+  - `ownerOf` - Returns the address of the owner of a specified NFT ID.
+
+- For **divisible** NFT contracts:
+  - `balanceOf` - Returns the amount of NFTs of the specified NFT ID for the specified account.
+  - `transfer` - Transfers tokens to from a specified account to another.
+  - `ownerOf` - Returns the addresses of all co-owners of a specified NFT ID.
+
+In both cases, the contract must also implement and trigger a `Transfer` event whenever tokens are transferred. 
+
+>Note: Although many methods and events have the same name as the NEP-17 standard, their implementation and parameters may differ.
+
+Here's a [full example](../../boa3_test/examples/nep11_non_divisible.py) of a non-divisible token contract following the NEP-11 standard.
+>Note: The example above is rather complete and contains more than just the basic implementation of a NEP-11 contract. Once again, be sure to check the [full documentation](https://docs.neo.org/docs/en-us/develop/write/nep11.html) on the NEP-11 standard to ensure the implementation is correct.
 
 ## Compiling your Smart Contract
 
@@ -151,8 +176,8 @@ Boa3.compile_and_save('path/to/your/file.py')
 Check out [Neo3-boa tutorials](https://developers.neo.org/tutorials/tags/neo-3-boa) on [Neo Developer](https://developers.neo.org/).
 
 For an extensive collection of examples:
-- [Smart contract examples](https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/examples)
-- [Features tests](https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/test_sc)
+- [Smart contract examples](../../boa3_test/examples)
+- [Features tests](../../boa3_test/test_sc)
 
 
 ## What's next
