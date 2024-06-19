@@ -91,11 +91,11 @@ In addition, Neo3-Boa has an interface for contracts that adhere to the NEP-17 s
 # calling_nep17_contract.py
 from boa3.sc.compiletime import public
 from boa3.sc.contracts import ContractManagement
-from boa3.sc.types import Nep17Contract
+from boa3.sc.types import Nep17Contract, UInt160
 
 
 @public
-def calling_other_contract(my_contract_hash: str) -> str:
+def calling_other_contract(my_contract_hash: UInt160) -> str:
     nep_17_contract: Nep17Contract = ContractManagement.get_contract(my_contract_hash)
     return nep_17_contract.symbol()
 ```
