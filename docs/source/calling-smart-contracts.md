@@ -85,6 +85,22 @@ def calling_other_contract() -> str:
     return neo_symbol
 ```
 
+### Calling NEP-17 Contracts
+In addition, Neo3-Boa has an interface for contracts that adhere to the NEP-17 standard.
+```python
+# calling_nep17_contract.py
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import ContractManagement
+from boa3.sc.types import Nep17Contract, UInt160
+
+
+@public
+def calling_other_contract(my_contract_hash: UInt160) -> str:
+    nep_17_contract: Nep17Contract = ContractManagement.get_contract(my_contract_hash)
+    return nep_17_contract.symbol()
+```
+> Note: The compiler cannot validate if the provided contract hash corresponds to a NEP-17 contract. If the corresponding smart contract does not implement a required NEP-17 method and such method is called, it will cause a runtime error.
+
 ### Automate with CPM
 Instead of manually writing the smart contract interface, you can use [CPM](https://github.com/CityOfZion/cpm/tree/master#readme) 
 to generate it automatically. After installing Neo3-Boa, you can install CPM by typing `install_cpm` on CLI (without the 
