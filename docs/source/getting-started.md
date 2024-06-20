@@ -153,6 +153,65 @@ In both cases, the contract must also implement and trigger a `Transfer` event w
 Here's a [full example](../../boa3_test/examples/nep11_non_divisible.py) of a non-divisible token contract following the NEP-11 standard.
 >Note: The example above is rather complete and contains more than just the basic implementation of a NEP-11 contract. Once again, be sure to check the [full documentation](https://docs.neo.org/docs/en-us/develop/write/nep11.html) on the NEP-11 standard to ensure the implementation is correct.
 
+### How to receive tokens
+Any smart contract can receive tokens. To do so, the smart contract must implement a method to be used as callback by the token contract:
+- If the token being received is a fungible token, then the token contract adheres to the NEP-17 standard
+  - In this case, the method `onNEP17Payment` must be implemented
+- If the token being received is a non-fungible token, then the token contract adheres to the NEP-11 standard
+  - In this case, the method `onNEP11Payment` must be implemented
+>Note: A contract **does not** need to adhere to the NEP-11 or NEP-17 standards to **receive** tokens, fungible or not. It needs only to implement the methods used as callbacks for each type of token it wishes to receive.
+
+We can then modify our `Hello World` example to be able to receive fungible and non-fungible tokens:
+```python
+# hello_world_receiving_tokens.py
+from typing import Any
+
+from boa3.sc import runtime, storage
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import NeoToken
+from boa3.sc.types import UInt160
+from boa3.sc.utils import abort
+
+@public
+def _deploy(data: Any, update: bool):
+    storage.put_str(b"second script",
+                    "Hello World")
+
+
+@public
+def get_message() -> str:
+    return storage.get_str(b"second script")
+
+
+@public
+def set_message(new_message: str):
+    storage.put_str(b"second script", new_message)
+
+
+# This method MUST be in camel case, either directly or renamed with the decorator parameter `name`
+# This callback is called every time a fungible token is transferred to this contract
+@public(name="onNEP17Payment")
+def on_nep17_payment(from_address: UInt160, amount: int, data: Any):
+    if runtime.calling_script_hash == NeoToken.hash: #  Check if the token contract calling this callback is the Neo token
+        storage.put_bool(b"has_received_neo", True)
+    else:
+        # We MUST abort the method if this contract is not accepting any other type of token
+        abort()
+
+
+# This method MUST be in camel case, either directly or renamed with the decorator parameter `name`
+# This callback is called every time a non-fungible token is transferred to this contract
+@public(name="onNEP11Payment")
+def on_nep11_payment(from_address: UInt160, amount: int, token_id: bytes, data: Any):
+    #  Check if the NFT contract calling this callback is "my NFT" contract hash
+    if runtime.calling_script_hash == UInt160(b"my_nft_contract_hash"):
+        storage.put_bool(b"has_received_nft", True)
+    else:
+        # We MUST abort the method if this contract is not accepting any other type of NFT    
+        abort()
+
+```
+
 ## Compiling your Smart Contract
 
 ### Using CLI
