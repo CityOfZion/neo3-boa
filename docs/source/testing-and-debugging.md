@@ -140,30 +140,47 @@ of the transaction.
 
 If you want to test events, you'll get all the notifications that were emitted on the transaction from the second return
 value of the `call` method. The resulting stack of every notification is a list of stack items, so it's best you unwrap
-them using [neo-mamba unwrapping methods](https://dojo.coz.io/neo3/mamba/api/neo3/api/helpers/unwrap.html). In this
-example, we are testing the "Transfer" event, so we can use the `Nep17TransferEvent` class from `boaconstructor`. If you
-plan to test other events, it's best you also create a class or method that will help you unwrap the stack results. 
-Check out [`Nep17TransferEvent`](https://github.com/CityOfZion/boa-test-constructor/blob/20a45755767b3d919bf7a594cfff6bff78cb72ac/boaconstructor/__init__.py#L302-L314)
-implementation for reference.
+them using [neo-mamba unwrapping methods](https://dojo.coz.io/neo3/mamba/api/neo3/api/helpers/unwrap.html). In this 
+example, we are testing the "Transfer" event from the GAS token smart contract, so we can create a `Nep17TransferEvent` 
+class that is compliant with the event being emitted. If you plan to test other events, it's best you also create a 
+class or method that will help you unwrap the stack results.
 
 ```python
     # inside the HelloWorldWithDeployTest class
     async def test_gas_transfer_event(self):
-        # the amount of GAS tokens to transfer, since we will be invoking the transfer method, it's necessary to multiply by the decimals 
-        amount = 1 * 10**8
+        from dataclasses import dataclass
+        from neo3.api import noderpc, StackItemType
+
+        # the dataclass decorator will automatically generate the __init__ method among other things
+        @dataclass
+        class Nep17TransferEvent:
+            # the Transfer event has 3 parameters: from, to, and amount
+            from_script_hash: types.UInt160 | None
+            to_script_hash: types.UInt160 | None
+            amount: int
+
+            @classmethod
+            def from_notification(cls, n: noderpc.Notification):
+                stack = n.state.as_list()
+                from_script_hash = stack[0].as_uint160() if not stack[0].type == StackItemType.ANY else None
+                to_script_hash = stack[1].as_uint160() if not stack[1].type == StackItemType.ANY else None
+                amount = stack[2].as_int()
+                return cls(from_script_hash, to_script_hash, amount)
+
+        # the amount of GAS tokens to transfer, since we will be invoking the transfer method, it's necessary to multiply by the decimals
+        amount_gas = 1 * 10 ** 8
         # calling the transfer method to emit a 'Transfer' event
         result, notifications = await self.call(
-            "transfer", [self.user1.script_hash, self.genesis.script_hash, amount, None],
+            "transfer", [self.user1.script_hash, self.genesis.script_hash, amount_gas, None],
             return_type=bool, target_contract=GAS, signing_accounts=[self.user1]
         )
         self.assertEqual(True, result)
         self.assertEqual(1, len(notifications))
         self.assertEqual("Transfer", notifications[0].event_name)
 
-        from boaconstructor import Nep17TransferEvent
         # we can use the Nep17TransferEvent class to unwrap the stack items
         transfer_event = Nep17TransferEvent.from_notification(notifications[0])
-        self.assertEqual(self.user1.script_hash, transfer_event.source)
-        self.assertEqual(self.genesis.script_hash, transfer_event.destination)
-        self.assertEqual(amount, transfer_event.amount)
+        self.assertEqual(self.user1.script_hash, transfer_event.from_script_hash)
+        self.assertEqual(self.genesis.script_hash, transfer_event.to_script_hash)
+        self.assertEqual(amount_gas, transfer_event.amount)
 ```
