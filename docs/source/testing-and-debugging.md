@@ -184,3 +184,42 @@ class or method that will help you unwrap the stack results.
         self.assertEqual(self.genesis.script_hash, transfer_event.to_script_hash)
         self.assertEqual(amount_gas, transfer_event.amount)
 ```
+
+#### Accessing the Storage
+
+To get the key-value pairs stored in the smart contract's storage, you can use the `get_storage` method from 
+`SmartContractTestCase`. Use it with the prefix of the keys you want to access, or without a prefix to get all key-value
+pairs, and it will return a `dict[bytes, bytes]`. If you want to remove the prefix from the result you can use the 
+`remove_prefix` parameter. 
+
+If you want to convert those bytes values into another type, you can also pass a [`PostProcessor`](https://github.com/CityOfZion/boa-test-constructor/blob/20a45755767b3d919bf7a594cfff6bff78cb72ac/boaconstructor/storage.py#L13-L15)
+as argument to process the keys and/or values before adding it to the dictionary. This `PostProcessor` needs to be an
+object that when called will receive at least a `bytes` argument, in this case the key or value from the storage, and 
+return this argument processed into another value. It can also receive other arguments that will help this process, but
+this is optional, and currently it's not being used internally. For simpler cases, you can use the methods from
+`boaconstructor.storage` that will process the most common types in Neo.
+
+```python
+    # inside the HelloWorldWithDeployTest class
+    async def test_smart_contract_storage(self):
+        from typing import cast
+
+        # this function is implementing the PostProcessor pattern, and it's used to convert bytes to a string
+        def bytes_to_str(data: bytes, *args) -> str:
+            return data.decode("utf-8")
+
+        # the return from the get_storage method is a `dict[bytes, bytes]`, but we are passing the bytes_to_str function
+        # to convert the values to strings, so we should cast the return to `dict[bytes, str]` to avoid type warnings
+        smart_contract_storage = cast(
+            dict[bytes, str],
+            await self.get_storage(
+                # since we are not passing the prefix, it will get all key-value pairs from the smart contract storage
+                values_post_processor=bytes_to_str
+            )
+        )
+
+        # only the "Hello World" message is in this smart contract storage
+        self.assertEqual(1, len(smart_contract_storage))
+        self.assertIn(b"second script", smart_contract_storage)
+        self.assertEqual("Hello World", smart_contract_storage[b"second script"])
+```
