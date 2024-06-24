@@ -37,7 +37,7 @@ def check_witness(hash_or_pubkey: UInt160 | ECPoint) -> bool:
     False
 
     :param hash_or_pubkey: script hash or public key to validate
-    :type hash_or_pubkey: UInt160 or ECPoint
+    :type hash_or_pubkey: boa3.sc.types.UInt160 or boa3.sc.types.ECPoint
     :return: a boolean value that represents whether the script hash was verified
     :rtype: bool
     """
@@ -85,7 +85,7 @@ def get_trigger() -> TriggerType:
     TriggerType.APPLICATION
 
     :return: a value that represents the contract trigger type
-    :rtype: TriggerType
+    :rtype: boa3.sc.types.TriggerType
     """
     pass
 
@@ -116,7 +116,7 @@ def get_notifications(script_hash: UInt160 = UInt160()) -> list[Notification]:
 
     :param script_hash: must have 20 bytes, but if it's all zero 0000...0000 it refers to all existing notifications
         (like a * wildcard)
-    :type script_hash: UInt160
+    :type script_hash: boa3.sc.types.UInt160
     :return: It will return an array of all matched notifications
     :rtype: list[Notification]
     """

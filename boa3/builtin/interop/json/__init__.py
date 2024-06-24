@@ -5,10 +5,10 @@ __all__ = [
 
 from typing import Any
 
-from deprecation import deprecated
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def json_serialize(item: Any) -> str:
     """
     Serializes an item into a json.
@@ -27,7 +27,7 @@ def json_serialize(item: Any) -> str:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def json_deserialize(json: str) -> Any:
     """
     Deserializes a json into some valid type.

@@ -378,7 +378,7 @@ def get_uint160(key: bytes, context: StorageContext = get_context()) -> UInt160:
     :param context: storage context to be used
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
-    :rtype: UInt160
+    :rtype: boa3.sc.types.UInt160
     """
     pass
 
@@ -399,7 +399,7 @@ def try_get_uint160(key: bytes, context: StorageContext = get_context()) -> tupl
     :param context: storage context to be used
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
-    :rtype: tuple[UInt160, bool]
+    :rtype: tuple[boa3.sc.types.UInt160, bool]
     """
     pass
 
@@ -421,7 +421,7 @@ def get_uint256(key: bytes, context: StorageContext = get_context()) -> UInt256:
     :param context: storage context to be used
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
-    :rtype: UInt256
+    :rtype: boa3.sc.types.UInt256
     """
     pass
 
@@ -442,7 +442,7 @@ def try_get_uint256(key: bytes, context: StorageContext = get_context()) -> tupl
     :param context: storage context to be used
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
-    :rtype: tuple[UInt256, bool]
+    :rtype: tuple[boa3.sc.types.UInt256, bool]
     """
     pass
 
@@ -464,7 +464,7 @@ def get_ecpoint(key: bytes, context: StorageContext = get_context()) -> ECPoint:
     :param context: storage context to be used
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context
-    :rtype: ECPoint
+    :rtype: boa3.sc.types.ECPoint
     """
     pass
 
@@ -485,7 +485,7 @@ def try_get_ecpoint(key: bytes, context: StorageContext = get_context()) -> tupl
     :param context: storage context to be used
     :type context: StorageContext
     :return: the value corresponding to given key for current storage context and whether it was actually stored
-    :rtype: tuple[ECPoint, bool]
+    :rtype: tuple[boa3.sc.types.ECPoint, bool]
     """
     pass
 
@@ -640,7 +640,7 @@ def put_uint160(key: bytes, value: UInt160, context: StorageContext = get_contex
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param value: value to be stored
-    :type value: UInt160
+    :type value: boa3.sc.types.UInt160
     :param context: storage context to be used
     :type context: StorageContext
     """
@@ -658,7 +658,7 @@ def put_uint256(key: bytes, value: UInt256, context: StorageContext = get_contex
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param value: value to be stored
-    :type value: UInt256
+    :type value: boa3.sc.types.UInt256
     :param context: storage context to be used
     :type context: StorageContext
     """
@@ -676,7 +676,7 @@ def put_ecpoint(key: bytes, value: ECPoint, context: StorageContext = get_contex
     :param key: the identifier in the store for the new value
     :type key: bytes
     :param value: value to be stored
-    :type value: ECPoint
+    :type value: boa3.sc.types.ECPoint
     :param context: storage context to be used
     :type context: StorageContext
     """
@@ -722,7 +722,7 @@ def find(prefix: bytes,
     :param context: storage context to be used
     :type context: StorageContext
     :param options: the options of the search
-    :type options: FindOptions
+    :type options: boa3.sc.types.FindOptions
     :return: an iterator with the search results
     :rtype: Iterator
     """

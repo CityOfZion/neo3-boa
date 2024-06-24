@@ -24,11 +24,11 @@ class RoleManagement:
         []
 
         :param role: the type of the role
-        :type role: Role
+        :type role: boa3.sc.type.Role
         :param index: the index of the block to be queried
         :type index: int
 
         :return: the public keys of the nodes
-        :rtype: ECPoint
+        :rtype: boa3.sc.types.ECPoint
         """
         pass

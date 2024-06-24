@@ -78,7 +78,7 @@ class PolicyContract:
         False
 
         :param account: the account to be checked
-        :type account: UInt160
+        :type account: boa3.sc.types.UInt160
 
         :return: whether the account is blocked or not
         :rtype: bool

@@ -26,7 +26,7 @@ from typing import Any, Sequence
 from boa3.sc.types import Event, ECPoint, UInt160, CallFlags
 from boa3.sc.utils.iterator import Iterator
 
-env: str
+env: str = 'compiler'
 """
 Gets the compiled environment. This allows specific environment validations to be easily included in the smart contract 
 logic without the need to rewrite anything before compiling (i.e. changes in smart contracts hashes between testnet and 
@@ -188,13 +188,13 @@ def call_contract(script_hash: UInt160, method: str, args: Sequence = (), call_f
     100
 
     :param script_hash: the target smart contract's script hash
-    :type script_hash: UInt160
+    :type script_hash: boa3.sc.types.UInt160
     :param method: the name of the method to be executed
     :type method: str
     :param args: the specified method's arguments
     :type args: Sequence[Any]
     :param call_flags: the CallFlags to be used to call the contract
-    :type call_flags: CallFlags
+    :type call_flags: boa3.sc.types.CallFlags
 
     :return: the result of the specified method
     :rtype: Any
@@ -239,7 +239,7 @@ def check_sig(pub_key: ECPoint, signature: bytes) -> bool:
     False
 
     :param pub_key: the public key of the account
-    :type pub_key: ECPoint
+    :type pub_key: boa3.sc.types.ECPoint
     :param signature: the signature of the current script container
     :type signature: bytes
     :return: whether the signature is valid or not
@@ -258,7 +258,7 @@ def check_multisig(pubkeys: list[ECPoint], signatures: list[bytes]) -> bool:
     False
 
     :param pubkeys: a list of public keys
-    :type pubkeys: list[ECPoint]
+    :type pubkeys: list[boa3.sc.types.ECPoint]
     :param signatures: a list of signatures
     :type signatures: list[bytes]
     :return: a boolean value that represents whether the signatures were validated
@@ -275,10 +275,10 @@ def create_standard_account(pub_key: ECPoint) -> UInt160:
     b'\\r\\xa9g\\xa4\\x00C+\\xf2\\x7f\\x8e\\x8e\\xb4o\\xe8\\xace\\x9e\\xcc\\xde\\x04'
 
     :param pub_key: the given public key
-    :type pub_key: ECPoint
+    :type pub_key: boa3.sc.types.ECPoint
 
     :return: the corresponding script hash of the public key
-    :rtype: UInt160
+    :rtype: boa3.sc.types.UInt160
     """
     pass
 
@@ -293,10 +293,10 @@ def create_multisig_account(m: int, pub_keys: list[ECPoint]) -> UInt160:
     :param m: the minimum number of correct signatures need to be provided in order for the verification to pass.
     :type m: int
     :param pub_keys: the public keys of the account
-    :type pub_keys: list[ECPoint]
+    :type pub_keys: list[boa3.sc.types.ECPoint]
 
     :return: the hash of the corresponding account
-    :rtype: UInt160
+    :rtype: boa3.sc.types.UInt160
     """
     pass
 

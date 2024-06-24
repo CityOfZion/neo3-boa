@@ -104,7 +104,7 @@ class GasToken:
         :param from_address: the address to transfer from
         :type from_address: boa3.sc.types.UInt160
         :param to_address: the address to transfer to
-        :type to_address: UInt160
+        :type to_address: boa3.sc.types.UInt160
         :param amount: the amount of GAS to transfer
         :type amount: int
         :param data: whatever data is pertinent to the onNEP17Payment method

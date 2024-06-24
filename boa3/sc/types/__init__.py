@@ -186,13 +186,13 @@ class Block:
     about Blocks.
 
     :ivar hash: a unique identifier based on the unsigned data portion of the object
-    :vartype hash: UInt256
+    :vartype hash: boa3.sc.types.UInt256
     :ivar version: the data structure version of the block
     :vartype version: int
     :ivar previous_hash: the hash of the previous block
-    :vartype previous_hash: UInt256
+    :vartype previous_hash: boa3.sc.types.UInt256
     :ivar merkle_root: the merkle root of the transactions
-    :vartype merkle_root: UInt256
+    :vartype merkle_root: boa3.sc.types.UInt256
     :ivar timestamp: UTC timestamp of the block in milliseconds
     :vartype timestamp: int
     :ivar nonce: a random number used once in the cryptography
@@ -200,7 +200,7 @@ class Block:
     :ivar index: the index of the block
     :vartype index: int
     :ivar next_consensus: the script hash of the consensus nodes that generates the next block
-    :vartype next_consensus: UInt160
+    :vartype next_consensus: boa3.sc.types.UInt160
     :ivar transaction_count: the number of transactions on this block
     :vartype transaction_count: int
     """
@@ -229,7 +229,7 @@ class Contract:
     :ivar update_counter: the number of times the contract was updated
     :vartype update_counter: int
     :ivar hash: the hash of the contract
-    :vartype hash: UInt160
+    :vartype hash: boa3.sc.types.UInt160
     :ivar nef: the serialized Neo Executable Format (NEF) object holding of the smart contract code and compiler
         information
     :vartype nef: bytes
@@ -323,9 +323,9 @@ class ContractPermissionDescriptor:
     Indicates which contracts are authorized to be called.
 
     :ivar hash: The hash of the contract.
-    :vartype hash: UInt160 or None
+    :vartype hash: boa3.sc.types.UInt160 or None
     :ivar group: The group of the contracts.
-    :vartype group: ECPoint or None
+    :vartype group: boa3.sc.types.ECPoint or None
     """
 
     def __init__(self):
@@ -344,7 +344,7 @@ class ContractGroup:
     the contract is indeed included in the group.
 
     :ivar pubkey: The public key of the group.
-    :vartype pubkey: ECPoint
+    :vartype pubkey: boa3.sc.types.ECPoint
     :ivar signature: The signature of the contract hash which can be verified by `pubkey`.
     :vartype signature: bytes
     """
@@ -456,13 +456,13 @@ class Signer:
     about Signers.
 
     :ivar account:
-    :vartype account: UInt160
+    :vartype account: boa3.sc.types.UInt160
     :ivar scopes:
     :vartype scopes: WitnessScope
     :ivar allowed_contracts:
-    :vartype allowed_contracts: list[UInt160]
+    :vartype allowed_contracts: list[boa3.sc.types.UInt160]
     :ivar allowed_groups:
-    :vartype allowed_groups: list[UInt160]
+    :vartype allowed_groups: list[boa3.sc.types.UInt160]
     :ivar rules:
     :vartype rules: list[WitnessRule]
     """
@@ -516,13 +516,13 @@ class Transaction:
     Transactions.
 
     :ivar hash: a unique identifier based on the unsigned data portion of the object
-    :vartype hash: UInt256
+    :vartype hash: boa3.sc.types.UInt256
     :ivar version: the data structure version of the transaction
     :vartype version: int
     :ivar nonce: a random number used once in the cryptography
     :vartype nonce: int
     :ivar sender: the sender is the first signer of the transaction, they will pay the fees of the transaction
-    :vartype sender: UInt160
+    :vartype sender: boa3.sc.types.UInt160
     :ivar system_fee: the fee paid for executing the `script`
     :vartype system_fee: int
     :ivar network_fee: the fee paid for the validation and inclusion of the transaction in a block by the consensus node
@@ -555,7 +555,7 @@ class Notification:
     Represents a notification.
 
     :ivar script_hash: the script hash of the notification sender
-    :vartype script_hash: UInt160
+    :vartype script_hash: boa3.sc.types.UInt160
     :ivar event_name: the notification's name
     :vartype event_name: str
     :ivar state: a tuple value storing all the notification contents.
@@ -577,7 +577,7 @@ class NeoAccountState:
     :ivar height: the height of the block where the balance changed last time
     :vartype height: int
     :ivar vote_to: the voting target of the account
-    :vartype vote_to: ECPoint
+    :vartype vote_to: boa3.sc.types.ECPoint
     """
 
     def __init__(self):

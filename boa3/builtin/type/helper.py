@@ -5,10 +5,10 @@ __all__ = [
     'to_str',
 ]
 
-from deprecation import deprecated
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def to_bytes(value: str | int) -> bytes:
     """
     Converts a str or integer value to an array of bytes
@@ -22,7 +22,7 @@ def to_bytes(value: str | int) -> bytes:
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def to_str(value: bytes) -> str:
     """
     Converts a bytes value to a string.
@@ -33,7 +33,7 @@ def to_str(value: bytes) -> str:
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def to_int(value: bytes) -> int:
     """
     Converts a bytes value to the integer it represents.
@@ -44,7 +44,7 @@ def to_int(value: bytes) -> int:
     pass
 
 
-@deprecated(details='This module is deprecated. Use boa3.sc.utils instead')
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def to_bool(value: bytes) -> bool:
     """
     Return a bytes value to the boolean it represents.

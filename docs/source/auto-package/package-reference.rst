@@ -2,6 +2,8 @@ Package Reference
 =================
 
 .. toctree::
-   :caption: Contents:
+   :caption: boa3 package:
 
-   boa3/boa3
+   boa3/sc/boa3-sc
+   boa3/builtin/boa3-builtins
+

@@ -15,10 +15,10 @@ __all__ = [
 
 from typing import Any
 
-from deprecation import deprecated
+from boa3.internal.deprecation import deprecated
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def base58_encode(key: bytes) -> str:
     """
     Encodes a bytes value using base58.
@@ -34,7 +34,7 @@ def base58_encode(key: bytes) -> str:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def base58_decode(key: str) -> bytes:
     """
     Decodes a string value encoded with base58.
@@ -50,7 +50,7 @@ def base58_decode(key: str) -> bytes:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def base58_check_encode(key: bytes) -> str:
     """
     Converts a bytes value to its equivalent str representation that is encoded with base-58 digits. The encoded str
@@ -67,7 +67,7 @@ def base58_check_encode(key: bytes) -> str:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def base58_check_decode(key: str) -> bytes:
     """
     Converts the specified str, which encodes binary data as base-58 digits, to an equivalent bytes value. The encoded
@@ -84,7 +84,7 @@ def base58_check_decode(key: str) -> bytes:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def base64_encode(key: bytes) -> str:
     """
     Encodes a bytes value using base64.
@@ -100,7 +100,7 @@ def base64_encode(key: bytes) -> str:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def base64_decode(key: str) -> bytes:
     """
     Decodes a string value encoded with base64.
@@ -116,7 +116,7 @@ def base64_decode(key: str) -> bytes:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def serialize(item: Any) -> bytes:
     """
     Serializes the given value into its bytes representation.
@@ -143,7 +143,7 @@ def serialize(item: Any) -> bytes:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def deserialize(data: bytes) -> Any:
     """
     Deserializes the given bytes value.
@@ -170,7 +170,7 @@ def deserialize(data: bytes) -> Any:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def atoi(value: str, base: int = 10) -> int:
     """
     Converts a character string to a specific base value, decimal or hexadecimal. The default is decimal.
@@ -199,7 +199,7 @@ def atoi(value: str, base: int = 10) -> int:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def itoa(value: int, base: int = 10) -> str:
     """
     Converts the specific type of value to a decimal or hexadecimal string. The default is decimal.
@@ -226,7 +226,7 @@ def itoa(value: int, base: int = 10) -> str:
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def memory_search(mem: bytes | str, value: bytes | str, start: int = 0, backward: bool = False) -> int:
     """
     Searches for a given value in a given memory.
@@ -252,7 +252,7 @@ def memory_search(mem: bytes | str, value: bytes | str, start: int = 0, backward
     pass
 
 
-@deprecated(details='This module is deprecated. Use StdLib from boa3.sc.contracts instead')
+@deprecated(details='This module is deprecated. Use :class:`StdLib` from :mod:`boa3.sc.contracts` instead')
 def memory_compare(mem1: bytes | str, mem2: bytes | str) -> int:
     """
     Compares a memory with another one.

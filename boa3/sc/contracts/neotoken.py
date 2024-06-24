@@ -103,7 +103,7 @@ class NeoToken:
         :param from_address: the address to transfer from
         :type from_address: boa3.sc.types.UInt160
         :param to_address: the address to transfer to
-        :type to_address: UInt160
+        :type to_address: boa3.sc.types.UInt160
         :param amount: the amount of NEO to transfer
         :type amount: int
         :param data: whatever data is pertinent to the onNEP17Payment method
@@ -140,7 +140,7 @@ class NeoToken:
         100000000
 
         :param account: the account to check
-        :type account: UInt160
+        :type account: boa3.sc.types.UInt160
         :param end: the block index used when calculating GAS
         :type end: int
         """
@@ -155,7 +155,7 @@ class NeoToken:
         False
 
         :param pubkey: The public key of the account to be registered
-        :type pubkey: ECPoint
+        :type pubkey: boa3.sc.types.ECPoint
         :return: whether the registration was a success or not
         :rtype: bool
         """
@@ -170,7 +170,7 @@ class NeoToken:
         False
 
         :param pubkey: The public key of the account to be unregistered
-        :type pubkey: ECPoint
+        :type pubkey: boa3.sc.types.ECPoint
         :return: whether the unregistration was a success or not
         :rtype: bool
         """
@@ -187,7 +187,7 @@ class NeoToken:
         :param account: the account that is voting
         :type account: boa3.sc.types.UInt160
         :param vote_to: the public key of the one being voted
-        :type vote_to: ECPoint
+        :type vote_to: boa3.sc.types.ECPoint
         """
         pass
 
@@ -226,7 +226,7 @@ class NeoToken:
         []
 
         :return: all registered candidates
-        :rtype: list[tuple[ECPoint, int]]
+        :rtype: list[tuple[boa3.sc.types.ECPoint, int]]
         """
         pass
 
@@ -255,7 +255,7 @@ class NeoToken:
         [ b'\\x02|\\x84\\xb0V\\xc2j{$XG\\x1em\\xcfgR\\xed\\xd9k\\x96\\x88}x34\\xe3Q\\xdd\\xfe\\x13\\xc4\\xbc\\xa2' ]
 
         :return: all committee members
-        :rtype: list[ECPoint]
+        :rtype: list[boa3.sc.types.ECPoint]
         """
         pass
 
@@ -268,7 +268,7 @@ class NeoToken:
         UInt160(0x9273d3c792bce5eab4daac1c3ffdc1e83c4237f7)
 
         :return: the address of the committee
-        :rtype: UInt160
+        :rtype: boa3.sc.types.UInt160
         """
         pass
 
@@ -294,7 +294,7 @@ class NeoToken:
         [ b'\\x02|\\x84\\xb0V\\xc2j{$XG\\x1em\\xcfgR\\xed\\xd9k\\x96\\x88}x34\\xe3Q\\xdd\\xfe\\x13\\xc4\\xbc\\xa2' ]
 
         :return: the public keys of the validators
-        :rtype: list[ECPoint]
+        :rtype: list[boa3.sc.types.ECPoint]
         """
         pass
 

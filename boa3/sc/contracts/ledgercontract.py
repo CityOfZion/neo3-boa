@@ -55,7 +55,7 @@ class LedgerContract:
         None
 
         :param index_or_hash: index or hash identifier of the block
-        :type index_or_hash: int or UInt256
+        :type index_or_hash: int or boa3.sc.types.UInt256
         :return: the desired block, if exists. None otherwise
         :rtype: boa3.sc.types.Block or None
         """
@@ -89,7 +89,7 @@ class LedgerContract:
         b'\\x3e\\x65\\xe5\\x4d\\x75\\x5a\\x94\\x90\\xd6\\x98\\x3a\\x77\\xe4\\x82\\xaf\\x7a\\x38\\xc9\\x8c\\x1a\\xc6\\xd9\\xda\\x48\\xbd\\x7c\\x22\\xb3\\x2a\\x9e\\x34\\xea'
 
         :return: the hash of the current block
-        :rtype: UInt256
+        :rtype: boa3.sc.types.UInt256
         """
         pass
 
@@ -114,7 +114,7 @@ class LedgerContract:
         None
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.sc.types.UInt256
         :return: the Transaction, if exists. None otherwise
         """
         pass
@@ -155,7 +155,7 @@ class LedgerContract:
         None
 
         :param block_hash_or_height: a block identifier
-        :type block_hash_or_height: UInt256 or int
+        :type block_hash_or_height: boa3.sc.types.UInt256 or int
         :param tx_index: the transaction identifier in the block
         :type tx_index: int
         :return: the Transaction, if exists. None otherwise
@@ -177,7 +177,7 @@ class LedgerContract:
         -1
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.sc.types.UInt256
         :return: height of the transaction
         """
         pass
@@ -199,7 +199,7 @@ class LedgerContract:
         ]
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.sc.types.UInt256
         :return: VM state of the transaction
         """
         pass
@@ -213,7 +213,7 @@ class LedgerContract:
         VMState.HALT
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.sc.types.UInt256
         :return: VM state of the transaction
         """
         pass
