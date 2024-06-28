@@ -693,11 +693,22 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         case_symbols = []
 
         for case in match_node.cases:
-            if (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)) or
+            if (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton, ast.MatchMapping, ast.MatchSequence)) or
                     isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None
             ):
                 self.new_local_scope()
-                if not isinstance(case.pattern, ast.MatchAs):
+
+                if isinstance(case.pattern, ast.MatchSequence):
+                    for pattern in case.pattern.patterns:
+                        if isinstance(pattern, ast.MatchValue):
+                            self.visit(pattern.value)
+                        elif isinstance(pattern, ast.MatchAs):
+                            element_type = subject_type.value_type if Type.list.is_type_of(subject_type) else Type.any
+
+                            self._current_scope.include_symbol(pattern.name, Variable(element_type))
+                elif isinstance(case.pattern, ast.MatchMapping):
+                    pass
+                elif isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)):
                     self.visit(case.pattern.value)
 
                 for stmt in case.body:

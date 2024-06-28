@@ -1,3 +1,5 @@
+from typing import Any
+
 from boa3.internal.exception import CompilerError
 from boa3_test.tests import boatestcase
 
@@ -171,3 +173,55 @@ class TestMatchCase(boatestcase.BoaTestCase):
     def test_unsupported_case(self):
         path = self.get_contract_path('UnsupportedCase.py')
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, path)
+
+    async def test_list_type_match_case(self):
+        await self.set_up_contract('ListTypeTupleTypeMatchCase.py')
+
+        def match_case(x: Any) -> str:
+            match x:
+                case [1, 2, 3]:
+                    return "list of 1, 2, 3"
+                case [1, 2, x]:
+                    return f"list of 1, 2, " + str(x)
+                case (1, 2):
+                    return "1 2"
+                case (1, "2", x):
+                    return "1" + "2 string" + x
+                case _:
+                    return "other"
+
+        arg = [1, 2, 3]
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = [1, 2, 999]
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = (1, 3)
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = (1, "2")
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = (1, "3")
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = (1, 2, 7, 8)
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = (1, "2", "anything", 4)
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = [1, 2]
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = (1, 2)
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)

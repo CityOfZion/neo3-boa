@@ -1493,7 +1493,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def visit_Match(self, match_node: ast.Match):
         for case in match_node.cases:
-            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton, ast.MatchMapping)) or
+            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton, ast.MatchMapping, ast.MatchSequence)) or
                     isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None and case.guard is None
             ):
                 self._log_error(
@@ -1502,7 +1502,25 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                         symbol_id='case pattern with guard'
                     )
                 )
-        return super().generic_visit(match_node)
+
+        self._match_case_context = match_node
+        super().generic_visit(match_node)
+        self._match_case_context = None
+
+    # def visit_MatchAs(self, match_as: ast.MatchAs):
+    #
+    #     # verifica o type do subject, se for possivel ser um List, entao verifica os tipos inteiros de list,
+    #     # se for Any, entao o tipo é Any
+    #
+    #     if match_as.name is not None:
+    #         var_type = self.visit_type(self._match_case_context.subject)
+    #
+    #         return_type = self.assign_value(match_as.name, var_type,
+    #                                         source_node=match_as)
+    #         return return_type
+    #
+    #     else:
+    #         return Type.none
 
     def visit_ListComp(self, node: ast.ListComp):
         return self._visit_comprehension(node)

@@ -2,7 +2,7 @@ __all__ = [
     'CodeGenerator'
 ]
 
-
+import ast
 from collections.abc import Sequence
 from typing import Any
 
@@ -2526,11 +2526,12 @@ class CodeGenerator:
         self.convert_literal(False)
 
         #   else:
-        self.convert_begin_else(if_key_in_var)
+        else_key_in_var = self.convert_begin_else(if_key_in_var)
         self.remove_stack_top_item()
         self.remove_stack_top_item()
         #     return False
         self.convert_literal(False)
+        self.convert_end_if(else_key_in_var, is_internal=True)
 
         self.convert_end_if(values_are_not_equal, is_internal=True)
 
@@ -2551,6 +2552,95 @@ class CodeGenerator:
 
         # when finishing while loop, clean the stack and only `is_ok` will remain
         self.remove_stack_item(2)
+        self.remove_stack_item(2)
+        self.remove_stack_item(2)
+        self.remove_stack_item(2)
+        self.remove_stack_item(2)
+
+    def compare_lists_match_case(self, match_sequence: list[ast.pattern]):
+        """
+        Compares if a case sequence matches the given sequence
+
+        :param match_sequence: the list of elements of a match sequence to be compared (will be used to check if the element is a variable)
+        """
+        self.swap_reverse_stack_items(2)
+        # stack: MATCH var (bottom), CASE pattern (top)
+
+        self.duplicate_stack_top_item()
+        # list_length = len(pattern)
+        self.convert_builtin_method_call(Builtin.Len)
+        # index = 0
+        self.convert_literal(0)
+        # is_ok = True
+        self.convert_literal(True)
+        # stack: var, pattern, list_length, index, is_ok
+
+        var_elements = []
+        for index, pattern in enumerate(match_sequence):
+            if isinstance(pattern, ast.MatchAs):
+                self.convert_literal(index)
+                var_elements.append(index)
+        self.convert_new_array(len(var_elements))
+        # stack: var, pattern, list_length, index, is_ok, var_indexes
+
+        # while index < list_length and is_ok:
+        begin_list_comparison = self.convert_begin_while()
+
+        self.duplicate_stack_item(3)
+        self.duplicate_stack_item(2)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, index, var_indexes
+        self.convert_operation(BinaryOp.NotIn, is_internal=True)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, is_variable
+
+        #   if not is_variable:
+        if_is_not_var = self.convert_begin_if()
+
+        self.duplicate_stack_item(6)
+        self.duplicate_stack_item(4)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, var, index
+        self.convert_get_item(index_inserted_internally=True, index_is_positive=True, test_is_negative_index=False)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, var[index]
+
+        self.duplicate_stack_item(6)
+        self.duplicate_stack_item(5)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, var[index], pattern, index
+        self.convert_get_item(index_inserted_internally=True, index_is_positive=True, test_is_negative_index=False)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, var[index], pattern[index]
+
+        self.convert_operation(BinaryOp.NotEq, is_internal=True)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, elements_not_equal
+
+        #       if var[index] != pattern[index]
+        if_elements_not_eq = self.convert_begin_if()
+
+        self.remove_stack_item(2)
+        self.convert_literal(False)
+        #           is_ok = False
+        self.swap_reverse_stack_items(2)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes
+
+        self.convert_end_if(if_elements_not_eq)
+        self.convert_end_if(if_is_not_var)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes
+
+        self.swap_reverse_stack_items(3)
+        #  index += 1
+        self.insert_opcode(Opcode.INC)
+        self.swap_reverse_stack_items(3)
+
+        # checking if `index < list_length and is_ok` is still true
+        condition_address = self.bytecode_size
+        self.duplicate_stack_item(3)
+        self.duplicate_stack_item(5)
+        self.convert_operation(BinaryOp.Lt, is_internal=True)
+        self.duplicate_stack_item(3)
+        self.convert_operation(BinaryOp.And, is_internal=True)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes, continue_for_loop
+        self.convert_end_while(begin_list_comparison, condition_address, is_internal=True)
+        # stack: var, pattern, list_length, index, is_ok, var_indexes
+
+        # when finishing while loop, clean the stack and only `is_ok` will remain
+        self.remove_stack_top_item()
         self.remove_stack_item(2)
         self.remove_stack_item(2)
         self.remove_stack_item(2)

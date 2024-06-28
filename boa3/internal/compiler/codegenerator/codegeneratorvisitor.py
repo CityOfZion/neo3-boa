@@ -367,6 +367,19 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         return self.build_data(ret)
 
+    def create_sentinel(self):
+        var_id = '-sentinel'
+        address = self.generator.bytecode_size
+        # sentinel = VariableGenerationData(var_id, None, address)
+        self._symbols[var_id] = Variable(Type.dict, None)
+
+        self.generator.convert_new_map(Type.dict)
+        self.generator.convert_store_variable(var_id, address, self.current_class if self.current_method is None else None)
+
+    def get_sentinel(self):
+        symbol_id = '-sentinel'
+        self.generator.convert_load_symbol(symbol_id, is_internal=True, class_type=None)
+
     def store_variable(self, *var_ids: VariableGenerationData, value: ast.AST):
         # if the value is None, it is a variable declaration
         if value is not None:
@@ -706,9 +719,13 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.convert_end_if(case_addresses[-1])
             else:
                 subject = self.visit_to_map(match_node.subject, generate=True)
+                subject_stack_size = self.generator.stack_size
                 if isinstance(case.pattern, ast.MatchSingleton):
                     self.generator.convert_literal(case.pattern.value)
                     pattern_type = self.get_type(case.pattern.value)
+                elif isinstance(case.pattern, ast.MatchValue):
+                    pattern = self.visit_to_generate(case.pattern.value)
+                    pattern_type = pattern.type
                 elif isinstance(case.pattern, ast.MatchMapping):
                     pattern_type = Type.dict
 
@@ -720,11 +737,11 @@ class VisitorCodeGenerator(IAstAnalyser):
                         self.visit_to_generate(case.pattern.keys[map_index])
                         self.visit_to_generate(case.pattern.patterns[map_index].value)
                         self.generator.convert_set_item(start_address)
-                else:
-                    pattern = self.visit_to_generate(case.pattern.value)
-                    pattern_type = pattern.type
 
-                self.generator.duplicate_stack_item(2)
+                elif isinstance(case.pattern, ast.MatchSequence):
+                    pattern_type = Type.list
+
+                self.generator.duplicate_stack_item(self.generator.stack_size - subject_stack_size + 1)
                 pattern_type.generate_is_instance_type_check(self.generator)
 
                 is_same_type = self.generator.convert_begin_if()
@@ -732,6 +749,32 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.swap_reverse_stack_items(2)
                 if isinstance(case.pattern, ast.MatchMapping):
                     self.generator.compare_dicts_match_case()
+                elif isinstance(case.pattern, ast.MatchSequence):
+                    self.generator.duplicate_stack_item(self.generator.stack_size - subject_stack_size + 1)
+                    self.generator.convert_builtin_method_call(Builtin.Len)
+                    self.generator.convert_operation(BinaryOp.NumEq)
+                    has_same_length = self.generator.convert_begin_if()
+
+                    array_match_sequence = case.pattern.patterns.copy()
+                    array_match_sequence.reverse()
+
+                    is_first_comparison = True
+                    for index, pattern in enumerate(array_match_sequence):
+                        if isinstance(pattern, ast.MatchValue):
+                            if not is_first_comparison:
+                                self.generator.convert_operation(BinaryOp.And)
+                            else:
+                                is_first_comparison = False
+
+                            self.visit_to_generate(self.generator.stack_size - subject_stack_size + 1)
+                            self.generator.convert_literal(index)
+                            self.generator.convert_get_item(index_inserted_internally=True, index_is_positive=True, test_is_negative_index=False)
+                            self.visit_to_generate(pattern.value)
+                            self.generator.convert_operation(BinaryOp.NumEq)
+
+                    else_has_not_same_length = self.generator.convert_begin_else(has_same_length)
+                    self.generator.convert_literal(False)
+                    self.generator.convert_end_if(else_has_not_same_length)
                 else:
                     self.generator.convert_operation(BinaryOp.NumEq)
 
@@ -742,6 +785,16 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.convert_end_if(is_not_same_type)
 
                 case_addresses.append(self.generator.convert_begin_if())
+
+                if isinstance(case.pattern, ast.MatchSequence):
+                    for index, pattern in enumerate(case.pattern.patterns):
+                        if isinstance(pattern, ast.MatchAs):
+                            # regenerate the subject to assign it to the variable
+                            self.visit_to_map(match_node.subject, generate=True)
+                            self.generator.convert_literal(index)
+                            self.generator.convert_get_item(index_is_positive=True, index_inserted_internally=True, test_is_negative_index=False)
+                            self.generator.convert_store_variable(pattern.name)
+
                 for stmt in case.body:
                     self.visit_to_map(stmt, generate=True)
 
