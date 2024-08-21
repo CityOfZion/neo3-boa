@@ -11,6 +11,7 @@ from boa3.internal.model.builtin.interop.oracle import *
 from boa3.internal.model.builtin.interop.policy import *
 from boa3.internal.model.builtin.interop.role import *
 from boa3.internal.model.builtin.interop.runtime import *
+from boa3.internal.model.builtin.interop.runtime.getcurrentsignersmethod import GetCurrentSignersMethod
 from boa3.internal.model.builtin.interop.stdlib import *
 from boa3.internal.model.builtin.interop.storage import *
 from boa3.internal.model.event import Event
@@ -168,6 +169,7 @@ class Interop:
     GasLeft = GasLeftProperty()
     GetNetwork = GetNetworkMethod()
     GetNotifications = GetNotificationsMethod(NotificationType)
+    GetCurrentSigners = GetCurrentSignersMethod(SignerType)
     GetRandom = GetRandomMethod()
     GetTrigger = GetTriggerMethod(TriggerType)
     InvocationCounter = InvocationCounterProperty()
@@ -458,7 +460,8 @@ class Interop:
                                       GetTrigger,
                                       LoadScript,
                                       Log,
-                                      Notify
+                                      Notify,
+                                      GetCurrentSigners
                                       ],
                              packages=[NotificationModule,
                                        TriggerTypeModule

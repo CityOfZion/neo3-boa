@@ -19,12 +19,13 @@ __all__ = [
     'invocation_counter',
     'entry_script_hash',
     'script_container',
+    'get_current_signers',
 ]
 
 from collections.abc import Sequence
 from typing import Any
 
-from boa3.builtin.interop.blockchain import Transaction
+from boa3.builtin.interop.blockchain import Transaction, Signer
 from boa3.builtin.interop.contract.callflagstype import CallFlags
 from boa3.builtin.interop.runtime.notification import Notification
 from boa3.builtin.interop.runtime.triggertype import TriggerType
@@ -82,6 +83,15 @@ def log(message: str):
 
     :param message: the log message
     :type message: str
+    """
+    pass
+
+def get_current_signers() -> list[Signer]:
+    """
+    Get the Signers of the current transaction.
+
+    :return: Return an array of all signers of the transaction.
+    :rtype: list[Signer]
     """
     pass
 
