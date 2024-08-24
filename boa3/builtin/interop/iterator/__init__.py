@@ -4,10 +4,12 @@ __all__ = [
     'Iterator',
 ]
 
-
 from typing import Any
 
+from boa3.internal.deprecation import deprecated
 
+
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 class Iterator:
     """
     The iterator for smart contracts.

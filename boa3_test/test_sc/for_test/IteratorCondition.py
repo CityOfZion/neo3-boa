@@ -1,8 +1,9 @@
 from typing import Any, cast
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop import storage
-from boa3.builtin.interop.iterator import Iterator
+from boa3.sc import storage
+from boa3.sc.compiletime import public
+from boa3.sc.types import FindOptions
+from boa3.sc.utils.iterator import Iterator
 
 
 @public
@@ -26,4 +27,4 @@ def _deploy(data: Any, update: bool):
 
 def get_iterator() -> Iterator:
     prefix = b'example'
-    return storage.find(prefix, options=storage.FindOptions.VALUES_ONLY)
+    return storage.find(prefix, options=FindOptions.VALUES_ONLY)

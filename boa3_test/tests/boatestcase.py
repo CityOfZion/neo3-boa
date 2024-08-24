@@ -299,7 +299,6 @@ class BoaTestCase(SmartContractTestCase):
         manifest_path = (pathlib.Path(frame.filename)
                          .parent
                          .joinpath(path_to_nef)
-                         .with_suffix("")
                          .with_suffix(".manifest.json")
                          )
 

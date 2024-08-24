@@ -13,6 +13,7 @@ from boa3.internal.model.builtin.native.nativecontract import NativeContract
 from boa3.internal.model.event import Event
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.imports.package import Package
+from boa3.internal.model.sc import ContractImports, BoaSCPackage
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.math import Math
 from boa3.internal.model.type.typeutils import TypeUtils, TypingPackage
@@ -42,6 +43,14 @@ class CompilerBuiltin:
         self._generate_builtin_package('typing', TypeUtils.package_symbols(TypingPackage.Typing))
         self._generate_builtin_package('collections', TypeUtils.package_symbols(TypingPackage.Collections))
         self._generate_builtin_package('math', Math.get_methods_from_math_lib())
+
+        self._generate_builtin_package('boa3.sc.contracts', ContractImports.package_symbols(BoaSCPackage.Contracts))
+        self._generate_builtin_package('boa3.sc.compiletime', ContractImports.package_symbols(BoaSCPackage.Compiletime))
+        self._generate_builtin_package('boa3.sc.math', ContractImports.package_symbols(BoaSCPackage.Math))
+        self._generate_builtin_package('boa3.sc.types', ContractImports.package_symbols(BoaSCPackage.Types))
+        self._generate_builtin_package('boa3.sc.runtime', ContractImports.package_symbols(BoaSCPackage.Runtime))
+        self._generate_builtin_package('boa3.sc.storage', ContractImports.package_symbols(BoaSCPackage.Storage))
+        self._generate_builtin_package('boa3.sc.utils', ContractImports.package_symbols(BoaSCPackage.Utils))
 
         # TODO: deprecate boa3.builtin packages
         self._generate_builtin_package('boa3.builtin', Builtin.boa_builtins)

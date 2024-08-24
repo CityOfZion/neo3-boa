@@ -1,5 +1,5 @@
-from boa3.builtin.nativecontract.ledger import Ledger
+from boa3.sc.contracts import LedgerContract
 
 
 def main() -> list:
-    return Ledger.get_transaction_signers(123)
+    return LedgerContract.get_transaction_signers(123)

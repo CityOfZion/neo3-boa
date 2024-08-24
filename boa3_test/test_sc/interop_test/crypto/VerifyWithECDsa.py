@@ -1,8 +1,8 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.crypto import NamedCurve, verify_with_ecdsa
-from boa3.builtin.type import ECPoint
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import CryptoLib
+from boa3.sc.types import ECPoint, NamedCurveHash
 
 
 @public
-def Main(message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurve) -> bool:
-    return verify_with_ecdsa(message, pubkey, signature, curve)
+def Main(message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurveHash) -> bool:
+    return CryptoLib.verify_with_ecdsa(message, pubkey, signature, curve)

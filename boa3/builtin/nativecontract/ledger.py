@@ -4,8 +4,10 @@ __all__ = [
 
 from boa3.builtin.interop.blockchain import Block, Signer, Transaction, VMState
 from boa3.builtin.type import UInt256, UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class Ledger:
     """
     A class used to represent the Ledger native contract.
@@ -56,9 +58,9 @@ class Ledger:
         None
 
         :param index_or_hash: index or hash identifier of the block
-        :type index_or_hash: int or UInt256
+        :type index_or_hash: int or boa3.builtin.type.UInt256
         :return: the desired block, if exists. None otherwise
-        :rtype: Block or None
+        :rtype: boa3.builtin.interop.blockchain.block.Block or None
         """
         pass
 
@@ -78,6 +80,19 @@ class Ledger:
 
         :return: the index of the current block
         :rtype: int
+        """
+        pass
+
+    @classmethod
+    def get_current_hash(cls) -> UInt256:
+        """
+        Gets the hash of the current block.
+
+        >>> Ledger.get_current_hash()
+        b'\\x3e\\x65\\xe5\\x4d\\x75\\x5a\\x94\\x90\\xd6\\x98\\x3a\\x77\\xe4\\x82\\xaf\\x7a\\x38\\xc9\\x8c\\x1a\\xc6\\xd9\\xda\\x48\\xbd\\x7c\\x22\\xb3\\x2a\\x9e\\x34\\xea'
+
+        :return: the hash of the current block
+        :rtype: boa3.builtin.type.UInt256
         """
         pass
 
@@ -102,7 +117,7 @@ class Ledger:
         None
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.builtin.type.UInt256
         :return: the Transaction, if exists. None otherwise
         """
         pass
@@ -143,7 +158,7 @@ class Ledger:
         None
 
         :param block_hash_or_height: a block identifier
-        :type block_hash_or_height: UInt256 or int
+        :type block_hash_or_height: boa3.builtin.type.UInt256 or int
         :param tx_index: the transaction identifier in the block
         :type tx_index: int
         :return: the Transaction, if exists. None otherwise
@@ -165,7 +180,7 @@ class Ledger:
         -1
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.builtin.type.UInt256
         :return: height of the transaction
         """
         pass
@@ -187,7 +202,7 @@ class Ledger:
         ]
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.builtin.type.UInt256
         :return: VM state of the transaction
         """
         pass
@@ -201,7 +216,7 @@ class Ledger:
         VMState.HALT
 
         :param hash_: hash identifier of the transaction
-        :type hash_: UInt256
+        :type hash_: boa3.builtin.type.UInt256
         :return: VM state of the transaction
         """
         pass

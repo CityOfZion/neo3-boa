@@ -3,11 +3,12 @@ __all__ = [
     'Role',
 ]
 
-
 from boa3.builtin.interop.role.roletype import Role
 from boa3.builtin.type import ECPoint, UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class RoleManagement:
     """
     A class used to represent the RoleManagement native contract.
@@ -27,11 +28,11 @@ class RoleManagement:
         []
 
         :param role: the type of the role
-        :type role: Role
+        :type role: boa3.builtin.interop.role.roletype.Role
         :param index: the index of the block to be queried
         :type index: int
 
         :return: the public keys of the nodes
-        :rtype: ECPoint
+        :rtype: boa3.builtin.type.ECPoint
         """
         pass

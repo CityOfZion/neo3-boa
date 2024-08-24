@@ -2,12 +2,13 @@ __all__ = [
     'GAS',
 ]
 
-
 from typing import Any
 
 from boa3.builtin.type import UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class GAS:
     """
     A class used to represent the GAS native contract.
@@ -72,7 +73,7 @@ class GAS:
         1000000000
 
         :param account: the account's address to retrieve the balance for
-        :type account: UInt160
+        :type account: boa3.builtin.type.UInt160
         :return: the account's balance
         :rtype: int
         """
@@ -102,9 +103,9 @@ class GAS:
         False
 
         :param from_address: the address to transfer from
-        :type from_address: UInt160
+        :type from_address: boa3.builtin.type.UInt160
         :param to_address: the address to transfer to
-        :type to_address: UInt160
+        :type to_address: boa3.builtin.type.UInt160
         :param amount: the amount of GAS to transfer
         :type amount: int
         :param data: whatever data is pertinent to the onNEP17Payment method

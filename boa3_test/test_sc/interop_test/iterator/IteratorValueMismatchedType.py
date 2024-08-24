@@ -1,5 +1,5 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.storage import find
+from boa3.sc.compiletime import public
+from boa3.sc.storage import find
 
 
 @public

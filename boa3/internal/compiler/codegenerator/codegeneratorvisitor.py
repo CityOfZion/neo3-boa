@@ -208,7 +208,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         for stmt in function_stmts:
             self.visit(stmt)
 
-        if self.generator.initialize_static_fields():
+        has_static_fields, can_initialize_static_fields = self.generator.initialize_static_fields()
+        if can_initialize_static_fields:
             last_symbols = self.symbols  # save to revert in the end and not compromise consequent visits
             class_non_static_stmts = []
 
@@ -246,23 +247,24 @@ class VisitorCodeGenerator(IAstAnalyser):
                         class_non_static_stmts.append(cls_fun)
                     self.symbols = last_symbols  # don't use inner scopes to evaluate the other globals
 
-            # to generate the 'initialize' method for Neo
-            self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")
-            self._is_generating_initialize = True
-            for stmt in global_stmts:
-                cur_tree = self._tree
-                cur_filename = self.filename
-                if hasattr(stmt, 'origin'):
-                    if hasattr(stmt.origin, 'filename'):
-                        self.set_filename(stmt.origin.filename)
-                    self._tree = stmt.origin
+            if has_static_fields:
+                # to generate the 'initialize' method for Neo
+                self._log_info(f"Compiling '{constants.INITIALIZE_METHOD_ID}' function")
+                self._is_generating_initialize = True
+                for stmt in global_stmts:
+                    cur_tree = self._tree
+                    cur_filename = self.filename
+                    if hasattr(stmt, 'origin'):
+                        if hasattr(stmt.origin, 'filename'):
+                            self.set_filename(stmt.origin.filename)
+                        self._tree = stmt.origin
 
-                self.visit(stmt)
-                self.filename = cur_filename
-                self._tree = cur_tree
+                    self.visit(stmt)
+                    self.filename = cur_filename
+                    self._tree = cur_tree
 
-            self._is_generating_initialize = False
-            self.generator.end_initialize()
+                self._is_generating_initialize = False
+                self.generator.end_initialize()
 
             # generate any symbol inside classes that's not variables AFTER generating 'initialize' method
             for stmt in class_non_static_stmts:
@@ -710,6 +712,17 @@ class VisitorCodeGenerator(IAstAnalyser):
                 if isinstance(case.pattern, ast.MatchSingleton):
                     self.generator.convert_literal(case.pattern.value)
                     pattern_type = self.get_type(case.pattern.value)
+                elif isinstance(case.pattern, ast.MatchMapping):
+                    pattern_type = Type.dict
+
+                    self.generator.convert_new_map(pattern_type)
+
+                    for map_index in range(len(case.pattern.keys)):
+                        start_address = VMCodeMapping.instance().bytecode_size
+                        self.generator.duplicate_stack_top_item()
+                        self.visit_to_generate(case.pattern.keys[map_index])
+                        self.visit_to_generate(case.pattern.patterns[map_index].value)
+                        self.generator.convert_set_item(start_address)
                 else:
                     pattern = self.visit_to_generate(case.pattern.value)
                     pattern_type = pattern.type
@@ -717,9 +730,19 @@ class VisitorCodeGenerator(IAstAnalyser):
                 self.generator.duplicate_stack_item(2)
                 pattern_type.generate_is_instance_type_check(self.generator)
 
-                self.generator.swap_reverse_stack_items(3)
-                self.generator.convert_operation(BinaryOp.NumEq)
-                self.generator.convert_operation(BinaryOp.And)
+                is_same_type = self.generator.convert_begin_if()
+
+                self.generator.swap_reverse_stack_items(2)
+                if isinstance(case.pattern, ast.MatchMapping):
+                    self.generator.compare_dicts_match_case()
+                else:
+                    self.generator.convert_operation(BinaryOp.NumEq)
+
+                is_not_same_type = self.generator.convert_begin_else(is_same_type)
+                self.generator.remove_stack_top_item()
+                self.generator.remove_stack_top_item()
+                self.generator.convert_literal(False)
+                self.generator.convert_end_if(is_not_same_type)
 
                 case_addresses.append(self.generator.convert_begin_if())
                 for stmt in case.body:

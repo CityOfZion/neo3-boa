@@ -10,7 +10,8 @@ from neo3.network.payloads import verification
 from neo3.wallet import account
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests import annotation, boatestcase
 
 
@@ -75,8 +76,21 @@ class TestNeoClass(boatestcase.BoaTestCase):
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
             return await cls.node.facade.test_invoke(NeoToken().get_gas_per_block())
 
+    @classmethod
+    async def get_register_price(cls) -> int:
+        async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
+            return await cls.node.facade.test_invoke(NeoToken().candidate_registration_price())
+
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
+
+        expected = types.UInt160(constants.NEO_SCRIPT)
+        result, _ = await self.call('main', [], return_type=types.UInt160)
+        self.assertEqual(expected, result)
+
+    async def test_get_hash_deprecated(self):
+        await self.set_up_contract('GetHashDeprecated.py')
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         expected = types.UInt160(constants.NEO_SCRIPT)
         result, _ = await self.call('main', [], return_type=types.UInt160)
@@ -571,3 +585,19 @@ class TestNeoClass(boatestcase.BoaTestCase):
             self.assertIsNone(result[2])
             self.assertGreaterEqual(result[3], 0)
         self.assertRegex(str(context.exception), "item is not of type 'StackItemType.ARRAY' but of type 'StackItemType.STRUCT'")
+
+    async def test_get_committee_address(self):
+        expected_output = (
+            Opcode.CALLT + b'\x00\x00'
+            + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('GetCommitteeAddress.py')
+        self.assertEqual(expected_output, output)
+
+    async def test_get_register_price(self):
+        await self.set_up_contract('GetRegisterPrice.py')
+
+        register_price = await self.get_register_price()
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(register_price, result)

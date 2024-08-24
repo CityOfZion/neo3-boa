@@ -72,7 +72,7 @@ class Interop:
     ContractType = ContractType.build()
     FindOptionsType = FindOptionsType()
     Iterator = IteratorType.build()
-    NamedCurveType = NamedCurveType()
+    NamedCurveHashType = NamedCurveHashType()
     NotificationType = NotificationType.build()
     OracleResponseCode = OracleResponseCodeType.build()
     OracleType = OracleClass.build()
@@ -81,6 +81,7 @@ class Interop:
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
+    TransactionAttributeType = TransactionAttributeType()
     TriggerType = TriggerType()
     VMStateType = VMStateType.build()
     WitnessCondition = WitnessConditionType.build()
@@ -130,6 +131,7 @@ class Interop:
     CheckSig = CheckSigMethod()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
+    Keccak256 = Keccak256Method()
     Murmur32 = Murmur32Method()
     Ripemd160 = Ripemd160Method()
     Sha256 = Sha256Method()
@@ -148,7 +150,9 @@ class Interop:
     GetExecFeeFactor = GetExecFeeFactorMethod()
     GetFeePerByte = GetFeePerByteMethod()
     GetStoragePrice = GetStoragePriceMethod()
+    GetAttributeFee = GetAttributeFeeMethod(TransactionAttributeType)
     IsBlocked = IsBlockedMethod()
+    SetAttributeFee = SetAttributeFeeMethod(TransactionAttributeType)
 
     # Role Interops
     GetDesignatedByRole = GetDesignatedByRoleMethod()
@@ -196,13 +200,29 @@ class Interop:
     StorageGetInt = StorageGetIntMethod()
     StorageGetBool = StorageGetBoolMethod()
     StorageGetStr = StorageGetStrMethod()
+    StorageGetList = StorageGetListMethod()
+    StorageGetDict = StorageGetDictMethod()
+    StorageGetObject = StorageGetObjectMethod()
     StorageGetUInt160 = StorageGetUInt160Method()
     StorageGetUInt256 = StorageGetUInt256Method()
     StorageGetECPoint = StorageGetECPointMethod()
+    StorageGetCheck = StorageTryGetBytesMethod()
+    StorageGetCheckInt = StorageTryGetIntMethod()
+    StorageGetCheckBool = StorageTryGetBoolMethod()
+    StorageGetCheckStr = StorageTryGetStrMethod()
+    StorageGetCheckList = StorageTryGetListMethod()
+    StorageGetCheckDict = StorageTryGetDictMethod()
+    StorageGetCheckObject = StorageTryGetObjectMethod()
+    StorageGetCheckUInt160 = StorageTryGetUInt160Method()
+    StorageGetCheckUInt256 = StorageTryGetUInt256Method()
+    StorageGetCheckECPoint = StorageTryGetECPointMethod()
     StoragePut = StoragePutBytesMethod()
     StoragePutInt = StoragePutIntMethod()
     StoragePutBool = StoragePutBoolMethod()
     StoragePutStr = StoragePutStrMethod()
+    StoragePutList = StoragePutListMethod()
+    StoragePutDict = StoragePutDictMethod()
+    StoragePutObject = StoragePutObjectMethod()
     StoragePutUInt160 = StoragePutUInt160Method()
     StoragePutUInt256 = StoragePutUInt256Method()
     StoragePutECPoint = StoragePutECPointMethod()
@@ -211,11 +231,15 @@ class Interop:
 
     # region Packages
 
-    BlockModule = Package(identifier=BlockType.identifier.lower(),
+    BlockModule = Package(deprecated=True,
+                          new_location='boa3.sc.types',
+                          identifier=BlockType.identifier.lower(),
                           types=[BlockType]
                           )
 
-    SignerModule = Package(identifier=SignerType.identifier.lower(),
+    SignerModule = Package(deprecated=True,
+                           new_location='boa3.sc.types',
+                           identifier=SignerType.identifier.lower(),
                            types=[SignerType,
                                   WitnessConditionType,
                                   WitnessCondition,
@@ -225,15 +249,21 @@ class Interop:
                                   ]
                            )
 
-    TransactionModule = Package(identifier=TransactionType.identifier.lower(),
+    TransactionModule = Package(deprecated=True,
+                                new_location='boa3.sc.types',
+                                identifier=TransactionType.identifier.lower(),
                                 types=[TransactionType]
                                 )
 
-    VMStateModule = Package(identifier=VMStateType.identifier.lower(),
+    VMStateModule = Package(deprecated=True,
+                            new_location='boa3.sc.types',
+                            identifier=VMStateType.identifier.lower(),
                             types=[VMStateType]
                             )
 
-    BlockchainPackage = Package(identifier=InteropPackage.Blockchain,
+    BlockchainPackage = Package(deprecated=True,
+                                new_location='boa3.sc.contracts and boa3.sc.types',
+                                identifier=InteropPackage.Blockchain,
                                 types=[BlockType,
                                        SignerType,
                                        TransactionType,
@@ -256,15 +286,21 @@ class Interop:
                                           ]
                                 )
 
-    CallFlagsTypeModule = Package(identifier=f'{CallFlagsType.identifier.lower()}type',
+    CallFlagsTypeModule = Package(deprecated=True,
+                                  new_location='boa3.sc.types',
+                                  identifier=f'{CallFlagsType.identifier.lower()}type',
                                   types=[CallFlagsType]
                                   )
 
-    ContractModule = Package(identifier=ContractType.identifier.lower(),
+    ContractModule = Package(deprecated=True,
+                             new_location='boa3.sc.types',
+                             identifier=ContractType.identifier.lower(),
                              types=[ContractType]
                              )
 
-    ContractManifestModule = Package(identifier=ContractManifestType.identifier.lower(),
+    ContractManifestModule = Package(deprecated=True,
+                                     new_location='boa3.sc.types',
+                                     identifier=ContractManifestType.identifier.lower(),
                                      types=[ContractAbiType.build(),
                                             ContractEventDescriptorType.build(),
                                             ContractGroupType.build(),
@@ -277,7 +313,9 @@ class Interop:
                                             ]
                                      )
 
-    ContractPackage = Package(identifier=InteropPackage.Contract,
+    ContractPackage = Package(deprecated=True,
+                              new_location='boa3.sc.contracts, boa3.sc.utils and boa3.sc.types',
+                              identifier=InteropPackage.Contract,
                               types=[CallFlagsType,
                                      ContractManifestType,
                                      ContractType
@@ -300,8 +338,10 @@ class Interop:
                                         ]
                               )
 
-    CryptoPackage = Package(identifier=InteropPackage.Crypto,
-                            types=[NamedCurveType,
+    CryptoPackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts, boa3.sc.utils and boa3.sc.types',
+                            identifier=InteropPackage.Crypto,
+                            types=[NamedCurveHashType,
                                    Bls12381Type
                                    ],
                             methods=[Bls12381Add,
@@ -321,29 +361,41 @@ class Interop:
                                      ]
                             )
 
-    IteratorPackage = Package(identifier=InteropPackage.Iterator,
+    IteratorPackage = Package(deprecated=True,
+                              new_location='boa3.sc.utils',
+                              identifier=InteropPackage.Iterator,
                               types=[Iterator],
                               )
 
-    JsonPackage = Package(identifier=InteropPackage.Json,
+    JsonPackage = Package(deprecated=True,
+                          new_location='boa3.sc.contracts',
+                          identifier=InteropPackage.Json,
                           methods=[JsonDeserialize,
                                    JsonSerialize
                                    ]
                           )
 
-    NotificationModule = Package(identifier=NotificationType.identifier.lower(),
+    NotificationModule = Package(deprecated=True,
+                                 new_location='boa3.sc.types',
+                                 identifier=NotificationType.identifier.lower(),
                                  types=[NotificationType]
                                  )
 
-    OracleResponseCodeModule = Package(identifier=OracleResponseCode.identifier.lower(),
+    OracleResponseCodeModule = Package(deprecated=True,
+                                       new_location='boa3.sc.types',
+                                       identifier=OracleResponseCode.identifier.lower(),
                                        types=[OracleResponseCode]
                                        )
 
-    OracleModule = Package(identifier=OracleType.identifier.lower(),
+    OracleModule = Package(deprecated=True,
+                           new_location='boa3.sc.contracts',
+                           identifier=OracleType.identifier.lower(),
                            types=[OracleType]
                            )
 
-    OraclePackage = Package(identifier=InteropPackage.Oracle,
+    OraclePackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts and boa3.sc.types',
+                            identifier=InteropPackage.Oracle,
                             types=[OracleResponseCode,
                                    OracleType
                                    ],
@@ -352,11 +404,15 @@ class Interop:
                                       ]
                             )
 
-    TriggerTypeModule = Package(identifier=TriggerType.identifier.lower(),
+    TriggerTypeModule = Package(deprecated=True,
+                                new_location='boa3.sc.types',
+                                identifier=TriggerType.identifier.lower(),
                                 types=[TriggerType]
                                 )
 
-    PolicyPackage = Package(identifier=InteropPackage.Policy,
+    PolicyPackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts',
+                            identifier=InteropPackage.Policy,
                             methods=[GetExecFeeFactor,
                                      GetFeePerByte,
                                      GetStoragePrice,
@@ -364,17 +420,23 @@ class Interop:
                                      ]
                             )
 
-    RoleTypeModule = Package(identifier=RoleType.identifier.lower(),
+    RoleTypeModule = Package(deprecated=True,
+                             new_location='boa3.sc.types',
+                             identifier=RoleType.identifier.lower(),
                              types=[RoleType]
                              )
 
-    RolePackage = Package(identifier=InteropPackage.Role,
+    RolePackage = Package(deprecated=True,
+                          new_location='boa3.sc.contracts',
+                          identifier=InteropPackage.Role,
                           types=[RoleType],
                           methods=[GetDesignatedByRole],
                           packages=[RoleTypeModule]
                           )
 
-    RuntimePackage = Package(identifier=InteropPackage.Runtime,
+    RuntimePackage = Package(deprecated=True,
+                             new_location='boa3.sc.runtime and boa3.sc.types',
+                             identifier=InteropPackage.Runtime,
                              types=[NotificationType,
                                     TriggerType
                                     ],
@@ -403,11 +465,15 @@ class Interop:
                                        ]
                              )
 
-    FindOptionsModule = Package(identifier=FindOptionsType.identifier.lower(),
+    FindOptionsModule = Package(deprecated=True,
+                                new_location='boa3.sc.types',
+                                identifier=FindOptionsType.identifier.lower(),
                                 types=[FindOptionsType]
                                 )
 
-    StdlibPackage = Package(identifier=InteropPackage.Stdlib,
+    StdlibPackage = Package(deprecated=True,
+                            new_location='boa3.sc.contracts',
+                            identifier=InteropPackage.Stdlib,
                             methods=[Atoi,
                                      Base58CheckDecode,
                                      Base58CheckEncode,
@@ -423,15 +489,21 @@ class Interop:
                                      ]
                             )
 
-    StorageContextModule = Package(identifier=StorageContextType.identifier.lower(),
+    StorageContextModule = Package(deprecated=True,
+                                   new_location='boa3.sc.storage',
+                                   identifier=StorageContextType.identifier.lower(),
                                    types=[StorageContextType]
                                    )
 
-    StorageMapModule = Package(identifier=StorageMapType.identifier.lower(),
+    StorageMapModule = Package(deprecated=True,
+                               new_location='boa3.sc.storage',
+                               identifier=StorageMapType.identifier.lower(),
                                types=[StorageMapType]
                                )
 
-    StoragePackage = Package(identifier=InteropPackage.Storage,
+    StoragePackage = Package(deprecated=True,
+                             new_location='boa3.sc.storage',
+                             identifier=InteropPackage.Storage,
                              types=[FindOptionsType,
                                     StorageContextType,
                                     StorageMapType
@@ -442,15 +514,31 @@ class Interop:
                                       StorageGetInt,
                                       StorageGetBool,
                                       StorageGetStr,
+                                      StorageGetList,
+                                      StorageGetDict,
+                                      StorageGetObject,
                                       StorageGetUInt160,
                                       StorageGetUInt256,
                                       StorageGetECPoint,
+                                      StorageGetCheck,
+                                      StorageGetCheckInt,
+                                      StorageGetCheckBool,
+                                      StorageGetCheckStr,
+                                      StorageGetCheckList,
+                                      StorageGetCheckDict,
+                                      StorageGetCheckObject,
+                                      StorageGetCheckUInt160,
+                                      StorageGetCheckUInt256,
+                                      StorageGetCheckECPoint,
                                       StorageGetContext,
                                       StorageGetReadOnlyContext,
                                       StoragePut,
                                       StoragePutInt,
                                       StoragePutBool,
                                       StoragePutStr,
+                                      StoragePutList,
+                                      StoragePutDict,
+                                      StoragePutObject,
                                       StoragePutUInt160,
                                       StoragePutUInt256,
                                       StoragePutECPoint,

@@ -3,9 +3,7 @@ from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 class TestString(boatestcase.BoaTestCase):
@@ -1105,17 +1103,12 @@ class TestString(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [start, end], return_type=str)
         self.assertEqual(string[start:end], result)
 
-    def test_f_string_literal(self):
-        path, _ = self.get_deploy_file_paths('FStringLiteral.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_f_string_literal(self):
+        await self.set_up_contract('FStringLiteral.py')
 
-        invoke = runner.call_contract(path, 'main')
         expected_result = "unit test"
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        self.assertEqual(expected_result, invoke.result)
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual(expected_result, result)
 
     async def test_f_string_string_var(self):
         await self.set_up_contract('FStringStringVar.py')

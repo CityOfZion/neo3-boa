@@ -1,7 +1,6 @@
 import ast
 from typing import Self
 
-from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
 from boa3.internal.analyser.astoptimizer import AstOptimizer
@@ -14,6 +13,7 @@ from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.exception.CompilerWarning import CompilerWarning
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.type import Type
+from boa3.sc.compiletime import NeoMetadata
 
 
 class Analyser:

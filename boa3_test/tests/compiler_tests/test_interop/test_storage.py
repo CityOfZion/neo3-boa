@@ -1,7 +1,7 @@
 from boaconstructor import storage
 from neo3.api import StackItemType
 
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
@@ -18,7 +18,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
     storage_put_hash = Interop.StoragePut.interop_method_hash
     storage_delete_hash = Interop.StorageDelete.interop_method_hash
 
-    def test_storage_get_bytes_key(self):
+    def test_storage_get_bytes_key_compile(self):
         expected_output = (
             Opcode.INITSLOT
             + b'\x00'
@@ -41,11 +41,90 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('StorageGetBytesKey.py')
         self.assertEqual(expected_output, output)
 
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'StorageGetDeprecated.py')
+        self.assertEqual(expected_output, output)
+
+    async def test_storage_get_bytes_key_run(self):
+        await self.set_up_contract('StorageGetBytesKey.py')
+
+        result, _ = await self.call('Main', [b'123'], return_type=bytes)
+        self.assertEqual(b'', result)
+
     def test_storage_get_str_key(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageGetStrKey.py')
 
     def test_storage_get_mismatched_type(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'StorageGetMismatchedType.py')
+
+    async def test_storage_try_get(self):
+        await self.set_up_contract('StorageTryGet.py')
+
+        key = b'example_key'
+        value = 42
+
+        expected = (0, False)
+        result, _ = await self.call('get_value', [key], return_type=tuple[int, bool])
+        self.assertEqual(expected, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertNotIn(key, contract_storage)
+
+        result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        expected = (value, True)
+        result, _ = await self.call('get_value', [key], return_type=tuple[int, bool])
+        self.assertEqual(expected, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertIn(key, contract_storage)
+        self.assertEqual(value, contract_storage[key])
+
+    async def test_storage_try_get_value(self):
+        await self.set_up_contract('StorageTryGetValue.py')
+
+        key = b'example_key'
+        value = 42
+
+        expected = 0
+        result, _ = await self.call('get_value', [key], return_type=int)
+        self.assertEqual(expected, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertNotIn(key, contract_storage)
+
+        result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result, _ = await self.call('get_value', [key], return_type=int)
+        self.assertEqual(value, result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertIn(key, contract_storage)
+        self.assertEqual(value, contract_storage[key])
+
+    async def test_storage_try_get_exists(self):
+        await self.set_up_contract('StorageTryGetExists.py')
+
+        key = b'example_key'
+        value = 42
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertNotIn(key, contract_storage)
+
+        expected = key in contract_storage
+        result, _ = await self.call('get_value', [key], return_type=bool)
+        self.assertEqual(expected, result)
+
+        result, _ = await self.call('put_value', [key, value], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        contract_storage = await self.get_storage(values_post_processor=storage.as_int)
+        self.assertIn(key, contract_storage)
+
+        expected = key in contract_storage
+        result, _ = await self.call('get_value', [key], return_type=bool)
+        self.assertEqual(expected, result)
 
     async def test_storage_put_bytes_key_bytes_value(self):
         await self.set_up_contract('StoragePutBytesKeyBytesValue.py')
@@ -89,6 +168,9 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         )
 
         output, _ = self.assertCompile('StoragePutBytesKeyIntValue.py')
+        self.assertEqual(expected_output, output)
+
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'StoragePutDeprecated.py')
         self.assertEqual(expected_output, output)
 
     async def test_storage_put_bytes_key_int_value(self):
@@ -192,6 +274,9 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         )
 
         output, _ = self.assertCompile('StorageDeleteBytesKey.py')
+        self.assertStartsWith(output, expected_output)
+
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'StorageDeleteDeprecated.py')
         self.assertStartsWith(output, expected_output)
 
     async def test_storage_delete_bytes_key(self):
@@ -651,6 +736,7 @@ class TestStorageInterop(boatestcase.BoaTestCase):
         self.assertEqual({}, contract_storage)
 
     async def test_import_interop_storage(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropStorage.py')
         await self.set_up_contract('ImportInteropStorage.py')
 
         prefix = b'unit'

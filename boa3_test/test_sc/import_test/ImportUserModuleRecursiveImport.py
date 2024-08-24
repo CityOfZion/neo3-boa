@@ -1,5 +1,5 @@
 import boa3_test.test_sc.import_test.UserModuleWithRecursiveImport
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 
 
 @public

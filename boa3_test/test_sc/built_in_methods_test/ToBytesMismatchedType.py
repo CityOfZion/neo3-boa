@@ -1,4 +1,4 @@
-from boa3.builtin.type.helper import to_bytes
+from boa3.sc.utils import to_bytes
 
 
 def list_to_bytes() -> bytes:

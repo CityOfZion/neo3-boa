@@ -8,17 +8,39 @@ class TestMatchCase(boatestcase.BoaTestCase):
     async def test_any_type_match_case(self):
         await self.set_up_contract('AnyTypeMatchCase.py')
 
-        result, _ = await self.call('main', [True], return_type=str)
-        self.assertEqual("True", result)
+        def match_case(x) -> str:
+            match x:
+                case True:
+                    return "True"
+                case 1:
+                    return "one"
+                case "2":
+                    return "2 string"
+                case {}:
+                    return "dictionary"
+                case _:
+                    # this is the default case, when all others are False
+                    return "other"
 
-        result, _ = await self.call('main', [1], return_type=str)
-        self.assertEqual("one", result)
+        arg = True
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
 
-        result, _ = await self.call('main', ["2"], return_type=str)
-        self.assertEqual("2 string", result)
+        arg = 1
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
 
-        result, _ = await self.call('main', ['other value'], return_type=str)
-        self.assertEqual("other", result)
+        arg = "2"
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = {'any': 'dict'}
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = 'other value'
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
 
     async def test_bool_type_match_case(self):
         await self.set_up_contract('BoolTypeMatchCase.py')
@@ -63,6 +85,52 @@ class TestMatchCase(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', ['unit test'], return_type=str)
         self.assertEqual("other", result)
+
+    async def test_dict_type_match_case(self):
+        await self.set_up_contract('DictTypeMatchCase.py')
+
+        def match_case(dict_: dict) -> str:
+            match dict_:
+                case {
+                    'ccccc': None,
+                    'ab': 'cd',
+                    '12': '34',
+                    'xy': 'zy',
+                    '00': '55',
+                }:
+                    return "big dictionary"
+                case {'key': 'value'}:
+                    return "key and value"
+                case {}:
+                    return "empty dict"
+                case _:
+                    return "default return"
+
+        arg = {}
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = {'key': 'value'}
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = {'key': 'value', 'unit': 'test'}
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = {'another': 'pair'}
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
+
+        arg = {
+            'ccccc': None,
+            'ab': 'cd',
+            '12': '34',
+            'xy': 'zy',
+            '00': '55',
+        }
+        result, _ = await self.call('main', [arg], return_type=str)
+        self.assertEqual(match_case(arg), result)
 
     async def test_outer_var_inside_match(self):
         await self.set_up_contract('OuterVariableInsideMatch.py')

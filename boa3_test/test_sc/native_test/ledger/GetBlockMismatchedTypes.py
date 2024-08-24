@@ -1,6 +1,6 @@
-from boa3.builtin.interop.blockchain import Block
-from boa3.builtin.nativecontract.ledger import Ledger
+from boa3.sc.contracts import LedgerContract
+from boa3.sc.types import Block
 
 
 def Main(index: str) -> Block | None:
-    return Ledger.get_block(index)
+    return LedgerContract.get_block(index)

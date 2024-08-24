@@ -1,8 +1,9 @@
 from typing import Any
 
-from boa3.builtin.compile_time import CreateNewEvent, NeoMetadata, public
-from boa3.builtin.interop.iterator import Iterator
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.types import UInt160
+from boa3.sc.utils import CreateNewEvent
+from boa3.sc.utils.iterator import Iterator
 
 on_transfer = CreateNewEvent(
     # trigger when tokens are transferred, including zero value transfers.

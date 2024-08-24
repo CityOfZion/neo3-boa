@@ -1,7 +1,7 @@
 from typing import Any
 
-from boa3.builtin.interop.contract import destroy_contract
+from boa3.sc.contracts import ContractManagement
 
 
 def Main(arg0: Any):
-    destroy_contract(arg0)
+    ContractManagement.destroy(arg0)

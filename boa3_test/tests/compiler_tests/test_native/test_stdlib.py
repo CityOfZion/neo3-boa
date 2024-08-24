@@ -1,7 +1,7 @@
 import json
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
@@ -14,6 +14,13 @@ class TestStdlibClass(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
+
+        result, _ = await self.call('main', [], return_type=bytes)
+        self.assertEqual(constants.STD_LIB_SCRIPT, result)
+
+    async def test_get_hash_deprecated(self):
+        await self.set_up_contract('GetHashDeprecated.py')
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         result, _ = await self.call('main', [], return_type=bytes)
         self.assertEqual(constants.STD_LIB_SCRIPT, result)

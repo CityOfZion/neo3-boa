@@ -1,8 +1,8 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.contract import Nep17TransferEvent
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import public
+from boa3.sc.types import UInt160
+from boa3.sc.utils import Nep17TransferEvent
 
 on_transfer = Nep17TransferEvent
 

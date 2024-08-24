@@ -1,8 +1,8 @@
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 
-from boa3.builtin.interop.runtime import notify
+from boa3.sc.runtime import notify
 
 
 @public
-def Main(notify_name: str):
-    notify(10, notify_name)
+def Main():
+    notify(10, 'unit_test')

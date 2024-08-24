@@ -3,13 +3,14 @@ __all__ = [
     'Contract',
 ]
 
-
 from typing import Any
 
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class ContractManagement:
     """
     A class used to represent the ContractManagement native contract.
@@ -59,9 +60,9 @@ class ContractManagement:
         None
 
         :param script_hash: a smart contract hash
-        :type script_hash: UInt160
+        :type script_hash: boa3.builtin.type.UInt160
         :return: a contract
-        :rtype: Contract
+        :rtype: boa3.builtin.interop.contract.contract.Contract
 
         :raise Exception: raised if hash length isn't 20 bytes.
         """
@@ -85,7 +86,7 @@ class ContractManagement:
         False
 
         :param hash: The hash of the deployed contract
-        :type hash: UInt160
+        :type hash: boa3.builtin.type.UInt160
         :param method: The name of the method
         :type method: str
         :param parameter_count: The number of parameters
@@ -128,7 +129,7 @@ class ContractManagement:
         :type data: Any
 
         :return: the contract that was created
-        :rtype: Contract
+        :rtype: boa3.builtin.interop.contract.contract.Contract
 
         :raise Exception: raised if the nef or the manifest are not a valid smart contract.
         """

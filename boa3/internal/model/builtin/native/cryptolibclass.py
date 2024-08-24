@@ -23,6 +23,7 @@ class CryptoLibClass(INativeContractClass):
                 'murmur32': Interop.Murmur32,
                 'sha256': Interop.Sha256,
                 'ripemd160': Interop.Ripemd160,
+                'keccak256': Interop.Keccak256,
                 'verify_with_ecdsa': Interop.VerifyWithECDsa,
                 'bls12_381_add': Interop.Bls12381Add,
                 'bls12_381_deserialize': Interop.Bls12381Deserialize,

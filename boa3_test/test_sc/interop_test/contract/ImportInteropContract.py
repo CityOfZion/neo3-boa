@@ -1,7 +1,8 @@
 from typing import Any
 
 from boa3.builtin import interop, type
-from boa3.builtin.compile_time import NeoMetadata, public
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.utils import call_contract
 
 
 @public
@@ -11,7 +12,7 @@ def call_flags_all() -> interop.contract.CallFlags:
 
 @public
 def main(scripthash: type.UInt160, method: str, args: list) -> Any:
-    return interop.contract.call_contract(scripthash, method, args)
+    return call_contract(scripthash, method, args)
 
 
 def manifest_metadata() -> NeoMetadata:

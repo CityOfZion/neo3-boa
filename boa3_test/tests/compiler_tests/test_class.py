@@ -459,3 +459,49 @@ class TestClass(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', ['unit test'], return_type=str)
         self.assertEqual('unit test', result)
+
+    async def test_return_dict_with_class_attributes(self):
+        await self.set_up_contract('ReturnDictWithClassAttributes.py')
+
+        expected_result = {
+            'shape': 'Rectangle',
+            'color': 'Blue',
+            'background': 'Black',
+            'size': 'Small'
+        }
+        result, _ = await self.call('test_only_values', [], return_type=dict[str,str])
+        self.assertEqual(expected_result, result)
+
+        expected_result = {
+            'Rectangle': 'shape',
+            'Blue': 'color',
+            'Black': 'background',
+            'Small': 'size'
+        }
+        result, _ = await self.call('test_only_keys', [], return_type=dict[str,str])
+        self.assertEqual(expected_result, result)
+
+        expected_result = {
+            'Rectangle': 'Rectangle',
+            'Blue': 'Blue',
+            'Black': 'Black',
+            'Small': 'Small'
+        }
+        result, _ = await self.call('test_pair', [], return_type=dict[str,str])
+        self.assertEqual(expected_result, result)
+
+    async def test_class_init_with_static_variable_no_optimization(self):
+        await self.set_up_contract('ClassInitWithStaticVariable.py', optimize=False)
+        from boa3_test.test_sc.class_test.ClassInitWithStaticVariable import MyNFT
+
+        expected_result = MyNFT('Rectangle', 'Blue', 'Black', 'Small')
+        result, _ = await self.call('test', [], return_type=list)
+        self.assertObjectEqual(expected_result, result)
+
+    async def test_class_init_with_static_variable_optimized(self):
+        await self.set_up_contract('ClassInitWithStaticVariable.py', optimize=True)
+        from boa3_test.test_sc.class_test.ClassInitWithStaticVariable import MyNFT
+
+        expected_result = MyNFT('Rectangle', 'Blue', 'Black', 'Small')
+        result, _ = await self.call('test', [], return_type=list)
+        self.assertObjectEqual(expected_result, result)

@@ -8,9 +8,11 @@ __all__ = [
 ]
 
 from boa3.builtin.type import UInt160
+from boa3.internal.deprecation import deprecated
 from boa3.internal.neo3.network.payloads.verification import WitnessConditionType, WitnessRuleAction, WitnessScope
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class Signer:
     """
     Represents a signer.
@@ -19,13 +21,13 @@ class Signer:
     about Signers.
 
     :ivar account:
-    :vartype account: UInt160
+    :vartype account: boa3.builtin.type.UInt160
     :ivar scopes:
     :vartype scopes: WitnessScope
     :ivar allowed_contracts:
-    :vartype allowed_contracts: list[UInt160]
+    :vartype allowed_contracts: list[boa3.builtin.type.UInt160]
     :ivar allowed_groups:
-    :vartype allowed_groups: list[UInt160]
+    :vartype allowed_groups: list[boa3.builtin.type.UInt160]
     :ivar rules:
     :vartype rules: list[WitnessRule]
     """
@@ -38,6 +40,7 @@ class Signer:
         self.rules: list[WitnessRule] = []
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class WitnessRule:
     """
     Represents a witness rule.
@@ -56,6 +59,7 @@ class WitnessRule:
         self.condition: WitnessCondition = WitnessCondition()
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class WitnessCondition:
     """
     Represents a witness condition.

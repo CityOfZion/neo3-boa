@@ -13,13 +13,13 @@ class Transaction:
     Transactions.
 
     :ivar hash: a unique identifier based on the unsigned data portion of the object
-    :vartype hash: UInt256
+    :vartype hash: boa3.builtin.type.UInt256
     :ivar version: the data structure version of the transaction
     :vartype version: int
     :ivar nonce: a random number used once in the cryptography
     :vartype nonce: int
     :ivar sender: the sender is the first signer of the transaction, they will pay the fees of the transaction
-    :vartype sender: UInt160
+    :vartype sender: boa3.builtin.type.UInt160
     :ivar system_fee: the fee paid for executing the `script`
     :vartype system_fee: int
     :ivar network_fee: the fee paid for the validation and inclusion of the transaction in a block by the consensus node

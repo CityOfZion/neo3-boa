@@ -1,4 +1,4 @@
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3_test.tests import boatestcase
 
@@ -38,6 +38,9 @@ class TestRoleInterop(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('ImportRole.py')
         self.assertEqual(expected_output, output)
 
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportRole.py')
+        self.assertEqual(expected_output, output)
+
     def test_import_interop_role(self):
         expected_output = (
             Opcode.INITSLOT
@@ -49,4 +52,7 @@ class TestRoleInterop(boatestcase.BoaTestCase):
         )
 
         output, _ = self.assertCompile('ImportInteropRole.py')
+        self.assertEqual(expected_output, output)
+        
+        output, _ = self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropRole.py')
         self.assertEqual(expected_output, output)

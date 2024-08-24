@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 
 
 class Example:

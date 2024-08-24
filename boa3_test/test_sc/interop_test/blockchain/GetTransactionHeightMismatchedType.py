@@ -1,5 +1,5 @@
-from boa3.builtin.interop.blockchain import get_transaction_height
+from boa3.sc.contracts import LedgerContract
 
 
 def main() -> int:
-    return get_transaction_height(123)
+    return LedgerContract.get_transaction_height(123)

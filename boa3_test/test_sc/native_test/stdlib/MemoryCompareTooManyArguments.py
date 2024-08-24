@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.nativecontract.stdlib import StdLib
+from boa3.sc.contracts import StdLib
 
 
 def main(mem1: bytes, mem2: bytes, arg: Any) -> int:

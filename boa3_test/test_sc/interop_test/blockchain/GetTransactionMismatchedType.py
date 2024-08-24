@@ -1,5 +1,6 @@
-from boa3.builtin.interop.blockchain import Transaction, get_transaction
+from boa3.sc.contracts import LedgerContract
+from boa3.sc.types import Transaction
 
 
 def main() -> Transaction:
-    return get_transaction(10)
+    return LedgerContract.get_transaction(10)

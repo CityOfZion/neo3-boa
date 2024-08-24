@@ -1,7 +1,7 @@
 from typing import cast
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.stdlib import deserialize, serialize
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
 
 
 class Example:
@@ -16,12 +16,12 @@ class Example:
 @public
 def serialize_user_class() -> bytes:
     user_class = Example()
-    return serialize(user_class)
+    return StdLib.serialize(user_class)
 
 
 @public
 def deserialize_user_class(arg: bytes) -> Example:
-    user_class = cast(Example, deserialize(arg))
+    user_class = cast(Example, StdLib.deserialize(arg))
     return user_class
 
 

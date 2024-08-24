@@ -5,10 +5,11 @@ __all__ = [
     'is_blocked',
 ]
 
-
 from boa3.builtin.type import UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :class:`PolicyContract` from :mod:`boa3.sc.contracts` instead')
 def get_exec_fee_factor() -> int:
     """
     Gets the execution fee factor. This is a multiplier that can be adjusted by the committee to adjust the system fees
@@ -23,6 +24,7 @@ def get_exec_fee_factor() -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`PolicyContract` from :mod:`boa3.sc.contracts` instead')
 def get_fee_per_byte() -> int:
     """
     Gets the network fee per transaction byte.
@@ -36,6 +38,7 @@ def get_fee_per_byte() -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`PolicyContract` from :mod:`boa3.sc.contracts` instead')
 def get_storage_price() -> int:
     """
     Gets the storage price.
@@ -49,6 +52,7 @@ def get_storage_price() -> int:
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`PolicyContract` from :mod:`boa3.sc.contracts` instead')
 def is_blocked(account: UInt160) -> bool:
     """
     Determines whether the specified account is blocked.
@@ -57,7 +61,7 @@ def is_blocked(account: UInt160) -> bool:
     False
 
     :param account: the account to be checked
-    :type account: UInt160
+    :type account: boa3.builtin.type.UInt160
 
     :return: whether the account is blocked or not
     :rtype: bool

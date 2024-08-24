@@ -1,9 +1,8 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.blockchain import get_contract
-from boa3.builtin.interop.contract import Contract
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import ContractManagement
+from boa3.sc.types import UInt160, Contract
 
 
 @public
 def main(hash: UInt160) -> Contract | None:
-    return get_contract(hash)
+    return ContractManagement.get_contract(hash)

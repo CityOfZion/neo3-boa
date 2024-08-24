@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 from package_with_import import Module as imported_module
 
 

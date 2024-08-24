@@ -1,8 +1,8 @@
 from typing import Any, cast
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.storage import get, put
-from boa3.builtin.nativecontract.stdlib import StdLib
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import StdLib
+from boa3.sc.storage import get, put
 
 
 @public

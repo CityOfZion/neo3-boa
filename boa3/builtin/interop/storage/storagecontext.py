@@ -3,8 +3,10 @@ from __future__ import annotations
 __all__ = ['StorageContext']
 
 from boa3.builtin.interop.storage.storagemap import StorageMap
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.storage` instead')
 class StorageContext:
     """
     The storage context used to read and write data in smart contracts.
@@ -23,7 +25,7 @@ class StorageContext:
         :param prefix: the identifier of the storage map
         :type prefix: bytes
         :return: a map with the key-values in the storage that match with the given prefix
-        :rtype: StorageMap
+        :rtype: boa3.builtin.interop.storage.storagemap.StorageMap
         """
         pass
 

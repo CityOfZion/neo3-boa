@@ -20,8 +20,10 @@ from boa3.builtin.interop.blockchain.transaction import Transaction
 from boa3.builtin.interop.blockchain.vmstate import VMState
 from boa3.builtin.interop.contract import Contract
 from boa3.builtin.type import UInt160, UInt256
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :class:`ContractManagement` from :mod:`boa3.sc.contracts` instead')
 def get_contract(hash: UInt160) -> Contract | None:
     """
     Gets a contract with a given hash. If the script hash is not associated with a smart contract, then it will return
@@ -48,15 +50,16 @@ def get_contract(hash: UInt160) -> Contract | None:
     None
 
     :param hash: a smart contract hash
-    :type hash: UInt160
+    :type hash: boa3.builtin.type.UInt160
     :return: a contract
-    :rtype: Contract
+    :rtype: boa3.builtin.interop.contract.contract.Contract
 
     :raise Exception: raised if hash length isn't 20 bytes.
     """
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`LedgerContract` from :mod:`boa3.sc.contracts` instead')
 def get_block(index_or_hash: int | UInt256) -> Block | None:
     """
     Gets the block with the given index or hash. Will return None if the index or hash is not associated with a Block.
@@ -96,13 +99,14 @@ def get_block(index_or_hash: int | UInt256) -> Block | None:
     None
 
     :param index_or_hash: index or hash identifier of the block
-    :type index_or_hash: int or UInt256
+    :type index_or_hash: int or boa3.builtin.type.UInt256
     :return: the desired block, if exists. None otherwise
-    :rtype: Block or None
+    :rtype: boa3.builtin.interop.blockchain.block.Block or None
     """
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`LedgerContract` from :mod:`boa3.sc.contracts` instead')
 def get_transaction(hash_: UInt256) -> Transaction | None:
     """
     Gets a transaction with the given hash. Will return None if the hash is not associated with a Transaction.
@@ -123,12 +127,13 @@ def get_transaction(hash_: UInt256) -> Transaction | None:
     None
 
     :param hash_: hash identifier of the transaction
-    :type hash_: UInt256
+    :type hash_: boa3.builtin.type.UInt256
     :return: the Transaction, if exists. None otherwise
     """
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`LedgerContract` from :mod:`boa3.sc.contracts` instead')
 def get_transaction_from_block(block_hash_or_height: UInt256 | int, tx_index: int) -> Transaction | None:
     """
     Gets a transaction from a block. Will return None if the block hash or height is not associated with a Transaction.
@@ -164,7 +169,7 @@ def get_transaction_from_block(block_hash_or_height: UInt256 | int, tx_index: in
     None
 
     :param block_hash_or_height: a block identifier
-    :type block_hash_or_height: UInt256 or int
+    :type block_hash_or_height: boa3.builtin.type.UInt256 or int
     :param tx_index: the transaction identifier in the block
     :type tx_index: int
     :return: the Transaction, if exists. None otherwise
@@ -172,6 +177,7 @@ def get_transaction_from_block(block_hash_or_height: UInt256 | int, tx_index: in
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`LedgerContract` from :mod:`boa3.sc.contracts` instead')
 def get_transaction_height(hash_: UInt256) -> int:
     """
     Gets the height of a transaction. Will return -1 if the hash is not associated with a Transaction.
@@ -186,12 +192,13 @@ def get_transaction_height(hash_: UInt256) -> int:
     -1
 
     :param hash_: hash identifier of the transaction
-    :type hash_: UInt256
+    :type hash_: boa3.builtin.type.UInt256
     :return: height of the transaction
     """
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`LedgerContract` from :mod:`boa3.sc.contracts` instead')
 def get_transaction_signers(hash_: UInt256) -> list[Signer]:
     """
     Gets a list with the signers of a transaction.
@@ -208,12 +215,13 @@ def get_transaction_signers(hash_: UInt256) -> list[Signer]:
     ]
 
     :param hash_: hash identifier of the transaction
-    :type hash_: UInt256
+    :type hash_: boa3.builtin.type.UInt256
     :return: VM state of the transaction
     """
     pass
 
 
+@deprecated(details='This module is deprecated. Use :class:`LedgerContract` from :mod:`boa3.sc.contracts` instead')
 def get_transaction_vm_state(hash_: UInt256) -> VMState:
     """
     Gets the VM state of a transaction.
@@ -222,7 +230,7 @@ def get_transaction_vm_state(hash_: UInt256) -> VMState:
     VMState.HALT
 
     :param hash_: hash identifier of the transaction
-    :type hash_: UInt256
+    :type hash_: boa3.builtin.type.UInt256
     :return: VM state of the transaction
     """
     pass

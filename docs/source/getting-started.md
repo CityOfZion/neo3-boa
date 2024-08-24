@@ -11,30 +11,6 @@ there are some key differences that you should be aware of, here's the 4 most pr
 - if you want to call other smart contracts, you can only call public functions;
 - to interact with the Neo blockchain, you need to use a function, variable, or class inside the `boa3.builtin` package.
 
-### Overview of Neo3-Boa features
-
-| Packages                                                                                                        | Contains:                                                                                                                                 | Important features                                                                                                                                                                                                                                                                                                                                                                               |
-|-----------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [boa3.builtin](auto-package/boa3/builtin/boa3-builtins)                                                         | all packages below, it also contains an env variable that lets you change the value of a variable when compiling the smart contract.      | {data}`env <boa3.builtin.env>`                                                                                                                                                                                                                                                                                                                                                                   |
-| [boa3.builtin.compile_time](auto-package/boa3/builtin/compile-time/boa3-builtin-compile-time)                   | methods and classes that are needed when you are compiling your smart contract, as opposed to when it's being executed on the blockchain. | {func}`public <boa3.builtin.compile_time.public>`, {func}`metadata <boa3.builtin.compile_time.metadata>`, {func}`contract <boa3.builtin.compile_time.contract>`, {func}`CreateNewEvent <boa3.builtin.compile_time.CreateNewEvent>`, {class}`NeoMetadata <boa3.builtin.compile_time.NeoMetadata>`                                                                                                 |
-| [boa3.builtin.contract](auto-package/boa3/builtin/contract/boa3-builtin-contract)                               | events and methods that might help when writing something specific about Neo blockchain                                                   | {func}`abort <boa3.builtin.contract.abort>`, {data}`Nep17TransferEvent <boa3.builtin.contract.Nep17TransferEvent>`, {data}`Nep11TransferEvent <boa3.builtin.contract.Nep11TransferEvent>`                                                                                                                                                                                                        |
-| [boa3.builtin.interop](auto-package/boa3/builtin/interop/boa3-builtin-interop)                                  | other packages that have a lot of helpful interoperable services. Has some overlap with the native contracts.                             | {mod}`storage <boa3.builtin.interop.storage>`, {mod}`runtime <boa3.builtin.interop.runtime>`, {mod}`contract <boa3.builtin.interop.contract>`, {mod}`blockchain <boa3.builtin.interop.blockchain>`                                                                                                                                                                                               |
-| [boa3.builtin.interop.blockchain](auto-package/boa3/builtin/interop/blockchain/boa3-builtin-interop-blockchain) | features to get information on the Neo blockchain.                                                                                        | {data}`current_hash <boa3.builtin.interop.blockchain.current_hash>`, {func}`get_contract <boa3.builtin.interop.blockchain.get_contract>`, {class}`Transaction <boa3.builtin.interop.blockchain.transaction.Transaction>`                                                                                                                                                                         |
-| [boa3.builtin.interop.contract](auto-package/boa3/builtin/interop/contract/boa3-builtin-interop-contract)       | features related to smart contracts.                                                                                                      | {func}`call_contract <boa3.builtin.interop.contract.call_contract>`, {func}`update_contract <boa3.builtin.interop.contract.update_contract>`, {class}`Contract <boa3.builtin.interop.contract.contract.Contract>`                                                                                                                                                                                |
-| [boa3.builtin.interop.crypto](auto-package/boa3/builtin/interop/crypto/boa3-builtin-interop-crypto)             | features related to cryptography.                                                                                                         | {func}`sha256 <boa3.builtin.interop.crypto.sha256>`, {func}`hash160 <boa3.builtin.interop.crypto.hash160>`, {func}`hash256 <boa3.builtin.interop.crypto.hash256>`, {func}`check_sig <boa3.builtin.interop.crypto.check_sig>`                                                                                                                                                                     |
-| [boa3.builtin.interop.iterator](auto-package/boa3/builtin/interop/iterator/boa3-builtin-interop-iterator)       | the iterator class.                                                                                                                       | {class}`Iterator <boa3.builtin.interop.iterator.Iterator>`                                                                                                                                                                                                                                                                                                                                       |
-| [boa3.builtin.interop.json](auto-package/boa3/builtin/interop/json/boa3-builtin-interop-json)                   | methods to serialize and deserialize JSON.                                                                                                | {func}`json_serialize <boa3.builtin.interop.json.json_serialize>`, {func}`json_deserialize <boa3.builtin.interop.json.json_deserialize>`                                                                                                                                                                                                                                                         |
-| [boa3.builtin.interop.oracle](auto-package/boa3/builtin/interop/oracle/boa3-builtin-interop-oracle)             | features related with Neo Oracle, it is used to get information from outside the blockchain.                                              | {class}`Oracle <boa3.builtin.nativecontract.oracle.Oracle>`                                                                                                                                                                                                                                                                                                                                      |
-| [boa3.builtin.interop.policy](auto-package/boa3/builtin/interop/policy/boa3-builtin-interop-policy)             | features related to policies that affect the entire Neo blockchain.                                                                       | {func}`get_exec_fee_factor <boa3.builtin.interop.policy.get_exec_fee_factor>`, {func}`get_storage_price <boa3.builtin.interop.policy.get_storage_price>`                                                                                                                                                                                                                                         |
-| [boa3.builtin.interop.role](auto-package/boa3/builtin/interop/role/boa3-builtin-interop-role)                   | methods to get information about the nodes on the blockchain.                                                                             | {func}`get_designated_by_role <boa3.builtin.interop.role.get_designated_by_role>`                                                                                                                                                                                                                                                                                                                |
-| [boa3.builtin.interop.runtime](auto-package/boa3/builtin/interop/runtime/boa3-builtin-interop-runtime)          | features to get information that can only be acquired when running the smart contract.                                                    | {func}`check_witness <boa3.builtin.interop.runtime.check_witness>`, {func}`calling_script_hash <boa3.builtin.interop.runtime.calling_script_hash>`, {func}`executing_script_hash <boa3.builtin.interop.runtime.executing_script_hash>`, {func}`script_container <boa3.builtin.interop.runtime.script_container>`, {class}`Notification <boa3.builtin.interop.runtime.notification.Notification>` |
-| [boa3.builtin.interop.stdlib](auto-package/boa3/builtin/interop/stdlib/boa3-builtin-interop-stdlib)             | methods that convert one data to another or methods that can check and compare memory.                                                    | {func}`serialize <boa3.builtin.interop.stdlib.serialize>`, {func}`deserialize <boa3.builtin.interop.stdlib.deserialize>`                                                                                                                                                                                                                                                                         |
-| [boa3.builtin.interop.storage](auto-package/boa3/builtin/interop/storage/boa3-builtin-interop-storage)          | features to store, get, or change values inside the blockchain.                                                                           | {func}`get <boa3.builtin.interop.storage.get>`, {func}`put <boa3.builtin.interop.storage.put>`, {func}`find <boa3.builtin.interop.storage.find>`, {class}`FindOptions <boa3.builtin.interop.storage.findoptions.FindOptions>`                                                                                                                                                                    |
-| [boa3.builtin.nativecontract](auto-package/boa3/builtin/nativecontract/boa3-builtin-nativecontract)             | classes that interface Neo's native contracts.                                                                                            | {class}`ContractManagement <boa3.builtin.nativecontract.contractmanagement.ContractManagement>`, {class}`GAS <boa3.builtin.nativecontract.gas.GAS>`, {class}`NEO <boa3.builtin.nativecontract.neo.NEO>`, {class}`StdLib <boa3.builtin.nativecontract.stdlib.StdLib>`                                                                                                                             |
-| [boa3.builtin.type](auto-package/boa3/builtin/type/boa3-builtin-type)                                           | Neo types.                                                                                                                                | {class}`UInt160 <boa3.builtin.type.UInt160>`, {class}`UInt256 <boa3.builtin.type.UInt256>`, {class}`Event <boa3.builtin.type.Event>`, {class}`ECPoint <boa3.builtin.type.ECPoint>`                                                                                                                                                                                                               |
-| [boa3.builtin.vm](auto-package/boa3/builtin/vm/boa3-builtin-vm)                                                 | Opcodes used internally by the Neo VM, used to create scripts dynamically.                                                                | {class}`Opcode <boa3.builtin.vm.Opcode>`                                                                                                                                                                                                                                                                                                                                                         |
-| [boa3.builtin.math](auto-package/boa3/builtin/boa3-builtin-math)                                                | a small sample of functions similar to Python's math.                                                                                     | {func}`sqrt <boa3.builtin.math.sqrt>`, {func}`floor <boa3.builtin.math.floor>`, {func}`ceil <boa3.builtin.math.ceil>`                                                                                                                                                                                                                                                                            |
-
 
 ### Hello World
 Let's write a quick Hello World script that has a method that will save `"Hello World"` on the blockchain 
@@ -45,18 +21,19 @@ so let's import both the `public` decorator and the `storage` package.
 
 ```python
 # hello_world.py
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop import storage
+from boa3.sc.compiletime import public
+from boa3.sc import storage
 
 
-@public     # the public decorator will make this method callable
-def save_hello_world():             # an empty return type indicates that the return is None
-    storage.put_str(b"first script", "Hello World")  # the put method will store the "Hello World" value with the "first script" key
+@public  # the public decorator will make this method callable
+def save_hello_world():  # an empty return type indicates that the return is None
+    storage.put_str(b"first script",
+                    "Hello World")  # the put method will store the "Hello World" value with the "first script" key
 
 
-@public     # the public decorator will make this method callable too
-def get_hello_world() -> str:       # this method will return a string, so it needs to specify it
-    return storage.get_str(b"first script")               # the get method will return the value associated with "first script" key
+@public  # the public decorator will make this method callable too
+def get_hello_world() -> str:  # this method will return a string, so it needs to specify it
+    return storage.get_str(b"first script")  # the get method will return the value associated with "first script" key
 ```
 
 ### Neo Methods
@@ -64,7 +41,8 @@ Neo currently has 2 special methods: `_deploy` and `verify`:
 
 ```python
 from typing import Any
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
+
 
 @public
 def _deploy(data: Any, update: bool):
@@ -72,6 +50,7 @@ def _deploy(data: Any, update: bool):
     This method will automatically be called when the smart contract is deployed or updated.
     """
     pass
+
 
 @public
 def verify() -> bool:
@@ -92,23 +71,121 @@ another method to save a given string you could do the following:
 # hello_world_with_deploy.py
 from typing import Any
 
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop import storage
+from boa3.sc.compiletime import public
+from boa3.sc import storage
 
 
 @public
-def _deploy(data: Any, update: bool):               # the _deploy function needs to have this signature
-    storage.put_str(b"second script", "Hello World")  # "Hello World" will be stored when this smart contract is deployed
+def _deploy(data: Any, update: bool):  # the _deploy function needs to have this signature
+    storage.put_str(b"second script",
+                    "Hello World")  # "Hello World" will be stored when this smart contract is deployed
 
 
 @public
-def get_message() -> str:                       # this method will still try to get the value saved on the blockchain
-    return storage.get_str(b"second script")            
+def get_message() -> str:  # this method will still try to get the value saved on the blockchain
+    return storage.get_str(b"second script")
 
 
 @public
-def set_message(new_message: str):              # now this method will overwrite a new string on the blockchain
+def set_message(new_message: str):  # now this method will overwrite a new string on the blockchain
     storage.put_str(b"second script", new_message)
+```
+
+### How to make a Token smart contract
+For a smart contract to be a fungible token on the Neo blockchain, it needs to adhere to the [NEP-17](https://docs.neo.org/docs/en-us/develop/write/nep17.html) standard, which requires the implementation of a few specific methods:
+- `symbol` - Returns the symbol of the token.
+- `decimals` - Returns the number of decimals used by the token.
+- `totalSupply` - Returns the total supply of the token.
+- `balanceOf` - Returns the balance of the specified account.
+- `transfer` - Transfers tokens from one account to another.
+
+And must also implement and trigger a `Transfer` event whenever tokens are transferred, minted or burned. 
+
+Here's a [simple example](../../boa3_test/examples/simple_nep17.py) of a Token contract following the NEP-17 standard.
+>Note: The NEP-17 standard also has requirements on how each method must be implemented. Be sure to check the [full documentation](https://docs.neo.org/docs/en-us/develop/write/nep17.html) on the NEP-17 standard to ensure the implementation is correct.
+
+### How to make a Non-Fungible (NFT) Token smart contract
+Just like the fungible token, for a contract to be a non-fungible token (NFT) in the Neo blockchain, it needs to adhere to the [NEP-11](https://docs.neo.org/docs/en-us/develop/write/nep11.html) standard by implementing a few methods and events:
+- `symbol` - Returns the symbol of the token.
+- `decimals` - Returns the number of decimals used by the token.
+- `totalSupply` - Returns the total supply of the token.
+- `tokensOf` = Returns the IDs of all NFTs owned by the specified account.
+
+In addition, an NFT contract may be either *non-divisible* or *divisible*. The remaining methods have the same name, but different **signatures** for each, and different returns:
+- For **non-divisible** NFT contracts:
+  - `balanceOf` - Returns the total amount of NFTs of the specified account.
+  - `transfer` - Transfers tokens to a specified account.
+  - `ownerOf` - Returns the address of the owner of a specified NFT ID.
+
+- For **divisible** NFT contracts:
+  - `balanceOf` - Returns the amount of NFTs of the specified NFT ID for the specified account.
+  - `transfer` - Transfers tokens to from a specified account to another.
+  - `ownerOf` - Returns the addresses of all co-owners of a specified NFT ID.
+
+In both cases, the contract must also implement and trigger a `Transfer` event whenever tokens are transferred. 
+
+>Note: Although many methods and events have the same name as the NEP-17 standard, their implementation and parameters may differ.
+
+Here's a [full example](../../boa3_test/examples/nep11_non_divisible.py) of a non-divisible token contract following the NEP-11 standard.
+>Note: The example above is rather complete and contains more than just the basic implementation of a NEP-11 contract. Once again, be sure to check the [full documentation](https://docs.neo.org/docs/en-us/develop/write/nep11.html) on the NEP-11 standard to ensure the implementation is correct.
+
+### How to receive tokens
+Any smart contract can receive tokens. To do so, the smart contract must implement a method to be used as callback by the token contract:
+- If the token being received is a fungible token, then the token contract adheres to the NEP-17 standard
+  - In this case, the method `onNEP17Payment` must be implemented
+- If the token being received is a non-fungible token, then the token contract adheres to the NEP-11 standard
+  - In this case, the method `onNEP11Payment` must be implemented
+>Note: A contract **does not** need to adhere to the NEP-11 or NEP-17 standards to **receive** tokens, fungible or not. It needs only to implement the methods used as callbacks for each type of token it wishes to receive.
+
+We can then modify our `Hello World` example to be able to receive fungible and non-fungible tokens:
+```python
+# hello_world_receiving_tokens.py
+from typing import Any
+
+from boa3.sc import runtime, storage
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import NeoToken
+from boa3.sc.types import UInt160
+from boa3.sc.utils import abort
+
+@public
+def _deploy(data: Any, update: bool):
+    storage.put_str(b"second script",
+                    "Hello World")
+
+
+@public
+def get_message() -> str:
+    return storage.get_str(b"second script")
+
+
+@public
+def set_message(new_message: str):
+    storage.put_str(b"second script", new_message)
+
+
+# This method MUST be in camel case, either directly or renamed with the decorator parameter `name`
+# This callback is called every time a fungible token is transferred to this contract
+@public(name="onNEP17Payment")
+def on_nep17_payment(from_address: UInt160, amount: int, data: Any):
+    if runtime.calling_script_hash == NeoToken.hash: #  Check if the token contract calling this callback is the Neo token
+        storage.put_bool(b"has_received_neo", True)
+    else:
+        # We MUST abort the method if this contract is not accepting any other type of token
+        abort()
+
+
+# This method MUST be in camel case, either directly or renamed with the decorator parameter `name`
+# This callback is called every time a non-fungible token is transferred to this contract
+@public(name="onNEP11Payment")
+def on_nep11_payment(from_address: UInt160, amount: int, token_id: bytes, data: Any):
+    #  Check if the NFT contract calling this callback is "my NFT" contract hash
+    if runtime.calling_script_hash == UInt160(b"my_nft_contract_hash"):
+        storage.put_bool(b"has_received_nft", True)
+    else:
+        # We MUST abort the method if this contract is not accepting any other type of NFT    
+        abort()
+
 ```
 
 ## Compiling your Smart Contract
@@ -134,8 +211,10 @@ Boa3.compile_and_save('path/to/your/file.py')
 Check out [Neo3-boa tutorials](https://developers.neo.org/tutorials/tags/neo-3-boa) on [Neo Developer](https://developers.neo.org/).
 
 For an extensive collection of examples:
-- [Smart contract examples](https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/examples)
-- [Features tests](https://github.com/CityOfZion/neo3-boa/blob/development/boa3_test/test_sc)
+- [Smart contract examples](../../boa3_test/examples)
+- [Features tests](../../boa3_test/test_sc)
+
+For reference of boa3 smart contract package utilities, take a look at [Package Reference](https://dojo.coz.io/neo3/boa/auto-package/package-reference.html) from boa3 documentation
 
 
 ## What's next

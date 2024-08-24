@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.nativecontract.policy import Policy
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import PolicyContract
 
 
 @public
 def main() -> int:
-    return Policy.get_fee_per_byte()
+    return PolicyContract.get_fee_per_byte()

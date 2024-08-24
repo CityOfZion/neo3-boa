@@ -89,7 +89,7 @@ class IStoragePutMethod(InteropMethod, abc.ABC):
         if self.key_arg.type.is_type_of(key_type) and self.value_arg.type.is_type_of(value_type):
             return self
 
-        from boa3.internal.model.builtin.interop.storage.put.storageputintmethod import StoragePutBytesMethod
+        from boa3.internal.model.builtin.interop.storage.put.storageputbytesmethod import StoragePutBytesMethod
         method: InteropMethod = StoragePutBytesMethod()
         method.args['key'] = Variable(key_type)
         method.args['value'] = Variable(value_type)

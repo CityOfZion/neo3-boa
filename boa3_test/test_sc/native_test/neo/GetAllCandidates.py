@@ -1,8 +1,8 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.iterator import Iterator
-from boa3.builtin.nativecontract.neo import NEO
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import NeoToken
+from boa3.sc.utils.iterator import Iterator
 
 
 @public
 def main() -> Iterator:
-    return NEO.get_all_candidates()
+    return NeoToken.get_all_candidates()

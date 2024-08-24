@@ -1,7 +1,7 @@
 from typing import Any
 
-from boa3.builtin.compile_time import NeoMetadata, public
-from boa3.builtin.type import UInt160
+from boa3.sc.compiletime import NeoMetadata, public
+from boa3.sc.types import UInt160
 from boa3_test.test_sc.metadata_test.aux_package import internal_package
 
 

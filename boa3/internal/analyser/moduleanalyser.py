@@ -4,7 +4,6 @@ import os
 from collections.abc import Iterable
 from typing import Any
 
-from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.analyser import asthelper
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -19,6 +18,7 @@ from boa3.internal.model.builtin.compile_time.neometadatatype import MetadataTyp
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
 from boa3.internal.model.builtin.interop.runtime import ScriptContainerProperty
+from boa3.internal.model.builtin.interop.runtime import NotifyMethod
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.callable import Callable
 from boa3.internal.model.decorator import IDecorator
@@ -42,6 +42,7 @@ from boa3.internal.model.type.collection.sequence.sequencetype import SequenceTy
 from boa3.internal.model.type.primitive.primitivetype import PrimitiveType
 from boa3.internal.model.type.type import IType, Type
 from boa3.internal.model.variable import Variable
+from boa3.sc.compiletime import NeoMetadata
 
 
 class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
@@ -1333,6 +1334,18 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if updated_symbol.identifier != func_id:
                     self.__include_callable(updated_symbol.identifier, updated_symbol)
                     return self.get_type(updated_symbol)
+        elif isinstance(func_symbol, NotifyMethod) and len(call.args) == 2:
+            if isinstance(call.args[1], ast.Constant):
+                notification_name = self.visit(call.args[1])
+                named_notification = Event(notification_name, {'state': Variable(Type.any)})
+                named_notification.add_call_origin(call)
+                self._current_module.include_symbol(named_notification.identifier, named_notification)
+            else:
+                self._log_error(
+                    CompilerError.InvalidUsage(
+                        call.args[1].lineno, call.args[1].col_offset,
+                        'The notification name should be a constant, otherwise it won\'t be added to the manifest')
+                )
 
         return self.get_type(call.func)
 
@@ -1483,7 +1496,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
     def visit_Match(self, match_node: ast.Match):
         for case in match_node.cases:
-            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton)) or
+            if not (isinstance(case.pattern, (ast.MatchValue, ast.MatchSingleton, ast.MatchMapping)) or
                     isinstance(case.pattern, ast.MatchAs) and case.pattern.pattern is None and case.guard is None
             ):
                 self._log_error(

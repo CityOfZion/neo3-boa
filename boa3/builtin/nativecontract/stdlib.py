@@ -2,12 +2,13 @@ __all__ = [
     'StdLib',
 ]
 
-
 from typing import Any
 
 from boa3.builtin.type import UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class StdLib:
     """
     A class used to represent StdLib native contract.

@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.contract import destroy_contract
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import ContractManagement
 
 
 @public
 def Main():
-    destroy_contract()
+    ContractManagement.destroy()

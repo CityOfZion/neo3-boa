@@ -1,15 +1,17 @@
 __all__ = [
     'CryptoLib',
-    'NamedCurve',
+    'NamedCurveHash',
     'IBls12381'
 ]
 
 from typing import Any
 
-from boa3.builtin.interop.crypto import NamedCurve, IBls12381
+from boa3.builtin.interop.crypto import NamedCurveHash, IBls12381
 from boa3.builtin.type import ECPoint, UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class CryptoLib:
     """
     A class used to represent the CryptoLib native contract.
@@ -74,22 +76,22 @@ class CryptoLib:
         pass
 
     @classmethod
-    def verify_with_ecdsa(cls, message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurve) -> bool:
+    def verify_with_ecdsa(cls, message: bytes, pubkey: ECPoint, signature: bytes, curve: NamedCurveHash) -> bool:
         """
         Using the elliptic curve, it checks if the signature of the message was originally produced by the public key.
 
         >>> CryptoLib.verify_with_ecdsa(b'unit test', ECPoint(b'\\x03\\x5a\\x92\\x8f\\x20\\x16\\x39\\x20\\x4e\\x06\\xb4\\x36\\x8b\\x1a\\x93\\x36\\x54\\x62\\xa8\\xeb\\xbf\\xf0\\xb8\\x81\\x81\\x51\\xb7\\x4f\\xaa\\xb3\\xa2\\xb6\\x1a'),
-        ...                             b'wrong_signature', NamedCurve.SECP256R1)
+        ...                             b'wrong_signature', NamedCurveHash.SECP256R1SHA256)
         False
 
         :param message: the encrypted message
         :type message: bytes
         :param pubkey: the public key that might have created the item
-        :type pubkey: ECPoint
+        :type pubkey: boa3.builtin.type.ECPoint
         :param signature: the signature of the item
         :type signature: bytes
         :param curve: the curve that will be used by the ecdsa
-        :type curve: NamedCurve
+        :type curve: boa3.builtin.interop.crypto.namedcurveNamedCurveHash
         :return: a boolean value that represents whether the signature is valid
         :rtype: bool
         """

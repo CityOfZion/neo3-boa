@@ -1,8 +1,8 @@
 from typing import Self
 
-from boa3.builtin.compile_time import NeoMetadata
 from boa3.internal import constants
 from boa3.internal.neo3.core.types import UInt160
+from boa3.sc.compiletime import NeoMetadata
 
 
 class CompiledMetadata:

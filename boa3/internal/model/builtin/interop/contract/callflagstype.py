@@ -3,6 +3,7 @@ from typing import Any
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.itype import IType
 from boa3.internal.model.type.primitive.inttype import IntType
+from boa3.internal.neo3.contracts import CallFlags
 
 
 class CallFlagsType(IntType):
@@ -16,7 +17,6 @@ class CallFlagsType(IntType):
 
     @property
     def default_value(self) -> Any:
-        from boa3.builtin.interop.contract import CallFlags
         return CallFlags.ALL
 
     @classmethod
@@ -26,7 +26,6 @@ class CallFlagsType(IntType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        from boa3.builtin.interop.contract import CallFlags
         return isinstance(value, (CallFlags, CallFlagsType))
 
     @property
@@ -36,7 +35,6 @@ class CallFlagsType(IntType):
 
         :return: a dictionary that maps each symbol in the module with its name
         """
-        from boa3.builtin.interop.contract import CallFlags
         from boa3.internal.model.variable import Variable
 
         _symbols = super().symbols
@@ -50,8 +48,6 @@ class CallFlagsType(IntType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        from boa3.builtin.interop.contract import CallFlags
-
         if symbol_id in self.symbols and symbol_id in CallFlags.__members__:
             return CallFlags.__members__[symbol_id]
 

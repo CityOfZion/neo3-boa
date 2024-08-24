@@ -13,6 +13,7 @@ from typing import Any
 from boa3.builtin.compile_time import CreateNewEvent
 from boa3.builtin.contract.Nep17Contract import Nep17Contract
 from boa3.builtin.type import ECPoint, UInt160, Event
+from boa3.internal.deprecation import deprecated
 
 Nep11TransferEvent: Event = CreateNewEvent(
     [
@@ -78,6 +79,7 @@ Check out the `proposal <https://github.com/neo-project/proposals/blob/master/ne
 """
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def abort(msg: str | None = None):
     """
     Aborts the execution of a smart contract. Using this will cancel the changes made on the blockchain by the
@@ -93,6 +95,7 @@ def abort(msg: str | None = None):
     pass
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.types` instead')
 class NeoAccountState:
     """
     Represents the account state of NEO token in the NEO system.
@@ -102,7 +105,7 @@ class NeoAccountState:
     :ivar height: the height of the block where the balance changed last time
     :vartype height: int
     :ivar vote_to: the voting target of the account
-    :vartype vote_to: ECPoint
+    :vartype vote_to: boa3.builtin.type.ECPoint
     """
 
     def __init__(self):
@@ -113,6 +116,7 @@ class NeoAccountState:
         self.last_gas_per_vote: int = 0
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def to_script_hash(data_bytes: Any) -> bytes:
     """
     Converts a data to a script hash.
@@ -131,6 +135,7 @@ def to_script_hash(data_bytes: Any) -> bytes:
     pass
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.utils` instead')
 def to_hex_str(data: bytes) -> str:
     """
     Converts bytes into its string hex representation.

@@ -1,7 +1,7 @@
 from boa3.builtin import interop
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 
 
 @public
 def main() -> int:
-    return interop.runtime.gas_left + interop.runtime.invocation_counter
+    return interop.runtime.get_trigger() + interop.runtime.get_trigger()

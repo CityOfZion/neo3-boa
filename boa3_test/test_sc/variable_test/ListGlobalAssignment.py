@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 
 a = [1, 2, 3, 4]
 

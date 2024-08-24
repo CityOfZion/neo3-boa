@@ -522,19 +522,25 @@ class CodeGenerator:
             return found_id, found_symbol
         return identifier, Type.none
 
-    def initialize_static_fields(self) -> bool:
+    def initialize_static_fields(self) -> tuple[bool, bool]:
         """
         Converts the signature of the method
 
-        :return: whether there are static fields to be initialized
+        :return: whether there are static fields to be initialized and if they can be generated already
         """
+        can_init_static_fields = False
+        has_static_fields = False
+        default_result = (has_static_fields, can_init_static_fields)
+
         if not self.can_init_static_fields:
-            return False
+            return default_result
         if self.initialized_static_fields:
-            return False
+            return default_result
 
         num_static_fields = len(self._statics)
-        if num_static_fields > 0:
+        has_static_fields = num_static_fields > 0
+        can_init_static_fields = True
+        if has_static_fields:
             init_data = bytearray([num_static_fields])
             self.__insert1(OpcodeInfo.INITSSLOT, init_data)
 
@@ -548,7 +554,7 @@ class CodeGenerator:
             init_method.init_bytecode = self.last_code
             self.symbol_table[constants.INITIALIZE_METHOD_ID] = init_method
 
-        return num_static_fields > 0
+        return has_static_fields, can_init_static_fields
 
     def end_initialize(self):
         """
@@ -1202,19 +1208,20 @@ class CodeGenerator:
         self.__insert1(OpcodeInfo.NEWMAP)
         self._stack_append(map_type)
 
-    def convert_new_empty_array(self, length: int, array_type: IType):
+    def convert_new_empty_array(self, length: int, array_type: IType, *, as_struct: bool = False):
         """
         Converts the creation of a new empty array
 
         :param length: the size of the new array
         :param array_type: the Neo Boa type of the array
+        :param as_struct: convert as struct instead of array
         """
         if length <= 0:
-            self.__insert1(OpcodeInfo.NEWARRAY0)
+            self.__insert1(OpcodeInfo.NEWARRAY0 if not as_struct else OpcodeInfo.NEWSTRUCT0)
         else:
             self.convert_literal(length)
             self._stack_pop()
-            self.__insert1(OpcodeInfo.NEWARRAY)
+            self.__insert1(OpcodeInfo.NEWARRAY if not as_struct else OpcodeInfo.NEWSTRUCT)
         self._stack_append(array_type)
 
     def convert_new_array(self, length: int, array_type: IType = Type.list):
@@ -2453,3 +2460,98 @@ class CodeGenerator:
             self.remove_stack_top_item()
 
         self.convert_end_method()
+
+    def compare_dicts_match_case(self):
+        # stack: MATCH var (bottom), CASE pattern (top)
+        self.swap_reverse_stack_items(2)
+        self.duplicate_stack_top_item()
+        # pattern_keys = pattern.keys()
+        self.convert_builtin_method_call(Builtin.DictKeys)
+        # stack: var, pattern, pattern_keys
+
+        self.duplicate_stack_top_item()
+        # list_length = len(pattern_keys)
+        self.convert_builtin_method_call(Builtin.Len)
+        # index = 0
+        self.convert_literal(0)
+        # is_ok = True
+        self.convert_literal(True)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok
+
+        # while index < list_length and is_ok:
+        begin_map_comparison = self.convert_begin_while()
+
+        self.duplicate_stack_item(4)
+        self.duplicate_stack_item(3)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, pattern_keys, index
+        self.convert_get_item(index_inserted_internally=True, index_is_positive=True, test_is_negative_index=False)
+        # current_key = pattern_keys[index]
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, current_key
+
+        self.duplicate_stack_top_item()
+        self.duplicate_stack_item(8)
+        self.swap_reverse_stack_items(2)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, current_key, var, current_key
+
+        self.swap_reverse_stack_items(2)
+        # key_in_var = current_key in var
+        self.convert_operation(BinaryOp.In, is_internal=True)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, current_key, key_in_var
+
+        #   if key_in_var:
+        if_key_in_var = self.convert_begin_if()
+        self.duplicate_stack_top_item()
+        self.duplicate_stack_item(8)
+        self.swap_reverse_stack_items(2)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, current_key, var, current_key
+
+        #     var_current_value == var[current_key]
+        self.convert_get_item(index_inserted_internally=True, index_is_positive=True, test_is_negative_index=False)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, current_key, var_current_value
+        self.swap_reverse_stack_items(2)
+        self.duplicate_stack_item(7)
+        self.swap_reverse_stack_items(2)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, var_current_value, pattern, current_key
+        #     pattern_current_value == pattern[current_key]
+        self.convert_get_item(index_inserted_internally=True, index_is_positive=True, test_is_negative_index=False)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, var_current_value, pattern_current_value
+        #     not_same_values = var_current_value == pattern_current_value
+        self.convert_operation(BinaryOp.NotEq, is_internal=True)
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok, not_same_values
+
+        #     if not_same_values:
+        values_are_not_equal = self.convert_begin_if()
+        self.remove_stack_top_item()
+        #       return False
+        self.convert_literal(False)
+
+        #   else:
+        self.convert_begin_else(if_key_in_var)
+        self.remove_stack_top_item()
+        self.remove_stack_top_item()
+        #     return False
+        self.convert_literal(False)
+
+        self.convert_end_if(values_are_not_equal, is_internal=True)
+
+        #  index += 1
+        self.swap_reverse_stack_items(2)
+        self.__insert1(OpcodeInfo.INC)
+        self.swap_reverse_stack_items(2)
+
+        # stack: var, pattern, pattern_keys, list_length, index, is_ok
+        # checking if `index < list_length and is_ok` is still true
+        condition_address = self.bytecode_size
+        self.duplicate_stack_item(2)
+        self.duplicate_stack_item(4)
+        self.convert_operation(BinaryOp.Lt, is_internal=True)
+        self.duplicate_stack_item(2)
+        self.convert_operation(BinaryOp.And, is_internal=True)
+        self.convert_end_while(begin_map_comparison, condition_address, is_internal=True)
+
+        # when finishing while loop, clean the stack and only `is_ok` will remain
+        self.remove_stack_item(2)
+        self.remove_stack_item(2)
+        self.remove_stack_item(2)
+        self.remove_stack_item(2)
+        self.remove_stack_item(2)

@@ -1,4 +1,4 @@
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 from boa3_test.examples.nep17 import on_transfer
 
 

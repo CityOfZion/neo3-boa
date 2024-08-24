@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.interop.runtime import get_network
+from boa3.sc.runtime import get_network
 
 
 def main(arg: Any) -> int:

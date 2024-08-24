@@ -3,7 +3,9 @@ from neo3.api.wrappers import PolicyContract
 from neo3.core import types
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
+from neo3.network.payloads import verification
+from boa3.internal.neo3.network.payloads.transactionattributetype import TransactionAttributeType
 from boa3_test.tests import boatestcase
 
 
@@ -31,6 +33,45 @@ class TestPolicyContract(boatestcase.BoaTestCase):
         expected = types.UInt160(constants.POLICY_SCRIPT)
         result, _ = await self.call('main', [], return_type=types.UInt160)
         self.assertEqual(expected, result)
+
+    async def test_get_hash_deprecated(self):
+        await self.set_up_contract('GetHashDeprecated.py')
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
+
+        expected = types.UInt160(constants.POLICY_SCRIPT)
+        result, _ = await self.call('main', [], return_type=types.UInt160)
+        self.assertEqual(expected, result)
+
+    async def test_get_attribute_fee(self):
+        await self.set_up_contract('GetAttributeFee.py')
+
+        result, _ = await self.call('main', [TransactionAttributeType.HIGH_PRIORITY], return_type=int)
+        self.assertIsInstance(result, int)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [19999999], return_type=int)
+        self.assertRegex(str(context.exception), 'bigint does not fit into uint8')
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [20], return_type=int)
+        self.assertRegex(str(context.exception), 'invalid attribute type: 20')
+
+    async def test_set_attribute_fee(self):
+        await self.set_up_contract('SetAttributeFee.py')
+
+        signer = verification.Signer(
+            self.genesis.script_hash,
+            verification.WitnessScope.GLOBAL
+        )
+        result, _ = await self.call('main', [TransactionAttributeType.HIGH_PRIORITY, 100],
+                                    return_type=None, signers=[signer], signing_accounts=[self.genesis])
+
+        result, _ = await self.call('get_tx_attr', [TransactionAttributeType.HIGH_PRIORITY], return_type=int)
+        self.assertEqual(result, 100)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [TransactionAttributeType.HIGH_PRIORITY, 100], return_type=int)
+        self.assertRegex(str(context.exception), 'invalid committee signature')
 
     async def test_get_exec_fee_factor(self):
         await self.set_up_contract('GetExecFeeFactor.py')

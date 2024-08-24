@@ -12,9 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Deprecated
+- Deprecated @metadata decorator to identify metadata function.
 
 
 ### Removed
+- Dropped support to Python 3.10
 
 
 ### Fixed

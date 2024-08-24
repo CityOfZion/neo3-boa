@@ -2,14 +2,15 @@ __all__ = [
     'NEO',
 ]
 
-
 from typing import Any
 
 from boa3.builtin.contract import NeoAccountState
 from boa3.builtin.interop.iterator import Iterator
 from boa3.builtin.type import ECPoint, UInt160
+from boa3.internal.deprecation import deprecated
 
 
+@deprecated(details='This module is deprecated. Use :mod:`boa3.sc.contracts` instead')
 class NEO:
     """
     A class used to represent the NEO native contract.
@@ -71,7 +72,7 @@ class NEO:
         100
 
         :param account: the account's address to retrieve the balance for
-        :type account: UInt160
+        :type account: boa3.builtin.type.UInt160
         :return: the account's balance
         :rtype: int
         """
@@ -102,9 +103,9 @@ class NEO:
 
 
         :param from_address: the address to transfer from
-        :type from_address: UInt160
+        :type from_address: boa3.builtin.type.UInt160
         :param to_address: the address to transfer to
-        :type to_address: UInt160
+        :type to_address: boa3.builtin.type.UInt160
         :param amount: the amount of NEO to transfer
         :type amount: int
         :param data: whatever data is pertinent to the onNEP17Payment method
@@ -141,7 +142,7 @@ class NEO:
         100000000
 
         :param account: the account to check
-        :type account: UInt160
+        :type account: boa3.builtin.type.UInt160
         :param end: the block index used when calculating GAS
         :type end: int
         """
@@ -156,7 +157,7 @@ class NEO:
         False
 
         :param pubkey: The public key of the account to be registered
-        :type pubkey: ECPoint
+        :type pubkey: boa3.builtin.type.ECPoint
         :return: whether the registration was a success or not
         :rtype: bool
         """
@@ -171,7 +172,7 @@ class NEO:
         False
 
         :param pubkey: The public key of the account to be unregistered
-        :type pubkey: ECPoint
+        :type pubkey: boa3.builtin.type.ECPoint
         :return: whether the unregistration was a success or not
         :rtype: bool
         """
@@ -186,9 +187,9 @@ class NEO:
         False
 
         :param account: the account that is voting
-        :type account: UInt160
+        :type account: boa3.builtin.type.UInt160
         :param vote_to: the public key of the one being voted
-        :type vote_to: ECPoint
+        :type vote_to: boa3.builtin.type.ECPoint
         """
         pass
 
@@ -201,7 +202,7 @@ class NEO:
         []
 
         :return: all registered candidates
-        :rtype: Iterator
+        :rtype: boa3.builtin.interop.iterator.Iterator
         """
         pass
 
@@ -214,7 +215,7 @@ class NEO:
         False
 
         :param account: the account that is removing the vote
-        :type account: UInt160
+        :type account: boa3.builtin.type.UInt160
         """
         pass
 
@@ -227,7 +228,7 @@ class NEO:
         []
 
         :return: all registered candidates
-        :rtype: list[tuple[ECPoint, int]]
+        :rtype: list[tuple[boa3.builtin.type.ECPoint, int]]
         """
         pass
 
@@ -256,7 +257,7 @@ class NEO:
         [ b'\\x02|\\x84\\xb0V\\xc2j{$XG\\x1em\\xcfgR\\xed\\xd9k\\x96\\x88}x34\\xe3Q\\xdd\\xfe\\x13\\xc4\\xbc\\xa2' ]
 
         :return: all committee members
-        :rtype: list[ECPoint]
+        :rtype: list[boa3.builtin.type.ECPoint]
         """
         pass
 
@@ -269,7 +270,7 @@ class NEO:
         [ b'\\x02|\\x84\\xb0V\\xc2j{$XG\\x1em\\xcfgR\\xed\\xd9k\\x96\\x88}x34\\xe3Q\\xdd\\xfe\\x13\\xc4\\xbc\\xa2' ]
 
         :return: the public keys of the validators
-        :rtype: list[ECPoint]
+        :rtype: list[boa3.builtin.type.ECPoint]
         """
         pass
 
@@ -286,7 +287,7 @@ class NEO:
         }
 
         :param account: the specified account
-        :type account: UInt160
+        :type account: boa3.builtin.type.UInt160
         :return: the state of the account
         :rtype: NeoAccountState
         """

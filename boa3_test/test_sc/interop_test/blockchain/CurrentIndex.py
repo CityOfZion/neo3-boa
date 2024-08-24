@@ -1,7 +1,7 @@
-from boa3.builtin.compile_time import public
-from boa3.builtin.interop.blockchain import current_index
+from boa3.sc.compiletime import public
+from boa3.sc.contracts import LedgerContract
 
 
 @public
 def main() -> int:
-    return current_index
+    return LedgerContract.get_current_index()

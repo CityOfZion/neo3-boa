@@ -1,5 +1,5 @@
-from boa3.builtin.interop.contract import create_standard_account
-from boa3.builtin.type import UInt160
+from boa3.sc.types import UInt160
+from boa3.sc.utils import create_standard_account
 
 
 def main() -> UInt160:

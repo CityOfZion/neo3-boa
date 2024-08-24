@@ -883,7 +883,6 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
     async def test_max_int_more_arguments(self):
         await self.set_up_contract('MaxIntMoreArguments.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
 
         numbers = 4, 1, 16, 8, 2
         result, _ = await self.call('main', [], return_type=int)
@@ -1416,7 +1415,6 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
     async def test_super_call_method(self):
         await self.set_up_contract('SuperCallMethod.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
 
         super_method_expected_result = -20
         arg = 20
@@ -1531,7 +1529,6 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
     async def test_int_bytes(self):
         await self.set_up_contract('IntBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
 
         value = b'0b101'
         base = 0

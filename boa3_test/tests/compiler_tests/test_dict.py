@@ -592,3 +592,24 @@ class TestDict(boatestcase.BoaTestCase):
 
     def test_del_dict_pair(self):
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'DelPair.py')
+
+    async def test_dict_value_with_method_return(self):
+        await self.set_up_contract('DictValueWithMethodReturn.py')
+
+        symbol, _ = await self.call('symbol', return_type=str)
+        self.assertGreater(len(symbol), 0)
+
+        result, _ = await self.call('Main', [], return_type=dict[str, str], signing_accounts=[self.genesis])
+        self.assertIn('id', result)
+
+        token_id = result['id']
+        expected = {"id": token_id, "name": (symbol + token_id)}
+        self.assertEqual(expected, result)
+
+        result, _ = await self.call('Main', [], return_type=dict[str, str])
+        self.assertIn('id', result)
+        self.assertNotEqual(result['id'], token_id)
+
+        token_id = result['id']
+        expected = {"id": token_id, "name": (symbol + token_id)}
+        self.assertEqual(expected, result)

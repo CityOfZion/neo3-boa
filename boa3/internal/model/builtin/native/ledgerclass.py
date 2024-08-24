@@ -11,7 +11,7 @@ class LedgerClass(INativeContractClass):
     """
 
     def __init__(self):
-        super().__init__('Ledger', LedgerContract)
+        super().__init__('LedgerContract', LedgerContract)
 
     @property
     def class_methods(self) -> dict[str, Method]:
@@ -22,6 +22,7 @@ class LedgerClass(INativeContractClass):
             self._class_methods = {
                 'get_block': Interop.GetBlock,
                 'get_current_index': Interop.CurrentIndex.getter,
+                'get_current_hash': Interop.CurrentHash.getter,
                 'get_transaction': Interop.GetTransaction,
                 'get_transaction_from_block': Interop.GetTransactionFromBlock,
                 'get_transaction_height': Interop.GetTransactionHeight,

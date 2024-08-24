@@ -1,6 +1,6 @@
 from typing import Any
 
-from boa3.builtin.compile_time import public
+from boa3.sc.compiletime import public
 
 
 @public
@@ -12,6 +12,8 @@ def main(x: Any) -> str:
             return "one"
         case "2":
             return "2 string"
+        case {}:
+            return "dictionary"
         case _:
             # this is the default case, when all others are False
             return "other"

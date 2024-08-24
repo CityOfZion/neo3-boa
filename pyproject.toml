@@ -16,6 +16,7 @@ classifiers = [
 dynamic = ['version']
 dependencies = [
     'base58>=1.0.3',
+    'deprecation>=2.1.0',
     'wheel>=0.30.0',
     'requests==2.31.0',
 ]
@@ -30,9 +31,10 @@ dev = [
     'twine>=1.10.0',
 ]
 test = [
-    'boa-test-constructor==0.3.1',
+    'boa-test-constructor>=0.3.1',
 ]
 docs = [
+    'autodocsumm>=0.2.12',
     'myst-parser==1.0.0',
     'Sphinx==5.0.0',
     'sphinx-rtd-theme==1.2.1',
@@ -53,7 +55,6 @@ exclude = ['boa3_test.tests.*_tests*']
 include = [
     'boa3', 'boa3.*',
     'boa3_test',
-    'boa3_test.tests', 'boa3_test.tests.*',
     'boa3_test.test_drive', 'boa3_test.test_drive.*'
 ]
 

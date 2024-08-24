@@ -1,5 +1,5 @@
-from boa3.builtin.interop.policy import is_blocked
+from boa3.sc.contracts import PolicyContract
 
 
 def main() -> int:
-    return is_blocked(10)
+    return PolicyContract.is_blocked(10)

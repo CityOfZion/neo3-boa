@@ -1,10 +1,10 @@
 import hashlib
 
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
-from boa3.internal.neo3.contracts.namedcurve import NamedCurve
+from boa3.internal.neo3.contracts.namedcurvehash import NamedCurveHash
 from boa3_test.tests import boatestcase
 
 
@@ -247,34 +247,34 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.compile(path)
 
     def test_verify_with_ecdsa_secp256r1_str(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Str.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Sha256Str.py')
 
     def test_verify_with_ecdsa_secp256r1_bool(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Bool.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Sha256Bool.py')
 
     def test_verify_with_ecdsa_secp256r1_int(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Int.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Sha256Int.py')
 
     def test_verify_with_ecdsa_secp256r1_bytes(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Bool.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Sha256Bool.py')
 
     def test_verify_with_ecdsa_secp256r1_mismatched_type(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1MismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256r1Sha256MismatchedType.py')
 
     def test_verify_with_ecdsa_secp256k1_str(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Str.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Sha256Str.py')
 
     def test_verify_with_ecdsa_secp256k1_bool(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Bool.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Sha256Bool.py')
 
     def test_verify_with_ecdsa_secp256k1_int(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Int.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Sha256Int.py')
 
     def test_verify_with_ecdsa_secp256k1_bytes(self):
         byte_input1 = b'0123456789ABCDEFGHIJKLMNOPQRSTUVW'
         byte_input2 = b'signature'
         string = b'unit test'
-        named_curve = Integer(NamedCurve.SECP256K1).to_byte_array(signed=True, min_length=1)
+        named_curve = Integer(NamedCurveHash.SECP256K1SHA256).to_byte_array(signed=True, min_length=1)
 
         expected_output = (
             Opcode.PUSHINT8 + named_curve
@@ -293,13 +293,14 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
             + Opcode.RET
         )
 
-        output, _ = self.assertCompile('VerifyWithECDsaSecp256k1Bytes.py')
+        output, _ = self.assertCompile('VerifyWithECDsaSecp256k1Sha256Bytes.py')
         self.assertEqual(expected_output, output)
 
     def test_verify_with_ecdsa_secp256k1_mismatched_type(self):
-        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1MismatchedType.py')
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'VerifyWithECDsaSecp256k1Sha256MismatchedType.py')
 
     async def test_import_crypto(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportCrypto.py')
         await self.set_up_contract('ImportCrypto.py')
 
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
@@ -307,6 +308,7 @@ class TestCryptoInterop(boatestcase.BoaTestCase):
         self.assertEqual(expected_result, result)
 
     async def test_import_interop_crypto(self):
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'ImportInteropCrypto.py')
         await self.set_up_contract('ImportInteropCrypto.py')
 
         expected_result = hashlib.new('ripemd160', (hashlib.sha256(b'unit test').digest())).digest()
