@@ -17,6 +17,7 @@ from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.compile_time.neometadatatype import MetadataTypeSingleton
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+from boa3.internal.model.builtin.interop.runtime import ScriptContainerProperty
 from boa3.internal.model.builtin.interop.runtime import NotifyMethod
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.callable import Callable
@@ -1444,6 +1445,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         value: ISymbol = self.get_symbol(value_id) if value_id is not None else self.visit(attribute.value)
 
         if isinstance(value, Variable):
+            value = value.type
+        elif isinstance(value, ScriptContainerProperty):
             value = value.type
 
         attribute_symbol = None

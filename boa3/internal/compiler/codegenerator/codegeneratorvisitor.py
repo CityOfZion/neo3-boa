@@ -126,6 +126,9 @@ class VisitorCodeGenerator(IAstAnalyser):
             result = self.visit(node)
 
             if not result.already_generated and result.symbol_id is not None:
+                if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Attribute):
+                    self.visit_to_generate(node.value)
+
                 if self.is_exception_name(result.symbol_id):
                     self.generator.convert_new_exception()
                 else:

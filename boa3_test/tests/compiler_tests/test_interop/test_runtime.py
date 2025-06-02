@@ -894,3 +894,16 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
                                     return_type=int
                                     )
         self.assertEqual(expected_result, result)
+
+    async def test_script_container_hash(self):
+        # test https://github.com/CityOfZion/neo3-boa/issues/1273
+        # both import styles must work
+        await self.set_up_contract('ScriptContainerHash.py')
+
+        result, _ = await self.call('main', [], return_type=types.UInt256)
+        self.assertIsInstance(result, types.UInt256)
+
+        await self.set_up_contract('ScriptContainerHash2.py')
+        result, _ = await self.call('main', [], return_type=types.UInt256)
+        self.assertIsInstance(result, types.UInt256)
+
