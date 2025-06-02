@@ -30,7 +30,7 @@ dev = [
     'twine>=1.10.0',
 ]
 test = [
-    'boa-test-constructor==0.3.1',
+    'boa-test-constructor==0.3.2',
 ]
 docs = [
     'myst-parser==1.0.0',
