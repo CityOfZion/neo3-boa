@@ -154,7 +154,8 @@ class ContractImports:
             Interop.Platform,
             Interop.InvocationCounter,
             Interop.EntryScriptHash,
-            Interop.ScriptContainer
+            Interop.ScriptContainer,
+            Interop.GetCurrentSigners
         ],
         methods=[
             Interop.BurnGas,

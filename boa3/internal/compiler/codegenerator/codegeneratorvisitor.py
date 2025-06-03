@@ -1092,6 +1092,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         else:
             if isinstance(value, ast.Attribute) and value_data.already_generated:
                 need_to_visit_again = False
+            elif isinstance(value, ast.Subscript):
+                need_to_visit_again = False
             else:
                 need_to_visit_again = value_data.already_generated
                 self._remove_inserted_opcodes_since(last_address, last_stack)
