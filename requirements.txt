@@ -1,4 +1,0 @@
-base58>=1.0.3
-deprecation>=2.1.0
-wheel>=0.30.0
-requests==2.31.0
