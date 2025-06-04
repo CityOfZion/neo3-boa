@@ -1,6 +1,8 @@
 from neo3.api import noderpc
 from neo3.contracts.contract import CONTRACT_HASHES
 from neo3.core import utils, types
+from neo3.core.types import UInt160
+from neo3.network.payloads import verification
 from neo3.wallet import account
 
 from boa3.internal import constants
@@ -907,3 +909,51 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [], return_type=types.UInt256)
         self.assertIsInstance(result, types.UInt256)
 
+
+    async def test_get_signers(self):
+        await self.set_up_contract('GetSigners.py')
+
+        result, _ = await self.call('main', return_type=list)
+        self.assertEqual(1, len(result))
+        signer = result[0]
+        account_hash = 0
+        scope = 1
+        allowed_contracts = 2
+        allowed_groups = 3
+        rules = 4
+        self.assertEqual(5, len(signer))
+        self.assertEqual('\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00', signer[account_hash])
+        self.assertEqual(0, signer[scope])
+        self.assertEqual([], signer[allowed_contracts])
+        self.assertEqual([], signer[allowed_groups])
+        self.assertEqual([], signer[rules])
+
+        signer = verification.Signer(
+            self.genesis.script_hash,
+            verification.WitnessScope.GLOBAL
+        )
+        result, _ = await self.call('main', return_type=list, signers=[signer])
+        self.assertEqual(1, len(result))
+        signer = result[0]
+        self.assertEqual(5, len(signer))
+        self.assertEqual(self.genesis.script_hash.to_array(), signer[account_hash])
+        self.assertEqual(verification.WitnessScope.GLOBAL, signer[scope])
+        self.assertEqual([], signer[allowed_contracts])
+        self.assertEqual([], signer[allowed_groups])
+        self.assertEqual([], signer[rules])
+
+    async def test_get_signers_compare_signer(self):
+        await self.set_up_contract('GetSigners.py')
+
+        result, _ = await self.call('compare_scope', [verification.WitnessScope.NONE], return_type=bool)
+        self.assertEqual(True, result)
+
+        result, _ = await self.call('compare_scope', [verification.WitnessScope.CALLED_BY_ENTRY], return_type=bool)
+        self.assertEqual(False, result)
+
+        signer = verification.Signer(
+            self.genesis.script_hash,
+            verification.WitnessScope.GLOBAL
+        )
+        result, _ = await self.call('compare_scope', [verification.WitnessScope.GLOBAL], return_type=bool, signers=[signer])
+        self.assertEqual(True, result)

@@ -168,6 +168,7 @@ class Interop:
     GasLeft = GasLeftProperty()
     GetNetwork = GetNetworkMethod()
     GetNotifications = GetNotificationsMethod(NotificationType)
+    GetCurrentSigners = GetCurrentSignersMethod(SignerType)
     GetRandom = GetRandomMethod()
     GetTrigger = GetTriggerMethod(TriggerType)
     InvocationCounter = InvocationCounterProperty()
@@ -458,7 +459,8 @@ class Interop:
                                       GetTrigger,
                                       LoadScript,
                                       Log,
-                                      Notify
+                                      Notify,
+                                      GetCurrentSigners
                                       ],
                              packages=[NotificationModule,
                                        TriggerTypeModule

@@ -2,6 +2,7 @@ __all__ = [
     'check_witness',
     'notify',
     'log',
+    'get_current_signers',
     'get_trigger',
     'get_notifications',
     'get_network',
@@ -23,7 +24,7 @@ __all__ = [
 from collections.abc import Sequence
 from typing import Any
 
-from boa3.sc.types import ECPoint, UInt160, Transaction, Notification, TriggerType, CallFlags
+from boa3.sc.types import ECPoint, UInt160, Transaction, Notification, TriggerType, CallFlags, Signer
 
 
 def check_witness(hash_or_pubkey: UInt160 | ECPoint) -> bool:
@@ -76,6 +77,14 @@ def log(message: str):
     """
     pass
 
+def get_current_signers() -> list[Signer]:
+    """
+    Get the Signers of the current transaction.
+
+    :return: Return an array of all signers of the transaction.
+    :rtype: list[Signer]
+    """
+    pass
 
 def get_trigger() -> TriggerType:
     """

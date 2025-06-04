@@ -18,6 +18,7 @@ __all__ = ['AddressVersionProperty',
            'ScriptContainerProperty',
            'GetTriggerMethod',
            'TriggerType',
+           'GetCurrentSignersMethod'
            ]
 
 from boa3.internal.model.builtin.interop.runtime.burngasmethod import BurnGasMethod
@@ -25,6 +26,7 @@ from boa3.internal.model.builtin.interop.runtime.checkwitnessmethod import Check
 from boa3.internal.model.builtin.interop.runtime.getaddressversionmethod import AddressVersionProperty
 from boa3.internal.model.builtin.interop.runtime.getblocktimemethod import BlockTimeProperty
 from boa3.internal.model.builtin.interop.runtime.getcallingscripthashmethod import CallingScriptHashProperty
+from boa3.internal.model.builtin.interop.runtime.getcurrentsignersmethod import GetCurrentSignersMethod
 from boa3.internal.model.builtin.interop.runtime.getentryscripthashmethod import EntryScriptHashProperty
 from boa3.internal.model.builtin.interop.runtime.getexecutingscripthashmethod import ExecutingScriptHashProperty
 from boa3.internal.model.builtin.interop.runtime.getgasleftmethod import GasLeftProperty
