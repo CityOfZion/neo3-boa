@@ -32,8 +32,6 @@
 
 <br/>
 
-> Note: The latest release (v0.14.0) has breaking changes with contracts written using previous versions. Please refer to our [migration guide](/docs/migration-guide-v0.14.0.md) to update your smart contracts.
-
 ## Table of Contents
 - [Overview](#overview)
 - [Quickstart](#quickstart)
