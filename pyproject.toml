@@ -35,9 +35,9 @@ test = [
 ]
 docs = [
     'autodocsumm>=0.2.12',
-    'myst-parser==1.0.0',
-    'Sphinx==5.0.0',
-    'sphinx-rtd-theme==1.2.1',
+    'myst-parser==4.0.1',
+    'Sphinx==8.2.3',
+    'sphinx-rtd-theme==3.0.2',
 ]
 
 [project.urls]

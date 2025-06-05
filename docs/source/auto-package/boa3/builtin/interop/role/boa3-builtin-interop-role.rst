@@ -7,3 +7,4 @@ role
 Subpackages
 -----------
 .. automodule:: boa3.builtin.interop.role.roletype
+    :no-index:

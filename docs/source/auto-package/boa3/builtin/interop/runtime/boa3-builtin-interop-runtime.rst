@@ -8,3 +8,4 @@ Subpackages
 -----------
 .. automodule:: boa3.builtin.interop.runtime.notification
 .. automodule:: boa3.builtin.interop.runtime.triggertype
+    :no-index:

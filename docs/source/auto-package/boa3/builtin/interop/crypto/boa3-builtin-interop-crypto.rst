@@ -7,3 +7,4 @@ crypto
 Subpackages
 -----------
 .. automodule:: boa3.builtin.interop.crypto.namedcurve
+    :no-index:
