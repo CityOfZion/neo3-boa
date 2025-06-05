@@ -211,8 +211,9 @@ Boa3.compile_and_save('path/to/your/file.py')
 Check out [Neo3-boa tutorials](https://developers.neo.org/tutorials/tags/neo-3-boa) on [Neo Developer](https://developers.neo.org/).
 
 For an extensive collection of examples:
-- [Smart contract examples](../../boa3_test/examples)
-- [Features tests](../../boa3_test/test_sc)
+- [Smart contract examples](https://github.com/CityOfZion/neo3-boa/tree/master/boa3_test/examples)
+- [Features tests](https://github.com/CityOfZion/neo3-boa/tree/master/boa3_test/test_sc)
+
 
 For reference of boa3 smart contract package utilities, take a look at [Package Reference](https://dojo.coz.io/neo3/boa/auto-package/package-reference.html) from boa3 documentation
 
