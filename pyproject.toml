@@ -4,6 +4,7 @@ description = 'A Python compiler for the Neo3 Virtual Machine'
 readme = 'README.md'
 requires-python = '>= 3.11,< 3.13'
 license = 'MIT'
+license-files = ["LICENSE"]
 keywords = ['compiler', 'NEO', '.nef', 'blockchain', 'smartcontract', 'development', 'dApp']
 classifiers = [
     'Development Status :: 5 - Production/Stable',
@@ -47,9 +48,6 @@ changelog = 'https://github.com/CityOfZion/neo3-boa/blob/master/CHANGELOG.md'
 [project.scripts]
 neo3-boa = 'boa3.cli:main'
 install_cpm = 'boa3.cpm:main'
-
-[tool.setuptools]
-license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 exclude = ['boa3_test.tests.*_tests*']
