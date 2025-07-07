@@ -82,9 +82,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: The name identifier of the method. If the current method is None, returns None.
         :rtype: str or None
         """
-        if self._current_method in self.symbols.values():
-            index = list(self.symbols.values()).index(self._current_method)
-            return list(self.symbols.keys())[index]
+        current_symbols = self.symbols
+
+        if self._current_class is not None:
+            current_symbols = self.symbols[self._current_class.identifier].symbols
+
+        if self._current_method in current_symbols.values():
+            index = list(current_symbols.values()).index(self._current_method)
+            return list(current_symbols.keys())[index]
 
     @property
     def _current_scope(self) -> SymbolScope | None:
@@ -282,7 +287,11 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             # it is returning something, but there is no type hint for return
             elif self._current_method.return_type is Type.none:
                 self._log_error(
-                    CompilerError.TypeHintMissing(ret.lineno, ret.col_offset, symbol_id=self._current_method_id)
+                    CompilerError.TypeHintMissing(
+                        self._current_method.origin.lineno,
+                        self._current_method.origin.col_offset,
+                        symbol_id=self._current_method_id
+                    )
                 )
                 return
         self.validate_type_variable_assign(ret, ret_value, self._current_method)

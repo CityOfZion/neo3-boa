@@ -505,3 +505,12 @@ class TestClass(boatestcase.BoaTestCase):
         expected_result = MyNFT('Rectangle', 'Blue', 'Black', 'Small')
         result, _ = await self.call('test', [], return_type=list)
         self.assertObjectEqual(expected_result, result)
+
+    def test_user_class_instance_method_without_return_type(self):
+        self.assertCompilerLogs(CompilerError.TypeHintMissing, 'UserClassInstanceMethodWithoutReturnType.py')
+
+    def test_user_class_static_method_without_return_type(self):
+        self.assertCompilerLogs(CompilerError.TypeHintMissing, 'UserClassStaticMethodWithoutReturnType.py')
+
+    def test_user_class_class_method_without_return_type(self):
+        self.assertCompilerLogs(CompilerError.TypeHintMissing, 'UserClassClassMethodWithoutReturnType.py')
