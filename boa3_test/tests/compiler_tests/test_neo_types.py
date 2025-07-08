@@ -1,7 +1,11 @@
 from neo3.core import cryptography, types
 
 from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
 from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo3.contracts import CallFlags
+from boa3.internal.neo3.network.payloads.verification import WitnessScope, WitnessRuleAction, WitnessConditionType
+from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
 
 
@@ -313,6 +317,13 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         result, _ = await self.call('opcode_mult', [multiplier], return_type=bytes)
         self.assertEqual(Opcode.NOP * multiplier, result)
 
+    async def test_opcode_instantiate(self):
+        from boa3.internal.neo.vm.opcode.Opcode import Opcode
+        await self.set_up_contract('opcode', 'OpcodeInstantiate.py')
+
+        result, _ = await self.call('main', [Opcode.AND], return_type=bytes)
+        self.assertEqual(Opcode.AND, result)
+
     # endregion
 
     # region IsInstance Neo Types
@@ -470,5 +481,165 @@ class TestNeoTypes(boatestcase.BoaTestCase):
 
         result, _ = await self.call('is_ecpoint', [42], return_type=bool)
         self.assertEqual(False, result)
+
+    # endregion
+
+    # region Witness
+
+    async def test_witness_scope_instantiate(self):
+        await self.set_up_contract('witness', 'WitnessScopeInstantiate.py')
+
+        result, _ = await self.call('main', [WitnessScope.NONE], return_type=int)
+        self.assertEqual(WitnessScope.NONE, result)
+
+        result, _ = await self.call('main', [WitnessScope.CALLED_BY_ENTRY], return_type=int)
+        self.assertEqual(WitnessScope.CALLED_BY_ENTRY, result)
+
+        result, _ = await self.call('main', [WitnessScope.CUSTOM_CONTRACTS], return_type=int)
+        self.assertEqual(WitnessScope.CUSTOM_CONTRACTS, result)
+
+        result, _ = await self.call('main', [WitnessScope.CUSTOM_GROUPS], return_type=int)
+        self.assertEqual(WitnessScope.CUSTOM_GROUPS, result)
+
+        result, _ = await self.call('main', [WitnessScope.WITNESS_RULES], return_type=int)
+        self.assertEqual(WitnessScope.WITNESS_RULES, result)
+
+        result, _ = await self.call('main', [WitnessScope.GLOBAL], return_type=int)
+        self.assertEqual(WitnessScope.GLOBAL, result)
+
+    async def test_witness_rule_action_instantiate(self):
+        await self.set_up_contract('witness', 'WitnessRuleActionInstantiate.py')
+
+        result, _ = await self.call('main', [WitnessRuleAction.DENY], return_type=int)
+        self.assertEqual(WitnessRuleAction.DENY, result)
+
+        result, _ = await self.call('main', [WitnessRuleAction.ALLOW], return_type=int)
+        self.assertEqual(WitnessRuleAction.ALLOW, result)
+
+    async def test_witness_condition_type_action_instantiate(self):
+        await self.set_up_contract('witness', 'WitnessConditionTypeInstantiate.py')
+
+        result, _ = await self.call('main', [WitnessConditionType.BOOLEAN], return_type=int)
+        self.assertEqual(WitnessConditionType.BOOLEAN, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.NOT], return_type=int)
+        self.assertEqual(WitnessConditionType.NOT, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.AND], return_type=int)
+        self.assertEqual(WitnessConditionType.AND, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.OR], return_type=int)
+        self.assertEqual(WitnessConditionType.OR, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.SCRIPT_HASH], return_type=int)
+        self.assertEqual(WitnessConditionType.SCRIPT_HASH, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.GROUP], return_type=int)
+        self.assertEqual(WitnessConditionType.GROUP, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.CALLED_BY_ENTRY], return_type=int)
+        self.assertEqual(WitnessConditionType.CALLED_BY_ENTRY, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.CALLED_BY_CONTRACT], return_type=int)
+        self.assertEqual(WitnessConditionType.CALLED_BY_CONTRACT, result)
+
+        result, _ = await self.call('main', [WitnessConditionType.CALLED_BY_GROUP], return_type=int)
+        self.assertEqual(WitnessConditionType.CALLED_BY_GROUP, result)
+
+    # endregion
+
+    # region VMState
+
+    async def test_vm_state_instantiate(self):
+        await self.set_up_contract('VMStateInstantiate.py')
+
+        result, _ = await self.call('main', [VMState.NONE], return_type=int)
+        self.assertEqual(VMState.NONE, result)
+
+        result, _ = await self.call('main', [VMState.HALT], return_type=int)
+        self.assertEqual(VMState.HALT, result)
+
+        result, _ = await self.call('main', [VMState.FAULT], return_type=int)
+        self.assertEqual(VMState.FAULT, result)
+
+        result, _ = await self.call('main', [VMState.BREAK], return_type=int)
+        self.assertEqual(VMState.BREAK, result)
+
+    # endregion
+
+    # region ContractParameterType
+
+    async def test_contract_parameter_type_instantiate(self):
+        await self.set_up_contract('ContractParameterTypeInstantiate.py')
+
+        result, _ = await self.call('main', [ContractParameterType.Any], return_type=int)
+        self.assertEqual(ContractParameterType.Any, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Boolean], return_type=int)
+        self.assertEqual(ContractParameterType.Boolean, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Integer], return_type=int)
+        self.assertEqual(ContractParameterType.Integer, result)
+
+        result, _ = await self.call('main', [ContractParameterType.ByteArray], return_type=int)
+        self.assertEqual(ContractParameterType.ByteArray, result)
+
+        result, _ = await self.call('main', [ContractParameterType.String], return_type=int)
+        self.assertEqual(ContractParameterType.String, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Hash160], return_type=int)
+        self.assertEqual(ContractParameterType.Hash160, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Hash256], return_type=int)
+        self.assertEqual(ContractParameterType.Hash256, result)
+
+        result, _ = await self.call('main', [ContractParameterType.PublicKey], return_type=int)
+        self.assertEqual(ContractParameterType.PublicKey, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Signature], return_type=int)
+        self.assertEqual(ContractParameterType.Signature, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Array], return_type=int)
+        self.assertEqual(ContractParameterType.Array, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Map], return_type=int)
+        self.assertEqual(ContractParameterType.Map, result)
+
+        result, _ = await self.call('main', [ContractParameterType.InteropInterface], return_type=int)
+        self.assertEqual(ContractParameterType.InteropInterface, result)
+
+        result, _ = await self.call('main', [ContractParameterType.Void], return_type=int)
+        self.assertEqual(ContractParameterType.Void, result)
+
+    # endregion
+
+    # region CallFlags
+
+    async def test_call_flags_instantiate(self):
+        await self.set_up_contract('CallFlagsInstantiate.py')
+
+        result, _ = await self.call('main', [CallFlags.NONE], return_type=int)
+        self.assertEqual(CallFlags.NONE, result)
+
+        result, _ = await self.call('main', [CallFlags.READ_STATES], return_type=int)
+        self.assertEqual(CallFlags.READ_STATES, result)
+
+        result, _ = await self.call('main', [CallFlags.WRITE_STATES], return_type=int)
+        self.assertEqual(CallFlags.WRITE_STATES, result)
+
+        result, _ = await self.call('main', [CallFlags.ALLOW_CALL], return_type=int)
+        self.assertEqual(CallFlags.ALLOW_CALL, result)
+
+        result, _ = await self.call('main', [CallFlags.ALLOW_NOTIFY], return_type=int)
+        self.assertEqual(CallFlags.ALLOW_NOTIFY, result)
+
+        result, _ = await self.call('main', [CallFlags.STATES], return_type=int)
+        self.assertEqual(CallFlags.STATES, result)
+
+        result, _ = await self.call('main', [CallFlags.READ_ONLY], return_type=int)
+        self.assertEqual(CallFlags.READ_ONLY, result)
+
+        result, _ = await self.call('main', [CallFlags.ALL], return_type=int)
+        self.assertEqual(CallFlags.ALL, result)
 
     # endregion

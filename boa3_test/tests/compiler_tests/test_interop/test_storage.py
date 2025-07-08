@@ -853,3 +853,34 @@ class TestStorageInterop(boatestcase.BoaTestCase):
 
     def test_find_options_mismatched_type(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'FindOptionsMismatchedType.py')
+
+    async def test_find_options_instantiate(self):
+        await self.set_up_contract('FindOptionsInstantiate.py')
+
+        result, _ = await self.call('main', [FindOptions.NONE], return_type=int)
+        self.assertEqual(FindOptions.NONE, result)
+
+        result, _ = await self.call('main', [FindOptions.KEYS_ONLY], return_type=int)
+        self.assertEqual(FindOptions.KEYS_ONLY, result)
+
+        result, _ = await self.call('main', [FindOptions.REMOVE_PREFIX], return_type=int)
+        self.assertEqual(FindOptions.REMOVE_PREFIX, result)
+
+        result, _ = await self.call('main', [FindOptions.VALUES_ONLY], return_type=int)
+        self.assertEqual(FindOptions.VALUES_ONLY, result)
+
+        result, _ = await self.call('main', [FindOptions.DESERIALIZE_VALUES], return_type=int)
+        self.assertEqual(FindOptions.DESERIALIZE_VALUES, result)
+
+        result, _ = await self.call('main', [FindOptions.PICK_FIELD_0], return_type=int)
+        self.assertEqual(FindOptions.PICK_FIELD_0, result)
+
+        result, _ = await self.call('main', [FindOptions.PICK_FIELD_1], return_type=int)
+        self.assertEqual(FindOptions.PICK_FIELD_1, result)
+
+        result, _ = await self.call('main', [FindOptions.BACKWARDS], return_type=int)
+        self.assertEqual(FindOptions.BACKWARDS, result)
+
+        result, _ = await self.call('main', [FindOptions.KEYS_ONLY | FindOptions.REMOVE_PREFIX], return_type=int)
+        self.assertEqual(FindOptions.KEYS_ONLY | FindOptions.REMOVE_PREFIX, result)
+

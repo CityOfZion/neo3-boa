@@ -1,7 +1,11 @@
 from typing import Any, Self
 
+from boa3.internal.model.builtin.method import IBuiltinMethod
+from boa3.internal.model.expression import IExpression
+from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.primitive.inttype import IntType
+from boa3.internal.model.variable import Variable
 from boa3.internal.neo3.network.payloads.verification import WitnessScope
 
 
@@ -52,5 +56,32 @@ class WitnessScopeType(IntType):
 
         return None
 
+    def constructor_method(self) -> Method | None:
+        if self._constructor is None:
+            self._constructor: Method = WitnessScopeMethod(self)
+        return self._constructor
+
 
 _WitnessScope = WitnessScopeType()
+
+
+class WitnessScopeMethod(IBuiltinMethod):
+
+    def __init__(self, return_type: WitnessScopeType):
+        from boa3.internal.model.type.type import Type
+        identifier = '-WitnessScope__init__'
+        args: dict[str, Variable] = {
+            'x': Variable(Type.int)
+        }
+        super().__init__(identifier, args, return_type=return_type)
+
+    def validate_parameters(self, *params: IExpression) -> bool:
+        return len(params) == 1
+
+    @property
+    def _args_on_stack(self) -> int:
+        return len(self.args)
+
+    @property
+    def _body(self) -> str | None:
+        return None

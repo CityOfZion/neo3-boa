@@ -371,3 +371,18 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
 
     def test_bls12_381_serialize_mismatched_type(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Bls12381SerializeMismatchedType.py')
+
+    async def test_get_named_curve_hash(self):
+        await self.set_up_contract('NamedCurveHashInstantiate.py')
+
+        result, _ = await self.call('main', [NamedCurveHash.SECP256K1SHA256], return_type=int)
+        self.assertEqual(NamedCurveHash.SECP256K1SHA256, result)
+
+        result, _ = await self.call('main', [NamedCurveHash.SECP256R1SHA256], return_type=int)
+        self.assertEqual(NamedCurveHash.SECP256R1SHA256, result)
+
+        result, _ = await self.call('main', [NamedCurveHash.SECP256K1KECCAK256], return_type=int)
+        self.assertEqual(NamedCurveHash.SECP256K1KECCAK256, result)
+
+        result, _ = await self.call('main', [NamedCurveHash.SECP256R1KECCAK256], return_type=int)
+        self.assertEqual(NamedCurveHash.SECP256R1KECCAK256, result)
