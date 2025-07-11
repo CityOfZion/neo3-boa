@@ -5,6 +5,7 @@ from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
 from boa3.internal.model.type.primitive.inttype import IntType
+from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo3.network.payloads.verification import WitnessConditionType as WitnessCondition
 
@@ -38,8 +39,6 @@ class WitnessConditionType(IntType):
 
         :return: a dictionary that maps each symbol in the module with its name
         """
-        from boa3.internal.model.variable import Variable
-
         _symbols = super().symbols
         _symbols.update({name: Variable(self) for name in WitnessCondition.__members__.keys()})
 
@@ -68,7 +67,6 @@ _WitnessConditionType = WitnessConditionType()
 class WitnessConditionEnumMethod(IBuiltinMethod):
 
     def __init__(self, return_type: WitnessConditionType):
-        from boa3.internal.model.type.type import Type
         identifier = '-WitnessConditionType__init__'
         args: dict[str, Variable] = {
             'x': Variable(Type.int)
