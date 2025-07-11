@@ -121,3 +121,18 @@ class TestPolicyContract(boatestcase.BoaTestCase):
 
     def test_is_blocked_too_few_parameters(self):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, 'IsBlockedTooFewArguments.py')
+
+    async def test_transaction_attribute_instantiate(self):
+        await self.set_up_contract('TransactionAttributeTypeInstantiate.py')
+
+        result, _ = await self.call('main', [TransactionAttributeType.HIGH_PRIORITY], return_type=int)
+        self.assertEqual(TransactionAttributeType.HIGH_PRIORITY, result)
+
+        result, _ = await self.call('main', [TransactionAttributeType.ORACLE_RESPONSE], return_type=int)
+        self.assertEqual(TransactionAttributeType.ORACLE_RESPONSE, result)
+
+        result, _ = await self.call('main', [TransactionAttributeType.NOT_VALID_BEFORE], return_type=int)
+        self.assertEqual(TransactionAttributeType.NOT_VALID_BEFORE, result)
+
+        result, _ = await self.call('main', [TransactionAttributeType.CONFLICTS], return_type=int)
+        self.assertEqual(TransactionAttributeType.CONFLICTS, result)

@@ -3,6 +3,7 @@ from neo3.core import types
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo3.contracts.native import Role
 from boa3_test.tests import boatestcase
 
 
@@ -41,3 +42,15 @@ class TestRoleManagementClass(boatestcase.BoaTestCase):
 
     def test_get_designated_by_role_too_few_parameters(self):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, 'GetDesignatedByRoleTooFewArguments.py')
+
+    async def test_role_instantiate(self):
+        await self.set_up_contract('RoleInstantiate.py')
+
+        result, _ = await self.call('main', [Role.STATE_VALIDATOR], return_type=int)
+        self.assertEqual(Role.STATE_VALIDATOR, result)
+
+        result, _ = await self.call('main', [Role.ORACLE], return_type=int)
+        self.assertEqual(Role.ORACLE, result)
+
+        result, _ = await self.call('main', [Role.NEO_FS_ALPHABET_NODE], return_type=int)
+        self.assertEqual(Role.NEO_FS_ALPHABET_NODE, result)

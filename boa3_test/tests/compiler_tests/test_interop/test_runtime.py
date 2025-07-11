@@ -957,3 +957,24 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
         )
         result, _ = await self.call('compare_scope', [verification.WitnessScope.GLOBAL], return_type=bool, signers=[signer])
         self.assertEqual(True, result)
+
+    async def test_trigger_type_instantiate(self):
+        await self.set_up_contract('TriggerTypeInstantiate.py')
+
+        result, _ = await self.call('main', [TriggerType.ON_PERSIST], return_type=int)
+        self.assertEqual(TriggerType.ON_PERSIST, result)
+
+        result, _ = await self.call('main', [TriggerType.POST_PERSIST], return_type=int)
+        self.assertEqual(TriggerType.POST_PERSIST, result)
+
+        result, _ = await self.call('main', [TriggerType.SYSTEM], return_type=int)
+        self.assertEqual(TriggerType.SYSTEM, result)
+
+        result, _ = await self.call('main', [TriggerType.VERIFICATION], return_type=int)
+        self.assertEqual(TriggerType.VERIFICATION, result)
+
+        result, _ = await self.call('main', [TriggerType.APPLICATION], return_type=int)
+        self.assertEqual(TriggerType.APPLICATION, result)
+
+        result, _ = await self.call('main', [TriggerType.ALL], return_type=int)
+        self.assertEqual(TriggerType.ALL, result)
