@@ -51,19 +51,38 @@ class InsertMethod(IBuiltinMethod):
 
         code_generator.duplicate_stack_item(3)
         code_generator.duplicate_stack_top_item()
-        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
-        code_generator.insert_opcode(Opcode.DEC)
-
-        code_generator.duplicate_stack_item(2)
-        code_generator.duplicate_stack_item(2)
-        code_generator.convert_get_item(index_inserted_internally=True)
-
-        # array.append(value)
-        code_generator.duplicate_stack_item(3)
-        code_generator.swap_reverse_stack_items(2)
+        # array.append(None)
+        code_generator.convert_literal(None)
         code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
 
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.insert_opcode(Opcode.DEC)
         # x = len(array) - 1
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(4)
+
+        # if index > x:
+        #   index = x
+        if_index_gt_array = code_generator.convert_begin_if()
+        code_generator.change_jump(if_index_gt_array, Opcode.JMPGT)
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.remove_stack_top_item()
+        code_generator.duplicate_stack_item(2)
+        else_index_le_array = code_generator.convert_begin_else(if_index_gt_array, is_internal=True)
+
+        code_generator.convert_literal(0)
+        code_generator.duplicate_stack_item(4)
+        # elif index < 0:
+        #  index = 0
+        elif_index_lt_zero = code_generator.convert_begin_if()
+        code_generator.change_jump(elif_index_lt_zero, Opcode.JMPLE)
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(0)
+        code_generator.swap_reverse_stack_items(3)
+        code_generator.convert_end_if(elif_index_lt_zero, is_internal=True)
+        code_generator.convert_end_if(else_index_le_array, is_internal=True)
 
         # while x > index:
         while_begin = code_generator.convert_begin_while()
