@@ -1368,6 +1368,23 @@ class TestList(boatestcase.BoaTestCase):
         result, _ = await self.call('Main', [], return_type=list)
         self.assertEqual([1, 2, 4, 3], result)
 
+    async def test_list_insert_empty_list(self):
+        await self.set_up_contract('ListInsertEmptyList.py')
+
+        list_ = []
+        index = 0
+        value = 10
+        result, _ = await self.call('main', [index, value], return_type=list)
+        list_.insert(index, value)
+        self.assertEqual(list_, result)
+
+        list_ = []
+        index = 99
+        value = 10
+        result, _ = await self.call('main', [index, value], return_type=list)
+        list_.insert(index, value)
+        self.assertEqual(list_, result)
+
     async def test_list_insert_any_value(self):
         await self.set_up_contract('ListInsertAnyValue.py')
 
@@ -1388,6 +1405,20 @@ class TestList(boatestcase.BoaTestCase):
         list_ = [1, 2, 3]
         pos = 3
         value = '4'
+        result, _ = await self.call('Main', [list_, pos, value], return_type=list)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
+
+        list_ = [1, 2, 3]
+        pos = 4
+        value = '4'
+        result, _ = await self.call('Main', [list_, pos, value], return_type=list)
+        list_.insert(pos, value)
+        self.assertEqual(list_, result)
+
+        list_ = [1, 2, 3]
+        pos = 99
+        value = 4
         result, _ = await self.call('Main', [list_, pos, value], return_type=list)
         list_.insert(pos, value)
         self.assertEqual(list_, result)

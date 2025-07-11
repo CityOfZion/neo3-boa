@@ -52,7 +52,23 @@ class InsertMethod(IBuiltinMethod):
         code_generator.duplicate_stack_item(3)
         code_generator.duplicate_stack_top_item()
         code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+
+        code_generator.duplicate_stack_top_item()
+        code_generator.duplicate_stack_item(4)
+
+        # if len(array) <= index:
+        if_index_exceeds_sequence_len = code_generator.convert_begin_if()
+        code_generator.change_jump(if_index_exceeds_sequence_len, Opcode.JMPGT)
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.remove_stack_top_item()
+        code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
+        #   array.append(value)
+        #   return
+
+        else_index_not_exceed_sequence_len = code_generator.convert_begin_else(if_index_exceeds_sequence_len, is_internal=True)
         code_generator.insert_opcode(Opcode.DEC)
+        # x = len(array) - 1
 
         code_generator.duplicate_stack_item(2)
         code_generator.duplicate_stack_item(2)
@@ -62,8 +78,6 @@ class InsertMethod(IBuiltinMethod):
         code_generator.duplicate_stack_item(3)
         code_generator.swap_reverse_stack_items(2)
         code_generator.convert_builtin_method_call(Builtin.SequenceAppend, is_internal=True)
-
-        # x = len(array) - 1
 
         # while x > index:
         while_begin = code_generator.convert_begin_while()
@@ -100,6 +114,8 @@ class InsertMethod(IBuiltinMethod):
         value_address = code_generator.bytecode_size
         code_generator.swap_reverse_stack_items(2)
         code_generator.convert_set_item(value_address, index_inserted_internally=True)
+
+        code_generator.convert_end_if(else_index_not_exceed_sequence_len, is_internal=True)
 
     def push_self_first(self) -> bool:
         return self.has_self_argument
