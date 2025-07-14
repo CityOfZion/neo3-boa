@@ -9,7 +9,7 @@ there are some key differences that you should be aware of, here's the 4 most pr
 - there is no floating point arithmetic, only the `int` type is implemented;
 - you need to specify a function's return type and parameter types;
 - if you want to call other smart contracts, you can only call public functions;
-- to interact with the Neo blockchain, you need to use a function, variable, or class inside the `boa3.builtin` package.
+- to interact with the Neo blockchain, you need to use a function, variable, or class inside the `boa3.sc` package.
 
 
 ### Hello World

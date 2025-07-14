@@ -16,7 +16,8 @@ To call the `hello_stranger` method, first you'll need to know the smart contrac
 Let us also assume it is `0x000102030405060708090A0B0C0D0E0F10111213`.
 
 ## with call_contract
-Use the `call_contract` method from `boa3.builtin.interop.contract` on your smart contract. You'll need to use the 
+
+Use the `call_contract` method from `boa3.sc.utils` on your smart contract. You'll need to use the
 script hash, followed by the name of the function you want to call, followed by the arguments of said function. You'll 
 also need to type cast the return so the compiler type checker works as expected, otherwise the return type will be 
 considered as `Any`.
@@ -44,7 +45,8 @@ keep track of a lot of `call_contract`s on the same file. It's pretty much alway
 smart contracts.
 
 ## with Interface
-Use the `contract` decorator from `boa3.builtin.compile_time` using the script hash and create a class that have the 
+
+Use the `contract` decorator from `boa3.sc.compile_time` using the script hash and create a class that have the
 same methods you want call.
 
 ```python
@@ -70,8 +72,9 @@ class HelloStrangerContract:
 ```
 
 ### Calling native contracts
+
 Neo3-Boa already has interfaces for all the [native contracts](https://docs.neo.org/docs/en-us/reference/scapi/framework/native.html) 
-that you can import from `boa3.builtin.nativecontract`
+that you can import from `boa3.sc.contracts`
 
 ```python
 # calling_native_contract.py
