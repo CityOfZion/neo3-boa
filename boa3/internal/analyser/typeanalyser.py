@@ -331,7 +331,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         else:
 
             has_else_stmt: bool = hasattr(node, 'orelse')
-            has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass)) for stmt in node.body)
+            has_body_return: bool = any(isinstance(stmt, (ast.Return, ast.Pass, ast.Raise)) for stmt in node.body)
             if has_body_return and not has_else_stmt:
                 # if any statement in the function body is a return, all flow has a return
                 return True
