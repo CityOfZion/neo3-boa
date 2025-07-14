@@ -1061,6 +1061,17 @@ class TestFunction(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [[1, 2, 3]], return_type=int)
         self.assertEqual(3, result)
 
+    async def test_return_exception(self):
+        await self.set_up_contract('ReturnException.py')
+
+        result, _ = await self.call('main', [1], return_type=bytes)
+        self.assertEqual(b'\x01', result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [0], return_type=bytes)
+
+        self.assertRegex(str(context.exception), 'unhandled exception: "x must be 1"')
+
     async def test_call_function_with_same_name_in_different_scopes(self):
         await self.set_up_contract('CallFunctionsWithSameNameInDifferentScopes.py')
 
