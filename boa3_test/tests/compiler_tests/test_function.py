@@ -1072,6 +1072,9 @@ class TestFunction(boatestcase.BoaTestCase):
 
         self.assertRegex(str(context.exception), 'unhandled exception: "x must be 1"')
 
+    async def test_return_exception_incorrect_if_return(self):
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'ReturnExceptionIncorrectIfReturn.py')
+
     async def test_call_function_with_same_name_in_different_scopes(self):
         await self.set_up_contract('CallFunctionsWithSameNameInDifferentScopes.py')
 
@@ -1126,3 +1129,15 @@ class TestFunction(boatestcase.BoaTestCase):
 
     def test_function_builtin_function_decorators_with_class(self):
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'BuiltinContractDecoratorWithFunction.py')
+
+    def test_type_hint_bytes_return_other_collection(self):
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'TypeHintBytesReturnOtherCollection.py')
+
+    def test_type_hint_str_return_other_collection(self):
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'TypeHintStrReturnOtherCollection.py')
+
+    def test_type_hint_list_return_other_collection(self):
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'TypeHintListReturnOtherCollection.py')
+
+    def test_type_hint_dict_return_other_collection(self):
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'TypeHintDictReturnOtherCollection.py')

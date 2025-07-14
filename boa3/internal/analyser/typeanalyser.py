@@ -32,6 +32,7 @@ from boa3.internal.model.type.classes.classtype import ClassType
 from boa3.internal.model.type.classes.pythonclass import PythonClass
 from boa3.internal.model.type.classes.userclass import UserClass
 from boa3.internal.model.type.collection.icollection import ICollectionType as Collection
+from boa3.internal.model.type.primitive.ibytestringtype import IByteStringType
 from boa3.internal.model.type.type import IType, Type
 from boa3.internal.model.type.typeutils import TypeUtils
 from boa3.internal.model.variable import Variable
@@ -505,7 +506,9 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             target_type = self.get_type(value)
 
         has_only_default_values = value == target_type.default_value
-        if not has_only_default_values and isinstance(target_type, Collection) and hasattr(value, '__len__'):
+        is_collection_and_not_bytestring = (isinstance(target_type, Collection) and
+                                            not isinstance(target_type, IByteStringType))
+        if not has_only_default_values and is_collection_and_not_bytestring and hasattr(value, '__len__'):
             has_only_default_values = True
             if isinstance(value, dict):
                 for key, item in value.items():
