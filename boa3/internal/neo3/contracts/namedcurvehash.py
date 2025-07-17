@@ -1,7 +1,7 @@
-from enum import IntFlag
+from enum import IntEnum
 
 
-class NamedCurveHash(IntFlag):
+class NamedCurveHash(IntEnum):
     """
     Represents the named curve used in ECDSA.
 

@@ -1,7 +1,6 @@
 from neo3.api import noderpc
 from neo3.contracts.contract import CONTRACT_HASHES
 from neo3.core import utils, types
-from neo3.core.types import UInt160
 from neo3.network.payloads import verification
 from neo3.wallet import account
 
@@ -961,20 +960,17 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
     async def test_trigger_type_instantiate(self):
         await self.set_up_contract('TriggerTypeInstantiate.py')
 
-        result, _ = await self.call('main', [TriggerType.ON_PERSIST], return_type=int)
-        self.assertEqual(TriggerType.ON_PERSIST, result)
+        for trigger_type in TriggerType:
+            result, _ = await self.call('main', [trigger_type], return_type=int)
+            self.assertEqual(trigger_type, result)
 
-        result, _ = await self.call('main', [TriggerType.POST_PERSIST], return_type=int)
-        self.assertEqual(TriggerType.POST_PERSIST, result)
+        result, _ = await self.call('main', [TriggerType.ON_PERSIST | TriggerType.VERIFICATION], return_type=int)
+        self.assertEqual(TriggerType.ON_PERSIST | TriggerType.VERIFICATION, result)
 
-        result, _ = await self.call('main', [TriggerType.SYSTEM], return_type=int)
-        self.assertEqual(TriggerType.SYSTEM, result)
+        result, _ = await self.call('main', [TriggerType.POST_PERSIST | TriggerType.APPLICATION], return_type=int)
+        self.assertEqual(TriggerType.POST_PERSIST | TriggerType.APPLICATION, result)
 
-        result, _ = await self.call('main', [TriggerType.VERIFICATION], return_type=int)
-        self.assertEqual(TriggerType.VERIFICATION, result)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [128], return_type=int)
 
-        result, _ = await self.call('main', [TriggerType.APPLICATION], return_type=int)
-        self.assertEqual(TriggerType.APPLICATION, result)
-
-        result, _ = await self.call('main', [TriggerType.ALL], return_type=int)
-        self.assertEqual(TriggerType.ALL, result)
+        self.assertRegex(str(context.exception), "Invalid TriggerType parameter value")

@@ -1,10 +1,10 @@
 from neo3.api import noderpc
 from neo3.api.wrappers import PolicyContract
 from neo3.core import types
+from neo3.network.payloads import verification
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError, CompilerWarning
-from neo3.network.payloads import verification
 from boa3.internal.neo3.network.payloads.transactionattributetype import TransactionAttributeType
 from boa3_test.tests import boatestcase
 
@@ -136,3 +136,13 @@ class TestPolicyContract(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', [TransactionAttributeType.CONFLICTS], return_type=int)
         self.assertEqual(TransactionAttributeType.CONFLICTS, result)
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [0x00], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid TransactionAttributeType parameter value")
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [0xFF], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid TransactionAttributeType parameter value")

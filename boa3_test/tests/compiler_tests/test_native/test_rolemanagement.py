@@ -54,3 +54,8 @@ class TestRoleManagementClass(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', [Role.NEO_FS_ALPHABET_NODE], return_type=int)
         self.assertEqual(Role.NEO_FS_ALPHABET_NODE, result)
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [1], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid Role parameter value")
