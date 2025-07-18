@@ -1,7 +1,7 @@
-from enum import IntFlag
+from enum import IntEnum
 
 
-class TransactionAttributeType(IntFlag):
+class TransactionAttributeType(IntEnum):
     """
     Represents the TransactionAttributeType for running smart contracts.
     """

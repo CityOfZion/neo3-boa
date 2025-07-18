@@ -1,7 +1,7 @@
-from enum import IntFlag
+from enum import IntEnum
 
 
-class OracleResponseCode(IntFlag):
+class OracleResponseCode(IntEnum):
     """
     Represents the response code for the oracle request.
     """

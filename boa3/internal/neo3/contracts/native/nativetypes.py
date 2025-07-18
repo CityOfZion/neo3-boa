@@ -1,7 +1,7 @@
-from enum import IntFlag
+from enum import IntEnum
 
 
-class Role(IntFlag):
+class Role(IntEnum):
     """
     Represents the roles in the NEO system. They are the permission types of the native contract `RoleManagement`.
     """

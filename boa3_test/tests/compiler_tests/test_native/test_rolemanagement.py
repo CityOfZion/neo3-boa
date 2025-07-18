@@ -54,3 +54,15 @@ class TestRoleManagementClass(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', [Role.NEO_FS_ALPHABET_NODE], return_type=int)
         self.assertEqual(Role.NEO_FS_ALPHABET_NODE, result)
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [1], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid Role parameter value")
+
+    async def test_role_not(self):
+        await self.set_up_contract('RoleNot.py')
+
+        for role in Role:
+            result, _ = await self.call('main', [role], return_type=int)
+            self.assertEqual(~role, result)

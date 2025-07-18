@@ -420,32 +420,23 @@ class TestNativeContracts(boatestcase.BoaTestCase):
     async def test_oracle_response_code_instantiate(self):
         await self.set_up_contract('OracleResponseCodeInstantiate.py')
 
-        result, _ = await self.call('main', [OracleResponseCode.SUCCESS], return_type=int)
-        self.assertEqual(OracleResponseCode.SUCCESS, result)
+        for oracle_response_code in OracleResponseCode:
+            result, _ = await self.call('main', [oracle_response_code], return_type=int)
+            self.assertEqual(oracle_response_code, result)
 
-        result, _ = await self.call('main', [OracleResponseCode.PROTOCOL_NOT_SUPPORTED], return_type=int)
-        self.assertEqual(OracleResponseCode.PROTOCOL_NOT_SUPPORTED, result)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [0xcc], return_type=int)
 
-        result, _ = await self.call('main', [OracleResponseCode.CONSENSUS_UNREACHABLE], return_type=int)
-        self.assertEqual(OracleResponseCode.CONSENSUS_UNREACHABLE, result)
+        self.assertRegex(str(context.exception), "Invalid OracleResponseCode parameter value")
 
-        result, _ = await self.call('main', [OracleResponseCode.NOT_FOUND], return_type=int)
-        self.assertEqual(OracleResponseCode.NOT_FOUND, result)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [0x01], return_type=int)
 
-        result, _ = await self.call('main', [OracleResponseCode.TIME_OUT], return_type=int)
-        self.assertEqual(OracleResponseCode.TIME_OUT, result)
+        self.assertRegex(str(context.exception), "Invalid OracleResponseCode parameter value")
 
-        result, _ = await self.call('main', [OracleResponseCode.FORBIDDEN], return_type=int)
-        self.assertEqual(OracleResponseCode.FORBIDDEN, result)
+    async def test_oracle_response_code_not(self):
+        await self.set_up_contract('OracleResponseCodeNot.py')
 
-        result, _ = await self.call('main', [OracleResponseCode.RESPONSE_TOO_LARGE], return_type=int)
-        self.assertEqual(OracleResponseCode.RESPONSE_TOO_LARGE, result)
-
-        result, _ = await self.call('main', [OracleResponseCode.INSUFFICIENT_FUNDS], return_type=int)
-        self.assertEqual(OracleResponseCode.INSUFFICIENT_FUNDS, result)
-
-        result, _ = await self.call('main', [OracleResponseCode.CONTENT_TYPE_NOT_SUPPORTED], return_type=int)
-        self.assertEqual(OracleResponseCode.CONTENT_TYPE_NOT_SUPPORTED, result)
-
-        result, _ = await self.call('main', [OracleResponseCode.ERROR], return_type=int)
-        self.assertEqual(OracleResponseCode.ERROR, result)
+        for oracle_response_code in OracleResponseCode:
+            result, _ = await self.call('main', [oracle_response_code], return_type=int)
+            self.assertEqual(~oracle_response_code, result)

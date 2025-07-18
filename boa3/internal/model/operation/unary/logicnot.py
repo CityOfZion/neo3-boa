@@ -1,5 +1,6 @@
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.operation.unary.unaryoperation import UnaryOperation
+from boa3.internal.model.type.enum.intflagtype import IntFlagType
 from boa3.internal.model.type.type import IType, Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
@@ -27,9 +28,23 @@ class LogicNot(UnaryOperation):
 
     def _get_result(self, operand: IType) -> IType:
         if self.validate_type(operand):
+            if isinstance(operand, IntFlagType):
+                return operand
             return Type.int
+
+        return Type.none
+
+    def generate_opcodes(self, code_generator):
+        from boa3.internal.model.operation.binaryop import BinaryOp
+
+        if isinstance(self.operand_type, IntFlagType):
+            next_power_of_two = self.operand_type.next_power_of_two
+
+            code_generator.convert_literal(next_power_of_two - 1)
+            code_generator.convert_operation(BinaryOp.Xor, is_internal=True)
+
         else:
-            return Type.none
+            super().generate_opcodes(code_generator)
 
     def generate_internal_opcodes(self, code_generator):
         code_generator.insert_opcode(Opcode.INVERT)

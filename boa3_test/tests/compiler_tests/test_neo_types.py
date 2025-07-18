@@ -321,8 +321,14 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
         await self.set_up_contract('opcode', 'OpcodeInstantiate.py')
 
-        result, _ = await self.call('main', [Opcode.AND], return_type=bytes)
-        self.assertEqual(Opcode.AND, result)
+        for opcode in Opcode:
+            result, _ = await self.call('main', [opcode], return_type=bytes)
+            self.assertEqual(opcode, result)
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [b'\xff'], return_type=bytes)
+
+        self.assertRegex(str(context.exception), "Invalid Opcode parameter value")
 
     # endregion
 
@@ -507,6 +513,18 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [WitnessScope.GLOBAL], return_type=int)
         self.assertEqual(WitnessScope.GLOBAL, result)
 
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [0xFF], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid WitnessScope parameter value")
+
+    async def test_witness_scope_not(self):
+        await self.set_up_contract('witness', 'WitnessScopeNot.py')
+
+        for witness_scope in WitnessScope:
+            result, _ = await self.call('main', [witness_scope], return_type=int)
+            self.assertEqual(~witness_scope, result)
+
     async def test_witness_rule_action_instantiate(self):
         await self.set_up_contract('witness', 'WitnessRuleActionInstantiate.py')
 
@@ -516,35 +534,36 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [WitnessRuleAction.ALLOW], return_type=int)
         self.assertEqual(WitnessRuleAction.ALLOW, result)
 
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [2], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid WitnessRuleAction parameter value")
+
+    async def test_witness_rule_action_not(self):
+        await self.set_up_contract('witness', 'WitnessRuleActionNot.py')
+
+        for witness_rule_action in WitnessRuleAction:
+            result, _ = await self.call('main', [witness_rule_action], return_type=int)
+            self.assertEqual(~witness_rule_action, result)
+
     async def test_witness_condition_type_action_instantiate(self):
         await self.set_up_contract('witness', 'WitnessConditionTypeInstantiate.py')
 
-        result, _ = await self.call('main', [WitnessConditionType.BOOLEAN], return_type=int)
-        self.assertEqual(WitnessConditionType.BOOLEAN, result)
+        for witness_condition_type in WitnessConditionType:
+            result, _ = await self.call('main', [witness_condition_type], return_type=int)
+            self.assertEqual(witness_condition_type, result)
 
-        result, _ = await self.call('main', [WitnessConditionType.NOT], return_type=int)
-        self.assertEqual(WitnessConditionType.NOT, result)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [0xFF], return_type=int)
 
-        result, _ = await self.call('main', [WitnessConditionType.AND], return_type=int)
-        self.assertEqual(WitnessConditionType.AND, result)
+        self.assertRegex(str(context.exception), "Invalid WitnessConditionType parameter value")
 
-        result, _ = await self.call('main', [WitnessConditionType.OR], return_type=int)
-        self.assertEqual(WitnessConditionType.OR, result)
+    async def test_witness_condition_type_action_not(self):
+        await self.set_up_contract('witness', 'WitnessConditionTypeNot.py')
 
-        result, _ = await self.call('main', [WitnessConditionType.SCRIPT_HASH], return_type=int)
-        self.assertEqual(WitnessConditionType.SCRIPT_HASH, result)
-
-        result, _ = await self.call('main', [WitnessConditionType.GROUP], return_type=int)
-        self.assertEqual(WitnessConditionType.GROUP, result)
-
-        result, _ = await self.call('main', [WitnessConditionType.CALLED_BY_ENTRY], return_type=int)
-        self.assertEqual(WitnessConditionType.CALLED_BY_ENTRY, result)
-
-        result, _ = await self.call('main', [WitnessConditionType.CALLED_BY_CONTRACT], return_type=int)
-        self.assertEqual(WitnessConditionType.CALLED_BY_CONTRACT, result)
-
-        result, _ = await self.call('main', [WitnessConditionType.CALLED_BY_GROUP], return_type=int)
-        self.assertEqual(WitnessConditionType.CALLED_BY_GROUP, result)
+        for witness_condition_type in WitnessConditionType:
+            result, _ = await self.call('main', [witness_condition_type], return_type=int)
+            self.assertEqual(~witness_condition_type, result)
 
     # endregion
 
@@ -565,6 +584,18 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [VMState.BREAK], return_type=int)
         self.assertEqual(VMState.BREAK, result)
 
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [0xFF], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid VMState parameter value")
+
+    async def test_vm_state_not(self):
+        await self.set_up_contract('VMStateNot.py')
+
+        for vm_state in VMState:
+            result, _ = await self.call('main', [vm_state], return_type=int)
+            self.assertEqual(~vm_state, result)
+
     # endregion
 
     # region ContractParameterType
@@ -572,44 +603,21 @@ class TestNeoTypes(boatestcase.BoaTestCase):
     async def test_contract_parameter_type_instantiate(self):
         await self.set_up_contract('ContractParameterTypeInstantiate.py')
 
-        result, _ = await self.call('main', [ContractParameterType.Any], return_type=int)
-        self.assertEqual(ContractParameterType.Any, result)
+        for param_type in ContractParameterType:
+            result, _ = await self.call('main', [param_type], return_type=int)
+            self.assertEqual(param_type, result)
 
-        result, _ = await self.call('main', [ContractParameterType.Boolean], return_type=int)
-        self.assertEqual(ContractParameterType.Boolean, result)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [1], return_type=int)
 
-        result, _ = await self.call('main', [ContractParameterType.Integer], return_type=int)
-        self.assertEqual(ContractParameterType.Integer, result)
+        self.assertRegex(str(context.exception), "Invalid ContractParameterType parameter value")
 
-        result, _ = await self.call('main', [ContractParameterType.ByteArray], return_type=int)
-        self.assertEqual(ContractParameterType.ByteArray, result)
+    async def test_contract_parameter_type_not(self):
+        await self.set_up_contract('ContractParameterTypeNot.py')
 
-        result, _ = await self.call('main', [ContractParameterType.String], return_type=int)
-        self.assertEqual(ContractParameterType.String, result)
-
-        result, _ = await self.call('main', [ContractParameterType.Hash160], return_type=int)
-        self.assertEqual(ContractParameterType.Hash160, result)
-
-        result, _ = await self.call('main', [ContractParameterType.Hash256], return_type=int)
-        self.assertEqual(ContractParameterType.Hash256, result)
-
-        result, _ = await self.call('main', [ContractParameterType.PublicKey], return_type=int)
-        self.assertEqual(ContractParameterType.PublicKey, result)
-
-        result, _ = await self.call('main', [ContractParameterType.Signature], return_type=int)
-        self.assertEqual(ContractParameterType.Signature, result)
-
-        result, _ = await self.call('main', [ContractParameterType.Array], return_type=int)
-        self.assertEqual(ContractParameterType.Array, result)
-
-        result, _ = await self.call('main', [ContractParameterType.Map], return_type=int)
-        self.assertEqual(ContractParameterType.Map, result)
-
-        result, _ = await self.call('main', [ContractParameterType.InteropInterface], return_type=int)
-        self.assertEqual(ContractParameterType.InteropInterface, result)
-
-        result, _ = await self.call('main', [ContractParameterType.Void], return_type=int)
-        self.assertEqual(ContractParameterType.Void, result)
+        for param_type in ContractParameterType:
+            result, _ = await self.call('main', [param_type], return_type=int)
+            self.assertEqual(~param_type, result)
 
     # endregion
 
@@ -618,28 +626,26 @@ class TestNeoTypes(boatestcase.BoaTestCase):
     async def test_call_flags_instantiate(self):
         await self.set_up_contract('CallFlagsInstantiate.py')
 
-        result, _ = await self.call('main', [CallFlags.NONE], return_type=int)
-        self.assertEqual(CallFlags.NONE, result)
+        for call_flags in CallFlags:
+            result, _ = await self.call('main', [call_flags], return_type=int)
+            self.assertEqual(call_flags, result)
 
-        result, _ = await self.call('main', [CallFlags.READ_STATES], return_type=int)
-        self.assertEqual(CallFlags.READ_STATES, result)
+        result, _ = await self.call('main', [CallFlags.STATES | CallFlags.ALLOW_CALL], return_type=int)
+        self.assertEqual(CallFlags.STATES | CallFlags.ALLOW_CALL, result)
 
-        result, _ = await self.call('main', [CallFlags.WRITE_STATES], return_type=int)
-        self.assertEqual(CallFlags.WRITE_STATES, result)
+        result, _ = await self.call('main', [CallFlags.STATES | CallFlags.ALLOW_NOTIFY], return_type=int)
+        self.assertEqual(CallFlags.STATES | CallFlags.ALLOW_NOTIFY, result)
 
-        result, _ = await self.call('main', [CallFlags.ALLOW_CALL], return_type=int)
-        self.assertEqual(CallFlags.ALLOW_CALL, result)
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [128], return_type=int)
 
-        result, _ = await self.call('main', [CallFlags.ALLOW_NOTIFY], return_type=int)
-        self.assertEqual(CallFlags.ALLOW_NOTIFY, result)
+        self.assertRegex(str(context.exception), "Invalid CallFlags parameter value")
 
-        result, _ = await self.call('main', [CallFlags.STATES], return_type=int)
-        self.assertEqual(CallFlags.STATES, result)
+    async def test_call_flags_not(self):
+        await self.set_up_contract('CallFlagsNot.py')
 
-        result, _ = await self.call('main', [CallFlags.READ_ONLY], return_type=int)
-        self.assertEqual(CallFlags.READ_ONLY, result)
-
-        result, _ = await self.call('main', [CallFlags.ALL], return_type=int)
-        self.assertEqual(CallFlags.ALL, result)
+        for call_flags in CallFlags:
+            result, _ = await self.call('main', [call_flags], return_type=int)
+            self.assertEqual(~call_flags, result)
 
     # endregion
