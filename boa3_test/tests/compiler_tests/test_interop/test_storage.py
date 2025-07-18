@@ -877,3 +877,10 @@ class TestStorageInterop(boatestcase.BoaTestCase):
             await self.call('main', [1 << 8], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid FindOptions parameter value")
+
+    async def test_find_options_not(self):
+        await self.set_up_contract('FindOptionsNot.py')
+
+        for find_option in FindOptions:
+            result, _ = await self.call('main', [find_option], return_type=int)
+            self.assertEqual(~find_option, result)

@@ -146,3 +146,10 @@ class TestPolicyContract(boatestcase.BoaTestCase):
             await self.call('main', [0xFF], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid TransactionAttributeType parameter value")
+
+    async def test_transaction_attribute_not(self):
+        await self.set_up_contract('TransactionAttributeTypeNot.py')
+
+        for transaction_attribute_type in TransactionAttributeType:
+            result, _ = await self.call('main', [transaction_attribute_type], return_type=int)
+            self.assertEqual(~transaction_attribute_type, result)

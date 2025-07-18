@@ -974,3 +974,10 @@ class TestRuntimeInterop(boatestcase.BoaTestCase):
             await self.call('main', [128], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid TriggerType parameter value")
+
+    async def test_trigger_type_not(self):
+        await self.set_up_contract('TriggerTypeNot.py')
+
+        for trigger_type in TriggerType:
+            result, _ = await self.call('main', [trigger_type], return_type=int)
+            self.assertEqual(~trigger_type, result)

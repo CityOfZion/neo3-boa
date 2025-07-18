@@ -401,3 +401,10 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
             await self.call('main', [999], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid NamedCurveHash parameter value")
+
+    async def test_named_curve_hash_not(self):
+        await self.set_up_contract('NamedCurveHashNot.py')
+
+        for named_curve_hash in NamedCurveHash:
+            result, _ = await self.call('main', [named_curve_hash], return_type=int)
+            self.assertEqual(~named_curve_hash, result)

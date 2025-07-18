@@ -53,6 +53,22 @@ class IntFlagType(IntType):
     def exception_message(self) -> str:
         return f"Invalid {self.identifier} parameter value"
 
+    @property
+    def all_flags(self) -> IntFlag:
+        flag_values = [value for value in self._enum_type]
+        return reduce(lambda x, y: x | y, flag_values)
+
+    @property
+    def next_power_of_two(self) -> int:
+        """
+        Gets the next power of two value
+        """
+        highest_enum = self.all_flags
+        next_power_of_two = 1
+        while next_power_of_two < highest_enum:
+            next_power_of_two *= 2
+
+        return next_power_of_two
 
 class IntEnumMethod(IBuiltinMethod):
 
@@ -78,11 +94,9 @@ class IntEnumMethod(IBuiltinMethod):
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.model.operation.unaryop import UnaryOp
-        flag_values = [value for value in self._enum_type]
-        all_flags = reduce(lambda x, y: x | y, flag_values)
 
         code_generator.duplicate_stack_top_item()
-        code_generator.convert_literal(all_flags)
+        code_generator.convert_literal(self.return_type.all_flags)
         code_generator.convert_operation(UnaryOp.BitNot, is_internal=True)
         code_generator.convert_operation(BinaryOp.BitAnd, is_internal=True)
 

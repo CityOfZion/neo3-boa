@@ -433,3 +433,10 @@ class TestNativeContracts(boatestcase.BoaTestCase):
             await self.call('main', [0x01], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid OracleResponseCode parameter value")
+
+    async def test_oracle_response_code_not(self):
+        await self.set_up_contract('OracleResponseCodeNot.py')
+
+        for oracle_response_code in OracleResponseCode:
+            result, _ = await self.call('main', [oracle_response_code], return_type=int)
+            self.assertEqual(~oracle_response_code, result)

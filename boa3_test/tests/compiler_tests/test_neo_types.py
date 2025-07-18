@@ -518,6 +518,13 @@ class TestNeoTypes(boatestcase.BoaTestCase):
 
         self.assertRegex(str(context.exception), "Invalid WitnessScope parameter value")
 
+    async def test_witness_scope_not(self):
+        await self.set_up_contract('witness', 'WitnessScopeNot.py')
+
+        for witness_scope in WitnessScope:
+            result, _ = await self.call('main', [witness_scope], return_type=int)
+            self.assertEqual(~witness_scope, result)
+
     async def test_witness_rule_action_instantiate(self):
         await self.set_up_contract('witness', 'WitnessRuleActionInstantiate.py')
 
@@ -532,6 +539,13 @@ class TestNeoTypes(boatestcase.BoaTestCase):
 
         self.assertRegex(str(context.exception), "Invalid WitnessRuleAction parameter value")
 
+    async def test_witness_rule_action_not(self):
+        await self.set_up_contract('witness', 'WitnessRuleActionNot.py')
+
+        for witness_rule_action in WitnessRuleAction:
+            result, _ = await self.call('main', [witness_rule_action], return_type=int)
+            self.assertEqual(~witness_rule_action, result)
+
     async def test_witness_condition_type_action_instantiate(self):
         await self.set_up_contract('witness', 'WitnessConditionTypeInstantiate.py')
 
@@ -543,6 +557,13 @@ class TestNeoTypes(boatestcase.BoaTestCase):
             await self.call('main', [0xFF], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid WitnessConditionType parameter value")
+
+    async def test_witness_condition_type_action_not(self):
+        await self.set_up_contract('witness', 'WitnessConditionTypeNot.py')
+
+        for witness_condition_type in WitnessConditionType:
+            result, _ = await self.call('main', [witness_condition_type], return_type=int)
+            self.assertEqual(~witness_condition_type, result)
 
     # endregion
 
@@ -568,6 +589,13 @@ class TestNeoTypes(boatestcase.BoaTestCase):
 
         self.assertRegex(str(context.exception), "Invalid VMState parameter value")
 
+    async def test_vm_state_not(self):
+        await self.set_up_contract('VMStateNot.py')
+
+        for vm_state in VMState:
+            result, _ = await self.call('main', [vm_state], return_type=int)
+            self.assertEqual(~vm_state, result)
+
     # endregion
 
     # region ContractParameterType
@@ -583,6 +611,13 @@ class TestNeoTypes(boatestcase.BoaTestCase):
             await self.call('main', [1], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid ContractParameterType parameter value")
+
+    async def test_contract_parameter_type_not(self):
+        await self.set_up_contract('ContractParameterTypeNot.py')
+
+        for param_type in ContractParameterType:
+            result, _ = await self.call('main', [param_type], return_type=int)
+            self.assertEqual(~param_type, result)
 
     # endregion
 
@@ -605,5 +640,12 @@ class TestNeoTypes(boatestcase.BoaTestCase):
             await self.call('main', [128], return_type=int)
 
         self.assertRegex(str(context.exception), "Invalid CallFlags parameter value")
+
+    async def test_call_flags_not(self):
+        await self.set_up_contract('CallFlagsNot.py')
+
+        for call_flags in CallFlags:
+            result, _ = await self.call('main', [call_flags], return_type=int)
+            self.assertEqual(~call_flags, result)
 
     # endregion
