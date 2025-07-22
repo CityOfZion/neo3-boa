@@ -4,7 +4,7 @@ from boa3.internal.model.type.enum.intenumtype import IntEnumType
 from boa3.internal.neo3.network.payloads.verification import WitnessConditionType as WitnessCondition
 
 
-class WitnessConditionType(IntEnumType):
+class WitnessConditionTypeType(IntEnumType):
     """
     A class used to represent Neo interop WitnessConditionType type
     """
@@ -24,6 +24,7 @@ class WitnessConditionType(IntEnumType):
 
     @classmethod
     def _is_type_of(cls, value: Any = None):
-        return isinstance(value, (WitnessCondition, WitnessConditionType))
+        return isinstance(value, (WitnessCondition, WitnessConditionTypeType))
 
-_WitnessConditionType = WitnessConditionType()
+
+_WitnessConditionType = WitnessConditionTypeType()

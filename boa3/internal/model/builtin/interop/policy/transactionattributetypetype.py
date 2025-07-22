@@ -6,7 +6,7 @@ from boa3.internal.neo3.network.payloads.transactionattributetype import \
     TransactionAttributeType as TransactionAttribute
 
 
-class TransactionAttributeType(IntEnumType):
+class TransactionAttributeTypeType(IntEnumType):
     """
     A class used to represent Neo TransactionAttributeType
     """
@@ -23,5 +23,4 @@ class TransactionAttributeType(IntEnumType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, (TransactionAttribute, TransactionAttributeType))
-
+        return isinstance(value, (TransactionAttribute, TransactionAttributeTypeType))

@@ -1,11 +1,11 @@
 from boa3.internal.model.builtin.interop.nativecontract import PolicyContractMethod
-from boa3.internal.model.builtin.interop.policy.transactionattributetype import TransactionAttributeType
+from boa3.internal.model.builtin.interop.policy.transactionattributetypetype import TransactionAttributeTypeType
 from boa3.internal.model.variable import Variable
 
 
 class SetAttributeFeeMethod(PolicyContractMethod):
 
-    def __init__(self, tx_attribute_type: TransactionAttributeType):
+    def __init__(self, tx_attribute_type: TransactionAttributeTypeType):
         from boa3.internal.model.type.type import Type
         identifier = 'set_attribute_fee'
         native_identifier = 'setAttributeFee'

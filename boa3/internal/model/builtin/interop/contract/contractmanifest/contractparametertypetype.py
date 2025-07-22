@@ -5,7 +5,7 @@ from boa3.internal.model.type.itype import IType
 from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType as ContractParameter
 
 
-class ContractParameterType(IntEnumType):
+class ContractParameterTypeType(IntEnumType):
     """
     A class used to represent Neo interop ContractParameterType type
     """
@@ -25,6 +25,7 @@ class ContractParameterType(IntEnumType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, (ContractParameter, ContractParameterType))
+        return isinstance(value, (ContractParameter, ContractParameterTypeType))
 
-_ContractParameterType = ContractParameterType()
+
+_ContractParameterType = ContractParameterTypeType()

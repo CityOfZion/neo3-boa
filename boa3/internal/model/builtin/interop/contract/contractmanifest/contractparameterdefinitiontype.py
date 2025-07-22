@@ -13,12 +13,13 @@ class ContractParameterDefinitionType(ClassStructType):
 
     def __init__(self):
         super().__init__('ContractParameterDefinition')
-        from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparametertype import ContractParameterType
+        from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparametertypetype import \
+            ContractParameterTypeType
         from boa3.internal.model.type.type import Type
 
         self._variables: dict[str, Variable] = {
             'name': Variable(Type.str),
-            'type': Variable(ContractParameterType.build())
+            'type': Variable(ContractParameterTypeType.build())
         }
         self._constructor: Method = None
 

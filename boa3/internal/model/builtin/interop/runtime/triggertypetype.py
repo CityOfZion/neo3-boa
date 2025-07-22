@@ -5,9 +5,9 @@ from boa3.internal.model.type.itype import IType
 from boa3.internal.neo3.contracts import TriggerType as Trigger
 
 
-class TriggerType(IntFlagType):
+class TriggerTypeType(IntFlagType):
     """
-    A class used to represent Neo interop Trigger type
+    A class used to represent Neo interop TriggerType type
     """
 
     def __init__(self):
@@ -26,4 +26,4 @@ class TriggerType(IntFlagType):
 
     @classmethod
     def _is_type_of(cls, value: Any):
-        return isinstance(value, (Trigger, TriggerType))
+        return isinstance(value, (Trigger, TriggerTypeType))

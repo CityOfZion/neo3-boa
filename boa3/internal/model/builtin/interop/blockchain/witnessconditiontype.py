@@ -15,7 +15,8 @@ class WitnessConditionType(ClassArrayType):
 
     def __init__(self):
         super().__init__('WitnessCondition')
-        from boa3.internal.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
+        from boa3.internal.model.builtin.interop.blockchain.witnessconditionenumtype import \
+            WitnessConditionTypeType as WitnessConditionEnum
 
         self._variables: dict[str, Variable] = {
             'type': Variable(WitnessConditionEnum.build())
@@ -76,7 +77,8 @@ class WitnessConditionMethod(IBuiltinMethod):
         return len(params) == 0
 
     def generate_internal_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.blockchain.witnessconditionenumtype import WitnessConditionType as WitnessConditionEnum
+        from boa3.internal.model.builtin.interop.blockchain.witnessconditionenumtype import \
+            WitnessConditionTypeType as WitnessConditionEnum
 
         code_generator.convert_literal(WitnessConditionEnum.build().default_value)  # type
         code_generator.convert_new_array(length=1, array_type=self.type)
