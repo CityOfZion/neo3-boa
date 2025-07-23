@@ -17,7 +17,7 @@ __all__ = ['AddressVersionProperty',
            'PlatformProperty',
            'ScriptContainerProperty',
            'GetTriggerMethod',
-           'TriggerType',
+           'TriggerTypeType',
            'GetCurrentSignersMethod'
            ]
 
@@ -41,4 +41,4 @@ from boa3.internal.model.builtin.interop.runtime.logmethod import LogMethod
 from boa3.internal.model.builtin.interop.runtime.notificationtype import NotificationType
 from boa3.internal.model.builtin.interop.runtime.notifymethod import NotifyMethod
 from boa3.internal.model.builtin.interop.runtime.scriptcontainermethod import ScriptContainerProperty
-from boa3.internal.model.builtin.interop.runtime.triggertype import TriggerType
+from boa3.internal.model.builtin.interop.runtime.triggertypetype import TriggerTypeType

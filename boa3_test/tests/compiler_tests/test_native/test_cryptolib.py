@@ -372,7 +372,7 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
     def test_bls12_381_serialize_mismatched_type(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Bls12381SerializeMismatchedType.py')
 
-    async def test_get_named_curve_hash(self):
+    async def test_named_curve_hash_instantiate(self):
         await self.set_up_contract('NamedCurveHashInstantiate.py')
 
         result, _ = await self.call('main', [NamedCurveHash.SECP256K1SHA256], return_type=int)
@@ -386,3 +386,25 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', [NamedCurveHash.SECP256R1KECCAK256], return_type=int)
         self.assertEqual(NamedCurveHash.SECP256R1KECCAK256, result)
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [1], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid NamedCurveHash parameter value")
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [-1], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid NamedCurveHash parameter value")
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [999], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid NamedCurveHash parameter value")
+
+    async def test_named_curve_hash_not(self):
+        await self.set_up_contract('NamedCurveHashNot.py')
+
+        for named_curve_hash in NamedCurveHash:
+            result, _ = await self.call('main', [named_curve_hash], return_type=int)
+            self.assertEqual(~named_curve_hash, result)

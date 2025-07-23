@@ -1,7 +1,7 @@
-from enum import IntEnum, IntFlag
+from enum import IntEnum
 
 
-class WitnessScope(IntFlag):
+class WitnessScope(IntEnum):
     """
     Determine the rules for a smart contract :func:`CheckWitness()` sys call.
     """

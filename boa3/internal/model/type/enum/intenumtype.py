@@ -1,37 +1,24 @@
-from typing import Any
+from enum import IntEnum
+from typing import Type as TType, Any
 
 from boa3.internal.model.builtin.method import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.method import Method
 from boa3.internal.model.symbol import ISymbol
-from boa3.internal.model.type.itype import IType
-from boa3.internal.model.type.primitive.bytestype import BytesType
+from boa3.internal.model.type.primitive.inttype import IntType
 from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
-from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
-class OpcodeType(BytesType):
+class IntEnumType(IntType):
     """
-    A class used to represent Neo interop Opcode type
+    A class used to represent Python IntEnum type
     """
 
-    def __init__(self):
+    def __init__(self, enum_type: TType[IntEnum]):
         super().__init__()
-        self._identifier = 'Opcode'
-
-    @property
-    def default_value(self) -> Any:
-        return Opcode.NOP
-
-    @classmethod
-    def build(cls, value: Any = None) -> IType:
-        if value is None or cls._is_type_of(value):
-            return _Opcode
-
-    @classmethod
-    def _is_type_of(cls, value: Any):
-        return isinstance(value, (Opcode, OpcodeType))
+        self._identifier = '-IntEnum'
+        self._enum_type = enum_type
 
     @property
     def symbols(self) -> dict[str, ISymbol]:
@@ -41,7 +28,7 @@ class OpcodeType(BytesType):
         :return: a dictionary that maps each symbol in the module with its name
         """
         _symbols = super().symbols
-        _symbols.update({name: Variable(self) for name in Opcode.__members__.keys()})
+        _symbols.update({name: Variable(self) for name in self._enum_type.__members__.keys()})
 
         return _symbols
 
@@ -51,28 +38,30 @@ class OpcodeType(BytesType):
 
         :return: the value if this type has this symbol. None otherwise.
         """
-        if symbol_id in self.symbols:
-            return Opcode.__members__[symbol_id]
+        if symbol_id in self.symbols and symbol_id in self._enum_type.__members__:
+            return self._enum_type.__members__[symbol_id]
 
         return None
 
     def constructor_method(self) -> Method | None:
         if self._constructor is None:
-            self._constructor: Method = OpcodeMethod(self)
+            self._constructor: Method = IntEnumMethod(self, self._enum_type)
         return self._constructor
 
+    @property
+    def exception_message(self) -> str:
+        return f"Invalid {self.identifier} parameter value"
 
-_Opcode = OpcodeType()
 
+class IntEnumMethod(IBuiltinMethod):
 
-class OpcodeMethod(IBuiltinMethod):
-
-    def __init__(self, return_type: OpcodeType):
-        identifier = '-Opcode__init__'
+    def __init__(self, return_type: IntEnumType, enum_type: TType[IntEnum]):
+        identifier = f'-{return_type.identifier}__init__'
         args: dict[str, Variable] = {
-            'x': Variable(Type.bytes)
+            'x': Variable(Type.int)
         }
         super().__init__(identifier, args, return_type=return_type)
+        self._enum_type = enum_type
 
     def validate_parameters(self, *params: IExpression) -> bool:
         return len(params) == 1
@@ -87,14 +76,14 @@ class OpcodeMethod(IBuiltinMethod):
 
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.operation.binaryop import BinaryOp
-        enum_values = [value for value in Opcode]
+        enum_values = [value for value in self._enum_type]
 
         for index, value in enumerate(enum_values):
             code_generator.duplicate_stack_item(code_generator.stack_size)
             code_generator.convert_literal(value)
-            code_generator.convert_operation(BinaryOp.Eq, is_internal=True)
+            code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
             if index > 0:
                 code_generator.convert_operation(BinaryOp.Or, is_internal=True)
 
-        code_generator.convert_literal(f"Invalid {self.return_type.identifier} parameter value")
+        code_generator.convert_literal(self.return_type.exception_message)
         code_generator.convert_assert(has_message=True)

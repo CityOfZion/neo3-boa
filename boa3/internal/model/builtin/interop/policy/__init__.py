@@ -5,7 +5,7 @@ __all__ = [
     'GetStoragePriceMethod',
     'IsBlockedMethod',
     'SetAttributeFeeMethod',
-    'TransactionAttributeType',
+    'TransactionAttributeTypeType',
 ]
 
 from boa3.internal.model.builtin.interop.policy.getattributefeemethod import GetAttributeFeeMethod
@@ -14,4 +14,4 @@ from boa3.internal.model.builtin.interop.policy.getfeeperbytemethod import GetFe
 from boa3.internal.model.builtin.interop.policy.getstoragepricemethod import GetStoragePriceMethod
 from boa3.internal.model.builtin.interop.policy.isblockedmethod import IsBlockedMethod
 from boa3.internal.model.builtin.interop.policy.setattributefeemethod import SetAttributeFeeMethod
-from boa3.internal.model.builtin.interop.policy.transactionattributetype import TransactionAttributeType
+from boa3.internal.model.builtin.interop.policy.transactionattributetypetype import TransactionAttributeTypeType

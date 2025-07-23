@@ -264,7 +264,7 @@ class ContractImports:
             ContractGroupType.build(),
             ContractMethodDescriptorType.build(),
             ContractParameterDefinitionType.build(),
-            ContractParameterType.build(),
+            ContractParameterTypeType.build(),
             ContractPermissionDescriptorType.build(),
             ContractPermissionType.build(),
             Builtin.Nep17Contract,

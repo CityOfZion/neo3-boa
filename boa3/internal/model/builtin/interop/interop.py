@@ -81,8 +81,8 @@ class Interop:
     StorageContextType = StorageContextType.build()
     StorageMapType = StorageMapType.build()
     TransactionType = TransactionType.build()
-    TransactionAttributeType = TransactionAttributeType()
-    TriggerType = TriggerType()
+    TransactionAttributeType = TransactionAttributeTypeType()
+    TriggerType = TriggerTypeType()
     VMStateType = VMStateType.build()
     WitnessCondition = WitnessConditionType.build()
     WitnessConditionType = WitnessConditionEnumType.build()
@@ -308,7 +308,7 @@ class Interop:
                                             ContractManifestType,
                                             ContractMethodDescriptorType.build(),
                                             ContractParameterDefinitionType.build(),
-                                            ContractParameterType.build(),
+                                            ContractParameterTypeType.build(),
                                             ContractPermissionDescriptorType.build(),
                                             ContractPermissionType.build()
                                             ]

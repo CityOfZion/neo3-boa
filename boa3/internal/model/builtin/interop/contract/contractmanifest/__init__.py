@@ -5,7 +5,7 @@ __all__ = ['ContractAbiType',
            'ContractManifestType',
            'ContractMethodDescriptorType',
            'ContractParameterDefinitionType',
-           'ContractParameterType',
+           'ContractParameterTypeType',
            'ContractPermissionDescriptorType',
            'ContractPermissionType'
            ]
@@ -18,7 +18,8 @@ from boa3.internal.model.builtin.interop.contract.contractmanifest.contractmetho
     ContractMethodDescriptorType
 from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparameterdefinitiontype import \
     ContractParameterDefinitionType
-from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparametertype import ContractParameterType
+from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparametertypetype import \
+    ContractParameterTypeType
 from boa3.internal.model.builtin.interop.contract.contractmanifest.contractpermissiondescriptortype import \
     ContractPermissionDescriptorType
 from boa3.internal.model.builtin.interop.contract.contractmanifest.contractpermissiontype import ContractPermissionType

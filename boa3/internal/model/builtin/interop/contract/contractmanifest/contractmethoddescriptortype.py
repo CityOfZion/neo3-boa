@@ -15,13 +15,14 @@ class ContractMethodDescriptorType(ClassStructType):
         super().__init__('ContractMethodDescriptor')
         from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparameterdefinitiontype import \
             ContractParameterDefinitionType
-        from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparametertype import ContractParameterType
+        from boa3.internal.model.builtin.interop.contract.contractmanifest.contractparametertypetype import \
+            ContractParameterTypeType
         from boa3.internal.model.type.type import Type
 
         self._variables: dict[str, Variable] = {
             'name': Variable(Type.str),
             'parameters': Variable(Type.list.build_collection(ContractParameterDefinitionType.build())),
-            'return_type': Variable(ContractParameterType.build()),
+            'return_type': Variable(ContractParameterTypeType.build()),
             'offset': Variable(Type.int),
             'safe': Variable(Type.bool)
         }
