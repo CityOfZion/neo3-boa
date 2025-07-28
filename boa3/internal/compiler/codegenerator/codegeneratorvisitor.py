@@ -9,6 +9,7 @@ from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
 from boa3.internal.model.builtin.builtin import Builtin
+from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.imports.package import Package
@@ -300,8 +301,9 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             if self._is_generating_initialize:
                 address = self.generator.bytecode_size
-                self.generator.convert_new_empty_array(len(class_symbol.class_variables), class_symbol)
-                self.generator.convert_store_variable(node.name, address)
+                if not any([isinstance(decorator, ContractDecorator) for decorator in class_symbol.decorators]):
+                    self.generator.convert_new_empty_array(len(class_symbol.class_variables), class_symbol)
+                    self.generator.convert_store_variable(node.name, address)
             else:
                 init_method = class_symbol.constructor_method()
                 if isinstance(init_method, Method) and init_method.start_address is None:
