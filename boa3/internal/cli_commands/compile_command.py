@@ -1,5 +1,6 @@
 import logging
 import os
+import pathlib
 import sys
 from argparse import _SubParsersAction
 
@@ -52,12 +53,30 @@ class CompileCommand(ICommand):
         fail_fast: bool = not args['no_failfast']
         log_level = args['log_level']
 
-        if not sc_path.endswith(".py") or not os.path.isfile(sc_path):
+        if not sc_path.endswith(".py"):
             logging.error("Input file is not .py")
             sys.exit(1)
 
-        fullpath = os.path.realpath(sc_path)
-        path, filename = os.path.split(fullpath)
+        file_path = pathlib.Path(sc_path).resolve()
+        file_path_parts = file_path.parts
+        current_file_path = pathlib.Path(file_path_parts[0]).resolve()
+        for part in file_path_parts[1:]:
+            try:
+                actual_name = next(f.name for f in current_file_path.iterdir()
+                                   if f.name.lower() == part.lower())
+                if actual_name != part:
+                    logging.error(
+                        f"Path exists but case doesn't match. Found: {actual_name}, Expected: {part}"
+                    )
+                    sys.exit(1)
+
+                current_file_path = current_file_path / actual_name
+            except StopIteration:
+                logging.error(f"Path component not found: {part}")
+                sys.exit(1)
+
+        filename = file_path.name
+        path = file_path.parent
 
         if isinstance(output_path, str):
             if not output_path.endswith('.nef'):

@@ -213,3 +213,25 @@ class TestCliCompile(BoaCliTest):
         self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
         self.assertEqual(1, len(logs.output))
         self.assertIn("Unknown level: 'FOO'", logs.output[-1])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'arithmetic_test', 'AdDiTiOn.py'))
+    def test_cli_compile_wrong_letter_case_file_name(self):
+        logs, system_exit = self.get_cli_log(get_exit_code=True)
+
+        self.assertEqual(1, len(logs.output))
+        self.assertTrue("Path exists but case doesn't match." in logs.output[0])
+
+        correct_name = 'Addition.py'
+        wrong_name = 'AdDiTiOn.py'
+        self.assertTrue(f"Found: {correct_name}, Expected: {wrong_name}" in logs.output[0])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'ArItHmEtIc_TeSt', 'Addition.py'))
+    def test_cli_compile_wrong_letter_case_module_name(self):
+        logs, system_exit = self.get_cli_log(get_exit_code=True)
+
+        self.assertEqual(1, len(logs.output))
+        self.assertTrue("Path exists but case doesn't match." in logs.output[0])
+
+        correct_name = 'arithmetic_test'
+        wrong_name = 'ArItHmEtIc_TeSt'
+        self.assertTrue(f"Found: {correct_name}, Expected: {wrong_name}" in logs.output[0])
