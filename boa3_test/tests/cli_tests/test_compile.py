@@ -219,7 +219,7 @@ class TestCliCompile(BoaCliTest):
         logs, system_exit = self.get_cli_log(get_exit_code=True)
 
         self.assertEqual(1, len(logs.output))
-        self.assertTrue("Path exists but case doesn't match." in logs.output[0])
+        self.assertTrue("File path exists but case doesn't match." in logs.output[0])
 
         correct_name = 'Addition.py'
         wrong_name = 'AdDiTiOn.py'
@@ -230,8 +230,17 @@ class TestCliCompile(BoaCliTest):
         logs, system_exit = self.get_cli_log(get_exit_code=True)
 
         self.assertEqual(1, len(logs.output))
-        self.assertTrue("Path exists but case doesn't match." in logs.output[0])
+        self.assertTrue("File path exists but case doesn't match." in logs.output[0])
 
         correct_name = 'arithmetic_test'
         wrong_name = 'ArItHmEtIc_TeSt'
         self.assertTrue(f"Found: {correct_name}, Expected: {wrong_name}" in logs.output[0])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('this_path', 'does_not_exist.py'))
+    def test_cli_compile_non_existing_path(self):
+        logs, system_exit = self.get_cli_log(get_exit_code=True)
+
+        self.assertEqual(1, len(logs.output))
+
+        first_wrong_dir = 'this_path'
+        self.assertTrue(f"Can't find '{first_wrong_dir}'" in logs.output[0])

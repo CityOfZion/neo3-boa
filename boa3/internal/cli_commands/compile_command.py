@@ -66,13 +66,13 @@ class CompileCommand(ICommand):
                                    if f.name.lower() == part.lower())
                 if actual_name != part:
                     logging.error(
-                        f"Path exists but case doesn't match. Found: {actual_name}, Expected: {part}"
+                        f"File path exists but case doesn't match. Found: {actual_name}, Expected: {part}"
                     )
                     sys.exit(1)
 
                 current_file_path = current_file_path / actual_name
             except StopIteration:
-                logging.error(f"Path component not found: {part}")
+                logging.error(f"Can't find '{part}' in the path '{file_path}'")
                 sys.exit(1)
 
         filename = file_path.name
