@@ -9,7 +9,7 @@ executors:
       - image: cimg/python:3.12.0
 
 orbs:
-  python: circleci/python@0.1.2
+  python: circleci/python@3.2.0
 
 jobs:
   unit-test-311: &unit-test
@@ -17,7 +17,11 @@ jobs:
     executor: python311-executor
     steps:
       - checkout
-      #      - python/load-cache
+
+      - python/install-packages:
+          pip-dependency-file: pyproject.toml
+          path-args: .[dev,test]
+          pkg-manager: pip
 
       - run:
           name: Test Build Package
