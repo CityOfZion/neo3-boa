@@ -33,26 +33,6 @@ jobs:
             sudo -E python fix-ripemd160-loading.py
             python -c "import hashlib;print(hashlib.new('ripemd160'))"
 
-      - run:
-          name: Install Dependencies
-          command: |
-            pip install -e .[dev,test]
-            sudo apt update
-
-            sudo apt-get install -y apt-transport-https
-            wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-            sudo dpkg -i packages-microsoft-prod.deb
-            sudo apt update
-
-            sudo apt remove dotnet* aspnetcore* netstandard*
-            sudo rm /etc/apt/sources.list.d/microsoft-prod.list
-            sudo apt update && \
-              sudo apt-get install -y dotnet-sdk-6.0
-
-            sudo apt install libsnappy-dev libc6-dev librocksdb-dev -y
-            dotnet tool install Neo.Express --version 3.5.20 -g
-            dotnet tool install Neo.Test.Runner --version 3.5.17 -g
-
       - python/save-cache
 
 workflows:
