@@ -17,7 +17,7 @@ jobs:
     executor: python311-executor
     steps:
       - checkout
-      - python/load-cache
+      #      - python/load-cache
       - run:
           name: Test Build Package
           command: |
@@ -33,7 +33,7 @@ jobs:
             sudo -E python fix-ripemd160-loading.py
             python -c "import hashlib;print(hashlib.new('ripemd160'))"
 
-      - python/save-cache
+#      - python/save-cache
 
 workflows:
   version: 2
