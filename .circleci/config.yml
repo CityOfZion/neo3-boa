@@ -9,7 +9,7 @@ executors:
       - image: cimg/python:3.12.0
 
 orbs:
-  python: circleci/python@3.2.0
+  python: circleci/python@0.2.1
 
 jobs:
   unit-test-311: &unit-test
@@ -54,6 +54,84 @@ jobs:
             dotnet tool install Neo.Test.Runner --version 3.5.17 -g
 
       - python/save-cache
+      - run:
+          name: Test
+          command: |
+            export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
+            export PATH="$PATH:$DOTNET_TOOL_PATH"
+            
+            coverage run boa3_test/tests/run_unit_tests.py
+            pip install coveralls
+            coveralls --service=circleci
+
+  unit-test-312:
+    <<: *unit-test
+    executor: python312-executor
+
+  build_deploy: &build_deploy
+    working_directory: ~/neo3-boa
+    executor: python311-executor
+    steps:
+      - checkout
+
+      - run:
+          name: Setup Environment
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+
+      - run:
+          name: Install Deps
+          command: |
+            pip install -e .[dev,test]
+
+      - run:
+          name: Build .pypirc
+          command: |
+            echo -e "[$PYPI_REPO]" >> ~/.pypirc
+            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+
+      - run:
+          name: Build Package
+          command: |
+            python3 -m pip install --upgrade pip
+            pip install twine build
+            python3 -m build
+            twine check dist/*
+
+      - run:
+          name: Push to TestPyPi
+          command:
+            python3 -m twine upload --repository $PYPI_REPO dist/*
+  build_deploy_test:
+    <<: *build_deploy
+  build_deploy_prod:
+    <<: *build_deploy
+
+  publish-docs:
+    executor: python311-executor
+    working_directory: ~/neo3-boa
+    steps:
+      - checkout
+      - python/load-cache
+
+      - run:
+          name: Install Dependencies
+          command: |
+            pip install -e .[docs]
+
+      - run:
+          name: install aws cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Build and release docs
+          command: |
+            cd docs
+            make publish-docs
 
 workflows:
   version: 2
@@ -63,3 +141,58 @@ workflows:
          filters:
            tags:
              only: /.*/
+      - unit-test-312:
+          filters:
+            tags:
+              only: /.*/
+      - build_deploy_test:
+          context: pypi_test
+          requires:
+            - unit-test-311
+            - unit-test-312
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - approve-release:
+          type: approval
+          requires:
+            - build_deploy_test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build_deploy_prod:
+          context: pypi_prod
+          requires:
+            - approve-release
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+  update-docs:
+    jobs:
+      - approve-update:
+          type: approval
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - staging
+                - master
+      - publish-docs:
+          context: aws
+          requires:
+            - approve-update
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - staging
+                - master
