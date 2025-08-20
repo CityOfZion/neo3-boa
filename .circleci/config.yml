@@ -21,7 +21,7 @@ jobs:
       - python/install-packages:
           pip-dependency-file: pyproject.toml
           path-args: .[dev,test]
-          pkg-manager: pip
+          pkg-manager: pip-dist
 
       - run:
           name: Test Build Package
