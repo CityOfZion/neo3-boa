@@ -12,7 +12,7 @@ orbs:
   python: circleci/python@3.2.0
 
 jobs:
-  unit-test-311:
+  unit-test-311: &unit-test
     working_directory: ~/neo3-boa
     executor: python311-executor
     steps:
@@ -38,6 +38,99 @@ jobs:
             sudo -E python fix-ripemd160-loading.py
             python -c "import hashlib;print(hashlib.new('ripemd160'))"
 
+      - run:
+          name: Install Dependencies
+          command: |
+            sudo apt update
+
+            sudo apt-get install -y apt-transport-https
+            wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+            sudo dpkg -i packages-microsoft-prod.deb
+            sudo apt update
+
+            sudo apt remove dotnet* aspnetcore* netstandard*
+            sudo rm /etc/apt/sources.list.d/microsoft-prod.list
+            sudo apt update && \
+              sudo apt-get install -y dotnet-sdk-6.0
+
+            sudo apt install libsnappy-dev libc6-dev librocksdb-dev -y
+            dotnet tool install Neo.Express --version 3.5.20 -g
+            dotnet tool install Neo.Test.Runner --version 3.5.17 -g
+
+      - run:
+          name: Test
+          command: |
+            export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
+            export PATH="$PATH:$DOTNET_TOOL_PATH"
+            
+            coverage run boa3_test/tests/run_unit_tests.py
+
+  unit-test-312:
+    <<: *unit-test
+    executor: python312-executor
+
+  build_deploy: &build_deploy
+    working_directory: ~/neo3-boa
+    executor: python311-executor
+    steps:
+      - checkout
+
+      - run:
+          name: Setup Environment
+          command: |
+            python3 -m venv venv
+            source venv/bin/activate
+
+      - python/install-packages:
+          pip-dependency-file: pyproject.toml
+          path-args: .[dev,test]
+          pkg-manager: pip-dist
+
+      - run:
+          name: Build .pypirc
+          command: |
+            echo -e "[$PYPI_REPO]" >> ~/.pypirc
+            echo -e "username = $PYPI_USERNAME" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+
+      - run:
+          name: Build Package
+          command: |
+            python3 -m pip install --upgrade pip
+            pip install twine build
+            python3 -m build
+            twine check dist/*
+
+  publish-docs:
+    executor: python311-executor
+    working_directory: ~/neo3-boa
+    steps:
+      - checkout
+      - python/load-cache
+
+      - python/install-packages:
+          pip-dependency-file: pyproject.toml
+          path-args: .[docs]
+          pkg-manager: pip-dist
+
+      - run:
+          name: install aws cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Build and release docs
+          command: |
+            cd docs
+            make docs
+
+  build_deploy_test:
+    <<: *build_deploy
+  build_deploy_prod:
+    <<: *build_deploy
+
+
 workflows:
   version: 2
   build_test_deploy:
@@ -46,3 +139,59 @@ workflows:
          filters:
            tags:
              only: /.*/
+      - unit-test-312:
+          filters:
+            tags:
+              only: /.*/
+      - build_deploy_test:
+          context: pypi_test
+          requires:
+            - unit-test-311
+            - unit-test-312
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - approve-release:
+          type: approval
+          requires:
+            - build_deploy_test
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+      - build_deploy_prod:
+          context: pypi_prod
+          requires:
+            - approve-release
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+
+
+  update-docs:
+    jobs:
+      - approve-update:
+          type: approval
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - staging
+                - master
+      - publish-docs:
+          context: aws
+          requires:
+            - approve-update
+          filters:
+            tags:
+              only: /.*/
+            branches:
+              only:
+                - staging
+                - master
