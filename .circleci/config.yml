@@ -106,7 +106,6 @@ jobs:
     working_directory: ~/neo3-boa
     steps:
       - checkout
-      - python/load-cache
 
       - python/install-packages:
           pip-dependency-file: pyproject.toml
