@@ -9,7 +9,7 @@ executors:
       - image: cimg/python:3.12.0
 
 orbs:
-  python: circleci/python@0.2.1
+  python: circleci/python@3.2.0
 
 jobs:
   unit-test-311: &unit-test
@@ -17,7 +17,12 @@ jobs:
     executor: python311-executor
     steps:
       - checkout
-      - python/load-cache
+
+      - python/install-packages:
+          pip-dependency-file: pyproject.toml
+          path-args: .[dev,test]
+          pkg-manager: pip-dist
+
       - run:
           name: Test Build Package
           command: |
@@ -36,7 +41,6 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
-            pip install -e .[dev,test]
             sudo apt update
 
             sudo apt-get install -y apt-transport-https
@@ -53,7 +57,6 @@ jobs:
             dotnet tool install Neo.Express --version 3.5.20 -g
             dotnet tool install Neo.Test.Runner --version 3.5.17 -g
 
-      - python/save-cache
       - run:
           name: Test
           command: |
@@ -80,10 +83,10 @@ jobs:
             python3 -m venv venv
             source venv/bin/activate
 
-      - run:
-          name: Install Deps
-          command: |
-            pip install -e .[dev,test]
+      - python/install-packages:
+          pip-dependency-file: pyproject.toml
+          path-args: .[dev,test]
+          pkg-manager: pip-dist
 
       - run:
           name: Build .pypirc
@@ -110,28 +113,27 @@ jobs:
     <<: *build_deploy
 
   publish-docs:
-      executor: python311-executor
-      working_directory: ~/neo3-boa
-      steps:
-        - checkout
-        - python/load-cache
+    executor: python311-executor
+    working_directory: ~/neo3-boa
+    steps:
+      - checkout
 
-        - run:
-            name: Install Dependencies
-            command: |
-              pip install -e .[docs]
+      - python/install-packages:
+          pip-dependency-file: pyproject.toml
+          path-args: .[docs]
+          pkg-manager: pip-dist
 
-        - run:
-            name: install aws cli
-            command: |
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip awscliv2.zip
-              sudo ./aws/install
-        - run:
-            name: Build and release docs
-            command: |
-              cd docs
-              make publish-docs
+      - run:
+          name: install aws cli
+          command: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+      - run:
+          name: Build and release docs
+          command: |
+            cd docs
+            make publish-docs
 
 workflows:
   version: 2
@@ -180,19 +182,16 @@ workflows:
           type: approval
           filters:
             tags:
-              only: /.*/
+              only: /^v.*/
             branches:
-              only:
-                - staging
-                - master
+              ignore: /.*/
+
       - publish-docs:
           context: aws
           requires:
             - approve-update
           filters:
             tags:
-              only: /.*/
+              only: /^v.*/
             branches:
-              only:
-                - staging
-                - master
+              ignore: /.*/
