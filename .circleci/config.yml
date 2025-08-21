@@ -178,19 +178,16 @@ workflows:
           type: approval
           filters:
             tags:
-              only: /.*/
+              only: /^v.*/
             branches:
-              only:
-                - staging
-                - master
+              ignore: /.*/
+
       - publish-docs:
           context: aws
           requires:
             - approve-update
           filters:
             tags:
-              only: /.*/
+              only: /^v.*/
             branches:
-              only:
-                - staging
-                - master
+              ignore: /.*/
