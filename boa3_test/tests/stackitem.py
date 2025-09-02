@@ -35,6 +35,7 @@ def from_block(block_: block.Block) -> annotation.Block:
         block_.timestamp,
         block_.nonce,
         block_.index,
+        block_.primary_index,
         block_.next_consensus,
         len(block_.transactions)
     )

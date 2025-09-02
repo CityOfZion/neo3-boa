@@ -32,6 +32,7 @@ Block = tuple[
     int,  # timestamp
     int,  # nonce
     int,  # index
+    int,  # primary index
     types.UInt160,  # next consensus
     int,  # tx count
 ]
