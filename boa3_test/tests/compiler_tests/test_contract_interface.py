@@ -204,6 +204,14 @@ class TestContractInterface(boatestcase.BoaTestCase):
                        },
                       manifest['permissions'])
 
+    async def test_contract_interface_with_another_class_with_static_variables(self):
+        await self.set_up_contract('ContractInterfaceAndClassWithStaticVars.py',
+                                   compile_if_found=True, debug=True)
+
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(1, result)
+
+
     async def test_get_hash_on_metadata_run(self):
         await self.set_up_contract('ContractInterfaceGetHashOnMetadata.py')
 
