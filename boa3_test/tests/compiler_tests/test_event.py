@@ -1,3 +1,5 @@
+from neo3.core import types
+
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -147,12 +149,16 @@ class TestEvent(boatestcase.BoaTestCase):
     async def test_event_nep17_transfer_run(self):
         await self.set_up_contract('EventNep17Transfer.py')
 
-        transfer_args = b'1', b'2', 10
+        transfer_args = (
+            types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213'),
+            types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213'),
+            10
+        )
         result, events = await self.call('Main', [*transfer_args], return_type=None)
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.BoaTestEvent.from_notification(events[0], bytes, bytes, int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], types.UInt160, types.UInt160, int)
         self.assertEqual(transfer_args, event.state)
 
     def test_event_nep17_transfer_built_compile(self):
@@ -180,12 +186,16 @@ class TestEvent(boatestcase.BoaTestCase):
     async def test_event_nep17_transfer_built_run(self):
         await self.set_up_contract('EventNep17TransferBuilt.py')
 
-        transfer_args = b'1', b'2', 10
+        transfer_args = (
+            types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213'),
+            types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213'),
+            10
+        )
         result, events = await self.call('Main', [*transfer_args], return_type=None)
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.BoaTestEvent.from_notification(events[0], bytes, bytes, int)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], types.UInt160, types.UInt160, int)
         self.assertEqual(transfer_args, event.state)
 
     def test_event_nep11_transfer_compile(self):
@@ -214,12 +224,17 @@ class TestEvent(boatestcase.BoaTestCase):
     async def test_event_nep11_transfer_run(self):
         await self.set_up_contract('EventNep11Transfer.py')
 
-        transfer_args = b'1', b'2', 10, b'someToken'
+        transfer_args = (
+            types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213'),
+            types.UInt160.from_string('0x000102030405060708090A0B0C0D0E0F10111213'),
+            10,
+            b'someToken'
+        )
         result, events = await self.call('Main', [*transfer_args], return_type=None)
         self.assertIsNone(result)
 
         self.assertEqual(1, len(events))
-        event = boatestcase.BoaTestEvent.from_notification(events[0], bytes, bytes, int, bytes)
+        event = boatestcase.BoaTestEvent.from_notification(events[0], types.UInt160, types.UInt160, int, bytes)
         self.assertEqual(transfer_args, event.state)
 
     def test_event_without_types(self):
