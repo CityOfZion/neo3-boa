@@ -70,7 +70,7 @@ class TestNativeContracts(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
+        cls.owner = cls.node.wallet.account_new(label='owner')
 
         super().setupTestCase()
 
@@ -78,7 +78,7 @@ class TestNativeContracts(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100, 8)
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')

@@ -15,17 +15,20 @@ class TestPolicyContract(boatestcase.BoaTestCase):
     @classmethod
     async def get_exec_fee_factor(cls) -> int:
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
-            return await cls.node.facade.test_invoke(PolicyContract().exec_fee_factor())
+            receipt = await cls.node.facade.test_invoke(PolicyContract().exec_fee_factor())
+            return receipt.result
 
     @classmethod
     async def get_fee_per_byte(cls) -> int:
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
-            return await cls.node.facade.test_invoke(PolicyContract().fee_per_byte())
+            receipt = await cls.node.facade.test_invoke(PolicyContract().fee_per_byte())
+            return receipt.result
 
     @classmethod
     async def get_storage_price(cls) -> int:
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
-            return await cls.node.facade.test_invoke(PolicyContract().storage_price())
+            receipt = await cls.node.facade.test_invoke(PolicyContract().storage_price())
+            return receipt.result
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')

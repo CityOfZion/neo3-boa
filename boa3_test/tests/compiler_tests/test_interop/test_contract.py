@@ -19,14 +19,14 @@ class TestContractInterop(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.account = cls.node.wallet.account_new(label='test', password='123')
+        cls.account = cls.node.wallet.account_new(label='test')
         super().setupTestCase()
 
     @classmethod
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account.script_hash, 100, 8)
 
     async def test_call_contract(self):
         await self.set_up_contract('CallScriptHash.py')
@@ -608,8 +608,8 @@ class TestContractInterop(boatestcase.BoaTestCase):
         await self.set_up_contract('CreateMultisigAccount.py')
 
         minimum_sigs = 2
-        account2 = self.node.wallet.account_new(label='test2', password='123')
-        account3 = self.node.wallet.account_new(label='test3', password='123')
+        account2 = self.node.wallet.account_new(label='test2')
+        account3 = self.node.wallet.account_new(label='test3')
         accounts = [
             self.account.public_key,
             account2.public_key,

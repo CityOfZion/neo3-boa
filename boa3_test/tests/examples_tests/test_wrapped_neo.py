@@ -23,10 +23,10 @@ class TestWrappedTokenTemplate(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
-        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
-        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
-        cls.account3 = cls.node.wallet.account_new(label='test3', password='123')
+        cls.owner = cls.node.wallet.account_new(label='owner')
+        cls.account1 = cls.node.wallet.account_new(label='test1')
+        cls.account2 = cls.node.wallet.account_new(label='test2')
+        cls.account3 = cls.node.wallet.account_new(label='test3')
 
         super().setupTestCase()
 
@@ -34,28 +34,28 @@ class TestWrappedTokenTemplate(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100, 0)
         await cls.set_up_contract('wrapped_neo.py', signing_account=cls.owner)
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100, 0)
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account3.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account3.script_hash, 100, 8)
 
         mint_owner = 50
         mint_account = 20
         success, _ = await cls.transfer(
             CONTRACT_HASHES.NEO_TOKEN,
-            cls.owner.script_hash, cls.contract_hash, mint_owner,
+            cls.owner.script_hash, cls.contract_hash, mint_owner, 0,
             signing_account=cls.owner
         )
         cls.OWNER_BALANCE += mint_owner
 
         success, _ = await cls.transfer(
             CONTRACT_HASHES.NEO_TOKEN,
-            cls.account1.script_hash, cls.contract_hash, mint_account,
+            cls.account1.script_hash, cls.contract_hash, mint_account, 0,
             signing_account=cls.account1
         )
         cls.TOTAL_SUPPLY += mint_owner + mint_account
@@ -247,7 +247,7 @@ class TestWrappedTokenTemplate(boatestcase.BoaTestCase):
             CONTRACT_HASHES.NEO_TOKEN,
             sender_script_hash,
             self.contract_hash,
-            neo_amount,
+            neo_amount, 0,
             signing_account=sender
         )
         self.assertEqual(True, result)
@@ -285,7 +285,7 @@ class TestWrappedTokenTemplate(boatestcase.BoaTestCase):
             CONTRACT_HASHES.GAS_TOKEN,
             sender_script_hash,
             self.contract_hash,
-            gas_amount,
+            gas_amount, gas_decimals,
             signing_account=sender
         )
         self.assertEqual(True, result)

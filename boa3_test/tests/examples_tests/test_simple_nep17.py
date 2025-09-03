@@ -17,9 +17,9 @@ class TestSimpleNEP17Template(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
-        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
-        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
+        cls.owner = cls.node.wallet.account_new(label='owner')
+        cls.account1 = cls.node.wallet.account_new(label='test1')
+        cls.account2 = cls.node.wallet.account_new(label='test2')
 
         cls.OWNER_BALANCE = cls.TOTAL_SUPPLY
         super().setupTestCase()
@@ -28,9 +28,9 @@ class TestSimpleNEP17Template(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 100, 8)
 
         await cls.set_up_contract('simple_nep17.py', signing_account=cls.owner)
         mint_amount = 100
@@ -38,7 +38,7 @@ class TestSimpleNEP17Template(boatestcase.BoaTestCase):
             cls.contract_hash,
             cls.owner.script_hash,
             cls.account1.script_hash,
-            mint_amount,
+            mint_amount, cls.DECIMALS,
             signing_account=cls.owner
         )
         cls.OWNER_BALANCE -= mint_amount * 10 ** cls.DECIMALS
@@ -218,6 +218,6 @@ class TestSimpleNEP17Template(boatestcase.BoaTestCase):
                 CONTRACT_HASHES.NEO_TOKEN,
                 self.genesis.script_hash,
                 self.contract_hash,
-                10,
+                10, 0,
                 signing_account=self.genesis,
             )

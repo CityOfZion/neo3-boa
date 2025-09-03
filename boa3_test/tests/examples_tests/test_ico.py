@@ -33,18 +33,18 @@ class TestICOTemplate(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
-        cls.account_for_balance_test = cls.node.wallet.account_new(label='accountBalanceOf', password='123')
-        cls.account_for_verify_test = cls.node.wallet.account_new(label='accountVerify', password='123')
-        cls.account_not_admin_for_allowance = cls.node.wallet.account_new(label='accountNotAdminAllowance', password='123')
-        cls.account_not_admin_for_register = cls.node.wallet.account_new(label='accountNotAdminRegister', password='123')
-        cls.account_not_admin_for_remove = cls.node.wallet.account_new(label='accountNotAdminRemove', password='123')
-        cls.account_originator_for_approve_test = cls.node.wallet.account_new(label='accountOriginatorApprove', password='123')
-        cls.account_receiver_for_approve_test = cls.node.wallet.account_new(label='accountReceiverApprove', password='123')
-        cls.account_for_refund_test = cls.node.wallet.account_new(label='accountRefund', password='123')
-        cls.account_originator_for_transfer_test = cls.node.wallet.account_new(label='accountOriginatorTransfer', password='123')
-        cls.account_sender_for_transfer_test = cls.node.wallet.account_new(label='accountSenderTransfer', password='123')
-        cls.account_receiver_for_transfer_test = cls.node.wallet.account_new(label='accountReceiverTransfer', password='123')
+        cls.owner = cls.node.wallet.account_new(label='owner')
+        cls.account_for_balance_test = cls.node.wallet.account_new(label='accountBalanceOf')
+        cls.account_for_verify_test = cls.node.wallet.account_new(label='accountVerify')
+        cls.account_not_admin_for_allowance = cls.node.wallet.account_new(label='accountNotAdminAllowance')
+        cls.account_not_admin_for_register = cls.node.wallet.account_new(label='accountNotAdminRegister')
+        cls.account_not_admin_for_remove = cls.node.wallet.account_new(label='accountNotAdminRemove')
+        cls.account_originator_for_approve_test = cls.node.wallet.account_new(label='accountOriginatorApprove')
+        cls.account_receiver_for_approve_test = cls.node.wallet.account_new(label='accountReceiverApprove')
+        cls.account_for_refund_test = cls.node.wallet.account_new(label='accountRefund')
+        cls.account_originator_for_transfer_test = cls.node.wallet.account_new(label='accountOriginatorTransfer')
+        cls.account_sender_for_transfer_test = cls.node.wallet.account_new(label='accountSenderTransfer')
+        cls.account_receiver_for_transfer_test = cls.node.wallet.account_new(label='accountReceiverTransfer')
 
         super().setupTestCase()
 
@@ -52,28 +52,40 @@ class TestICOTemplate(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_balance_test.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_verify_test.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_not_admin_for_allowance.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_not_admin_for_register.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_not_admin_for_remove.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_originator_for_approve_test.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_receiver_for_approve_test.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_refund_test.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_sender_for_transfer_test.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_receiver_for_transfer_test.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_balance_test.script_hash,
+                           100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_verify_test.script_hash,
+                           100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_not_admin_for_allowance.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_not_admin_for_register.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_not_admin_for_remove.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_originator_for_approve_test.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_receiver_for_approve_test.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_for_refund_test.script_hash,
+                           100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_sender_for_transfer_test.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_receiver_for_transfer_test.script_hash, 100, 8)
 
         await cls.set_up_contract('ico.py', signing_account=cls.owner)
 
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.contract_hash, 2 * cls.NEO_TO_REFUND)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.contract_hash, 2 * cls.GAS_TO_REFUND)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.contract_hash, 2 * cls.NEO_TO_REFUND,
+                           0)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.contract_hash, 2 * cls.GAS_TO_REFUND,
+                           8)
 
         await cls.transfer(
             cls.contract_hash,
             cls.owner.script_hash,
             cls.account_for_balance_test.script_hash,
-            cls.BALANCE_TO_TEST,
+            cls.BALANCE_TO_TEST, 8,
             signing_account=cls.owner
         )
 
@@ -81,7 +93,7 @@ class TestICOTemplate(boatestcase.BoaTestCase):
             cls.contract_hash,
             cls.owner.script_hash,
             cls.account_originator_for_approve_test.script_hash,
-            cls.BALANCE_TO_TEST,
+            cls.BALANCE_TO_TEST, 8,
             signing_account=cls.owner
         )
 
