@@ -42,7 +42,7 @@ Create a product that is easy to maintain and upgrade. Use Unit tests, typed and
 Quickstart
 ----------
 
-Installation requires Python 3.11 or later.
+Installation requires Python 3.12 or later.
 
 Compiling your Smart Contract
 =============================
