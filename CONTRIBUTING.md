@@ -52,7 +52,7 @@ snippet of the code where the problem is happening or a example of a feature, an
 ## Setting up your workspace
 
 If you wish to contribute with the project by implementing a feature or fixing a bug, it's necessary to have a Python3
-version equal or higher than 3.11 on your machine and install the Python packages listed inside the `requirements_dev.txt`
+version equal or higher than 3.12 on your machine and install the Python packages listed inside the `requirements_dev.txt`
 file, and also have the [.NET 6.0](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) tools: [Neo-Express](https://github.com/neo-project/neo-express#neo-express-and-neo-trace) and [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner)
 installed.
 

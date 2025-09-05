@@ -64,10 +64,10 @@ class TestAMMTemplate(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.owner = cls.node.wallet.account_new(label='test0', password='123')
-        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
-        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
-        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount', password='123')
+        cls.owner = cls.node.wallet.account_new(label='test0')
+        cls.account1 = cls.node.wallet.account_new(label='test1')
+        cls.account2 = cls.node.wallet.account_new(label='test2')
+        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount')
 
         super().setupTestCase()
 
@@ -75,12 +75,12 @@ class TestAMMTemplate(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10_000)
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10_000)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 10_000)
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 10_000)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash, 10)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 3000)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10_000, 8)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10_000, 0)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 10_000, 8)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account2.script_hash, 10_000, 0)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash, 10, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 3000, 8)
         cls.z_neo = await cls.compile_and_deploy('wrapped_neo.py', signing_account=cls.owner)
         cls.z_gas = await cls.compile_and_deploy('wrapped_gas.py', signing_account=cls.owner)
 

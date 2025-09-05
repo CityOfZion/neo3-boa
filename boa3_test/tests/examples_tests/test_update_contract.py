@@ -18,8 +18,8 @@ class TestUpdateContractTemplate(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.owner = cls.node.wallet.account_new(label='owner', password='123')
-        cls.other_account = cls.node.wallet.account_new(label='otherAccount', password='123')
+        cls.owner = cls.node.wallet.account_new(label='owner')
+        cls.other_account = cls.node.wallet.account_new(label='otherAccount')
 
         super().setupTestCase()
 
@@ -27,8 +27,8 @@ class TestUpdateContractTemplate(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.other_account.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.other_account.script_hash, 100, 8)
 
         await cls.set_up_contract('update_contract.py', signing_account=cls.owner)
 

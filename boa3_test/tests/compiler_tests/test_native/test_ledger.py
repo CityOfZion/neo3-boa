@@ -286,3 +286,36 @@ class TestLedgerContract(boatestcase.BoaTestCase):
         block_ = await self.get_last_block(self.called_tx)
         expected = block_.hash()
         self.assertEqual(expected, result)
+
+    async def test_get_genesis_block(self):
+        await self.set_up_contract('GetGenesisBlock.py')
+
+        result, _ = await self.call('get_hash', [], return_type=types.UInt256)
+        self.assertEqual(self.genesis_block.hash(), result)
+
+        result, _ = await self.call('get_version', [], return_type=int)
+        self.assertEqual(self.genesis_block.version, result)
+
+        result, _ = await self.call('get_previous_hash', [], return_type=types.UInt256)
+        self.assertEqual(self.genesis_block.prev_hash, result)
+
+        result, _ = await self.call('get_merkle_root', [], return_type=types.UInt256)
+        self.assertEqual(self.genesis_block.merkle_root, result)
+
+        result, _ = await self.call('get_timestamp', [], return_type=int)
+        self.assertEqual(self.genesis_block.timestamp, result)
+
+        result, _ = await self.call('get_nonce', [], return_type=int)
+        self.assertEqual(self.genesis_block.nonce, result)
+
+        result, _ = await self.call('get_index', [], return_type=int)
+        self.assertEqual(self.genesis_block.index, result)
+
+        result, _ = await self.call('get_primary_index', [], return_type=int)
+        self.assertEqual(self.genesis_block.primary_index, result)
+
+        result, _ = await self.call('get_next_consensus', [], return_type=types.UInt160)
+        self.assertEqual(self.genesis_block.next_consensus, result)
+
+        result, _ = await self.call('get_transaction_count', [], return_type=int)
+        self.assertEqual(len(self.genesis_block.transactions), result)

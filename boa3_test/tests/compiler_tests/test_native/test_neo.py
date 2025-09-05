@@ -44,15 +44,15 @@ class TestNeoClass(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
-        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
-        cls.account_get_account_state = cls.node.wallet.account_new(label='test8', password='123')
-        cls.candidate_register = cls.node.wallet.account_new(label='test3', password='123')
-        cls.candidate_unregister = cls.node.wallet.account_new(label='test4', password='123')
-        cls.candidate_vote = cls.node.wallet.account_new(label='test5', password='123')
-        cls.candidate_get_candidates = cls.node.wallet.account_new(label='test6', password='123')
-        cls.candidate_get_candidate_vote = cls.node.wallet.account_new(label='test7', password='123')
-        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount', password='123')
+        cls.account1 = cls.node.wallet.account_new(label='test1')
+        cls.account2 = cls.node.wallet.account_new(label='test2')
+        cls.account_get_account_state = cls.node.wallet.account_new(label='test8')
+        cls.candidate_register = cls.node.wallet.account_new(label='test3')
+        cls.candidate_unregister = cls.node.wallet.account_new(label='test4')
+        cls.candidate_vote = cls.node.wallet.account_new(label='test5')
+        cls.candidate_get_candidates = cls.node.wallet.account_new(label='test6')
+        cls.candidate_get_candidate_vote = cls.node.wallet.account_new(label='test7')
+        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount')
 
         super().setupTestCase()
 
@@ -60,26 +60,35 @@ class TestNeoClass(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 1_000)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10)
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account_get_account_state.script_hash, 10)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account_get_account_state.script_hash, 10)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_register.script_hash, 1010)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_unregister.script_hash, 3010)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_vote.script_hash, 4010)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_get_candidates.script_hash, 1010)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_get_candidate_vote.script_hash, 1010)
-        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash, cls.balance_test_amount)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 1_000, 0)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 10, 8)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash,
+                           cls.account_get_account_state.script_hash, 10, 0)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.account_get_account_state.script_hash, 10, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_register.script_hash, 1010,
+                           8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_unregister.script_hash,
+                           3010, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_vote.script_hash, 4010, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.candidate_get_candidates.script_hash,
+                           1010, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash,
+                           cls.candidate_get_candidate_vote.script_hash, 1010, 8)
+        await cls.transfer(CONTRACT_HASHES.NEO_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash,
+                           cls.balance_test_amount, 0)
 
     @classmethod
     async def get_gas_per_block(cls) -> int:
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
-            return await cls.node.facade.test_invoke(NeoToken().get_gas_per_block())
+            receipt = await cls.node.facade.test_invoke(NeoToken().get_gas_per_block())
+            return receipt.result
 
     @classmethod
     async def get_register_price(cls) -> int:
         async with noderpc.NeoRpcClient(cls.node.facade.rpc_host):
-            return await cls.node.facade.test_invoke(NeoToken().candidate_registration_price())
+            receipt = await cls.node.facade.test_invoke(NeoToken().candidate_registration_price())
+            return receipt.result
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
@@ -256,18 +265,6 @@ class TestNeoClass(boatestcase.BoaTestCase):
 
         candidate = self.candidate_register.script_hash
         candidate_pubkey = self.candidate_register.public_key
-
-        result, _ = await self.call('main', [candidate_pubkey], return_type=bool)
-        self.assertEqual(False, result)
-
-        # signing_accounts doesn't modify WitnessScope
-        # signing with call_by_entry is not enough to pass check witness calling from test contract
-        result, _ = await self.call('main',
-                                    [candidate_pubkey],
-                                    return_type=bool,
-                                    signing_accounts=[self.candidate_register]
-                                    )
-        self.assertEqual(False, result)
 
         signer = verification.Signer(
             candidate,

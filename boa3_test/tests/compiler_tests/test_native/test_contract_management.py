@@ -16,14 +16,14 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.account = cls.node.wallet.account_new(label='test', password='123')
+        cls.account = cls.node.wallet.account_new(label='test')
         super().setupTestCase()
 
     @classmethod
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account.script_hash, 100)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account.script_hash, 100, 8)
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')

@@ -18,9 +18,9 @@ class TestGasClass(boatestcase.BoaTestCase):
 
     @classmethod
     def setupTestCase(cls):
-        cls.account1 = cls.node.wallet.account_new(label='test1', password='123')
-        cls.account2 = cls.node.wallet.account_new(label='test2', password='123')
-        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount', password='123')
+        cls.account1 = cls.node.wallet.account_new(label='test1')
+        cls.account2 = cls.node.wallet.account_new(label='test2')
+        cls.balance_test = cls.node.wallet.account_new(label='balanceTestAccount')
 
         super().setupTestCase()
 
@@ -28,8 +28,8 @@ class TestGasClass(boatestcase.BoaTestCase):
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100)
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash, 10)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.account1.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.balance_test.script_hash, 10, 8)
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')

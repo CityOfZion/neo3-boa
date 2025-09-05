@@ -199,6 +199,8 @@ class Block:
     :vartype nonce: int
     :ivar index: the index of the block
     :vartype index: int
+    :ivar primary_index: the primary index of the consensus node that generated this block
+    :vartype primary_index: int
     :ivar next_consensus: the script hash of the consensus nodes that generates the next block
     :vartype next_consensus: boa3.sc.types.UInt160
     :ivar transaction_count: the number of transactions on this block
@@ -213,6 +215,7 @@ class Block:
         self.timestamp: int = 0
         self.nonce: int = 0
         self.index: int = 0
+        self.primary_index: int = 0
         self.next_consensus: UInt160 = UInt160()
         self.transaction_count: int = 0
 

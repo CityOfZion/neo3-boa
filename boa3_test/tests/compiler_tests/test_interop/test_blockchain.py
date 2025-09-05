@@ -30,6 +30,7 @@ class TestBlockchainInterop(boatestcase.BoaTestCase):
             0,  # timestamp
             0,  # nonce
             0,  # index
+            0,  # primary index
             types.UInt160.zero(),  # next consensus
             0  # tx count
         )

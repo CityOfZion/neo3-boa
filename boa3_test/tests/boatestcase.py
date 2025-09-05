@@ -25,6 +25,7 @@ from boaconstructor import (SmartContractTestCase,
                             PostProcessor,
                             )
 from neo3.api import noderpc
+from neo3.api.noderpc import ApplicationExecution
 from neo3.api.wrappers import GenericContract
 from neo3.contracts import manifest
 from neo3.core import types, cryptography
@@ -302,25 +303,20 @@ class BoaTestCase(SmartContractTestCase):
                          .with_suffix(".manifest.json")
                          )
 
-        try:
-            contract_hash = await super().deploy(
-                path_to_nef,
-                signing_account
-            )
-            _manifest = manifest.ContractManifest.from_file(str(manifest_path))
-            cls.deployed_contracts[_manifest.name] = contract_hash
-            return contract_hash
+        contract_hash = await super().deploy(
+            path_to_nef,
+            signing_account
+        )
+        _manifest = manifest.ContractManifest.from_file(str(manifest_path))
 
-        except ValueError as e:
-            # if the contract is already deployed, returns its script hash instead of raising an error
-            if not (e.args and isinstance(e.args[0], str) and 'contract already exists' in e.args[0]):
-                raise e
+        # if the contract is already deployed, returns its script hash instead of raising an error
+        if isinstance(contract_hash, ApplicationExecution):
+            if "contract already exists" in contract_hash.exception:
+                return cls.deployed_contracts[_manifest.name]
 
-            _manifest = manifest.ContractManifest.from_file(str(manifest_path))
-            if _manifest.name not in cls.deployed_contracts:
-                raise e
+        cls.deployed_contracts[_manifest.name] = contract_hash
+        return contract_hash
 
-            return cls.deployed_contracts[_manifest.name]
 
     @classmethod
     async def get_storage(
@@ -517,7 +513,7 @@ class BoaTestCase(SmartContractTestCase):
         Must be called after set_up_contract to ensure a valid response.
         If called before, it may not be able to find a valid tx.
         """
-        if cls.called_tx is not None:
+        if cls.called_tx is not None and cls.called_tx != types.UInt256.zero():
             return cls.called_tx
 
         block_ = None
