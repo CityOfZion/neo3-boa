@@ -1,12 +1,18 @@
+from typing import cast
+
+from boaconstructor import storage
 from neo3.core import cryptography, types
 
 from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.ContractParameterType import ContractParameterType
 from boa3.internal.neo.vm.type.Integer import Integer
+from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.contracts import CallFlags
+from boa3.internal.neo3.contracts import TriggerType
 from boa3.internal.neo3.network.payloads.verification import WitnessScope, WitnessRuleAction, WitnessConditionType
 from boa3.internal.neo3.vm import VMState
-from boa3_test.tests import boatestcase
+from boa3_test.tests import boatestcase, annotation
 
 
 class TestNeoTypes(boatestcase.BoaTestCase):
@@ -624,7 +630,7 @@ class TestNeoTypes(boatestcase.BoaTestCase):
     # region CallFlags
 
     async def test_call_flags_instantiate(self):
-        await self.set_up_contract('CallFlagsInstantiate.py')
+        await self.set_up_contract('callflags', 'CallFlagsInstantiate.py')
 
         for call_flags in CallFlags:
             result, _ = await self.call('main', [call_flags], return_type=int)
@@ -642,10 +648,305 @@ class TestNeoTypes(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), "Invalid CallFlags parameter value")
 
     async def test_call_flags_not(self):
-        await self.set_up_contract('CallFlagsNot.py')
+        await self.set_up_contract('callflags', 'CallFlagsNot.py')
 
         for call_flags in CallFlags:
             result, _ = await self.call('main', [call_flags], return_type=int)
             self.assertEqual(~call_flags, result)
+
+    async def test_call_flags_type(self):
+        await self.set_up_contract('callflags', 'CallFlagsType.py')
+
+        from neo3.contracts.callflags import CallFlags
+
+        result, _ = await self.call('main', ['ALL'], return_type=int)
+        self.assertEqual(CallFlags.ALL, result)
+
+        result, _ = await self.call('main', ['READ_ONLY'], return_type=int)
+        self.assertEqual(CallFlags.READ_ONLY, result)
+
+        result, _ = await self.call('main', ['STATES'], return_type=int)
+        self.assertEqual(CallFlags.STATES, result)
+
+        result, _ = await self.call('main', ['ALLOW_NOTIFY'], return_type=int)
+        self.assertEqual(CallFlags.ALLOW_NOTIFY, result)
+
+        result, _ = await self.call('main', ['ALLOW_CALL'], return_type=int)
+        self.assertEqual(CallFlags.ALLOW_CALL, result)
+
+        result, _ = await self.call('main', ['WRITE_STATES'], return_type=int)
+        self.assertEqual(CallFlags.WRITE_STATES, result)
+
+        result, _ = await self.call('main', ['READ_STATES'], return_type=int)
+        self.assertEqual(CallFlags.READ_STATES, result)
+
+        result, _ = await self.call('main', ['NONE'], return_type=int)
+        self.assertEqual(CallFlags.NONE, result)
+
+    async def test_get_call_flags(self):
+        await self.set_up_contract('callflags', 'CallScriptHashWithFlags.py')
+        call_hash = await self.compile_and_deploy('callflags', 'GetCallFlags.py')
+
+        from neo3.contracts.callflags import CallFlags
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.ALL], return_type=int)
+        self.assertEqual(CallFlags.ALL, result)
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.READ_ONLY], return_type=int)
+        self.assertEqual(CallFlags.READ_ONLY, result)
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.STATES], return_type=int)
+        self.assertEqual(CallFlags.STATES, result)
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.NONE], return_type=int)
+        self.assertEqual(CallFlags.NONE, result)
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.READ_STATES], return_type=int)
+        self.assertEqual(CallFlags.READ_STATES, result)
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.WRITE_STATES], return_type=int)
+        self.assertEqual(CallFlags.WRITE_STATES, result)
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.ALLOW_CALL], return_type=int)
+        self.assertEqual(CallFlags.ALLOW_CALL, result)
+
+        result, _ = await self.call('Main', [call_hash, 'main', [], CallFlags.ALLOW_NOTIFY], return_type=int)
+        self.assertEqual(CallFlags.ALLOW_NOTIFY, result)
+
+    # endregion
+
+    # region Block
+
+    async def test_block_constructor(self):
+        await self.set_up_contract('Block.py')
+
+        zero_uint256 = types.UInt256.zero()
+        expected: annotation.Block = (
+            zero_uint256,  # hash
+            0,  # version
+            zero_uint256,  # previous hash
+            zero_uint256,  # merkle root
+            0,  # timestamp
+            0,  # nonce
+            0,  # index
+            0,  # primary index
+            types.UInt160.zero(),  # next consensus
+            0  # tx count
+        )
+        result, _ = await self.call('main', [], return_type=annotation.Block)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
+
+    # endregion
+
+    # region Transaction
+
+    async def test_transaction_init(self):
+        await self.set_up_contract('Transaction.py')
+
+        expected: annotation.Transaction = (
+            types.UInt256.zero(),  # hash
+            0,  # version
+            0,  # nonce
+            types.UInt160.zero(),  # sender
+            0,  # system fee
+            0,  # network fee
+            0,  # valid until block
+            b''  # script
+        )
+        result, _ = await self.call('main', [], return_type=annotation.Transaction)
+        self.assertEqual(len(expected), len(result))
+        self.assertEqual(expected, result)
+
+    # endregion
+
+    # region Iterator
+
+    def test_iterator_create(self):
+        self.assertCompilerLogs(CompilerError.UnresolvedReference, 'iterator', 'IteratorCreate.py')
+
+    async def test_iterator_next(self):
+        await self.set_up_contract('iterator', 'IteratorNext.py')
+
+        prefix = b'test_iterator_next'
+        result, _ = await self.call('has_next', [prefix], return_type=bool)
+        self.assertEqual(False, result)
+
+        key = prefix + b'example1'
+        value = 1
+        await self.call('store_data', [key, value], return_type=None, signing_accounts=[self.genesis])
+
+        contract_storage = cast(
+            dict[bytes, int],
+            await self.get_storage(
+                prefix=prefix,
+                values_post_processor=storage.as_int
+            )
+        )
+        self.assertIn(key, contract_storage)
+        self.assertEqual(value, contract_storage[key])
+
+        result, _ = await self.call('has_next', [prefix], return_type=bool)
+        self.assertEqual(True, result)
+
+    async def test_iterator_value(self):
+        await self.set_up_contract('iterator', 'IteratorValue.py')
+
+        prefix = b'test_iterator_value'
+        result, _ = await self.call('test_iterator', [prefix], return_type=None)
+        self.assertIsNone(result)
+
+        key = prefix + b'example1'
+        await self.call('store_data', [key, 1], return_type=None, signing_accounts=[self.genesis])
+
+        contract_storage = cast(
+            dict[bytes, int],
+            await self.get_storage(
+                prefix=prefix
+            )
+        )
+        self.assertIn(key, contract_storage)
+
+        result, _ = await self.call('test_iterator', [prefix], return_type=tuple[bytes, bytes])
+        self.assertEqual((key, contract_storage[key]), result)
+
+    def test_iterator_value_dict_mismatched_type(self):
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'iterator', 'IteratorValueMismatchedType.py')
+
+    async def test_import_iterator(self):
+        await self.set_up_contract('iterator', 'ImportIterator.py')
+
+        # TODO: #86drqwhx0 neo-go in the current version of boa-test-constructor is not configured to return Iterators
+        with self.assertRaises(ValueError) as context:
+            result, _ = await self.call('return_iterator', [], return_type=list)
+            self.assertEqual([], result)
+
+        self.assertRegex(str(context.exception), 'Interop stack item only supports iterators')
+
+    async def test_iterator_implicit_typing(self):
+        await self.set_up_contract('iterator', 'IteratorImplicitTyping.py')
+
+        prefix = b'test_iterator_'
+        prefix_str = String.from_bytes(prefix)
+        result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])
+        self.assertEqual({}, result)
+
+        result, _ = await self.call('store', [prefix + b'1', 1], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result, _ = await self.call('store', [prefix + b'2', 2], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])
+        self.assertEqual({f'{prefix_str}1': 1, f'{prefix_str}2': 2}, result)
+
+    async def test_iterator_value_access(self):
+        await self.set_up_contract('iterator', 'IteratorValueAccess.py')
+
+        prefix = b'test_iterator_'
+        prefix_str = String.from_bytes(prefix)
+        result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])
+        self.assertEqual({}, result)
+
+        result, _ = await self.call('store', [prefix + b'1', 1], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result, _ = await self.call('store', [prefix + b'2', 2], return_type=None, signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result, _ = await self.call('search_storage', [prefix], return_type=dict[str, int])
+        self.assertEqual({f'{prefix_str}1': 1, f'{prefix_str}2': 2}, result)
+
+    # endregion
+
+    # region TriggerType
+
+    async def test_trigger_type_instantiate(self):
+        await self.set_up_contract('triggertype', 'TriggerTypeInstantiate.py')
+
+        for trigger_type in TriggerType:
+            result, _ = await self.call('main', [trigger_type], return_type=int)
+            self.assertEqual(trigger_type, result)
+
+        result, _ = await self.call('main', [TriggerType.ON_PERSIST | TriggerType.VERIFICATION], return_type=int)
+        self.assertEqual(TriggerType.ON_PERSIST | TriggerType.VERIFICATION, result)
+
+        result, _ = await self.call('main', [TriggerType.POST_PERSIST | TriggerType.APPLICATION], return_type=int)
+        self.assertEqual(TriggerType.POST_PERSIST | TriggerType.APPLICATION, result)
+
+        with self.assertRaises(boatestcase.AssertException) as context:
+            await self.call('main', [128], return_type=int)
+
+        self.assertRegex(str(context.exception), "Invalid TriggerType parameter value")
+
+    async def test_boa2_trigger_type_test(self):
+        await self.set_up_contract('triggertype', 'TriggerTypeBoa2Test.py')
+
+        result, _ = await self.call('main', [1], return_type=int)
+        self.assertEqual(0x40, result)
+
+        result, _ = await self.call('main', [2], return_type=int)
+        self.assertEqual(0x20, result)
+
+        result, _ = await self.call('main', [3], return_type=bytes)
+        self.assertEqual(b'\x20', result)
+
+        result, _ = await self.call('main', [0], return_type=int)
+        self.assertEqual(-1, result)
+
+    def test_is_application_trigger_compile(self):
+        from boa3.internal.model.builtin.interop.interop import Interop
+
+        application = Integer(TriggerType.APPLICATION).to_byte_array()
+        expected_output = (
+                Opcode.SYSCALL
+                + Interop.GetTrigger.interop_method_hash
+                + Opcode.PUSHINT8 + application
+                + Opcode.NUMEQUAL
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('triggertype/TriggerApplication.py')
+        self.assertEqual(expected_output, output)
+
+    def test_is_verification_trigger_compile(self):
+        from boa3.internal.model.builtin.interop.interop import Interop
+
+        verification = Integer(TriggerType.VERIFICATION).to_byte_array()
+        expected_output = (
+                Opcode.SYSCALL
+                + Interop.GetTrigger.interop_method_hash
+                + Opcode.PUSHINT8 + verification
+                + Opcode.NUMEQUAL
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('triggertype/TriggerVerification.py')
+        self.assertEqual(expected_output, output)
+
+    async def test_trigger_type_not(self):
+        await self.set_up_contract('triggertype', 'TriggerTypeNot.py')
+
+        for trigger_type in TriggerType:
+            result, _ = await self.call('main', [trigger_type], return_type=int)
+            self.assertEqual(~trigger_type, result)
+
+    async def test_trigger_not_system(self):
+        await self.set_up_contract('triggertype', 'TriggerNotSystem.py')
+
+        result, _ = await self.call('main', return_type=bool)
+        self.assertEqual(True, result)
+
+    async def test_is_application_trigger_run(self):
+        await self.set_up_contract('triggertype', 'TriggerApplication.py')
+
+        result, _ = await self.call('Main', [], return_type=bool)
+        self.assertEqual(True, result)
+
+    async def test_is_verification_trigger_run(self):
+        await self.set_up_contract('triggertype', 'TriggerVerification.py')
+
+        result, _ = await self.call('Main', [], return_type=bool)
+        self.assertEqual(False, result)
 
     # endregion

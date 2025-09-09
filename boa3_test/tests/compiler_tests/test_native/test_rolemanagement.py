@@ -1,7 +1,7 @@
 from neo3.core import types
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo3.contracts.native import Role
 from boa3_test.tests import boatestcase
@@ -12,14 +12,6 @@ class TestRoleManagementClass(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
-
-        expected = types.UInt160(constants.ROLE_MANAGEMENT)
-        result, _ = await self.call('main', [], return_type=types.UInt160)
-        self.assertEqual(expected, result)
-
-    async def test_get_hash_deprecated(self):
-        await self.set_up_contract('GetHashDeprecated.py')
-        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         expected = types.UInt160(constants.ROLE_MANAGEMENT)
         result, _ = await self.call('main', [], return_type=types.UInt160)
@@ -66,3 +58,29 @@ class TestRoleManagementClass(boatestcase.BoaTestCase):
         for role in Role:
             result, _ = await self.call('main', [role], return_type=int)
             self.assertEqual(~role, result)
+
+    def test_import_contracts_role_management(self):
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x00\x02'
+                + Opcode.LDARG1
+                + Opcode.LDARG0
+                + Opcode.CALLT + b'\x00\x00'
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('ImportContractsRoleManagement.py')
+        self.assertEqual(expected_output, output)
+
+    def test_import_sc_contracts_role_management(self):
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x00\x02'
+                + Opcode.LDARG1
+                + Opcode.LDARG0
+                + Opcode.CALLT + b'\x00\x00'
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('ImportScContractsRoleManagement.py')
+        self.assertEqual(expected_output, output)

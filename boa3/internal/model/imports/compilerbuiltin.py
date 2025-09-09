@@ -7,9 +7,6 @@ __all__ = [
 from typing import Self
 
 from boa3.internal import constants
-from boa3.internal.model.builtin.builtin import Builtin, BoaPackage
-from boa3.internal.model.builtin.interop.interop import Interop
-from boa3.internal.model.builtin.native.nativecontract import NativeContract
 from boa3.internal.model.event import Event
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.imports.package import Package
@@ -51,17 +48,6 @@ class CompilerBuiltin:
         self._generate_builtin_package('boa3.sc.runtime', ContractImports.package_symbols(BoaSCPackage.Runtime))
         self._generate_builtin_package('boa3.sc.storage', ContractImports.package_symbols(BoaSCPackage.Storage))
         self._generate_builtin_package('boa3.sc.utils', ContractImports.package_symbols(BoaSCPackage.Utils))
-
-        # TODO: deprecate boa3.builtin packages
-        self._generate_builtin_package('boa3.builtin', Builtin.boa_builtins)
-        self._set_events(Builtin.builtin_events())
-        self._generate_builtin_package('boa3.builtin.contract', Builtin.package_symbols(BoaPackage.Contract))
-        self._generate_builtin_package('boa3.builtin.compile_time', Builtin.package_symbols(BoaPackage.CompileTime))
-        self._generate_builtin_package('boa3.builtin.interop', Interop.package_symbols)
-        self._set_events(Interop.interop_events())
-        self._generate_builtin_package('boa3.builtin.nativecontract', NativeContract.package_symbols)
-        self._generate_builtin_package('boa3.builtin.type', Builtin.package_symbols(BoaPackage.Type))
-        self._generate_builtin_package('boa3.builtin.vm', Builtin.package_symbols(BoaPackage.VM))
 
     @classmethod
     def reset(cls):

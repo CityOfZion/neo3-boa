@@ -4,7 +4,7 @@ from neo3.core import types
 from neo3.network.payloads import verification
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.exception import CompilerError
 from boa3.internal.neo3.network.payloads.transactionattributetype import TransactionAttributeType
 from boa3_test.tests import boatestcase
 
@@ -32,14 +32,6 @@ class TestPolicyContract(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
-
-        expected = types.UInt160(constants.POLICY_SCRIPT)
-        result, _ = await self.call('main', [], return_type=types.UInt160)
-        self.assertEqual(expected, result)
-
-    async def test_get_hash_deprecated(self):
-        await self.set_up_contract('GetHashDeprecated.py')
-        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         expected = types.UInt160(constants.POLICY_SCRIPT)
         result, _ = await self.call('main', [], return_type=types.UInt160)
@@ -156,3 +148,15 @@ class TestPolicyContract(boatestcase.BoaTestCase):
         for transaction_attribute_type in TransactionAttributeType:
             result, _ = await self.call('main', [transaction_attribute_type], return_type=int)
             self.assertEqual(~transaction_attribute_type, result)
+
+    async def test_import_contracts_policy_contract(self):
+        await self.set_up_contract('ImportContractsPolicyContract.py')
+
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertIsInstance(result, int)
+
+    async def test_import_interop_policy(self):
+        await self.set_up_contract('ImportScContractsPolicyContract.py')
+
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertIsInstance(result, int)

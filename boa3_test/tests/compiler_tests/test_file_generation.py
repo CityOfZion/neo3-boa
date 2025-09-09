@@ -553,7 +553,7 @@ class TestFileGeneration(boatestcase.BoaTestCase):
                 self.assertEqual(local_type.abi_type if isinstance(local_type, IType) else AbiType.Any, var_type)
 
     def test_generate_manifest_file_with_notify_event(self):
-        path = self.get_contract_path('test_sc/interop_test/runtime', 'NotifySequence.py')
+        path = self.get_contract_path('test_sc/runtime_test', 'NotifySequence.py')
         _, expected_manifest_output = self.get_deploy_file_paths_without_compiling(path)
         output, manifest = self.compile_and_save(path)
 
@@ -852,7 +852,7 @@ class TestFileGeneration(boatestcase.BoaTestCase):
             self.assertIn('type', union_type)
 
     def test_generate_manifest_file_with_type_hint_storage_context(self):
-        path = self.get_contract_path('test_sc/interop_test/storage', 'StorageGetContext.py')
+        path = self.get_contract_path('test_sc/storage_test', 'StorageGetContext.py')
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]
@@ -861,7 +861,7 @@ class TestFileGeneration(boatestcase.BoaTestCase):
         self.assertEqual(abi_method_main['returnhint'], 'StorageContext')
 
     def test_generate_manifest_file_with_type_hint_iterator(self):
-        path = self.get_contract_path('test_sc/interop_test/iterator', 'ImportIterator.py')
+        path = self.get_contract_path('test_sc/neo_type_test/iterator', 'ImportIterator.py')
         _, abi_methods = self.verify_parameters_and_return_manifest(path)     # type: dict, list
 
         abi_method_main = abi_methods[0]

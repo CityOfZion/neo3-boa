@@ -1,8 +1,10 @@
-from boa3.builtin.interop.contract import NEO
 from boa3.sc.compiletime import contract
+from boa3.sc.types import UInt160
+
+test = UInt160()
 
 
-@contract(NEO)
+@contract(test)
 class ContractInterface:
 
     @staticmethod

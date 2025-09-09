@@ -5,7 +5,7 @@ from neo3.core import types
 from neo3.wallet import account
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import annotation, boatestcase, event, stackitem
 
@@ -27,14 +27,6 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
-
-        expected = types.UInt160(constants.MANAGEMENT_SCRIPT)
-        result, _ = await self.call('main', [], return_type=types.UInt160)
-        self.assertEqual(expected, result)
-
-    async def test_get_hash_deprecated(self):
-        await self.set_up_contract('GetHashDeprecated.py')
-        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         expected = types.UInt160(constants.MANAGEMENT_SCRIPT)
         result, _ = await self.call('main', [], return_type=types.UInt160)
@@ -106,7 +98,8 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
     async def test_deploy_contract_data_deploy(self):
         await self.set_up_contract('DeployContract.py')
-        call_contract_path = self.get_contract_path('boa3_test/test_sc/interop_test/contract', 'NewContract.py')
+        call_contract_path = self.get_contract_path('boa3_test/test_sc/native_test/contractmanagement',
+                                                    'NewContract.py')
 
         self.compile_and_save(call_contract_path)
         nef_file, manifest = self.get_serialized_output(call_contract_path)
@@ -152,7 +145,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
         self.assertRegex(str(context.exception), fr"method not found: {updated_method}/\d+")
 
-        new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
+        new_path = self.get_contract_path('test_sc/native_test', 'UpdateContract.py')
         self.compile_and_save(new_path)
         new_nef, new_manifest = self.get_serialized_output(new_path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
@@ -182,7 +175,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
         self.assertRegex(str(context.exception), fr"method not found: {updated_method}/\d+")
 
-        new_path = self.get_contract_path('test_sc/interop_test', 'UpdateContract.py')
+        new_path = self.get_contract_path('test_sc/native_test', 'UpdateContract.py')
         self.compile_and_save(new_path)
         new_nef, new_manifest = self.get_serialized_output(new_path)
         arg_manifest = String(json.dumps(new_manifest, separators=(',', ':'))).to_bytes()
@@ -224,7 +217,7 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertEqual(1, len(destroy_events))
         self.assertEqual(contract_hash, destroy_events[0].destroyed_contract)
 
-        call_contract = await self.compile_and_deploy('boa3_test/test_sc/interop_test/contract', 'CallScriptHash.py')
+        call_contract = await self.compile_and_deploy('boa3_test/test_sc/utils_test', 'CallScriptHash.py')
         with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('Main',
                             [contract_hash, 'Main', []],
@@ -236,3 +229,43 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
 
     def test_destroy_contract_too_many_parameters(self):
         self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'DestroyContractTooManyArguments.py')
+
+    async def test_import_contracts_contract_management(self):
+        await self.set_up_contract('ImportContractsContractManagement.py')
+
+        invalid_contract = types.UInt160.zero()
+        result, _ = await self.call('main', [invalid_contract], return_type=None)
+        self.assertIsNone(result)
+
+        invalid_contract = types.UInt160.zero()
+        result, _ = await self.call('main', [invalid_contract], return_type=None)
+        self.assertIsNone(result)
+
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Subtraction.py')
+        nef, manifest = self.get_serialized_output(call_contract_path)
+        manifest = stackitem.from_manifest(manifest)
+
+        call_hash = await self.compile_and_deploy(call_contract_path)
+        result, _ = await self.call('main', [call_hash], return_type=annotation.Contract)
+        self.assertEqual(5, len(result))
+        self.assertEqual(call_hash, result[2])
+        self.assertEqual(nef, result[3])
+        self.assertEqual(manifest, result[4])
+
+    async def test_import_sc_contracts_contract_management(self):
+        await self.set_up_contract('ImportScContractsContractManagement.py')
+
+        invalid_contract = types.UInt160.zero()
+        result, _ = await self.call('main', [invalid_contract], return_type=None)
+        self.assertIsNone(result)
+
+        call_contract_path = self.get_contract_path('test_sc/arithmetic_test', 'Concatenation.py')
+        nef, manifest = self.get_serialized_output(call_contract_path)
+        manifest = stackitem.from_manifest(manifest)
+
+        call_hash = await self.compile_and_deploy(call_contract_path)
+        result, _ = await self.call('main', [call_hash], return_type=annotation.Contract)
+        self.assertEqual(5, len(result))
+        self.assertEqual(call_hash, result[2])
+        self.assertEqual(nef, result[3])
+        self.assertEqual(manifest, result[4])

@@ -1,4 +1,4 @@
-from boa3.builtin import interop as functions
+from boa3 import sc as functions
 from boa3.sc.compiletime import public
 
 
