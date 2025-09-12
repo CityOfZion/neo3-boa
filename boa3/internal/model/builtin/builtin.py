@@ -1,33 +1,17 @@
-from enum import Enum
-
 from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 from boa3.internal.model.builtin.classmethod import *
-from boa3.internal.model.builtin.compile_time import *
 from boa3.internal.model.builtin.contract import *
 from boa3.internal.model.builtin.decorator import *
 from boa3.internal.model.builtin.internal import *
-from boa3.internal.model.builtin.interop.interop import Interop
 from boa3.internal.model.builtin.math import *
 from boa3.internal.model.builtin.method import *
 from boa3.internal.model.callable import Callable
-from boa3.internal.model.event import Event as EventSymbol
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
-from boa3.internal.model.imports.package import Package
 from boa3.internal.model.type.collection.sequence.ecpointtype import ECPointType
 from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
 from boa3.internal.model.type.collection.sequence.uint256type import UInt256Type
 from boa3.internal.model.type.itype import IType
-from boa3.internal.model.type.math import Math
 from boa3.internal.model.type.neo import *
-
-
-class BoaPackage(str, Enum):
-    CompileTime = 'compile_time'
-    Contract = 'contract'
-    Interop = 'interop'
-    Type = 'type'
-    TypeHelper = 'helper'
-    VM = 'vm'
 
 
 class Builtin:
@@ -202,21 +186,7 @@ class Builtin:
     BuiltinMathCeil = DecimalCeilingMethod()
     BuiltinMathFloor = DecimalFloorMethod()
 
-    MathModule = Package(deprecated=True,
-                         new_location='boa3.sc.math',
-                         identifier='math',
-                         methods=[Math.Sqrt,
-                                  BuiltinMathCeil,
-                                  BuiltinMathFloor])
-
-    _symbols = [Env]
-    _modules = [MathModule]
-
     # endregion
-
-    boa_builtins: list[IdentifiedSymbol] = []
-    boa_builtins.extend(_modules)
-    boa_builtins.extend(_symbols)
 
     metadata_fields: dict[str, type | tuple[type, ...]] = {
         'name': str,
@@ -227,68 +197,6 @@ class Builtin:
         'email': (str, type(None)),
         'description': (str, type(None)),
         'extras': dict
-    }
-
-    @classmethod
-    def boa_symbols(cls) -> dict[str, IdentifiedSymbol]:
-        return {symbol.identifier: symbol for symbol in cls.boa_builtins}
-
-    @classmethod
-    def package_symbols(cls, package: str = None) -> dict[str, IdentifiedSymbol]:
-        if package in BoaPackage.__members__.values():
-            return {symbol.identifier: symbol for symbol in cls._boa_symbols[package]}
-
-        return cls.boa_symbols()
-
-    @classmethod
-    def builtin_events(cls) -> list[EventSymbol]:
-        lst: list[EventSymbol] = [event for event in cls.boa_builtins if isinstance(event, EventSymbol)]
-
-        for symbols in cls._boa_symbols.values():
-            lst.extend([event for event in symbols if isinstance(event, EventSymbol)])
-
-        return lst
-
-    _builtin_type_package_symbols = [ECPoint,
-                                     UInt160,
-                                     UInt256,
-                                     Event,
-                                     Address,
-                                     BlockHash,
-                                     PublicKey,
-                                     ScriptHashType_,
-                                     ScriptHashLittleEndian,
-                                     TransactionId,
-                                     Package(deprecated=True,
-                                             new_location='boa3.sc.utils',
-                                             identifier=BoaPackage.TypeHelper,
-                                             methods=[ConvertToBool,
-                                                      ConvertToBytes,
-                                                      ConvertToInt,
-                                                      ConvertToStr,
-                                                      ]
-                                             )
-                                     ]
-
-    _boa_symbols: dict[BoaPackage, list[IdentifiedSymbol]] = {
-        BoaPackage.Contract: [Abort,
-                              NeoAccountState,
-                              Nep11Transfer,
-                              Nep17Transfer,
-                              Nep17Contract,
-                              ScriptHashMethod_,
-                              ToHexStr,
-                              ],
-        BoaPackage.Interop: Interop.package_symbols,
-        BoaPackage.Type: _builtin_type_package_symbols,
-        BoaPackage.VM: [Opcode
-                        ],
-        BoaPackage.CompileTime: [ContractInterface,
-                                 ContractMethodDisplayName,
-                                 NeoMetadataType,
-                                 Public,
-                                 NewEvent
-                                 ]
     }
 
     _internal_methods = [InnerDeployMethod.instance()

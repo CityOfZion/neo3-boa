@@ -1,6 +1,6 @@
 from boa3.sc.compiletime import public
 from boa3.sc.types import UInt160, Notification
-from boa3_test.test_sc.interop_test.runtime.GetNotifications import with_param
+from boa3_test.test_sc.runtime_test.GetNotifications import with_param
 
 
 @public

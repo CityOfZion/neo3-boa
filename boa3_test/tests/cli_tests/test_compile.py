@@ -140,7 +140,8 @@ class TestCliCompile(BoaCliTest):
         self.assertEqual(self.EXIT_CODE_ERROR, system_exit.exception.code)
         self.assertTrue('Input file is not .py' in logs.output[-1])
 
-    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'interop_test', 'storage', 'StoragePutStrKeyStrValue.py'))
+    @neo3_boa_cli('compile',
+                  get_path_from_boa3_test('test_sc', 'native_test', 'stdlib', 'Base64EncodeMismatchedType.py'))
     def test_cli_compile_invalid_smart_contract(self):
         logs, system_exit = self.get_cli_log(get_exit_code=True)
 

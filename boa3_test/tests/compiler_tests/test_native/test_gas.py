@@ -4,7 +4,7 @@ from neo3.network.payloads import verification
 from neo3.wallet import account
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.exception import CompilerError
 from boa3_test.tests import boatestcase
 
 
@@ -33,14 +33,6 @@ class TestGasClass(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
-
-        expected = types.UInt160(constants.GAS_SCRIPT)
-        result, _ = await self.call('main', [], return_type=types.UInt160)
-        self.assertEqual(expected, result)
-
-    async def test_get_hash_deprecated(self):
-        await self.set_up_contract('GetHashDeprecated.py')
-        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         expected = types.UInt160(constants.GAS_SCRIPT)
         result, _ = await self.call('main', [], return_type=types.UInt160)

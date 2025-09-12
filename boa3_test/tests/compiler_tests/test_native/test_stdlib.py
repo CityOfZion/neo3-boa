@@ -1,7 +1,7 @@
 import json
 
 from boa3.internal import constants
-from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
@@ -14,13 +14,6 @@ class TestStdlibClass(boatestcase.BoaTestCase):
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
-
-        result, _ = await self.call('main', [], return_type=bytes)
-        self.assertEqual(constants.STD_LIB_SCRIPT, result)
-
-    async def test_get_hash_deprecated(self):
-        await self.set_up_contract('GetHashDeprecated.py')
-        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol, 'GetHashDeprecated.py')
 
         result, _ = await self.call('main', [], return_type=bytes)
         self.assertEqual(constants.STD_LIB_SCRIPT, result)
@@ -350,6 +343,25 @@ class TestStdlibClass(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [4], return_type=list)
         self.assertEqual(['j', 3, 5], result)
 
+    async def test_user_class_serialization(self):
+        await self.set_up_contract('SerializationUserClass.py')
+
+        expected_class = [2, 4]
+        expected_result = serialize(expected_class)
+        result, _ = await self.call('serialize_user_class', [], return_type=bytes)
+        self.assertEqual(expected_result, result)
+
+        serialized = result
+
+        result, _ = await self.call('deserialize_user_class', [serialized], return_type=list)
+        self.assertEqual(expected_class, result)
+
+        result, _ = await self.call('get_variable_from_deserialized', [serialized], return_type=int)
+        self.assertEqual(2, result)
+
+        result, _ = await self.call('call_method_from_deserialized', [serialized], return_type=int)
+        self.assertEqual(42, result)
+
     async def test_atoi(self):
         await self.set_up_contract('Atoi.py')
 
@@ -625,3 +637,24 @@ class TestStdlibClass(boatestcase.BoaTestCase):
 
     def test_memory_compare_mismatched_type(self):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'MemoryCompareMismatchedType.py')
+
+    async def test_import_contracts_stdlib(self):
+        await self.set_up_contract('ImportContractsStdlib.py')
+
+        value = 123
+        result, _ = await self.call('main', [value], return_type=int)
+        self.assertEqual(value, result)
+
+        value = 'string'
+        result, _ = await self.call('main', [value], return_type=str)
+
+    async def test_import_sc_interop_json(self):
+        await self.set_up_contract('ImportScContractsStdlib.py')
+
+        value = 123
+        result, _ = await self.call('main', [value], return_type=int)
+        self.assertEqual(value, result)
+
+        value = 'string'
+        result, _ = await self.call('main', [value], return_type=str)
+        self.assertEqual(value, result)
