@@ -269,3 +269,17 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertEqual(call_hash, result[2])
         self.assertEqual(nef, result[3])
         self.assertEqual(manifest, result[4])
+
+    async def test_get_contract_by_id(self):
+        await self.set_up_contract('GetContractById.py')
+
+        invalid_contract_id = 999
+        result, _ = await self.call('main', [invalid_contract_id], return_type=None)
+        self.assertIsNone(result)
+
+        gas_contract_id = -6
+        result, _ = await self.call('main', [gas_contract_id], return_type=annotation.Contract)
+        self.assertEqual(5, len(result))
+        self.assertEqual(gas_contract_id, result[0])  # contract id
+        self.assertEqual(0, result[1])  # update counter
+        self.assertEqual(types.UInt160(constants.GAS_SCRIPT), result[2])  # contract hash

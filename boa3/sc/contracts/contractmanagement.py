@@ -66,6 +66,39 @@ class ContractManagement:
         pass
 
     @classmethod
+    def get_contract_by_id(cls, contract_id: int) -> Contract | None:
+        """
+        Gets a contract with a given ID. If the script hash is not associated with a smart contract, then it will
+        return None.
+
+        >>> ContractManagement.get_contract_by_id(-6)    # GAS ID
+        {
+            'id': -6,
+            'update_counter': 0,
+            'hash': b'\\xcfv\\xe2\\x8b\\xd0\\x06,JG\\x8e\\xe3Ua\\x01\\x13\\x19\\xf3\\xcf\\xa4\\xd2',
+            'nef': b'NEF3neo-core-v3.0\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00#\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@\\x10A\\x1a\\xf7{g@QA\\xc7\\x9e',
+            'manifest': {
+                'name': 'GasToken',
+                'group': [],
+                'supported_standards': ['NEP-17'],
+                'abi': [[['balanceOf', [['account', 20]], 17, 0, True], ['decimals', [], 17, 7, True], ['symbol', [], 19, 14, True], ['totalSupply', [], 17, 21, True], ['transfer', [['from', 20], ['to', 20], ['amount', 17], ['data', 0]], 16, 28, False]], [['Transfer', [['from', 20], ['to', 20], ['amount', 17]]]]],
+                'permissions': [[None, None]],
+                'trusts': [],
+                'extras': 'null'
+            },
+        }
+
+        >>> ContractManagement.get_contract_by_id(99999)
+        None
+
+        :param contract_id: a contract id
+        :type contract_id: int
+        :return: a contract
+        :rtype: boa3.sc.type.Contract
+        """
+        pass
+
+    @classmethod
     def has_method(cls, hash: UInt160, method: str, parameter_count: int) -> bool:
         """
         Check if a method exists in a contract.
