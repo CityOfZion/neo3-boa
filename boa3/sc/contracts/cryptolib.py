@@ -16,6 +16,29 @@ class CryptoLib:
     hash: UInt160
 
     @classmethod
+    def recover_secp256k1(cls, message_hash: bytes, signature: bytes) -> bytes | None:
+        """
+        Recovers the public key from a secp256k1 signature in a single byte array format.
+
+        >>> CryptoLib.recover_secp256k1(
+        ...     bytes.fromhex('5ae8317d34d1e595e3fa7247db80c0af4320cce1116de187f8f7e2e099c0d8d0'),
+        ...     bytes.fromhex('45c0b7f8c09a9e1f1cea0c25785594427b6bf8f9f878a8af0b1abbb48e16d0920d8becd0c220f67c51217eecfd7184ef0732481c843857e6bc7fc095c4f6b78801')
+        ... )
+        b'\x03J\x07\x1e\x8an\x10\xaa\xda+\x8c\xf3\x9f\xa3\xb5\xfb4\x00\xb0N\x99\xea\x8a\xe6L\xee\xa1\xa9w\xdb\xea\xf5\xd5'
+
+        >>> CryptoLib.recover_secp256k1(b'unit test', b'wrong signature')
+        None
+
+        :param message_hash: the hash of the message that was signed
+        :type message_hash: bytes
+        :param signature: the 65-byte signature in format: r[32] + s[32] + v[1]. 64-bytes for eip-2098, where v must be 27 or 28
+        :type signature: bytes
+        :return: the recovered public key in compressed format, or None if recovery fails.
+        :rtype: bytes
+        """
+        pass
+
+    @classmethod
     def murmur32(cls, data: bytes, seed: int) -> bytes:
         """
         Computes the hash value for the specified byte array using the murmur32 algorithm.

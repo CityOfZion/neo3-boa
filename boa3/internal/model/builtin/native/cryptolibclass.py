@@ -17,9 +17,11 @@ class CryptoLibClass(INativeContractClass):
     def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
         from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.model.builtin.native.crypto_lib import RecoverSecp256K1Method
 
         if len(self._class_methods) == 0:
             self._class_methods = {
+                'recover_secp256k1': RecoverSecp256K1Method(),
                 'murmur32': Interop.Murmur32,
                 'sha256': Interop.Sha256,
                 'ripemd160': Interop.Ripemd160,
