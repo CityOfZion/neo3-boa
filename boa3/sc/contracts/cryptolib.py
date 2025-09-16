@@ -2,8 +2,6 @@ __all__ = [
     'CryptoLib'
 ]
 
-from typing import Any
-
 from boa3.sc.types import ECPoint, UInt160, NamedCurveHash, IBls12381
 
 
@@ -35,36 +33,30 @@ class CryptoLib:
         pass
 
     @classmethod
-    def sha256(cls, key: Any) -> bytes:
+    def sha256(cls, data: bytes) -> bytes:
         """
         Encrypts a key using SHA-256.
 
-        >>> CryptoLib.sha256('unit test')
+        >>> CryptoLib.sha256(b'unit test')
         b'\\xdau1>J\\xc2W\\xf8LN\\xfb2\\x0f\\xbd\\x01\\x1cr@<\\xf5\\x93<\\x90\\xd2\\xe3\\xb8$\\xd6H\\x96\\xf8\\x9a'
 
-        >>> CryptoLib.sha256(10)
-        b'\\x9c\\x82r\\x01\\xb9@\\x19\\xb4/\\x85pk\\xc4\\x9cY\\xff\\x84\\xb5`M\\x11\\xca\\xaf\\xb9\\n\\xb9HV\\xc4\\xe1\\xddz'
-
-        :param key: the key to be encrypted
-        :type key: Any
+        :param data: the data to be encrypted
+        :type data: bytes
         :return: a byte value that represents the encrypted key
         :rtype: bytes
         """
         pass
 
     @classmethod
-    def ripemd160(cls, key: Any) -> bytes:
+    def ripemd160(cls, data: bytes) -> bytes:
         """
         Encrypts a key using RIPEMD-160.
 
-        >>> CryptoLib.ripemd160('unit test')
+        >>> CryptoLib.ripemd160(b'unit test')
         b'H\\x8e\\xef\\xf4Zh\\x89:\\xe6\\xf1\\xdc\\x08\\xdd\\x8f\\x01\\rD\\n\\xbdH'
 
-        >>> CryptoLib.ripemd160(10)
-        b'\\xc0\\xda\\x02P8\\xed\\x83\\xc6\\x87\\xdd\\xc40\\xda\\x98F\\xec\\xb9\\x7f9\\x98'
-
-        :param key: the key to be encrypted
-        :type key: Any
+        :param data: the data to be encrypted
+        :type data: Any
         :return: a byte value that represents the encrypted key
         :rtype: bytes
         """

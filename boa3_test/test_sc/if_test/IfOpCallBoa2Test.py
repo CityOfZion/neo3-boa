@@ -14,10 +14,10 @@ def main(operation: str, a: Any, b: Any) -> Any:
     elif operation == 'omax' and isinstance(a, int) and isinstance(b, int):
         return max(a, b)
 
-    elif operation == 'sha256':
+    elif operation == 'sha256' and isinstance(a, bytes):
         return CryptoLib.sha256(a)
 
-    elif operation == 'hash160':
+    elif operation == 'hash160' and isinstance(a, bytes):
         return hash160(a)
 
     return 'unknown'

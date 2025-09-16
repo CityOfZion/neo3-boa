@@ -33,29 +33,13 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(constants.CRYPTO_SCRIPT, result)
 
     async def test_ripemd160_str(self):
-        await self.set_up_contract('Ripemd160Str.py')
-
-        expected_result = hashlib.new('ripemd160', b'unit test')
-        result, _ = await self.call('Main', ['unit test'], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
-
-        expected_result = hashlib.new('ripemd160', b'')
-        result, _ = await self.call('Main', [''], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Ripemd160Str.py')
 
     async def test_ripemd160_int(self):
-        await self.set_up_contract('Ripemd160Int.py')
-
-        expected_result = hashlib.new('ripemd160', Integer(10).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Ripemd160Int.py')
 
     async def test_ripemd160_bool(self):
-        await self.set_up_contract('Ripemd160Bool.py')
-
-        expected_result = hashlib.new('ripemd160', Integer(1).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Ripemd160Bool.py')
 
     async def test_ripemd160_bytes(self):
         await self.set_up_contract('Ripemd160Bytes.py')
@@ -71,29 +55,13 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, 'Ripemd160TooFewArguments.py')
 
     async def test_sha256_str(self):
-        await self.set_up_contract('Sha256Str.py')
-
-        expected_result = hashlib.sha256(b'unit test')
-        result, _ = await self.call('Main', ['unit test'], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
-
-        expected_result = hashlib.sha256(b'')
-        result, _ = await self.call('Main', [''], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Sha256Str.py')
 
     async def test_sha256_int(self):
-        await self.set_up_contract('Sha256Int.py')
-
-        expected_result = hashlib.sha256(Integer(10).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Sha256Int.py')
 
     async def test_sha256_bool(self):
-        await self.set_up_contract('Sha256Bool.py')
-
-        expected_result = hashlib.sha256(Integer(1).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Sha256Bool.py')
 
     async def test_sha256_bytes(self):
         await self.set_up_contract('Sha256Bytes.py')
