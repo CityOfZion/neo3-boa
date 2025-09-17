@@ -40,6 +40,7 @@ class Builtin:
     Print = PrintMethod()
     ScriptHashMethod_ = ScriptHashMethod()
     StrSplit = StrSplitMethod()
+    StrSplitWithoutMaxsplit = StrSplitWithoutMaxsplitMethod()
     Sum = SumMethod()
     ToHexStr = ToHexStrMethod()
 
@@ -147,6 +148,7 @@ class Builtin:
         SequenceReverse,
         StaticMethodDecorator,
         StrSplit,
+        StrSplitWithoutMaxsplit,
         Sum,
         Super,
     ]

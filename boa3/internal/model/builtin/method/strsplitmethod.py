@@ -1,34 +1,49 @@
 import ast
+from typing import Any, Sized
 
-from boa3.internal.model.builtin.interop.nativecontract import StdLibMethod
+from boa3.internal.model.builtin.method import IBuiltinMethod
+from boa3.internal.model.builtin.native.stdlib.stringsplitmethod import \
+    StringSplitWithoutRemoveEmptyEntriesMethod
+from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 
 
-class StrSplitMethod(StdLibMethod):
-    def __init__(self):
-        from boa3.internal.model.type.type import Type
+class StrSplitMethod(IBuiltinMethod):
+    def __init__(self, args: dict[str, Variable] = None, defaults: list[ast.AST] = None):
         identifier = 'split'
-        syscall = 'stringSplit'
-        args: dict[str, Variable] = {
-            'self': Variable(Type.str),
-            'sep': Variable(Type.str),
-            'maxsplit': Variable(Type.int)
-        }
-        # whitespace is the default separator
-        separator_default = ast.parse("' '").body[0].value
-        # maxsplit the default value is -1
-        maxsplit_default = ast.parse("-1").body[0].value.operand
-        maxsplit_default.n = -1
 
-        neo_internal_args = {
-            'str': Variable(Type.str),
-            'separator': Variable(Type.str),
-        }
+        if args is None:
+            args: dict[str, Variable] = {
+                'self': Variable(Type.str),
+                'sep': Variable(Type.str),
+                'maxsplit': Variable(Type.int)
+            }
 
-        super().__init__(identifier, syscall, args, defaults=[separator_default, maxsplit_default],
-                         return_type=Type.list.build_collection(Type.str),
-                         internal_call_args=len(neo_internal_args))
+        if defaults is None:
+            # whitespace is the default separator
+            separator_default = ast.parse("' '").body[0].value
+            # maxsplit the default value is -1
+            maxsplit_default = ast.parse("-1").body[0].value.operand
+            maxsplit_default.n = -1
+            defaults = [separator_default, maxsplit_default]
+
+        super().__init__(identifier, args, defaults,
+                         return_type=Type.list.build_collection(Type.str))
+
+    @property
+    def identifier(self) -> str:
+        if 1 <= len(self.args) <= 2:
+            return '-{0}_2_args'.format(self._identifier)
+        return self._identifier
+
+    @property
+    def _args_on_stack(self) -> int:
+        return len(self.args)
+
+    @property
+    def _body(self) -> str | None:
+        return None
 
     @property
     def generation_order(self) -> list[int]:
@@ -45,11 +60,11 @@ class StrSplitMethod(StdLibMethod):
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
-        from boa3.internal.model.type.type import Type
 
         code_generator.duplicate_stack_item(3)
         code_generator.swap_reverse_stack_items(2)
-        super().generate_internal_opcodes(code_generator)
+
+        code_generator.convert_builtin_method_call(StringSplitWithoutRemoveEmptyEntriesMethod())
 
         # if maxsplit > 0
         code_generator.duplicate_stack_item(2)
@@ -66,10 +81,10 @@ class StrSplitMethod(StdLibMethod):
 
         code_generator.duplicate_stack_item(4)
         code_generator.duplicate_stack_item(2)
-        code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
+        code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True, add_to_stack=[Type.str])
         code_generator.convert_operation(concat_operation, is_internal=True)
         code_generator.duplicate_stack_item(2)
-        code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True)
+        code_generator.insert_opcode(Opcode.POPITEM, pop_from_stack=True, add_to_stack=[Type.str])
         code_generator.swap_reverse_stack_items(2)
         code_generator.convert_operation(concat_operation, is_internal=True)
         code_generator.convert_cast(Type.str, is_internal=True)
@@ -90,3 +105,24 @@ class StrSplitMethod(StdLibMethod):
         code_generator.swap_reverse_stack_items(3)
         code_generator.remove_stack_top_item()
         code_generator.remove_stack_top_item()
+
+    def build(self, value: Any) -> IBuiltinMethod:
+        if isinstance(value, Sized) and 1 <= len(value) <= 2:
+            return StrSplitWithoutMaxsplitMethod()
+
+        return self
+
+
+class StrSplitWithoutMaxsplitMethod(StrSplitMethod):
+    def __init__(self):
+        args: dict[str, Variable] = {
+            'self': Variable(Type.str),
+            'sep': Variable(Type.str),
+        }
+        # whitespace is the default separator
+        separator_default = ast.parse("' '").body[0].value
+
+        super().__init__(args, defaults=[separator_default])
+
+    def generate_internal_opcodes(self, code_generator):
+        code_generator.convert_builtin_method_call(StringSplitWithoutRemoveEmptyEntriesMethod())

@@ -299,3 +299,48 @@ class StdLib:
         :rtype: int
         """
         pass
+
+    @classmethod
+    def string_split(cls, string: str, separator: str, remove_empty_entries: bool = False) -> list[str]:
+        """
+        Searches for a given value in a given memory.
+
+        >>> StdLib.string_split('abc,def,ghi', ',')
+        ['abc', 'def', 'ghi']
+
+        >>> StdLib.string_split('abc,def,ghi,,', ',')
+        ['abc', 'def', 'ghi', '', '']
+
+        >>> StdLib.string_split('abc,def,ghi,,', ',', True)
+        ['abc', 'def', 'ghi']
+
+        :param string: the string to be split
+        :type string: str
+        :param separator: the seperator character used to split the string
+        :type separator: str
+        :param remove_empty_entries: whether it should include empty strings in the list
+        :type remove_empty_entries: bool
+
+        :return: a list of substrings split by the given separator
+        :rtype: list[str]
+        """
+        pass
+
+    @classmethod
+    def str_len(cls, string: str) -> int:
+        """
+        Gets the length of a string. Works with Unicode strings.utf
+
+        >>> StdLib.str_len('abcdefghijklmnopqrstuvwxyz')
+        26
+
+        >>> StdLib.str_len('😀')
+        1
+
+        :param string: the string to get the length of
+        :type string: str
+
+        :return: the length of the string
+        :rtype: list[str]
+        """
+        pass

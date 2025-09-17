@@ -29,6 +29,7 @@ __all__ = ['AbsMethod',
            'StrIntMethod',
            'StrSequenceMethod',
            'StrSplitMethod',
+           'StrSplitWithoutMaxsplitMethod',
            'SumMethod',
            'SuperMethod',
            'ToBoolMethod',
@@ -67,6 +68,7 @@ from boa3.internal.model.builtin.method.strclassmethod import StrClassMethod
 from boa3.internal.model.builtin.method.strintmethod import StrIntMethod
 from boa3.internal.model.builtin.method.strsequencemethod import StrSequenceMethod
 from boa3.internal.model.builtin.method.strsplitmethod import StrSplitMethod
+from boa3.internal.model.builtin.method.strsplitmethod import StrSplitWithoutMaxsplitMethod
 from boa3.internal.model.builtin.method.summethod import SumMethod
 from boa3.internal.model.builtin.method.supermethod import SuperMethod
 from boa3.internal.model.builtin.method.toboolmethod import ToBool as ToBoolMethod
