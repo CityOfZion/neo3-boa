@@ -32,7 +32,8 @@ __all__ = ['AbsMethod',
            'SumMethod',
            'SuperMethod',
            'ToBoolMethod',
-           'ToBytesMethod',
+           'IntToBytesMethod',
+           'StrToBytesMethod',
            'ToHexStrMethod',
            'ToIntMethod',
            'ToStrMethod',
@@ -70,7 +71,7 @@ from boa3.internal.model.builtin.method.strsplitmethod import StrSplitMethod
 from boa3.internal.model.builtin.method.summethod import SumMethod
 from boa3.internal.model.builtin.method.supermethod import SuperMethod
 from boa3.internal.model.builtin.method.toboolmethod import ToBool as ToBoolMethod
-from boa3.internal.model.builtin.method.tobytesmethod import ToBytes as ToBytesMethod
+from boa3.internal.model.builtin.method.tobytesmethod import IntToBytesMethod, StrToBytesMethod
 from boa3.internal.model.builtin.method.tohexstrmethod import ToHexStrMethod
 from boa3.internal.model.builtin.method.tointmethod import ToInt as ToIntMethod
 from boa3.internal.model.builtin.method.toscripthashmethod import ScriptHashMethod
