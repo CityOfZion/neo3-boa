@@ -317,7 +317,7 @@ def to_bool(value: bytes) -> bool:
     pass
 
 
-def to_bytes(value: str | int, length: int = 1, big_endian: bool = True) -> bytes:
+def to_bytes(value: str | int, length: int = 1, big_endian: bool = True, signed: bool = False) -> bytes:
     """
     Converts a str or integer value to an array of bytes.
     If the value is a string, the other parameters are not valid.
@@ -334,6 +334,8 @@ def to_bytes(value: str | int, length: int = 1, big_endian: bool = True) -> byte
     b'\x00\x04\xd2'
     >>> to_bytes(1234, 3, False)
     b'\xd2\x04\x00'
+    >>> to_bytes(-120, 1, False, True)
+    b'\x88'
 
     >>> to_bytes('A')
     b'A'
@@ -345,6 +347,9 @@ def to_bytes(value: str | int, length: int = 1, big_endian: bool = True) -> byte
     :param big_endian: available only to integer values, it represents whether the integer is represented in big or
     little endian
     :type big_endian: bool
+    :param signed: available only to integer values, it represents whether the integer has a bit to represent a signed
+    value
+    :type signed: bool
     :return: a byte value that represents the given value
     :rtype: bytes
 
