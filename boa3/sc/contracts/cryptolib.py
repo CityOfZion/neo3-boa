@@ -2,8 +2,6 @@ __all__ = [
     'CryptoLib'
 ]
 
-from typing import Any
-
 from boa3.sc.types import ECPoint, UInt160, NamedCurveHash, IBls12381
 
 
@@ -16,6 +14,29 @@ class CryptoLib:
     """
 
     hash: UInt160
+
+    @classmethod
+    def recover_secp256k1(cls, message_hash: bytes, signature: bytes) -> bytes | None:
+        """
+        Recovers the public key from a secp256k1 signature in a single byte array format.
+
+        >>> CryptoLib.recover_secp256k1(
+        ...     bytes.fromhex('5ae8317d34d1e595e3fa7247db80c0af4320cce1116de187f8f7e2e099c0d8d0'),
+        ...     bytes.fromhex('45c0b7f8c09a9e1f1cea0c25785594427b6bf8f9f878a8af0b1abbb48e16d0920d8becd0c220f67c51217eecfd7184ef0732481c843857e6bc7fc095c4f6b78801')
+        ... )
+        b'\x03J\x07\x1e\x8an\x10\xaa\xda+\x8c\xf3\x9f\xa3\xb5\xfb4\x00\xb0N\x99\xea\x8a\xe6L\xee\xa1\xa9w\xdb\xea\xf5\xd5'
+
+        >>> CryptoLib.recover_secp256k1(b'unit test', b'wrong signature')
+        None
+
+        :param message_hash: the hash of the message that was signed
+        :type message_hash: bytes
+        :param signature: the 65-byte signature in format: r[32] + s[32] + v[1]. 64-bytes for eip-2098, where v must be 27 or 28
+        :type signature: bytes
+        :return: the recovered public key in compressed format, or None if recovery fails.
+        :rtype: bytes
+        """
+        pass
 
     @classmethod
     def murmur32(cls, data: bytes, seed: int) -> bytes:
@@ -35,36 +56,30 @@ class CryptoLib:
         pass
 
     @classmethod
-    def sha256(cls, key: Any) -> bytes:
+    def sha256(cls, data: bytes) -> bytes:
         """
         Encrypts a key using SHA-256.
 
-        >>> CryptoLib.sha256('unit test')
+        >>> CryptoLib.sha256(b'unit test')
         b'\\xdau1>J\\xc2W\\xf8LN\\xfb2\\x0f\\xbd\\x01\\x1cr@<\\xf5\\x93<\\x90\\xd2\\xe3\\xb8$\\xd6H\\x96\\xf8\\x9a'
 
-        >>> CryptoLib.sha256(10)
-        b'\\x9c\\x82r\\x01\\xb9@\\x19\\xb4/\\x85pk\\xc4\\x9cY\\xff\\x84\\xb5`M\\x11\\xca\\xaf\\xb9\\n\\xb9HV\\xc4\\xe1\\xddz'
-
-        :param key: the key to be encrypted
-        :type key: Any
+        :param data: the data to be encrypted
+        :type data: bytes
         :return: a byte value that represents the encrypted key
         :rtype: bytes
         """
         pass
 
     @classmethod
-    def ripemd160(cls, key: Any) -> bytes:
+    def ripemd160(cls, data: bytes) -> bytes:
         """
         Encrypts a key using RIPEMD-160.
 
-        >>> CryptoLib.ripemd160('unit test')
+        >>> CryptoLib.ripemd160(b'unit test')
         b'H\\x8e\\xef\\xf4Zh\\x89:\\xe6\\xf1\\xdc\\x08\\xdd\\x8f\\x01\\rD\\n\\xbdH'
 
-        >>> CryptoLib.ripemd160(10)
-        b'\\xc0\\xda\\x02P8\\xed\\x83\\xc6\\x87\\xdd\\xc40\\xda\\x98F\\xec\\xb9\\x7f9\\x98'
-
-        :param key: the key to be encrypted
-        :type key: Any
+        :param data: the data to be encrypted
+        :type data: Any
         :return: a byte value that represents the encrypted key
         :rtype: bytes
         """

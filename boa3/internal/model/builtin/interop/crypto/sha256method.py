@@ -7,5 +7,5 @@ class Sha256Method(CryptoLibMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'sha256'
         native_identifier = 'sha256'
-        args: dict[str, Variable] = {'key': Variable(Type.any)}
+        args: dict[str, Variable] = {'data': Variable(Type.bytes)}
         super().__init__(identifier, native_identifier, args, return_type=Type.bytes)

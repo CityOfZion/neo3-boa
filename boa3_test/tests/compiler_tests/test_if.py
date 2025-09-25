@@ -531,10 +531,10 @@ class TestIf(boatestcase.BoaTestCase):
 
         from boa3.internal.neo.cryptography import sha256, hash160
         from boa3.internal.neo.vm.type.String import String
-        result, _ = await self.call('main', ['sha256', 'abc', 4], return_type=bytes)
+        result, _ = await self.call('main', ['sha256', b'abc', 4], return_type=bytes)
         self.assertEqual(sha256(String('abc').to_bytes()), result)
 
-        result, _ = await self.call('main', ['hash160', 'abc', 4], return_type=bytes)
+        result, _ = await self.call('main', ['hash160', b'abc', 4], return_type=bytes)
         self.assertEqual(hash160(String('abc').to_bytes()), result)
 
     async def test_boa2_test_many_elif(self):

@@ -8,5 +8,5 @@ class Ripemd160Method(CryptoLibMethod):
         from boa3.internal.model.type.type import Type
         identifier = 'ripemd160'
         native_identifier = 'ripemd160'
-        args: dict[str, Variable] = {'key': Variable(Type.any)}
+        args: dict[str, Variable] = {'data': Variable(Type.bytes)}
         super().__init__(identifier, native_identifier, args, return_type=Type.bytes)

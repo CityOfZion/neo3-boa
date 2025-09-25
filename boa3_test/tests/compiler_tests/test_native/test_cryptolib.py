@@ -33,29 +33,13 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertEqual(constants.CRYPTO_SCRIPT, result)
 
     async def test_ripemd160_str(self):
-        await self.set_up_contract('Ripemd160Str.py')
-
-        expected_result = hashlib.new('ripemd160', b'unit test')
-        result, _ = await self.call('Main', ['unit test'], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
-
-        expected_result = hashlib.new('ripemd160', b'')
-        result, _ = await self.call('Main', [''], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Ripemd160Str.py')
 
     async def test_ripemd160_int(self):
-        await self.set_up_contract('Ripemd160Int.py')
-
-        expected_result = hashlib.new('ripemd160', Integer(10).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Ripemd160Int.py')
 
     async def test_ripemd160_bool(self):
-        await self.set_up_contract('Ripemd160Bool.py')
-
-        expected_result = hashlib.new('ripemd160', Integer(1).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Ripemd160Bool.py')
 
     async def test_ripemd160_bytes(self):
         await self.set_up_contract('Ripemd160Bytes.py')
@@ -71,29 +55,13 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, 'Ripemd160TooFewArguments.py')
 
     async def test_sha256_str(self):
-        await self.set_up_contract('Sha256Str.py')
-
-        expected_result = hashlib.sha256(b'unit test')
-        result, _ = await self.call('Main', ['unit test'], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
-
-        expected_result = hashlib.sha256(b'')
-        result, _ = await self.call('Main', [''], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Sha256Str.py')
 
     async def test_sha256_int(self):
-        await self.set_up_contract('Sha256Int.py')
-
-        expected_result = hashlib.sha256(Integer(10).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Sha256Int.py')
 
     async def test_sha256_bool(self):
-        await self.set_up_contract('Sha256Bool.py')
-
-        expected_result = hashlib.sha256(Integer(1).to_byte_array())
-        result, _ = await self.call('Main', [], return_type=bytes)
-        self.assertEqual(expected_result.digest(), result)
+        self.assertCompilerLogs(CompilerError.MismatchedTypes, 'Sha256Bool.py')
 
     async def test_sha256_bytes(self):
         await self.set_up_contract('Sha256Bytes.py')
@@ -401,3 +369,38 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         for named_curve_hash in NamedCurveHash:
             result, _ = await self.call('main', [named_curve_hash], return_type=int)
             self.assertEqual(~named_curve_hash, result)
+
+    async def test_recover_secp256k1(self):
+        await self.set_up_contract('RecoverSecp256K1.py')
+
+        result, _ = await self.call('main', [b'unit test', b'wrong signature'], return_type=None)
+        self.assertIsNone(result)
+
+        # Test values taken from Neo Project tests
+        # https://github.com/neo-project/neo/blob/9b9be47357e9065de524005755212ed54c3f6a11/tests/Neo.UnitTests/Cryptography/UT_Crypto.cs#L99
+        message_hash = bytes.fromhex('5ae8317d34d1e595e3fa7247db80c0af4320cce1116de187f8f7e2e099c0d8d0')
+        signature = bytes.fromhex(
+            "45c0b7f8c09a9e1f1cea0c25785594427b6bf8f9f878a8af0b1abbb48e16d092" +
+            "0d8becd0c220f67c51217eecfd7184ef0732481c843857e6bc7fc095c4f6b78801"
+        )
+        public_key = bytes.fromhex('034a071e8a6e10aada2b8cf39fa3b5fb3400b04e99ea8ae64ceea1a977dbeaf5d5')
+        result, _ = await self.call('main', [message_hash, signature], return_type=bytes)
+        self.assertEqual(public_key, result)
+
+        message_hash = bytes.fromhex('586052916fb6f746e1d417766cceffbe1baf95579bab67ad49addaaa6e798862')
+        signature = bytes.fromhex(
+            "4e0ea79d4a476276e4b067facdec7460d2c98c8a65326a6e5c998fd7c6506114" +
+            "0e45aea5034af973410e65cf97651b3f2b976e3fc79c6a93065ed7cb69a2ab5a01"
+        )
+        public_key = bytes.fromhex('02dbf1f4092deb3cfd4246b2011f7b24840bc5dbedae02f28471ce5b3bfbf06e71')
+        result, _ = await self.call('main', [message_hash, signature], return_type=bytes)
+        self.assertEqual(public_key, result)
+
+        message_hash = bytes.fromhex('c36d0ecf4bfd178835c97aae7585f6a87de7dfa23cc927944f99a8d60feff68b')
+        signature = bytes.fromhex(
+            "f25b86e1d8a11d72475b3ed273b0781c7d7f6f9e1dae0dd5d3ee9b84f3fab891" +
+            "63d9c4e1391de077244583e9a6e3d8e8e1f236a3bf5963735353b93b1a3ba93500"
+        )
+        public_key = bytes.fromhex('03414549fd05bfb7803ae507ff86b99becd36f8d66037a7f5ba612792841d42eb9')
+        result, _ = await self.call('main', [message_hash, signature], return_type=bytes)
+        self.assertEqual(public_key, result)
