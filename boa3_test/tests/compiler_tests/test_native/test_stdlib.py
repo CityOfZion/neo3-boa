@@ -658,3 +658,27 @@ class TestStdlibClass(boatestcase.BoaTestCase):
         value = 'string'
         result, _ = await self.call('main', [value], return_type=str)
         self.assertEqual(value, result)
+
+    async def test_string_split(self):
+        await self.set_up_contract('StringSplit.py')
+
+        string = 'abc,def,ghi'
+        separator = ','
+        result, _ = await self.call('main', [string, separator], return_type=list[str])
+        self.assertEqual(string.split(separator), result)
+
+        string = 'abc,def,ghi,,'
+        separator = ','
+        result, _ = await self.call('main', [string, separator], return_type=list[str])
+        self.assertEqual(string.split(separator), result)
+
+    async def test_str_len(self):
+        await self.set_up_contract('StrLen.py')
+
+        string = 'abcdefghijklmnopqrstuvwxyz'
+        result, _ = await self.call('main', [string], return_type=int)
+        self.assertEqual(len(string), result)
+
+        string = '😀'
+        result, _ = await self.call('main', [string], return_type=int)
+        self.assertEqual(len(string), result)

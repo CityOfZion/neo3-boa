@@ -1,6 +1,7 @@
 from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import StdLibContract
+from boa3.internal.model.builtin.native import stdlib
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
 from boa3.internal.model.method import Method
 
@@ -34,6 +35,8 @@ class StdLibClass(INativeContractClass):
                 'atoi': Interop.Atoi,
                 'memory_compare': Interop.MemoryCompare,
                 'memory_search': Interop.MemorySearch,
+                'string_split': stdlib.StringSplitMethod(),
+                'str_len': stdlib.StrLenMethod(),
             }
         return super().class_methods
 

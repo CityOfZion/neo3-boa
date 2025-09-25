@@ -81,7 +81,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
             + Opcode.PUSHDATA1            # push the bytes
             + Integer(len(byte_input)).to_byte_array()
             + byte_input
-            + Opcode.SIZE
+            + Opcode.CALLT + b'\x00\x00'
             + Opcode.RET
         )
 
@@ -1095,6 +1095,27 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
     # region str split test
 
+    async def test_str_split_opcodes(self):
+        expected_output_start = (
+                Opcode.INITSLOT
+                + b'\x00'
+                + b'\x03'
+                + Opcode.LDARG1
+                + Opcode.LDARG2
+                + Opcode.LDARG0
+                + Opcode.PUSH2
+                + Opcode.PICK
+                + Opcode.SWAP
+                + Opcode.CALLT + b'\x00\x00'
+                + Opcode.OVER
+                + Opcode.PUSH0
+                + Opcode.JMPLT
+                + Integer(25).to_byte_array(signed=True, min_length=1)
+        )
+
+        output, _ = self.assertCompile('StrSplit.py')
+        self.assertStartsWith(output, expected_output_start)
+
     async def test_str_split(self):
         await self.set_up_contract('StrSplit.py')
 
@@ -1126,6 +1147,20 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         result, _ = await self.call('main', [string, separator, maxsplit], return_type=list)
         self.assertEqual(expected_result, result)
 
+    async def test_str_split_maxsplit_default_opcodes(self):
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x00'
+                + b'\x02'
+                + Opcode.LDARG1
+                + Opcode.LDARG0
+                + Opcode.CALLT + b'\x00\x00'
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('StrSplitMaxsplitDefault.py')
+        self.assertEqual(expected_output, output)
+
     async def test_str_split_maxsplit_default(self):
         await self.set_up_contract('StrSplitMaxsplitDefault.py')
 
@@ -1140,6 +1175,23 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         expected_result = string.split(separator)
         result, _ = await self.call('main', [string, separator], return_type=list)
         self.assertEqual(expected_result, result)
+
+    async def test_str_split_default_opcodes(self):
+        default_separator = String(' ').to_bytes()
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x00'
+                + b'\x01'
+                + Opcode.PUSHDATA1
+                + Integer(len(default_separator)).to_byte_array(min_length=1)
+                + default_separator
+                + Opcode.LDARG0
+                + Opcode.CALLT + b'\x00\x00'
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('StrSplitSeparatorDefault.py')
+        self.assertEqual(expected_output, output)
 
     async def test_str_split_default(self):
         await self.set_up_contract('StrSplitSeparatorDefault.py')
