@@ -406,8 +406,8 @@ class TestIf(boatestcase.BoaTestCase):
         result, _ = await self.call('example', ['123'], return_type=bytes)
         self.assertEqual(b'123', result)
 
-        result, _ = await self.call('example', [-70], return_type=bytes)
-        self.assertEqual(Integer(-70).to_byte_array(), result)
+        result, _ = await self.call('example', [70], return_type=bytes)
+        self.assertEqual(Integer(70).to_byte_array(), result)
 
         result, _ = await self.call('example', [True], return_type=bytes)
         self.assertEqual(b'\x01', result)

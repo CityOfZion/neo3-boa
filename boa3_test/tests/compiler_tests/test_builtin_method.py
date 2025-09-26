@@ -10,6 +10,8 @@ from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 class TestBuiltinMethod(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/built_in_methods_test'
+    FORGOT_SIGNED_ARG_MSG = 'did you call to_bytes on a negative integer without setting signed=True?'
+    LENGTH_ARG_TOO_SMALL_MSG = 'try raising the value of the length argument'
 
     # region len test
 
@@ -492,13 +494,156 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         result, _ = await self.call('int_to_bytes', [], return_type=bytes)
         self.assertEqual(value, result)
 
+    async def test_int_to_bytes_default_args(self):
+        await self.set_up_contract('IntToBytesDefaultArgs.py')
+
+        for x in range(256):
+            value = x
+            result, _ = await self.call('main', [value], return_type=bytes)
+            self.assertEqual(value.to_bytes(), result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [256], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [-1], return_type=bytes)
+        self.assertRegex(str(context.exception), self.FORGOT_SIGNED_ARG_MSG)
+
+    async def test_int_to_bytes_length_args(self):
+        await self.set_up_contract('IntToBytesLengthArgs.py')
+
+        for x in range(1, 65536, 1000):
+            value = x
+            length = 2
+            result, _ = await self.call('main', [value, length], return_type=bytes)
+            self.assertEqual(value.to_bytes(length), result)
+
+        value = 65535
+        length = 2
+        result, _ = await self.call('main', [value, length], return_type=bytes)
+        self.assertEqual(value.to_bytes(length), result)
+
+        value = 123
+        length = 10
+        result, _ = await self.call('main', [value, length], return_type=bytes)
+        self.assertEqual(value.to_bytes(length), result)
+
+        value = 1234
+        length = 10
+        result, _ = await self.call('main', [value, length], return_type=bytes)
+        self.assertEqual(value.to_bytes(length), result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [1234, 1], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [65536, 2], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [-1, 1], return_type=bytes)
+        self.assertRegex(str(context.exception), self.FORGOT_SIGNED_ARG_MSG)
+
+    async def test_int_to_bytes_length_big_endian_args(self):
+        await self.set_up_contract('IntToBytesLengthBigEndianArgs.py')
+
+        for x in range(0, 100000, 2000):
+            value = x
+            length = 5
+            big_endian = True
+            result, _ = await self.call('main', [value, length, big_endian], return_type=bytes)
+            self.assertEqual(value.to_bytes(length, 'big'), result)
+
+            big_endian = False
+            result, _ = await self.call('main', [value, length, big_endian], return_type=bytes)
+            self.assertEqual(value.to_bytes(length, 'little'), result)
+
+        value = 123
+        length = 10
+        big_endian = True
+        result, _ = await self.call('main', [value, length, big_endian], return_type=bytes)
+        self.assertEqual(value.to_bytes(length, 'big'), result)
+
+        value = 123
+        length = 10
+        big_endian = False
+        result, _ = await self.call('main', [value, length, big_endian], return_type=bytes)
+        self.assertEqual(value.to_bytes(length, 'little'), result)
+
+        value = 1234
+        length = 10
+        big_endian = True
+        result, _ = await self.call('main', [value, length, big_endian], return_type=bytes)
+        self.assertEqual(value.to_bytes(length, 'big'), result)
+
+        value = 1234
+        length = 10
+        big_endian = False
+        result, _ = await self.call('main', [value, length, big_endian], return_type=bytes)
+        self.assertEqual(value.to_bytes(length, 'little'), result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [1234, 1, False], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [1234, 1, True], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [-1, 1, True], return_type=bytes)
+        self.assertRegex(str(context.exception), self.FORGOT_SIGNED_ARG_MSG)
+
+    async def test_int_to_bytes_length_big_endian_signed_args(self):
+        await self.set_up_contract('IntToBytesLengthBigEndianSignedArgs.py')
+
+        for x in range(-30000, 30000, 1000):
+            value = x
+            length = 5
+            big_endian = True
+            signed = True
+            result, _ = await self.call('main', [value, length, big_endian, signed], return_type=bytes)
+            self.assertEqual(value.to_bytes(length, 'big', signed=signed), result)
+
+            big_endian = False
+            signed = True
+            result, _ = await self.call('main', [value, length, big_endian, signed], return_type=bytes)
+            self.assertEqual(value.to_bytes(length, 'little', signed=signed), result)
+
+        max_int_length1 = (1 << 7) - 1
+        length = 5
+        big_endian = True
+        signed = True
+        result, _ = await self.call('main', [max_int_length1, length, big_endian, signed], return_type=bytes)
+        self.assertEqual(max_int_length1.to_bytes(length, 'big', signed=signed), result)
+        big_endian = False
+        signed = True
+        result, _ = await self.call('main', [max_int_length1, length, big_endian, signed], return_type=bytes)
+        self.assertEqual(max_int_length1.to_bytes(length, 'little', signed=signed), result)
+
+        min_int_length1 = -(1 << 7)
+        length = 5
+        big_endian = True
+        signed = True
+        result, _ = await self.call('main', [min_int_length1, length, big_endian, signed], return_type=bytes)
+        self.assertEqual(min_int_length1.to_bytes(length, 'big', signed=signed), result)
+        big_endian = False
+        signed = True
+        result, _ = await self.call('main', [min_int_length1, length, big_endian, signed], return_type=bytes)
+        self.assertEqual(min_int_length1.to_bytes(length, 'little', signed=signed), result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [max_int_length1 + 1, 1, True, True], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [min_int_length1 - 1, 1, True, True], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+
     def test_int_to_bytes_with_builtin(self):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'IntToBytesWithBuiltin.py')
 
     async def test_int_to_bytes_as_parameter(self):
         await self.set_up_contract('IntToBytesAsParameter.py')
 
-        result, _ = await self.call('int_to_bytes', [1111], return_type=None)
+        result, _ = await self.call('int_to_bytes', [111], return_type=None)
         # return is Void, checking to see if there is no error
         self.assertIsNone(result)
 
@@ -519,6 +664,9 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
         result, _ = await self.call('str_to_bytes', [], return_type=bytes)
         self.assertEqual(String('123').to_bytes(), result)
+
+    def test_str_to_bytes_too_many_parameters(self):
+        self.assertCompilerLogs(CompilerError.UnexpectedArgument, 'StrToBytesTooManyParameters.py')
 
     def test_str_to_bytes_with_builtin(self):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'StrToBytesWithBuiltin.py')
