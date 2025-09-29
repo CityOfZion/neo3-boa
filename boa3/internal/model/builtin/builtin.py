@@ -92,7 +92,8 @@ class Builtin:
     DictValues = MapValuesMethod()
 
     # custom class methods
-    ConvertToBytes = ToBytesMethod
+    ConvertIntToBytes = IntToBytesMethod()
+    ConvertStrToBytes = StrToBytesMethod()
     ConvertToInt = ToIntMethod
     ConvertToStr = ToStrMethod
     ConvertToBool = ToBoolMethod
@@ -117,7 +118,8 @@ class Builtin:
         BytesStringReplace,
         ClassMethodDecorator,
         ConvertToBool,
-        ConvertToBytes,
+        ConvertIntToBytes,
+        ConvertStrToBytes,
         ConvertToInt,
         ConvertToStr,
         Copy,
