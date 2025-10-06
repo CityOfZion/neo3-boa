@@ -19,4 +19,4 @@ class StorageGetIntMethod(IStorageGetMethod):
         from boa3.internal.model.type.type import Type
 
         converter = ToInt.build(Type.bytes)
-        code_generator.convert_builtin_method_call(converter)
+        code_generator.convert_builtin_method_call(converter, is_internal=True)

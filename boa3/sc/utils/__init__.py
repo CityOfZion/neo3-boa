@@ -344,11 +344,11 @@ def to_bytes(value: str | int, length: int = 1, big_endian: bool = True, signed:
     :type value: str | int
     :param length: available only to integer values, it represents the length of the resulting bytes
     :type length: int
-    :param big_endian: available only to integer values, it represents whether the integer is represented in big or
-    little endian
+    :param big_endian: available only to integer values, whether to represent the integer in big-endian (True) or
+    little-endian (False) byte order
     :type big_endian: bool
-    :param signed: available only to integer values, it represents whether the integer has a bit to represent a signed
-    value
+    :param signed: available only to integer values, whether to represent the integer as signed (True) or
+    unsigned (False) in bytes return
     :type signed: bool
     :return: a byte value that represents the given value
     :rtype: bytes
@@ -358,12 +358,30 @@ def to_bytes(value: str | int, length: int = 1, big_endian: bool = True, signed:
     pass
 
 
-def to_int(value: bytes) -> int:
+def to_int(value: bytes, big_endian: bool = True, signed: bool = False) -> int:
     """
     Converts a bytes value to the integer it represents.
 
     >>> to_int(b'A')
     65
+
+    >>> to_int(b'\xfa\x15')
+    64021
+
+    >>> to_int(b'\xfa\x15', False)
+    5626
+
+    >>> to_int(b'\xfa\x15', True, True)
+    -1515
+
+    :param value: value to be converted to int
+    :type value: bytes
+    :param big_endian: whether to interpret the bytes in big-endian (True) or little-endian (False) byte order
+    :type big_endian: bool
+    :param signed: whether to interpret the bytes as a signed (True) or unsigned (False) integer
+    :type signed: bool
+    :return:
+    :rtype: int
     """
     pass
 
