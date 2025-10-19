@@ -3,7 +3,7 @@ import shutil
 import subprocess
 import sys
 
-__version__ = '1.3.0'
+__version__ = '1.4.0'
 
 docs_dir = os.path.abspath(f'{__file__}/..')
 latex_build_dir = os.sep.join([docs_dir, 'build', 'latex'])
