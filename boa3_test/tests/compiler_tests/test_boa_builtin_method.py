@@ -116,14 +116,58 @@ class TestBoaBuiltinMethod(boatestcase.BoaTestCase):
                                     target_contract=custom_env_contract)
         self.assertEqual(custom_env, result)
 
+    # region _deploy
+
     async def test_deploy_def(self):
         await self.set_up_contract('DeployDef.py')
 
         result, _ = await self.call('get_var', [], return_type=int)
         self.assertEqual(10, result)
 
+    async def test_deploy_reassign_variable(self):
+        await self.set_up_contract('DeployReassignVariable.py')
+
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(123, result)
+
     def test_deploy_def_incorrect_signature(self):
         self.assertCompilerLogs(CompilerError.InternalIncorrectSignature, 'DeployDefWrongSignature.py')
+
+    async def test_deploy_with_import_var(self):
+        await self.set_up_contract('DeployWithImportVar.py')
+
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('bar', result)
+
+    async def test_deploy_with_import_function(self):
+        await self.set_up_contract('DeployWithImportFunction.py')
+
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('bar', result)
+
+    async def test_deploy_with_global_var(self):
+        await self.set_up_contract('DeployWithGlobalVar.py')
+
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('change', result)
+
+    async def test_deploy_with_shadow_var(self):
+        await self.set_up_contract('DeployWithShadowVar.py')
+
+        result, _ = await self.call('main', [], return_type=str)
+        self.assertEqual('new variable', result)
+
+        result, _ = await self.call('get_global_var', [], return_type=str)
+        self.assertEqual('shadow', result)
+
+    async def test_deploy_with_import_class(self):
+        await self.set_up_contract('DeployWithImportClass.py')
+        from boa3_test.test_sc.import_test.class_import.example import Example
+
+        result, _ = await self.call('main', [], return_type=list)
+        self.assertObjectEqual(Example(42, '42'), result)
+
+    # endregion
 
     def test_will_not_compile(self):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'WillNotCompile.py')

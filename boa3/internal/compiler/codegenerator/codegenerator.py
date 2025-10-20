@@ -128,6 +128,8 @@ class CodeGenerator:
                 deploy_ast = ast.parse("")
                 deploy_ast.body = [deploy_method.origin]
 
+                generator.symbol_table.clear()
+                generator.symbol_table.update(deploy_origin_module.symbols.copy())
                 generator.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
                 analyser.symbol_table[constants.DEPLOY_METHOD_ID] = deploy_method
                 visitor._tree = deploy_origin_module

@@ -49,6 +49,8 @@ class VisitorCodeGenerator(IAstAnalyser):
         self._is_generating_initialize = False
         self._root_module: ast.AST = self._tree
 
+        self._is_generating_deploy = False
+
     @property
     def _symbols(self) -> dict[str, ISymbol]:
         symbol_table = self.symbols.copy()
@@ -337,6 +339,9 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             self._log_info(f"Compiling '{function_name}' function")
 
+            if function_name == constants.DEPLOY_METHOD_ID:
+                self._is_generating_deploy = True
+
             if method.is_public or method.is_called:
                 if not isinstance(self.current_class, ClassType) or not self.current_class.is_interface:
                     self.generator.convert_begin_method(method)
@@ -346,6 +351,8 @@ class VisitorCodeGenerator(IAstAnalyser):
 
                     self.generator.convert_end_method(function.name)
 
+            if function_name == constants.DEPLOY_METHOD_ID:
+                self._is_generating_deploy = False
             self.current_method = None
 
         return self.build_data(function, symbol=method, symbol_id=function.name)
@@ -464,7 +471,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                 continue
 
             # filter to find the imported variables
+            is_deploy_local_var = self._is_generating_deploy and var_id in self.current_method.symbols
             if (var_id not in self.generator.symbol_table
+                    and not is_deploy_local_var
                     and hasattr(assign, 'origin')
                     and isinstance(assign.origin, ast.AST)):
                 var_id = self._get_unique_name(var_id, assign.origin)
