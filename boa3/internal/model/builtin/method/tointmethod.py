@@ -18,9 +18,9 @@ class ToIntMethod(IBuiltinMethod):
             'big_endian': Variable(Type.bool),
             'signed': Variable(Type.bool),
         }
-        big_endian_default = set_internal_call(ast.parse("{0}".format(True)
+        big_endian_default = set_internal_call(ast.parse("{0}".format(False)
                                                             ).body[0].value)
-        signed_default = set_internal_call(ast.parse("{0}".format(Type.bool.default_value)
+        signed_default = set_internal_call(ast.parse("{0}".format(True)
                                                      ).body[0].value)
 
         super().__init__(identifier, args, defaults=[big_endian_default, signed_default],

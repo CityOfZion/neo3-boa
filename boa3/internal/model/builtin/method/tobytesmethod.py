@@ -63,9 +63,9 @@ class IntToBytesMethod(ToBytesMethod):
 
         length_default = ast.parse("{0}".format(1)
                                    ).body[0].value
-        big_endian_default = ast.parse("{0}".format(True)
+        big_endian_default = ast.parse("{0}".format(False)
                                        ).body[0].value
-        signed_default = ast.parse("{0}".format(Type.bool.default_value)
+        signed_default = ast.parse("{0}".format(True)
                                    ).body[0].value
 
         super().__init__(args, [length_default, big_endian_default, signed_default])
@@ -163,19 +163,11 @@ class IntToBytesMethod(ToBytesMethod):
         #   else if value >= 0:
         else_is_positive = code_generator.convert_begin_else(if_value_negative, is_internal=True)
         code_generator.duplicate_stack_item(2)
-        code_generator.convert_literal(0)
-        code_generator.convert_literal(1)
-        code_generator.convert_get_substring(is_internal=True)
-        #       first_bytes_value = value_bytes[0]
-        code_generator.convert_literal(0b10000000)
-        code_generator.convert_operation(BinaryOp.BitAnd)
-        code_generator.duplicate_stack_item(3)
         code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
-        code_generator.duplicate_stack_item(3)
-        code_generator.convert_operation(BinaryOp.Eq)
-        code_generator.convert_operation(BinaryOp.And)
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_operation(BinaryOp.Gt)
 
-        #       if first_bytes_value & 0b10000000 != 0 and len(value_bytes) == length: raise Exception
+        #       if len(value_bytes) > length: raise Exception
         if_positive_value_is_too_big = code_generator.convert_begin_if()
         code_generator.convert_literal(self.exception_message + length_arg_too_small_message)
         code_generator.convert_raise_exception()
