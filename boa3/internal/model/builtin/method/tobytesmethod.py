@@ -56,12 +56,12 @@ class IntToBytesMethod(ToBytesMethod):
 
         args: dict[str, Variable] = {
             'value': Variable(value_type),
-            'length': Variable(Type.int),
+            'length': Variable(Type.optional.build(Type.int)),
             'big_endian': Variable(Type.bool),
             'signed': Variable(Type.bool)
         }
 
-        length_default = ast.parse("{0}".format(1)
+        length_default = ast.parse("{0}".format(None)
                                    ).body[0].value
         big_endian_default = ast.parse("{0}".format(False)
                                        ).body[0].value
@@ -92,6 +92,30 @@ class IntToBytesMethod(ToBytesMethod):
         length_arg_too_small_message = ', try raising the value of the length argument'
 
         # stack: big_endian, signed, length, value
+
+        code_generator.duplicate_stack_item(2)
+        code_generator.convert_literal(None)
+        code_generator.convert_operation(BinaryOp.Is)
+        # if length is None:
+        if_len_is_null = code_generator.convert_begin_if()
+        code_generator.change_jump(if_len_is_null, Opcode.JMPIFNOT)
+
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.remove_stack_top_item()
+        code_generator.duplicate_stack_top_item()
+        super().generate_internal_opcodes(code_generator)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        #   length = len(value)
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+        #     if length == 0: length = 1
+        if_len_is_null_and_value_0 = code_generator.convert_begin_if()
+        code_generator.change_jump(if_len_is_null_and_value_0, Opcode.JMPNE)
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(1)
+        code_generator.convert_end_if(if_len_is_null_and_value_0)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_end_if(if_len_is_null)
 
         code_generator.duplicate_stack_top_item()
         # if value == 0: value_bytes = b'\x00' * length

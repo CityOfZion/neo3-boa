@@ -507,12 +507,15 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
             result, _ = await self.call('main', [value], return_type=bytes)
             self.assertEqual(value.to_bytes(byteorder='little', signed=True), result)
 
-        with self.assertRaises(boatestcase.FaultException) as context:
-            await self.call('main', [128], return_type=bytes)
-        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
-        with self.assertRaises(boatestcase.FaultException) as context:
-            await self.call('main', [-129], return_type=bytes)
-        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        value = 128
+        result, _ = await self.call('main', [value], return_type=bytes)
+        self.assertEqual(value.to_bytes(2, byteorder='little', signed=True), result)
+        value = 1234
+        result, _ = await self.call('main', [value], return_type=bytes)
+        self.assertEqual(value.to_bytes(2, byteorder='little', signed=True), result)
+        value = -129
+        result, _ = await self.call('main', [value], return_type=bytes)
+        self.assertEqual(value.to_bytes(2, byteorder='little', signed=True), result)
 
     async def test_int_to_bytes_length_args(self):
         await self.set_up_contract('IntToBytesLengthArgs.py')
