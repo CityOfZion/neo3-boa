@@ -317,7 +317,7 @@ def to_bool(value: bytes) -> bool:
     pass
 
 
-def to_bytes(value: str | int, length: int = 1, big_endian: bool = True, signed: bool = False) -> bytes:
+def to_bytes(value: str | int, length: int = None, big_endian: bool = False, signed: bool = True) -> bytes:
     """
     Converts a str or integer value to an array of bytes.
     If the value is a string, the other parameters are not valid.
@@ -327,13 +327,20 @@ def to_bytes(value: str | int, length: int = 1, big_endian: bool = True, signed:
 
     >>> to_bytes(65)
     b'A'
+    >>> to_bytes(1234)
+    b'\xd2\x04'
+    >>> to_bytes(-1)
+    b'\xff'
 
     >>> to_bytes(1234, 3)
-    b'\x00\x04\xd2'
+    b'\xd2\x04\x00'
     >>> to_bytes(1234, 3, True)
     b'\x00\x04\xd2'
     >>> to_bytes(1234, 3, False)
     b'\xd2\x04\x00'
+    >>> to_bytes(-1234, 3, False)
+    b'\x2e\xfb\xff'
+
     >>> to_bytes(-120, 1, False, True)
     b'\x88'
 
@@ -342,7 +349,8 @@ def to_bytes(value: str | int, length: int = 1, big_endian: bool = True, signed:
 
     :param value: value to be converted to bytes
     :type value: str | int
-    :param length: available only to integer values, it represents the length of the resulting bytes
+    :param length: available only to integer values, it represents the length of the resulting bytes. If value is None,
+    then it will try to use the least amount of bytes possible
     :type length: int
     :param big_endian: available only to integer values, whether to represent the integer in big-endian (True) or
     little-endian (False) byte order
@@ -358,7 +366,7 @@ def to_bytes(value: str | int, length: int = 1, big_endian: bool = True, signed:
     pass
 
 
-def to_int(value: bytes, big_endian: bool = True, signed: bool = False) -> int:
+def to_int(value: bytes, big_endian: bool = False, signed: bool = True) -> int:
     """
     Converts a bytes value to the integer it represents.
 
@@ -366,13 +374,17 @@ def to_int(value: bytes, big_endian: bool = True, signed: bool = False) -> int:
     65
 
     >>> to_int(b'\xfa\x15')
-    64021
+    5626
 
     >>> to_int(b'\xfa\x15', False)
     5626
-
-    >>> to_int(b'\xfa\x15', True, True)
+    >>> to_int(b'\xfa\x15', True)
     -1515
+
+    >>> to_int(b'\xfa\x15', True, False)
+    64021
+    >>> to_int(b'\xfa\x15', False, False)
+    5626
 
     :param value: value to be converted to int
     :type value: bytes

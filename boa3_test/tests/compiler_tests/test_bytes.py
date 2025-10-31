@@ -90,7 +90,7 @@ class TestBytes(boatestcase.BoaTestCase):
         await self.set_up_contract('BytesToInt.py')
 
         result, _ = await self.call('bytes_to_int', return_type=int)
-        self.assertEqual(int.from_bytes(b'\x01\x02'), result)
+        self.assertEqual(int.from_bytes(b'\x01\x02', "little", signed=True), result)
 
     async def test_bytes_to_int_default_args(self):
         await self.set_up_contract('BytesToIntDefaultArgs.py')
@@ -98,18 +98,18 @@ class TestBytes(boatestcase.BoaTestCase):
         for x in range(0, 256):
             bytes_value = x.to_bytes()
             result, _ = await self.call('main', [bytes_value], return_type=int)
-            self.assertEqual(int.from_bytes(bytes_value), result)
+            self.assertEqual(int.from_bytes(bytes_value, "little", signed=True), result)
 
         for x in range(256, 0x10000, 100):
             bytes_value = x.to_bytes(2)
             result, _ = await self.call('main', [bytes_value], return_type=int)
-            self.assertEqual(int.from_bytes(bytes_value), result)
+            self.assertEqual(int.from_bytes(bytes_value, "little", signed=True), result)
 
         for x in range(0, 0x100000, 1000):
             bytes_value = x.to_bytes(3)
 
             result, _ = await self.call('main', [bytes_value], return_type=int)
-            self.assertEqual(int.from_bytes(bytes_value), result)
+            self.assertEqual(int.from_bytes(bytes_value, "little", signed=True), result)
 
     async def test_bytes_to_int_big_endian_args(self):
         await self.set_up_contract('BytesToIntBigEndianArgs.py')
@@ -118,10 +118,10 @@ class TestBytes(boatestcase.BoaTestCase):
             bytes_value = x.to_bytes(3)
 
             result, _ = await self.call('main', [bytes_value, True], return_type=int)
-            self.assertEqual(int.from_bytes(bytes_value, 'big'), result)
+            self.assertEqual(int.from_bytes(bytes_value, 'big', signed=True), result)
 
             result, _ = await self.call('main', [bytes_value, False], return_type=int)
-            self.assertEqual(int.from_bytes(bytes_value, 'little'), result)
+            self.assertEqual(int.from_bytes(bytes_value, 'little', signed=True), result)
 
     async def test_bytes_to_int_big_endian_signed_args(self):
         await self.set_up_contract('BytesToIntBigEndianSignedArgs.py')
@@ -153,6 +153,20 @@ class TestBytes(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', [big_bytes_value, False, False], return_type=int)
         self.assertEqual(int.from_bytes(big_bytes_value, 'little', signed=False), result)
+
+    async def test_bytes_to_int_negative_numbers(self):
+        await self.set_up_contract('BytesToIntBigEndianSignedArgs.py')
+
+        min_num_len2 = 2 ** 16 // 2 * -1
+        max_num_len2 = 2 ** 16 // 2 - 1
+        for x in range(min_num_len2, max_num_len2 + 1, 200):
+            bytes_value = x.to_bytes(2, signed=True)
+
+            result, _ = await self.call('main', [bytes_value, True, True], return_type=int)
+            self.assertEqual(int.from_bytes(bytes_value, 'big', signed=True), result)
+
+            result, _ = await self.call('main', [bytes_value, False, True], return_type=int)
+            self.assertEqual(int.from_bytes(bytes_value, 'little', signed=True), result)
 
     def test_bytes_to_int_with_builtin(self):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToIntWithBuiltin.py')
@@ -721,7 +735,7 @@ class TestBytes(boatestcase.BoaTestCase):
         await self.set_up_contract('BytearrayToInt.py')
 
         result, _ = await self.call('bytes_to_int', return_type=int)
-        self.assertEqual(int.from_bytes(bytearray(b'\x01\x02')), result)
+        self.assertEqual(int.from_bytes(bytearray(b'\x01\x02'), "little", signed=True), result)
 
     def test_byte_array_to_int_with_builtin(self):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytearrayToIntWithBuiltin.py')
