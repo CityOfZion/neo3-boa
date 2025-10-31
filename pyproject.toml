@@ -64,7 +64,7 @@ boa3 = ['py.typed']
 version = { attr = 'boa3.__version__' }
 
 [tool.bumpversion]
-current_version = '1.4.0'
+current_version = '1.4.1'
 commit = true
 tag = true
 
