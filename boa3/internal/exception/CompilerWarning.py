@@ -148,5 +148,20 @@ class UsingSpecificException(CompilerWarning):
         return "{0} will be interpreted as BaseException when running in the blockchain".format(self._exception_id)
 
 
+class MethodWarning(CompilerWarning):
+    """
+    A warning raised when a method has unexpected or nonstandard behavior.
+    """
+
+    def __init__(self, line: int, col: int, method_name: str, message: str):
+        self._method_name = method_name
+        self._message = message
+        super().__init__(line, col)
+
+    @property
+    def _warning_message(self) -> str | None:
+        return "{0}: {1}".format(self._method_name, self._message)
+
+
 def join_args(iterable: Iterable[str]) -> str:
     return str.join("', '", iterable)

@@ -1,7 +1,7 @@
 from boaconstructor import storage
 from neo3.api import StackItemType
 
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
@@ -621,6 +621,8 @@ class TestStorage(boatestcase.BoaTestCase):
         self.assertNotIn(storage_key.to_byte_array(), contract_storage)
 
     async def test_storage_between_contracts(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'StorageGetAndPut1.py')
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'StorageGetAndPut2.py')
         await self.set_up_contract('StorageGetAndPut1.py')
         contract2 = await self.compile_and_deploy('StorageGetAndPut2.py')
 

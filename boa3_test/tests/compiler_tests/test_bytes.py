@@ -1,6 +1,6 @@
 from neo3.core import types
 
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
@@ -87,12 +87,14 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.MismatchedTypes, 'BytesReverse.py')
 
     async def test_bytes_to_int(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToInt.py')
         await self.set_up_contract('BytesToInt.py')
 
         result, _ = await self.call('bytes_to_int', return_type=int)
         self.assertEqual(int.from_bytes(b'\x01\x02', "little", signed=True), result)
 
     async def test_bytes_to_int_default_args(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntDefaultArgs.py')
         await self.set_up_contract('BytesToIntDefaultArgs.py')
 
         for x in range(0, 256):
@@ -112,6 +114,7 @@ class TestBytes(boatestcase.BoaTestCase):
             self.assertEqual(int.from_bytes(bytes_value, "little", signed=True), result)
 
     async def test_bytes_to_int_big_endian_args(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianArgs.py')
         await self.set_up_contract('BytesToIntBigEndianArgs.py')
 
         for x in range(0, 0x100000, 1000):
@@ -124,6 +127,7 @@ class TestBytes(boatestcase.BoaTestCase):
             self.assertEqual(int.from_bytes(bytes_value, 'little', signed=True), result)
 
     async def test_bytes_to_int_big_endian_signed_args(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianSignedArgs.py')
         await self.set_up_contract('BytesToIntBigEndianSignedArgs.py')
 
         for x in range(0, 0x100000, 1000):
@@ -155,6 +159,7 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(int.from_bytes(big_bytes_value, 'little', signed=False), result)
 
     async def test_bytes_to_int_negative_numbers(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianSignedArgs.py')
         await self.set_up_contract('BytesToIntBigEndianSignedArgs.py')
 
         min_num_len2 = 2 ** 16 // 2 * -1
