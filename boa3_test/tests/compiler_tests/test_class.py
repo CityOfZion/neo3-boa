@@ -2,6 +2,8 @@ from neo3.core import types
 
 from boa3.internal.exception import CompilerError
 from boa3.internal.exception.NotLoadedException import NotLoadedException
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
 
@@ -514,3 +516,21 @@ class TestClass(boatestcase.BoaTestCase):
 
     def test_user_class_class_method_without_return_type(self):
         self.assertCompilerLogs(CompilerError.TypeHintMissing, 'UserClassClassMethodWithoutReturnType.py')
+
+    async def test_expression_inside_class_compile(self):
+        expected_output = (
+                Opcode.CALL
+                + Integer(3).to_byte_array(min_length=1, signed=True)
+                + Opcode.RET
+                + Opcode.PUSH1
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('ExpressionInsideClass.py')
+        self.assertEqual(expected_output, output)
+
+    async def test_expression_inside_class(self):
+        await self.set_up_contract('ExpressionInsideClass.py')
+
+        result, _ = await self.call('main', [], return_type=int)
+        self.assertEqual(1, result)

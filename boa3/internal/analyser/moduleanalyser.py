@@ -731,6 +731,10 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
             self._current_symbol_scope.include_symbol(class_node.name, user_class)
         self._scope_stack.append(SymbolScope())
 
+        # don't evaluate constant expression - for example: string for documentation
+        class_node.body = [stmt for stmt in class_node.body
+                           if not isinstance(stmt, ast.Expr)]
+
         for stmt in class_node.body:
             self.visit(stmt)
 
