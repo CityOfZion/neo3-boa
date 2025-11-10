@@ -34,7 +34,11 @@ class ToIntMethod(IBuiltinMethod):
 
         return [signed_index, value_index, big_endian_index]
 
-    def warning_message(self) -> str:
+    @property
+    def warning_message(self) -> str | None:
+        if len(self.runtime_args) > 1:
+            return None
+
         return ("Neo3-boa uses little-endian and signed representation by default. "
                 "See the method documentation for more details.")
 

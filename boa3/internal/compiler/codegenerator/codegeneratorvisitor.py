@@ -936,10 +936,6 @@ class VisitorCodeGenerator(IAstAnalyser):
 
             args = reordered_args
 
-            if symbol.warning_message is not None:
-                self._log_warning(
-                    MethodWarning(call.lineno, call.col_offset, symbol.raw_identifier, symbol.warning_message)
-                )
         else:
             args = reversed(args_to_generate)
 

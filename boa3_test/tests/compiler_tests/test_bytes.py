@@ -114,7 +114,10 @@ class TestBytes(boatestcase.BoaTestCase):
             self.assertEqual(int.from_bytes(bytes_value, "little", signed=True), result)
 
     async def test_bytes_to_int_big_endian_args(self):
-        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianArgs.py')
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('BytesToIntBigEndianArgs.py')
 
         for x in range(0, 0x100000, 1000):
@@ -127,7 +130,10 @@ class TestBytes(boatestcase.BoaTestCase):
             self.assertEqual(int.from_bytes(bytes_value, 'little', signed=True), result)
 
     async def test_bytes_to_int_big_endian_signed_args(self):
-        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianSignedArgs.py')
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianSignedArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('BytesToIntBigEndianSignedArgs.py')
 
         for x in range(0, 0x100000, 1000):
@@ -159,7 +165,10 @@ class TestBytes(boatestcase.BoaTestCase):
         self.assertEqual(int.from_bytes(big_bytes_value, 'little', signed=False), result)
 
     async def test_bytes_to_int_negative_numbers(self):
-        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianSignedArgs.py')
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntBigEndianSignedArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('BytesToIntBigEndianSignedArgs.py')
 
         min_num_len2 = 2 ** 16 // 2 * -1

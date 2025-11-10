@@ -521,7 +521,10 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertEqual(value.to_bytes(2, byteorder='little', signed=True), result)
 
     async def test_int_to_bytes_length_args(self):
-        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthArgs.py')
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('IntToBytesLengthArgs.py')
 
         min_value_len2 = 2 ** (8 * 2) // 2 * -1
@@ -563,7 +566,10 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
 
     async def test_int_to_bytes_length_big_endian_args(self):
-        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthBigEndianArgs.py')
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthBigEndianArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('IntToBytesLengthBigEndianArgs.py')
 
         for x in range(-100000, 100000, 200):
@@ -609,7 +615,10 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
 
     async def test_int_to_bytes_length_big_endian_signed_args(self):
-        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthBigEndianSignedArgs.py')
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthBigEndianSignedArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('IntToBytesLengthBigEndianSignedArgs.py')
 
         for x in range(-30000, 30000, 200):

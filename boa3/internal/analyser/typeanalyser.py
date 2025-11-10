@@ -8,6 +8,7 @@ from boa3.internal.analyser.builtinfunctioncallanalyser import BuiltinFunctionCa
 from boa3.internal.analyser.model.optimizer import Undefined, UndefinedType
 from boa3.internal.analyser.model.symbolscope import SymbolScope
 from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.exception.CompilerWarning import MethodWarning
 from boa3.internal.model.attribute import Attribute
 from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
@@ -1261,6 +1262,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 return callable_target.return_type
 
             private_identifier = None  # used for validating internal builtin methods
+            user_args = call.args.copy()
             if self.validate_callable_arguments(call, callable_target):
                 args = [self.get_type(param, use_metatype=True) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
@@ -1291,6 +1293,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                             origin_type_id=origin_type_id,
                                                             cast_type_id=cast_type_id)
                             )
+
+                    callable_target.runtime_args = user_args
+                    if callable_target.warning_message is not None:
+                        self._log_warning(
+                            MethodWarning(call.lineno, call.col_offset, callable_target.raw_identifier,
+                                          callable_target.warning_message)
+                        )
+                    callable_target.runtime_args = None
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 

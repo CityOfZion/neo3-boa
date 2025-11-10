@@ -84,7 +84,10 @@ class IntToBytesMethod(ToBytesMethod):
         return 'can not convert int to bytes'
 
     @property
-    def warning_message(self) -> str:
+    def warning_message(self) -> str | None:
+        if len(self.runtime_args) > 1:
+            return None
+
         return ("Neo3-boa uses little-endian and signed representation by default, "
                 "it also automatically calculates the length. "
                 "See the method documentation for more details.")
