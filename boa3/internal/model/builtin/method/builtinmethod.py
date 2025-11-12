@@ -19,6 +19,8 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
                  deprecated: bool = False
                  ):
         super().__init__(identifier, args, vararg, kwargs, defaults, return_type, deprecated)
+        self.runtime_args: list[ast.AST] | None = None
+        self.runtime_kwargs: list[ast.AST] | None = None
 
     @property
     def is_supported(self) -> bool:
@@ -205,3 +207,12 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
         :rtype: IBuiltinMethod
         """
         return self
+
+    @property
+    def warning_message(self) -> str | None:
+        """
+        If a method has an unexpected behavior, this property will have a message that warns about it.
+
+        :rtype: str
+        """
+        return None

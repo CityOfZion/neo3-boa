@@ -1,4 +1,4 @@
-from boa3.internal.exception import CompilerError
+from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
@@ -481,6 +481,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
     # region to_bytes test
 
     async def test_int_to_bytes(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytes.py')
         await self.set_up_contract('IntToBytes.py')
 
         value = Integer(123).to_byte_array()
@@ -488,6 +489,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertEqual(value, result)
 
     async def test_int_zero_to_bytes(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntZeroToBytes.py')
         await self.set_up_contract('IntZeroToBytes.py')
 
         value = Integer(0).to_byte_array(min_length=1)
@@ -495,6 +497,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertEqual(value, result)
 
     async def test_int_to_bytes_default_args(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesDefaultArgs.py')
         await self.set_up_contract('IntToBytesDefaultArgs.py')
 
         for x in range(128):
@@ -518,6 +521,10 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertEqual(value.to_bytes(2, byteorder='little', signed=True), result)
 
     async def test_int_to_bytes_length_args(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('IntToBytesLengthArgs.py')
 
         min_value_len2 = 2 ** (8 * 2) // 2 * -1
@@ -559,6 +566,10 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
 
     async def test_int_to_bytes_length_big_endian_args(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthBigEndianArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('IntToBytesLengthBigEndianArgs.py')
 
         for x in range(-100000, 100000, 200):
@@ -604,6 +615,10 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
 
     async def test_int_to_bytes_length_big_endian_signed_args(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesLengthBigEndianSignedArgs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
         await self.set_up_contract('IntToBytesLengthBigEndianSignedArgs.py')
 
         for x in range(-30000, 30000, 200):
@@ -710,11 +725,17 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'IntToBytesWithBuiltin.py')
 
     async def test_int_to_bytes_as_parameter(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesAsParameter.py')
         await self.set_up_contract('IntToBytesAsParameter.py')
 
         result, _ = await self.call('int_to_bytes', [111], return_type=None)
         # return is Void, checking to see if there is no error
         self.assertIsNone(result)
+
+    async def test_int_to_bytes_kwargs(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesKwargs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
 
     def test_str_to_bytes_compile(self):
         value = String('123').to_bytes()

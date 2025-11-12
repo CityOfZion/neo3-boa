@@ -8,6 +8,7 @@ from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
+from boa3.internal.exception.CompilerWarning import MethodWarning
 from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -934,6 +935,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     reordered_args.append(args_to_generate[index])
 
             args = reordered_args
+
         else:
             args = reversed(args_to_generate)
 

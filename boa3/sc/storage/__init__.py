@@ -103,6 +103,9 @@ def try_get(key: bytes, context: StorageContext = get_context()) -> tuple[bytes,
 def get_int(key: bytes, context: StorageContext = get_context()) -> int:
     """
     Gets a value as integer from the persistent store based on the given key.
+    This method will use little-endian and signed representation when converting the bytes in storage to int.
+    If you wish to change this behavior, use `boa3.sc.utils.to_int` with the desired arguments instead.
+
     It's equivalent to boa3.sc.utils.to_int(get(key, context))
 
     >>> put_int(b'unit', 5)
@@ -523,7 +526,11 @@ def put(key: bytes, value: bytes, context: StorageContext = get_context()):
 def put_int(key: bytes, value: int, context: StorageContext = get_context()):
     """
     Inserts a given integer value in the key-value format into the persistent storage.
-    It's equivalent to put(key, boa3.sc.utils.to_int(value), context)
+    This method will use little-endian and signed representation, and it also automatically calculates the length of the
+    resulting bytes value.
+    If you wish to change this behavior, use `boa3.sc.utils.to_bytes` with the desired arguments instead.
+
+    It's equivalent to put(key, boa3.sc.utils.to_bytes(int_value), context)
 
     >>> put_int(b'unit', 5)
     None

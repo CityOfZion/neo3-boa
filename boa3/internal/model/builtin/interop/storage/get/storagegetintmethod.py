@@ -10,6 +10,11 @@ class StorageGetIntMethod(IStorageGetMethod):
 
         super().__init__(identifier, value_type=value_type)
 
+    @property
+    def warning_message(self) -> str | None:
+        return ("this method uses little-endian and signed representation by default. "
+                "See the method documentation for more details.")
+
     def generate_default_value_opcodes(self, code_generator):
         # default_value = 0
         code_generator.convert_literal(0)

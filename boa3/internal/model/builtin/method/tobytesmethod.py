@@ -83,6 +83,15 @@ class IntToBytesMethod(ToBytesMethod):
     def exception_message(self) -> str:
         return 'can not convert int to bytes'
 
+    @property
+    def warning_message(self) -> str | None:
+        if len(self.runtime_args) > 1 or len(self.runtime_kwargs) > 0:
+            return None
+
+        return ("Neo3-boa uses little-endian and signed representation by default, "
+                "it also automatically calculates the length. "
+                "See the method documentation for more details.")
+
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp

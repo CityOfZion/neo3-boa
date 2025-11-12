@@ -34,6 +34,14 @@ class ToIntMethod(IBuiltinMethod):
 
         return [signed_index, value_index, big_endian_index]
 
+    @property
+    def warning_message(self) -> str | None:
+        if len(self.runtime_args) > 1 or len(self.runtime_kwargs) > 0:
+            return None
+
+        return ("Neo3-boa uses little-endian and signed representation by default. "
+                "See the method documentation for more details.")
+
     def generate_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp

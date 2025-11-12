@@ -57,6 +57,9 @@ class CompileCommand(ICommand):
             logging.error("Input file is not .py")
             sys.exit(1)
 
+        if log_level is None:
+            log_level = "WARN"
+
         file_path = pathlib.Path(sc_path).resolve()
         file_path_parts = file_path.parts
         current_file_path = pathlib.Path(file_path_parts[0]).resolve()
