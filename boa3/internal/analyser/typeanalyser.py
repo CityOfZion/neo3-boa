@@ -1263,6 +1263,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
 
             private_identifier = None  # used for validating internal builtin methods
             user_args = call.args.copy()
+            user_kw_args = call.keywords.copy()
             if self.validate_callable_arguments(call, callable_target):
                 args = [self.get_type(param, use_metatype=True) for param in call.args]
                 if isinstance(callable_target, IBuiltinMethod):
@@ -1295,12 +1296,14 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                             )
 
                     callable_target.runtime_args = user_args
+                    callable_target.runtime_kwargs = user_kw_args
                     if callable_target.warning_message is not None:
                         self._log_warning(
                             MethodWarning(call.lineno, call.col_offset, callable_target.raw_identifier,
                                           callable_target.warning_message)
                         )
                     callable_target.runtime_args = None
+                    callable_target.runtime_kwargs = None
 
                 self.validate_passed_arguments(call, args, callable_id, callable_target)
 

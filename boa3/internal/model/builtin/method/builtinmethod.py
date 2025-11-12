@@ -20,6 +20,7 @@ class IBuiltinMethod(IBuiltinCallable, Method, ABC):
                  ):
         super().__init__(identifier, args, vararg, kwargs, defaults, return_type, deprecated)
         self.runtime_args: list[ast.AST] | None = None
+        self.runtime_kwargs: list[ast.AST] | None = None
 
     @property
     def is_supported(self) -> bool:

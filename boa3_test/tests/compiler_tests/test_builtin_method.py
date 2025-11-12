@@ -732,6 +732,11 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         # return is Void, checking to see if there is no error
         self.assertIsNone(result)
 
+    async def test_int_to_bytes_kwargs(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesKwargs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
     def test_str_to_bytes_compile(self):
         value = String('123').to_bytes()
         expected_output = (

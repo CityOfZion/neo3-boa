@@ -182,6 +182,11 @@ class TestBytes(boatestcase.BoaTestCase):
             result, _ = await self.call('main', [bytes_value, False, True], return_type=int)
             self.assertEqual(int.from_bytes(bytes_value, 'little', signed=True), result)
 
+    async def test_bytes_to_int_kwargs(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'BytesToIntKwargs.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
     def test_bytes_to_int_with_builtin(self):
         self.assertCompilerLogs(CompilerError.UnresolvedReference, 'BytesToIntWithBuiltin.py')
 
