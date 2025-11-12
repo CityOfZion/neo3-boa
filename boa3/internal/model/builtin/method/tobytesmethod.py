@@ -1,6 +1,7 @@
 import ast
 from typing import Any
 
+from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.type.itype import IType
@@ -70,6 +71,11 @@ class IntToBytesMethod(ToBytesMethod):
 
         super().__init__(args, [length_default, big_endian_default, signed_default])
 
+        self.padding_negative = b'\xFF'
+        self.padding_positive = b'\x00'
+        self.length_arg_too_small_message = ', try raising the value of the length argument'
+        self.forgot_signed_arg_message = ', did you call to_bytes on a negative integer without setting signed=True?'
+
     @property
     def generation_order(self) -> list[int]:
         value_index = list(self.args).index('value')
@@ -93,38 +99,45 @@ class IntToBytesMethod(ToBytesMethod):
                 "See the method documentation for more details.")
 
     def generate_internal_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.operation.binaryop import BinaryOp
-        padding_positive = b'\x00'
-        padding_negative = b'\xFF'
-        forgot_signed_arg_message = ', did you call to_bytes on a negative integer without setting signed=True?'
-        length_arg_too_small_message = ', try raising the value of the length argument'
+
+        def get_constant(data: GeneratorData) -> tuple[bool, Any]:
+            is_constant = False
+            value = None
+
+            if isinstance(data.node, ast.Constant):
+                is_constant = True
+                value = data.node.value
+            elif (
+                    data.symbol is not None and
+                    isinstance(data.symbol, Variable) and
+                    isinstance(data.symbol.origin, ast.Assign) and
+                    isinstance(data.symbol.origin.value, ast.Constant)
+            ):
+                is_constant = True
+                value = data.symbol.origin.value.value
+
+            return is_constant, value
+
+        is_const_length, const_length = get_constant(self.runtime_args_generated[2])
+        is_const_big_endian, const_big_endian = get_constant(self.runtime_args_generated[0])
+        is_const_signed, const_signed = get_constant(self.runtime_args_generated[1])
 
         # stack: big_endian, signed, length, value
 
-        code_generator.duplicate_stack_item(2)
-        code_generator.convert_literal(None)
-        code_generator.convert_operation(BinaryOp.Is)
-        # if length is None:
-        if_len_is_null = code_generator.convert_begin_if()
-        code_generator.change_jump(if_len_is_null, Opcode.JMPIFNOT)
+        if not is_const_length:
+            code_generator.duplicate_stack_item(2)
+            code_generator.convert_literal(None)
+            code_generator.convert_operation(BinaryOp.Is)
+            # if length is None:
+            if_len_is_null = code_generator.convert_begin_if()
+            code_generator.change_jump(if_len_is_null, Opcode.JMPIFNOT)
+            self.opcode_length_none(code_generator)
+            code_generator.convert_end_if(if_len_is_null)
+        elif is_const_length and const_length is None:
+            self.opcode_length_none(code_generator)
 
-        code_generator.swap_reverse_stack_items(2)
-        code_generator.remove_stack_top_item()
-        code_generator.duplicate_stack_top_item()
-        super().generate_internal_opcodes(code_generator)
-        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
-        #   length = len(value)
-        code_generator.duplicate_stack_top_item()
-        code_generator.convert_literal(0)
-        #     if length == 0: length = 1
-        if_len_is_null_and_value_0 = code_generator.convert_begin_if()
-        code_generator.change_jump(if_len_is_null_and_value_0, Opcode.JMPNE)
-        code_generator.remove_stack_top_item()
-        code_generator.convert_literal(1)
-        code_generator.convert_end_if(if_len_is_null_and_value_0)
-        code_generator.swap_reverse_stack_items(2)
-        code_generator.convert_end_if(if_len_is_null)
+        # stack: big_endian, signed, length, value
 
         code_generator.duplicate_stack_top_item()
         # if value == 0: value_bytes = b'\x00' * length
@@ -133,7 +146,7 @@ class IntToBytesMethod(ToBytesMethod):
         code_generator.remove_stack_top_item()
         code_generator.remove_stack_item(2)
         code_generator.remove_stack_item(2)
-        code_generator.convert_literal(padding_positive)
+        code_generator.convert_literal(self.padding_positive)
         code_generator.swap_reverse_stack_items(2)
         code_generator.convert_operation(BinaryOp.StrBytesMul)
 
@@ -146,16 +159,93 @@ class IntToBytesMethod(ToBytesMethod):
         code_generator.swap_reverse_stack_items(3, rotate=True)
         # stack: big_endian, value_bytes, length, signed
 
-        # if not signed:
-        if_not_signed = code_generator.convert_begin_if()
-        code_generator.change_jump(if_not_signed, Opcode.JMPIF)
+        if not is_const_signed:
+            # if not signed:
+            if_not_signed = code_generator.convert_begin_if()
+            code_generator.change_jump(if_not_signed, Opcode.JMPIF)
+            self.opcode_signed_false(code_generator)
+
+            # else if signed:
+            else_if_is_signed = code_generator.convert_begin_else(if_not_signed)
+            self.opcode_signed_true(code_generator)
+            code_generator.convert_end_if(else_if_is_signed, is_internal=True)
+        elif is_const_signed:
+            code_generator.remove_stack_top_item()
+            if const_signed:
+                self.opcode_signed_true(code_generator)
+            else:
+                self.opcode_signed_false(code_generator)
+
+        # stack: big_endian, padding, value_bytes, length
+
+        # amount_of_zeros = length - len(value)
+        code_generator.duplicate_stack_item(2)
+        from boa3.internal.model.builtin.builtin import Builtin
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        code_generator.convert_operation(BinaryOp.Sub)
+
+        if not is_const_length or (is_const_length and const_length is not None):
+            self.opcode_check_len_fits(code_generator)
+
+        # zero_bytes = amount_of_zeros * padding
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.convert_operation(BinaryOp.StrBytesMul)
+        code_generator.swap_reverse_stack_items(3)
+
+        if not is_const_big_endian:
+            # if big_endian:
+            if_is_big_endian = code_generator.convert_begin_if()
+            self.opcode_big_endian_true(code_generator)
+            #   result = zero_bytes + result
+
+            # else: # is little endian
+            else_is_little_endian = code_generator.convert_begin_else(if_is_big_endian, is_internal=True)
+            self.opcode_big_endian_false(code_generator)
+            #   result = value_bytes + zero_bytes
+            code_generator.convert_end_if(else_is_little_endian, is_internal=True)
+        elif is_const_big_endian:
+            code_generator.remove_stack_top_item()
+            if const_big_endian:
+                self.opcode_big_endian_true(code_generator)
+            else:
+                self.opcode_big_endian_false(code_generator)
+
+        code_generator.convert_operation(BinaryOp.Concat)
+
+        code_generator.convert_end_if(else_int_is_not_zero, is_internal=True)
+
+    def opcode_length_none(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        # stack: big_endian, signed, length, value
+
+        code_generator.swap_reverse_stack_items(2)
+        code_generator.remove_stack_top_item()
+        code_generator.duplicate_stack_top_item()
+        super().generate_internal_opcodes(code_generator)
+        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
+        #   length = len(value)
+        code_generator.duplicate_stack_top_item()
+        code_generator.convert_literal(0)
+
+        #     if length == 0: length = 1
+        if_len_is_null_and_value_0 = code_generator.convert_begin_if()
+        code_generator.change_jump(if_len_is_null_and_value_0, Opcode.JMPNE)
+        code_generator.remove_stack_top_item()
+        code_generator.convert_literal(1)
+        code_generator.convert_end_if(if_len_is_null_and_value_0)
+        code_generator.swap_reverse_stack_items(2)
+
+    def opcode_signed_false(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        # stack: big_endian, value_bytes, length, signed
 
         #   if value < 0: raise Exception
         code_generator.duplicate_stack_item(2)
         code_generator.convert_literal(0)
         if_value_is_bigger_than_length = code_generator.convert_begin_if()
         code_generator.change_jump(if_value_is_bigger_than_length, Opcode.JMPGE)
-        code_generator.convert_literal(self.exception_message + forgot_signed_arg_message)
+        code_generator.convert_literal(self.exception_message + self.forgot_signed_arg_message)
         code_generator.convert_raise_exception()
         code_generator.convert_end_if(if_value_is_bigger_than_length, is_internal=True)
 
@@ -166,7 +256,7 @@ class IntToBytesMethod(ToBytesMethod):
         code_generator.insert_opcode(Opcode.DEC)
         code_generator.convert_literal(1)
         code_generator.convert_get_substring(is_internal=True)
-        code_generator.convert_literal(padding_positive)
+        code_generator.convert_literal(self.padding_positive)
 
         #   if last_bytes_value == 0x00: value_bytes = value_bytes[:-1]
         if_starts_with_0x00 = code_generator.convert_begin_if()
@@ -181,15 +271,23 @@ class IntToBytesMethod(ToBytesMethod):
 
         code_generator.convert_end_if(if_starts_with_0x00)
         # stack: big_endian, value_bytes, length
-        # else if signed:
-        else_if_is_signed = code_generator.convert_begin_else(if_not_signed)
+
+        # padding = b'\x00' when positive
+        code_generator.convert_literal(self.padding_positive)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+
+    def opcode_signed_true(self, code_generator):
+        from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.operation.binaryop import BinaryOp
+        # stack: big_endian, value_bytes, length, signed
 
         #   if value < 0: padding = b'\xFF'
         code_generator.duplicate_stack_item(2)
         code_generator.convert_literal(0)
         if_value_negative = code_generator.convert_begin_if()
         code_generator.change_jump(if_value_negative, Opcode.JMPGE)
-        code_generator.convert_literal(padding_negative)
+        code_generator.convert_literal(self.padding_negative)
         code_generator.swap_reverse_stack_items(3, rotate=True)
         code_generator.swap_reverse_stack_items(3, rotate=True)
 
@@ -202,55 +300,35 @@ class IntToBytesMethod(ToBytesMethod):
 
         #       if len(value_bytes) > length: raise Exception
         if_positive_value_is_too_big = code_generator.convert_begin_if()
-        code_generator.convert_literal(self.exception_message + length_arg_too_small_message)
+        code_generator.convert_literal(self.exception_message + self.length_arg_too_small_message)
         code_generator.convert_raise_exception()
         code_generator.convert_end_if(if_positive_value_is_too_big, is_internal=True)
-
         # stack: big_endian, value_bytes, length
-        code_generator.convert_end_if(else_if_is_signed, is_internal=True)
-        # padding = b'\x00' when positive
-        code_generator.convert_literal(padding_positive)
-        code_generator.swap_reverse_stack_items(3, rotate=True)
-        code_generator.swap_reverse_stack_items(3, rotate=True)
-        # stack: big_endian, padding, value_bytes, length
 
+        # padding = b'\x00' when positive
+        code_generator.convert_literal(self.padding_positive)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
+        code_generator.swap_reverse_stack_items(3, rotate=True)
         code_generator.convert_end_if(else_is_positive, is_internal=True)
 
-        # amount_of_zeros = length - len(value)
-        code_generator.duplicate_stack_item(2)
-        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
-        code_generator.convert_operation(BinaryOp.Sub)
+    def opcode_check_len_fits(self, code_generator):
+        # stack: big_endian, padding, value_bytes, length
 
         # if amount_of_zeros < 0: raise Exception
         code_generator.duplicate_stack_top_item()
         code_generator.convert_literal(0)
         if_value_is_bigger_than_length = code_generator.convert_begin_if()
         code_generator.change_jump(if_value_is_bigger_than_length, Opcode.JMPGE)
-        code_generator.convert_literal(self.exception_message + length_arg_too_small_message)
+        code_generator.convert_literal(self.exception_message + self.length_arg_too_small_message)
         code_generator.convert_raise_exception()
         code_generator.convert_end_if(if_value_is_bigger_than_length, is_internal=True)
 
-        # zero_bytes = amount_of_zeros * padding_positive
-        code_generator.swap_reverse_stack_items(3, rotate=True)
-        code_generator.swap_reverse_stack_items(2)
-        code_generator.convert_operation(BinaryOp.StrBytesMul)
-        code_generator.swap_reverse_stack_items(3)
-
-        # if big_endian:
-        if_is_big_endian = code_generator.convert_begin_if()
+    def opcode_big_endian_true(self, code_generator):
         #   result = value_bytes[::-1] (e.g., b'\x12\x34' -> b'\x34\x12')
         code_generator.convert_array_negative_stride()
-        #   result = zero_bytes + result
 
-        # else: # is little endian
-        else_is_little_endian = code_generator.convert_begin_else(if_is_big_endian, is_internal=True)
-        #   result = value_bytes + zero_bytes
+    def opcode_big_endian_false(self, code_generator):
         code_generator.swap_reverse_stack_items(2)
-        code_generator.convert_end_if(else_is_little_endian, is_internal=True)
-
-        code_generator.convert_operation(BinaryOp.Concat)
-
-        code_generator.convert_end_if(else_int_is_not_zero, is_internal=True)
 
 
 class StrToBytesMethod(ToBytesMethod):
