@@ -181,7 +181,7 @@ class VMCodeMapping:
         from boa3.internal.neo.vm.type.Integer import Integer
         for code in self._code_map.get_code_with_target_list():
             if code.target is None:
-                relative = Integer.from_bytes(code.data)
+                relative = Integer.from_bytes(code.raw_data)
                 absolute = self._code_map.get_start_address(code) + relative
                 if absolute in self.code_map:
                     code.set_target(self.code_map[absolute])

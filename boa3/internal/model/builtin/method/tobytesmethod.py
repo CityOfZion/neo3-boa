@@ -193,6 +193,7 @@ class IntToBytesMethod(ToBytesMethod):
         code_generator.convert_operation(BinaryOp.StrBytesMul)
         code_generator.swap_reverse_stack_items(3)
 
+        # stack: str, bytes, bool
         if not is_const_big_endian:
             # if big_endian:
             if_is_big_endian = code_generator.convert_begin_if()
@@ -213,7 +214,7 @@ class IntToBytesMethod(ToBytesMethod):
 
         code_generator.convert_operation(BinaryOp.Concat)
 
-        code_generator.convert_end_if(else_int_is_not_zero, is_internal=True)
+        code_generator.convert_end_if(else_int_is_not_zero)
 
     def opcode_length_none(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
@@ -233,7 +234,7 @@ class IntToBytesMethod(ToBytesMethod):
         code_generator.change_jump(if_len_is_null_and_value_0, Opcode.JMPNE)
         code_generator.remove_stack_top_item()
         code_generator.convert_literal(1)
-        code_generator.convert_end_if(if_len_is_null_and_value_0)
+        code_generator.convert_end_if(if_len_is_null_and_value_0, is_internal=True)
         code_generator.swap_reverse_stack_items(2)
 
     def opcode_signed_false(self, code_generator):
@@ -302,14 +303,14 @@ class IntToBytesMethod(ToBytesMethod):
         if_positive_value_is_too_big = code_generator.convert_begin_if()
         code_generator.convert_literal(self.exception_message + self.length_arg_too_small_message)
         code_generator.convert_raise_exception()
-        code_generator.convert_end_if(if_positive_value_is_too_big, is_internal=True)
+        code_generator.convert_end_if(if_positive_value_is_too_big)
         # stack: big_endian, value_bytes, length
 
         # padding = b'\x00' when positive
         code_generator.convert_literal(self.padding_positive)
         code_generator.swap_reverse_stack_items(3, rotate=True)
         code_generator.swap_reverse_stack_items(3, rotate=True)
-        code_generator.convert_end_if(else_is_positive, is_internal=True)
+        code_generator.convert_end_if(else_is_positive)
 
     def opcode_check_len_fits(self, code_generator):
         # stack: big_endian, padding, value_bytes, length

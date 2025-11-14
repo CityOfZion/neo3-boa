@@ -8,6 +8,14 @@ from boa3_test.tests import boatestcase
 from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
+def minimal_signed_bytes(n: int) -> int:
+    length = 1
+    while True:
+        try:
+            return len(n.to_bytes(length, signed=True))
+        except OverflowError:
+            length += 1
+
 class TestBuiltinMethod(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/built_in_methods_test'
     FORGOT_SIGNED_ARG_MSG = 'did you call to_bytes on a negative integer without setting signed=True?'
@@ -500,13 +508,11 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesDefaultArgs.py')
         await self.set_up_contract('IntToBytesDefaultArgs.py')
 
-        for x in range(128):
-            value = x
+        for value in range(128):
             result, _ = await self.call('main', [value], return_type=bytes)
             self.assertEqual(value.to_bytes(byteorder='little', signed=True), result)
 
-        for x in range(-128, 0, -1):
-            value = x
+        for value in range(-128, 0, -1):
             result, _ = await self.call('main', [value], return_type=bytes)
             self.assertEqual(value.to_bytes(byteorder='little', signed=True), result)
 
@@ -529,8 +535,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
         min_value_len2 = 2 ** (8 * 2) // 2 * -1
         max_value_len2 = 2 ** (8 * 2) // 2 - 1
-        for x in range(min_value_len2, max_value_len2 + 1, 200):
-            value = x
+        for value in range(min_value_len2, max_value_len2 + 1, 200):
             length = 2
             result, _ = await self.call('main', [value, length], return_type=bytes)
             self.assertEqual(value.to_bytes(length, byteorder='little', signed=True), result)
@@ -572,8 +577,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
         await self.set_up_contract('IntToBytesLengthBigEndianArgs.py')
 
-        for x in range(-100000, 100000, 200):
-            value = x
+        for value in range(-100000, 100000, 200):
             length = 5
             big_endian = True
             result, _ = await self.call('main', [value, length, big_endian], return_type=bytes)
@@ -621,8 +625,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
         await self.set_up_contract('IntToBytesLengthBigEndianSignedArgs.py')
 
-        for x in range(-30000, 30000, 200):
-            value = x
+        for value in range(-30000, 30000, 200):
             length = 5
             big_endian = True
             signed = True
@@ -636,8 +639,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
         min_value_len2_unsigned = 0
         max_value_len2_unsigned = 2 ** 16 - 1
-        for x in range(min_value_len2_unsigned, max_value_len2_unsigned + 1, 200):
-            value = x
+        for value in range(min_value_len2_unsigned, max_value_len2_unsigned + 1, 200):
             length = 2
             big_endian = True
             signed = False
@@ -663,8 +665,7 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
         min_value_len2_signed = 2 ** (8 * 2) // 2 * -1
         max_value_len2_signed = 2 ** (8 * 2) // 2 - 1
-        for x in range(min_value_len2_signed, max_value_len2_signed + 1, 200):
-            value = x
+        for value in range(min_value_len2_signed, max_value_len2_signed + 1, 200):
             length = 2
             big_endian = True
             signed = True
@@ -731,6 +732,79 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
         result, _ = await self.call('int_to_bytes', [111], return_type=None)
         # return is Void, checking to see if there is no error
         self.assertIsNone(result)
+
+    async def test_int_to_bytes_constant_big_endian_true(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesConstantBigEndianTrue.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
+        await self.set_up_contract('IntToBytesConstantBigEndianTrue.py')
+
+        for value in range(-40000, 40000, 100):
+            length = minimal_signed_bytes(value)
+            result, _ = await self.call('main', [value], return_type=bytes)
+            self.assertEqual(value.to_bytes(length, 'big', signed=True), result)
+
+    async def test_int_to_bytes_constant_signed_false(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesConstantSignedFalse.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
+        await self.set_up_contract('IntToBytesConstantSignedFalse.py')
+
+        for value in range(0, 40000, 100):
+            length = minimal_signed_bytes(value)
+            result, _ = await self.call('main', [value], return_type=bytes)
+            self.assertEqual(value.to_bytes(length, 'little', signed=False), result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('main', [-1], return_type=bytes)
+        self.assertRegex(str(context.exception), self.FORGOT_SIGNED_ARG_MSG)
+
+    async def test_int_to_bytes_constant_length(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesConstantLength.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
+        await self.set_up_contract('IntToBytesConstantLength.py')
+
+        for value in range(-128, 128):
+            result, _ = await self.call('len_1', [value], return_type=bytes)
+            self.assertEqual(value.to_bytes(1, 'little', signed=True), result)
+
+        for value in range(-32768, 32768, 100):
+            result, _ = await self.call('len_2', [value], return_type=bytes)
+            self.assertEqual(value.to_bytes(2, 'little', signed=True), result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('len_1', [128], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('len_2', [32768], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+
+    async def test_int_to_bytes_constant_length_class(self):
+        with self.assertRaises(AssertionError) as context:
+            self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesConstantLengthClass.py')
+        self.assertRegex(str(context.exception), 'MethodWarning not logged')
+
+        await self.set_up_contract('IntToBytesConstantLengthClass.py')
+
+        for value in range(-128, 128):
+            result, _ = await self.call('len_1', [value], return_type=bytes)
+            self.assertEqual(value.to_bytes(1, 'little', signed=True), result)
+
+        for value in range(-32768, 32768, 100):
+            print(value)
+            result, _ = await self.call('len_2', [value], return_type=bytes)
+            self.assertEqual(value.to_bytes(2, 'little', signed=True), result)
+
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('len_1', [128], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
+        with self.assertRaises(boatestcase.FaultException) as context:
+            await self.call('len_2', [32768], return_type=bytes)
+        self.assertRegex(str(context.exception), self.LENGTH_ARG_TOO_SMALL_MSG)
 
     async def test_int_to_bytes_kwargs(self):
         with self.assertRaises(AssertionError) as context:
