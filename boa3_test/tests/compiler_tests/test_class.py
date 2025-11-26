@@ -538,7 +538,8 @@ class TestClass(boatestcase.BoaTestCase):
     async def test_class_prop_with_int_enum(self):
         await self.set_up_contract('ClassPropWithIntEnum.py')
 
-        result, _ = await self.call('main', [], return_type=list)
+        result, _ = await self.call('main', [], return_type=list, signing_accounts=[self.genesis])
+        block_ = await self.get_last_block(self.called_tx)
         self.assertEqual(8, len(result))
         self.assertEqual(1, result[0])
         self.assertEqual(
@@ -548,5 +549,5 @@ class TestClass(boatestcase.BoaTestCase):
         self.assertEqual(2, result[3])
         self.assertEqual(True, result[4])
         self.assertEqual(0, result[5])
-        self.assertEqual(2, result[6])
+        self.assertEqual(block_.index, result[6])
         self.assertEqual(23, result[7])
