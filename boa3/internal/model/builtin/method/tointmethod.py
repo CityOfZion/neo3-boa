@@ -83,17 +83,14 @@ class ToIntMethod(IBuiltinMethod):
         code_generator.swap_reverse_stack_items(2)
 
         if not is_const_signed:
-            # if signed:
-            if_is_signed = code_generator.convert_begin_if()
-            self.opcode_signed_true(code_generator)
-            else_is_not_signed = code_generator.convert_begin_else(if_is_signed, is_internal=True)
+            # if not signed:
+            if_not_signed = code_generator.convert_begin_if()
+            code_generator.change_jump(if_not_signed, Opcode.JMPIF)
             self.opcode_signed_false(code_generator)
-            code_generator.convert_end_if(else_is_not_signed, is_internal=True)
+            code_generator.convert_end_if(if_not_signed, is_internal=True)
         else:
             code_generator.remove_stack_top_item()
-            if const_signed:
-                self.opcode_signed_true(code_generator)
-            else:
+            if not const_signed:
                 self.opcode_signed_false(code_generator)
 
         # stack: value
@@ -108,28 +105,6 @@ class ToIntMethod(IBuiltinMethod):
         #  value = value + b'\x00'
         code_generator.convert_literal(b'\x00')
         code_generator.convert_operation(BinaryOp.Concat)
-
-    def opcode_signed_true(self, code_generator):
-        from boa3.internal.model.builtin.builtin import Builtin
-        from boa3.internal.model.operation.binaryop import BinaryOp
-
-        code_generator.duplicate_stack_top_item()
-        code_generator.duplicate_stack_top_item()
-        code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)
-        code_generator.insert_opcode(Opcode.DEC)
-        code_generator.convert_literal(1)
-        code_generator.convert_get_substring(is_internal=True)
-        code_generator.convert_cast(Type.bytes, is_internal=True)
-        code_generator.convert_literal(0b10000000)
-        code_generator.convert_operation(BinaryOp.BitAnd)
-
-        if_last_byte_not_begins_with_1 = code_generator.convert_begin_if()
-        code_generator.change_jump(if_last_byte_not_begins_with_1, Opcode.JMPIF)
-
-        #  value = value + b'\x00'
-        code_generator.convert_literal(b'\x00')
-        code_generator.convert_operation(BinaryOp.Concat)
-        code_generator.convert_end_if(if_last_byte_not_begins_with_1, is_internal=True)
 
     def opcode_big_endian_true(self, code_generator):
         code_generator.convert_array_negative_stride()
