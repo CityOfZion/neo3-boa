@@ -181,7 +181,7 @@ class VMCodeMapping:
         from boa3.internal.neo.vm.type.Integer import Integer
         for code in self._code_map.get_code_with_target_list():
             if code.target is None:
-                relative = Integer.from_bytes(code.data)
+                relative = Integer.from_bytes(code.raw_data)
                 absolute = self._code_map.get_start_address(code) + relative
                 if absolute in self.code_map:
                     code.set_target(self.code_map[absolute])
@@ -236,14 +236,14 @@ class VMCodeMapping:
                 for source in targeted_addresses[address]:
                     self._code_map.get_code(source).set_target(next_code)
 
-    def move_to_end(self, first_code_address: int, last_code_address: int) -> int:
+    def move_to_end(self, first_code_address: int, last_code_address: int, opcodes_to_remove: list[int] = None) -> int:
         """
         Moves a set of instructions to the end of the current bytecode
 
         :param first_code_address: first instruction start address
         :param last_code_address: last instruction end address
         """
-        result = self._code_map.move_to_end(first_code_address, last_code_address)
+        result = self._code_map.move_to_end(first_code_address, last_code_address, opcodes_to_remove)
         if not isinstance(result, int):
             return self.bytecode_size
 

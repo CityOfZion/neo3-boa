@@ -940,11 +940,12 @@ class VisitorCodeGenerator(IAstAnalyser):
             args = reversed(args_to_generate)
 
         args_begin_address = self.generator.last_code_start_address
+        args_generated = []
         for arg in args:
             args_addresses.append(
                 VMCodeMapping.instance().bytecode_size
             )
-            self.visit_to_generate(arg)
+            args_generated.append(self.visit_to_generate(arg))
 
         class_type = None
         if has_cls_or_self_argument:
@@ -953,7 +954,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                 value = self.generator._stack_pop(-num_args - 1)
                 self.generator._stack_append(value)
                 class_type = value if isinstance(value, UserClass) else None
-            end_address = VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
+            end_address = VMCodeMapping.instance().move_to_end(last_address, args_begin_address,
+                                                               self.generator._opcodes_to_remove)
             if not symbol.is_init:
                 args_addresses.append(end_address)
 
@@ -963,7 +965,9 @@ class VisitorCodeGenerator(IAstAnalyser):
             self_or_cls_id = list(self.current_method.args)[0]
             self.generator.convert_load_symbol(self_or_cls_id)
         elif isinstance(symbol, IBuiltinMethod):
+            symbol.runtime_args_generated = args_generated
             self.generator.convert_builtin_method_call(symbol, args_addresses)
+            symbol.runtime_args_generated = args_generated
         else:
             self.generator.convert_load_symbol(function_id, args_addresses,
                                                class_type=class_type)

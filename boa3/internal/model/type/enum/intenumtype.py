@@ -79,7 +79,10 @@ class IntEnumMethod(IBuiltinMethod):
         enum_values = [value for value in self._enum_type]
 
         for index, value in enumerate(enum_values):
-            code_generator.duplicate_stack_item(code_generator.stack_size)
+            if index == 0:
+                code_generator.duplicate_stack_top_item()
+            else:
+                code_generator.duplicate_stack_item(2)
             code_generator.convert_literal(value)
             code_generator.convert_operation(BinaryOp.NumEq, is_internal=True)
             if index > 0:

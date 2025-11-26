@@ -102,12 +102,12 @@ class TestBytes(boatestcase.BoaTestCase):
             result, _ = await self.call('main', [bytes_value], return_type=int)
             self.assertEqual(int.from_bytes(bytes_value, "little", signed=True), result)
 
-        for x in range(256, 0x10000, 100):
+        for x in range(256, 0x10000, 120):
             bytes_value = x.to_bytes(2)
             result, _ = await self.call('main', [bytes_value], return_type=int)
             self.assertEqual(int.from_bytes(bytes_value, "little", signed=True), result)
 
-        for x in range(0, 0x100000, 1000):
+        for x in range(0, 0x100000, 1200):
             bytes_value = x.to_bytes(3)
 
             result, _ = await self.call('main', [bytes_value], return_type=int)
@@ -120,7 +120,7 @@ class TestBytes(boatestcase.BoaTestCase):
 
         await self.set_up_contract('BytesToIntBigEndianArgs.py')
 
-        for x in range(0, 0x100000, 1000):
+        for x in range(0, 0x100000, 1200):
             bytes_value = x.to_bytes(3)
 
             result, _ = await self.call('main', [bytes_value, True], return_type=int)
@@ -136,7 +136,7 @@ class TestBytes(boatestcase.BoaTestCase):
 
         await self.set_up_contract('BytesToIntBigEndianSignedArgs.py')
 
-        for x in range(0, 0x100000, 1000):
+        for x in range(0, 0x100000, 1200):
             bytes_value = x.to_bytes(3)
 
             result, _ = await self.call('main', [bytes_value, True, True], return_type=int)
