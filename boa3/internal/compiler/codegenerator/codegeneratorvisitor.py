@@ -954,7 +954,8 @@ class VisitorCodeGenerator(IAstAnalyser):
                 value = self.generator._stack_pop(-num_args - 1)
                 self.generator._stack_append(value)
                 class_type = value if isinstance(value, UserClass) else None
-            end_address = VMCodeMapping.instance().move_to_end(last_address, args_begin_address)
+            end_address = VMCodeMapping.instance().move_to_end(last_address, args_begin_address,
+                                                               self.generator._opcodes_to_remove)
             if not symbol.is_init:
                 args_addresses.append(end_address)
 

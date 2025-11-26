@@ -140,7 +140,8 @@ class VMCodeMap:
 
                 next_address += self._vm_code_list[index].size
 
-    def move_to_end(self, first_code_address: int, last_code_address: int) -> int | None:
+    def move_to_end(self, first_code_address: int, last_code_address: int,
+                    opcodes_to_remove: list[int] = None) -> int | None:
         if last_code_address < first_code_address:
             return
 
@@ -163,8 +164,17 @@ class VMCodeMap:
             if last_index < first_index:
                 last_index = len(self._vm_code_addresses)
 
-            self._vm_code_list[first_index:] = (self._vm_code_list[last_index:] +
-                                                self._vm_code_list[first_index:last_index])
+            new_start_opcode = self._vm_code_list[last_index:]
+            new_end_opcode = self._vm_code_list[first_index:last_index]
+
+            # If there are opcodes to remove that have addresses inside this move_to_end, then update opcodes address too
+            if opcodes_to_remove is not None:
+                for index, address in enumerate(opcodes_to_remove):
+                    if self._vm_code_addresses.index(address) in range(last_index, last_index + len(
+                            new_start_opcode)):
+                        opcodes_to_remove[index] = address - len(new_end_opcode)
+
+            self._vm_code_list[first_index:] = (new_start_opcode + new_end_opcode)
             self.update_addresses(first_code_address)
 
         index = self.get_bytecode_size()

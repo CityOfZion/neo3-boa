@@ -811,6 +811,18 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
             self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesKwargs.py')
         self.assertRegex(str(context.exception), 'MethodWarning not logged')
 
+    async def test_int_to_bytes_as_args_inside_class_instance_method(self):
+        self.assertCompilerLogs(CompilerWarning.MethodWarning, 'IntToBytesAsArgInsideClassInstanceMethod.py')
+        await self.set_up_contract('IntToBytesAsArgInsideClassInstanceMethod.py')
+
+        value = Integer(30).to_byte_array()
+        result, _ = await self.call('int_to_bytes', [], return_type=bytes)
+        self.assertEqual(value, result)
+
+        value = Integer(10).to_byte_array() + Integer(20).to_byte_array()
+        result, _ = await self.call('int_to_bytes2', [], return_type=bytes)
+        self.assertEqual(value, result)
+
     def test_str_to_bytes_compile(self):
         value = String('123').to_bytes()
         expected_output = (
