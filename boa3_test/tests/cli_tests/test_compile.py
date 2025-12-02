@@ -36,7 +36,9 @@ class TestCliCompile(BoaCliTest):
         logs = self.get_cli_log()
 
         self.assertEqual(3, len(logs.output))
-        self.assertTrue(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}' in logs.output[0])
+        self.assertIn(f'neo3-boa v{constants.BOA_VERSION}\tPython {constants.SYS_VERSION}', logs.output[0])
+        self.assertIsNotNone(constants.COMMIT_HASH)
+        self.assertIn(constants.COMMIT_HASH, logs.output[0])
         self.assertTrue('Started compiling' in logs.output[1])
         self.assertTrue(f'Wrote {sc_nef_name} to ' in logs.output[-1],
                         msg=f'Something went wrong when compiling {sc_nef_name}')

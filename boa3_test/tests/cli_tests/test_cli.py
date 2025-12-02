@@ -13,6 +13,8 @@ class TestCli(BoaCliTest):
         self.assertIn('usage: neo3-boa [-h] [-v] {compile}', cli_output)
         self.assertIn(f'neo3-boa by COZ - version {constants.BOA_VERSION}', cli_output)
         self.assertIn('Write smart contracts for Neo3 in Python', cli_output)
+        self.assertIsNotNone(constants.COMMIT_HASH)
+        self.assertIn(constants.COMMIT_HASH, cli_output)
 
     @neo3_boa_cli('--version')
     def test_cli_version(self):
@@ -20,6 +22,8 @@ class TestCli(BoaCliTest):
 
         self.assertEqual(self.EXIT_CODE_SUCCESS, system_exit.exception.code)
         self.assertIn(f'neo3-boa {constants.BOA_VERSION}', cli_output)
+        self.assertIsNotNone(constants.COMMIT_HASH)
+        self.assertIn(constants.COMMIT_HASH, cli_output)
 
     @neo3_boa_cli('build')
     def test_cli_wrong_syntax(self):
