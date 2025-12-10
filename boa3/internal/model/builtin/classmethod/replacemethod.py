@@ -23,7 +23,7 @@ class ReplaceMethod(IBuiltinMethod):
         }
 
         count_default = ast.parse("-1").body[0].value.operand
-        count_default.n = -1
+        count_default.value = -1
 
         super().__init__(identifier, args, defaults=[count_default], return_type=self_type)
 

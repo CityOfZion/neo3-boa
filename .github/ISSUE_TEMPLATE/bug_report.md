@@ -24,7 +24,7 @@ If applicable, add screenshots to help explain your problem.
 **Platform:**
  - OS: [e.g. Windows 10 x64]
  - Version: [e.g. neo3-boa v1.0]
- - Python version: [e.g. Python 3.12]
+ - Python version: [e.g. Python 3.13]
 
 **(Optional) Additional context**
 Add any other context about the problem here.

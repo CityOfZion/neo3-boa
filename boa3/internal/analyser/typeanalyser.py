@@ -1733,7 +1733,8 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
             return '{0}.{1}'.format(attribute.value.id, attribute.attr)
 
         symbol = None
-        if isinstance(value, str) and not isinstance(attribute.value, ast.Str):
+        if isinstance(value, str) and not (
+                isinstance(attribute.value, ast.Constant) and isinstance(attribute.value.value, str)):
             symbol = self.get_symbol(value)
             if symbol is None:
                 return '{0}.{1}'.format(value, attribute.attr)
@@ -1842,44 +1843,12 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         :param constant: the python ast constant value node
         :return: the value of the constant
         """
-        if isinstance(constant, ast.Num) and not isinstance(constant.value, int):
+        if isinstance(constant.value, (int, float, complex)) and not isinstance(constant.value, int):
             # only integer numbers are allowed
             self._log_error(
                 CompilerError.InvalidType(constant.lineno, constant.col_offset, symbol_id=type(constant.value).__name__)
             )
         return constant.value
-
-    def visit_Num(self, num: ast.Num) -> int:
-        """
-        Verifies if the number is an integer
-
-        :param num: the python ast number node
-        :return: returns the value of the number
-        """
-        if not isinstance(num.n, int):
-            # only integer numbers are allowed
-            self._log_error(
-                CompilerError.InvalidType(num.lineno, num.col_offset, symbol_id=type(num.n).__name__)
-            )
-        return num.n
-
-    def visit_Str(self, string: ast.Str) -> str:
-        """
-        Visitor of literal string node
-
-        :param string: the python ast string node
-        :return: the value of the string
-        """
-        return string.s
-
-    def visit_Bytes(self, bts: ast.Bytes) -> bytes:
-        """
-        Visitor of literal bytes node
-
-        :param bts: the python ast bytes node
-        :return: the value of the bytes
-        """
-        return bts.s
 
     def _visit_literal(self, node: ast.expr, get_literal_values: bool = False) -> Any:
         if get_literal_values:
@@ -1949,15 +1918,6 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
         )
 
         return self.generic_visit(node)
-
-    def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
-        """
-        Visitor of constant names node
-
-        :param constant: the python ast name constant node
-        :return: the value of the constant
-        """
-        return constant.value
 
     def visit_Name(self, name: ast.Name) -> ast.Name:
         """

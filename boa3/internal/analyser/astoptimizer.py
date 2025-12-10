@@ -283,8 +283,8 @@ class AstOptimizer(IAstAnalyser, ast.NodeTransformer):
             value = self._evaluate_unary_operation(operand_value, un_op.op)
             if value is not None:
                 self.has_changes = True
-                if hasattr(un_op.operand, 'n'):
-                    un_op.operand.n = value
+                if hasattr(un_op.operand, 'value'):
+                    un_op.operand.value = value
                     self.update_line_and_col(un_op.operand, un_op)
                     return un_op.operand
                 return self.parse_to_node(str(value), un_op, isinstance(value, str))

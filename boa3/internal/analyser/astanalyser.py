@@ -120,7 +120,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
             if isinstance(fun_rtype_id, ast.Name):
                 fun_rtype_id = fun_rtype_id.id
 
-            if isinstance(fun_rtype_id, str) and not isinstance(value, ast.Str):
+            if isinstance(fun_rtype_id, str) and not (isinstance(value, ast.Constant) and isinstance(value.value, str)):
                 value = self.get_symbol(fun_rtype_id, origin_node=value)
                 if isinstance(value, IType) and not isinstance(value, MetaType):
                     value = TypeUtils.type.build(value) if use_metatype else value

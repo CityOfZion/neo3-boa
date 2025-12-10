@@ -311,7 +311,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         if hasattr(value, 'value') and value.value is None and annotation_type is Type.none:
             return annotation_type
 
-        if isinstance(value, (ast.Constant, ast.NameConstant, ast.List, ast.Tuple, ast.Dict, ast.Set)):
+        if isinstance(value, (ast.Constant, ast.List, ast.Tuple, ast.Dict, ast.Set)):
             # annotated types should only accept types
             return None
         return annotation_type
@@ -1033,7 +1033,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         :return: the type of the value inside the node. None by default
         """
         target_type = self.visit(target)  # Type:str or IType
-        if isinstance(target_type, str) and not isinstance(target, ast.Str):
+        if isinstance(target_type, str) and not (isinstance(target, ast.Constant) and isinstance(target.value, str)):
             symbol = self.get_symbol(target_type)
             if symbol is None:
                 # the symbol doesn't exist
@@ -1042,7 +1042,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 )
             target_type = symbol
 
-        if target_type is None and not isinstance(target, ast.NameConstant):
+        if target_type is None:
             # the value type is invalid
             return None
 
@@ -1061,7 +1061,8 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                 if hasattr(target, 'args'):
                     for arg in target.args:
                         result = self.visit(arg)
-                        if (isinstance(result, str) and not isinstance(arg, (ast.Str, ast.Constant))
+                        if (isinstance(result, str) and not (
+                                isinstance(arg, ast.Constant) and isinstance(arg.value, str))
                                 and result in self._current_scope.symbols):
                             result = self.get_type(self._current_scope.symbols[result])
                         args.append(result)
@@ -1222,7 +1223,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
 
         if isinstance(subscript.ctx, ast.Load):
             if (isinstance(symbol, (Collection, MetaType))
-                    and isinstance(subscript.value, (ast.Name, ast.NameConstant, ast.Attribute))):
+                    and isinstance(subscript.value, (ast.Name, ast.Attribute))):
                 # for evaluating names like list[str], dict[int, bool], etc
                 values_type: Iterable[IType] = self.get_values_type(subscript.slice)
                 if isinstance(symbol, Collection):
@@ -1388,7 +1389,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                     else:
                         event_arg_name, event_arg_type = value.elts
                         are_types_valid = True
-                        if not isinstance(event_arg_name, ast.Str):
+                        if not (isinstance(event_arg_name, ast.Constant) and isinstance(event_arg_name.value, str)):
                             are_types_valid = False
                         else:
                             if isinstance(event_arg_type, ast.Name):  # if is name, get the type of its id
@@ -1415,14 +1416,14 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                               actual_type_id=self.get_type(value).identifier)
                             )
                         else:
-                            arg_name = event_arg_name.s
+                            arg_name = event_arg_name.value
                             arg_type = (self.get_symbol(event_arg_type.id)
                                         if isinstance(event_arg_type, ast.Name)
                                         else self.visit(event_arg_type))
                             args[arg_name] = Variable(arg_type)
 
             if len(event_args) > 1:
-                if not isinstance(event_args[1], ast.Str):
+                if not (isinstance(event_args[1], ast.Constant) and isinstance(event_args[1].value, str)):
                     name_type = self.get_type(event_args[1])
                     self._log_error(
                         CompilerError.MismatchedTypes(line=event_args[1].lineno,
@@ -1431,7 +1432,7 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                                                       actual_type_id=name_type.identifier)
                     )
                 else:
-                    name = event_args[1].s
+                    name = event_args[1].value
 
         event = Event(name, args)
         event._origin_node = create_call
@@ -1559,33 +1560,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         return constant.value
 
-    def visit_NameConstant(self, constant: ast.NameConstant) -> Any:
-        """
-        Visitor of constant names node
-
-        :param constant:
-        :return: the value of the constant
-        """
-        return constant.value
-
-    def visit_Num(self, num: ast.Num) -> int:
-        """
-        Visitor of literal number node
-
-        :param num:
-        :return: the value of the number
-        """
-        return num.n
-
-    def visit_Str(self, str: ast.Str) -> str:
-        """
-        Visitor of literal string node
-
-        :param str:
-        :return: the value of the string
-        """
-        return str.s
-
     def visit_JoinedStr(self, joined_str: ast.JoinedStr):
         """
         Visitor of joined string node
@@ -1596,15 +1570,6 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         """
         for node in joined_str.values:
             self.visit(node)
-
-    def visit_Bytes(self, btes: ast.Bytes) -> bytes:
-        """
-        Visitor of literal string node
-
-        :param btes:
-        :return: the value of the string
-        """
-        return btes.s
 
     def visit_Tuple(self, tup_node: ast.Tuple) -> tuple | None:
         """

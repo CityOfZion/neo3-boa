@@ -25,7 +25,7 @@ class StrSplitMethod(IBuiltinMethod):
             separator_default = ast.parse("' '").body[0].value
             # maxsplit the default value is -1
             maxsplit_default = ast.parse("-1").body[0].value.operand
-            maxsplit_default.n = -1
+            maxsplit_default.value = -1
             defaults = [separator_default, maxsplit_default]
 
         super().__init__(identifier, args, defaults,

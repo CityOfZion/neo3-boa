@@ -27,7 +27,7 @@ class IndexSequenceMethod(IndexMethod):
         start_default = ast.parse("{0}".format(0)
                                   ).body[0].value
         end_default = ast.parse("-1").body[0].value.operand
-        end_default.n = -1
+        end_default.value = -1
 
         super().__init__(args, defaults=[start_default, end_default])
 
