@@ -41,6 +41,7 @@ jobs:
       - run:
           name: Install Dependencies
           command: |
+            sudo add-apt-repository ppa:dotnet/backports
             sudo apt update
 
             sudo apt-get install -y apt-transport-https
