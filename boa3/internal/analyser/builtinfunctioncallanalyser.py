@@ -91,7 +91,7 @@ class BuiltinFunctionCallAnalyser(IAstAnalyser):
         from boa3.internal.model.type.annotation.metatype import MetaType
         from boa3.internal.model.type.type import Type
         is_ast_valid = (isinstance(last_arg, ast.Name)
-                        or (isinstance(last_arg, ast.NameConstant) and args_types[-1] is Type.none))
+                        or (isinstance(last_arg, ast.Constant) and args_types[-1] is Type.none))
 
         is_id_valid = (hasattr(last_arg, 'id')
                        and last_arg.id != args_types[-1].identifier

@@ -52,7 +52,7 @@ Neo3-Boa is part of the Neo Python Framework, aimed to allow the full developmen
 
 ## Quickstart
 
-Installation requires Python 3.12 or later.
+Installation requires Python 3.13 or 3.14.
 
 ### Installation
 

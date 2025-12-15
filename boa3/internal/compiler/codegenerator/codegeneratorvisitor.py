@@ -8,7 +8,6 @@ from boa3.internal.compiler.codegenerator.codegenerator import CodeGenerator
 from boa3.internal.compiler.codegenerator.generatordata import GeneratorData
 from boa3.internal.compiler.codegenerator.variablegenerationdata import VariableGenerationData
 from boa3.internal.compiler.codegenerator.vmcodemapping import VMCodeMapping
-from boa3.internal.exception.CompilerWarning import MethodWarning
 from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -529,9 +528,9 @@ class VisitorCodeGenerator(IAstAnalyser):
             slice = subscript.slice
             self.visit_to_generate(slice)
 
-            index_is_constant_number = isinstance(slice, ast.Num) and isinstance(slice.n, int)
-            self.generator.convert_get_item(index_is_positive=(index_is_constant_number and slice.n >= 0),
-                                            test_is_negative_index=not (index_is_constant_number and slice.n < 0))
+            index_is_constant_number = isinstance(slice, ast.Constant) and isinstance(slice.value, int)
+            self.generator.convert_get_item(index_is_positive=(index_is_constant_number and slice.value >= 0),
+                                            test_is_negative_index=not (index_is_constant_number and slice.value < 0))
 
             value_type = value_data.type
         else:
@@ -558,7 +557,7 @@ class VisitorCodeGenerator(IAstAnalyser):
 
         self.visit_to_generate(subscript.value)
 
-        step_negative = True if not step_omitted and subscript.slice.step.n < 0 else False
+        step_negative = True if not step_omitted and subscript.slice.step.value < 0 else False
 
         if step_negative:
             # reverse the ByteString or the list
@@ -571,8 +570,9 @@ class VisitorCodeGenerator(IAstAnalyser):
                 addresses.append(VMCodeMapping.instance().bytecode_size)
                 self.visit_to_generate(index_number)
 
-                index_is_constant_number = isinstance(index_number, ast.Num) and isinstance(index_number.n, int)
-                if index_is_constant_number and index_number.n < 0:
+                index_is_constant_number = isinstance(index_number, ast.Constant) and isinstance(index_number.value,
+                                                                                                 int)
+                if index_is_constant_number and index_number.value < 0:
                     self.generator.fix_negative_index(test_is_negative=False)
                 elif not index_is_constant_number:
                     self.generator.fix_negative_index()
@@ -651,7 +651,7 @@ class VisitorCodeGenerator(IAstAnalyser):
                     self._convert_binary_operation(left, right, op)
                 else:
                     operand = left
-                    if isinstance(operand, ast.NameConstant) and operand.value is None:
+                    if isinstance(operand, ast.Constant) and operand.value is None:
                         operand = right
                     self._convert_unary_operation(operand, op)
                 # if it's more than two comparators, must include AND between the operations
@@ -1202,46 +1202,6 @@ class VisitorCodeGenerator(IAstAnalyser):
         index = self.generator.convert_literal(constant.value)
         result_type = self.get_type(constant.value)
         return self.build_data(constant, result_type=result_type, index=index, already_generated=True)
-
-    def visit_NameConstant(self, constant: ast.NameConstant) -> GeneratorData:
-        """
-        Visitor of constant names node
-
-        :param constant: the python ast name constant node
-        """
-        index = self.generator.convert_literal(constant.value)
-        result_type = self.get_type(constant.value)
-        return self.build_data(constant, result_type=result_type, index=index, already_generated=True)
-
-    def visit_Num(self, num: ast.Num) -> GeneratorData:
-        """
-        Visitor of literal number node
-
-        :param num: the python ast number node
-        """
-        index = self.generator.convert_literal(num.n)
-        result_type = self.get_type(num.n)
-        return self.build_data(num, result_type=result_type, index=index, already_generated=True)
-
-    def visit_Str(self, string: ast.Str) -> GeneratorData:
-        """
-        Visitor of literal string node
-
-        :param string: the python ast string node
-        """
-        index = self.generator.convert_literal(string.s)
-        result_type = self.get_type(string.s)
-        return self.build_data(string, result_type=result_type, index=index, already_generated=True)
-
-    def visit_Bytes(self, bts: ast.Bytes) -> GeneratorData:
-        """
-        Visitor of literal bytes node
-
-        :param bts: the python ast bytes node
-        """
-        index = self.generator.convert_literal(bts.s)
-        result_type = self.get_type(bts.s)
-        return self.build_data(bts, result_type=result_type, index=index, already_generated=True)
 
     def visit_Tuple(self, tup_node: ast.Tuple) -> GeneratorData:
         """
