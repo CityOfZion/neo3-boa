@@ -51,8 +51,10 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
     :ivar symbols: a dictionary that maps the global symbols.
     """
 
-    def __init__(self, analyser, symbol_table: dict[str, ISymbol], log: bool = False, fail_fast: bool = True):
-        super().__init__(analyser.ast_tree, analyser.filename, analyser.root, log=log, fail_fast=fail_fast)
+    def __init__(self, analyser, symbol_table: dict[str, ISymbol], log: bool = False, fail_fast: bool = True,
+                 exclude_warnings: list = None):
+        super().__init__(analyser.ast_tree, analyser.filename, analyser.root, log=log, fail_fast=fail_fast,
+                         exclude_warnings=exclude_warnings)
         self.type_errors: list[Exception] = []
         self.modules: dict[str, Module] = {}
         self.symbols: dict[str, ISymbol] = symbol_table

@@ -29,7 +29,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
     """
 
     def __init__(self, ast_tree: ast.AST, filename: str = None, root_folder: str = None,
-                 log: bool = False, fail_fast: bool = True):
+                 log: bool = False, fail_fast: bool = True, exclude_warnings: list = None):
         self.errors: list[CompilerError] = []
         self.warnings: list[CompilerWarning] = []
 
@@ -40,6 +40,7 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
                            else os.path.abspath(os.path.curdir))
         self.root_folder: str = root_folder
         self._log: bool = log
+        self._exclude_warnings: list = exclude_warnings
         self._fail_fast: bool = fail_fast
 
         self._tree: ast.AST = ast_tree
@@ -70,7 +71,9 @@ class IAstAnalyser(ABC, ast.NodeVisitor):
         if not any(warn == warning for warn in self.warnings):
             # don't include duplicated warnings
             self.warnings.append(warning)
-            if self._log:
+            if self._log and (
+                    self._exclude_warnings is None or
+                    not any(isinstance(warning, warn_type) for warn_type in self._exclude_warnings)):
                 logging.getLogger(constants.BOA_LOGGING_NAME).warning(warning)
 
     def _log_info(self, info_message: str, log_filename: bool = True):

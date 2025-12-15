@@ -47,7 +47,8 @@ class Boa3:
             debug: bool = False,
             env: str = None,
             fail_fast: bool = True,
-            optimize: bool = True
+            optimize: bool = True,
+            exclude_warnings: list = None
     ):
         """
         Load a Python file to be compiled and save the result into the files.
@@ -71,5 +72,5 @@ class Boa3:
             raise InvalidPathException(output_path)
 
         Compiler().compile_and_save(path, output_path, root_folder, show_errors, log_level, debug, env, fail_fast,
-                                    optimize
+                                    optimize, exclude_warnings
                                     )

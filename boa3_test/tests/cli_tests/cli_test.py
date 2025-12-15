@@ -8,9 +8,6 @@ from contextlib import redirect_stdout, redirect_stderr
 
 from boa3.cli import main
 from boa3_test.tests import boatestcase
-from boa3_test.tests.boatestcase import (_COMPILER_LOCK as LOCK,
-                                         _LOGGING_LOCK as LOG_LOCK
-                                         )
 from boa3_test.tests.cli_tests import utils
 
 
@@ -20,14 +17,6 @@ class BoaCliTest(boatestcase.BoaTestCase, abc.ABC):
     EXIT_CODE_SUCCESS = 0
     EXIT_CODE_ERROR = 1
     EXIT_CODE_CLI_SYNTAX_ERROR = 2
-
-    def setUp(self):
-        LOG_LOCK.acquire()
-        LOCK.acquire()
-
-    def tearDown(self):
-        LOCK.release()
-        LOG_LOCK.release()
 
     def get_cli_log(self, get_exit_code: bool = False):
         if get_exit_code:
