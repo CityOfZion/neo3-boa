@@ -57,7 +57,7 @@ class CompileCommand(ICommand):
                                  default=[],
                                  type=str,
                                  help="List of warning codes to be excluded from the output logs. "
-                                      f"Available options: {", ".join(warnings.keys())}")
+                                      f"Available options: {', '.join(warnings.keys())}")
 
         self.parser.set_defaults(func=self.execute_command)
 
