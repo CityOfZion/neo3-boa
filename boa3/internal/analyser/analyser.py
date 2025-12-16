@@ -24,13 +24,14 @@ class Analyser:
     """
 
     def __init__(self, ast_tree: ast.AST, path: str = None, project_root: str = None,
-                 env: str = None, log: bool = False, fail_fast: bool = False):
+                 env: str = None, log: bool = False, fail_fast: bool = False, exclude_warnings: list = None):
         self.symbol_table: dict[str, ISymbol] = {}
 
         self.ast_tree: ast.AST = ast_tree
         self.metadata: NeoMetadata = NeoMetadata()
         self.is_analysed: bool = False
         self._log: bool = log
+        self._exclude_warnings: list = exclude_warnings
         self._fail_fast: bool = fail_fast
         self._env: str = env if env is not None else constants.DEFAULT_CONTRACT_ENVIRONMENT
 
@@ -65,7 +66,8 @@ class Analyser:
             import_stack: list[str] | None = None,
             root: str = None,
             env: str = None,
-            compiler_entry: bool = False
+            compiler_entry: bool = False,
+            exclude_warnings: list = None
     ) -> Self:
         """
         Analyses the syntax of the Python code
@@ -86,7 +88,8 @@ class Analyser:
         with open(path, 'rb') as source:
             ast_tree = ast.parse(source.read())
 
-        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log, fail_fast)
+        analyser = Analyser(ast_tree, path, root if isinstance(root, str) else path, env, log, fail_fast,
+                            exclude_warnings)
         CompiledMetadata.set_current_metadata(analyser.metadata)
 
         if compiler_entry:
@@ -147,7 +150,8 @@ class Analyser:
 
         :return: a boolean value that represents if the analysis was successful
         """
-        type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log, fail_fast=self._fail_fast)
+        type_analyser = TypeAnalyser(self, self.symbol_table, log=self._log, fail_fast=self._fail_fast,
+                                     exclude_warnings=self._exclude_warnings)
         self._update_logs(type_analyser)
         return not type_analyser.has_errors
 
@@ -166,7 +170,8 @@ class Analyser:
                                          filename=self.filename,
                                          root_folder=self.root,
                                          analysed_files=imported_files,
-                                         import_stack=import_stack)
+                                         import_stack=import_stack,
+                                         exclude_warnings=self._exclude_warnings)
         self.symbol_table.update(module_analyser.global_symbols)
         self.ast_tree.body.extend(module_analyser.imported_nodes)
         self._update_logs(module_analyser)

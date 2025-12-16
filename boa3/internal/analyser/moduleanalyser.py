@@ -61,8 +61,9 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
                  analysed_files: dict | None = None,
                  import_stack: list[str] | None = None,
                  log: bool = False,
-                 fail_fast: bool = True):
-        super().__init__(analyser.ast_tree, filename, root_folder, log, fail_fast)
+                 fail_fast: bool = True,
+                 exclude_warnings: list = None):
+        super().__init__(analyser.ast_tree, filename, root_folder, log, fail_fast, exclude_warnings)
         self.modules: dict[str, Module] = {}
         self.symbols: dict[str, ISymbol] = symbol_table
 

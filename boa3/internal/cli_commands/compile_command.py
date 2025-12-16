@@ -6,8 +6,20 @@ from argparse import _SubParsersAction
 
 from boa3.boa3 import Boa3
 from boa3.internal.cli_commands.icommand import ICommand
+from boa3.internal.exception.CompilerWarning import DeprecatedSymbol, InvalidArgument, NameShadowing, RedeclaredSymbol, \
+    UnreachableCode, TypeCasting, UsingSpecificException, MethodWarning
 from boa3.internal.exception.NotLoadedException import NotLoadedException
 
+warnings = {
+    "deprecated_symbol": DeprecatedSymbol,
+    "invalid_argument": InvalidArgument,
+    "name_shadowing": NameShadowing,
+    "redeclared_symbol": RedeclaredSymbol,
+    "type_casting": TypeCasting,
+    "unreachable_code": UnreachableCode,
+    "using_specific_exception": UsingSpecificException,
+    "method_warning": MethodWarning,
+}
 
 class CompileCommand(ICommand):
 
@@ -40,6 +52,12 @@ class CompileCommand(ICommand):
         self.parser.add_argument("--log-level",
                                  type=str,
                                  help="Log output level")
+        self.parser.add_argument("--exclude-warnings",
+                                 nargs='+',
+                                 default=[],
+                                 type=str,
+                                 help="List of warning codes to be excluded from the output logs. "
+                                      f"Available options: {', '.join(warnings.keys())}")
 
         self.parser.set_defaults(func=self.execute_command)
 
@@ -52,10 +70,16 @@ class CompileCommand(ICommand):
         output_path: str | None = args['output_path']
         fail_fast: bool = not args['no_failfast']
         log_level = args['log_level']
+        exclude_warnings = args['exclude_warnings']
 
         if not sc_path.endswith(".py"):
             logging.error("Input file is not .py")
             sys.exit(1)
+
+        if any([warn not in warnings.keys() for warn in exclude_warnings]):
+            logging.error(f"Invalid list of warnings to exclude, available options: {warnings.keys()}")
+            sys.exit(1)
+        exclude_warnings = [warnings[warn] for warn in exclude_warnings] if exclude_warnings else None
 
         if log_level is None:
             log_level = "WARN"
@@ -96,7 +120,8 @@ class CompileCommand(ICommand):
                                   env=env,
                                   fail_fast=fail_fast,
                                   show_errors=True,
-                                  log_level=log_level
+                                  log_level=log_level,
+                                  exclude_warnings=exclude_warnings
                                   )
             logging.info(f"Wrote {filename.replace('.py', '.nef')} to {path}")
         except NotLoadedException as e:

@@ -49,8 +49,8 @@ class Compiler:
 
     def _internal_compile(self, path: str, root_folder: str = None, env: str = None,
                           log: bool = True, log_level: str = None,
-                          fail_fast: bool = True,
-                          optimization_level: OptimizationLevel = OptimizationLevel.DEFAULT
+                          fail_fast: bool = True, optimization_level: OptimizationLevel = OptimizationLevel.DEFAULT,
+                          exclude_warnings: list = None,
                           ) -> CompilerOutput:
         fullpath = os.path.realpath(path)
         filepath, filename = os.path.split(fullpath)
@@ -72,13 +72,13 @@ class Compiler:
         CompilerBuiltin.reset()
         CompiledMetadata.reset()
 
-        self._analyse(fullpath, root_folder, env, log, fail_fast)
+        self._analyse(fullpath, root_folder, env, log, fail_fast, exclude_warnings)
         return self._compile(optimization_level)
 
     def compile_and_save(self, path: str, output_path: str, root_folder: str = None,
                          log: bool = True, log_level: str = None,
                          debug: bool = False, env: str = None, fail_fast: bool = True,
-                         optimize: bool = True
+                         optimize: bool = True, exclude_warnings: list = None
                          ):
         """
         Save the compiled file and the metadata files
@@ -97,7 +97,8 @@ class Compiler:
         else:
             optimization_level = OptimizationLevel.NONE
 
-        self.result = self._internal_compile(path, root_folder, env, log, log_level, fail_fast, optimization_level)
+        self.result = self._internal_compile(path, root_folder, env, log, log_level, fail_fast, optimization_level,
+                                             exclude_warnings)
         self._save(output_path, debug)
         self._restore_log_level()
 
@@ -117,7 +118,7 @@ class Compiler:
             del self._previous_logger_level
 
     def _analyse(self, path: str, root_folder: str = None, env: str = None,
-                 log: bool = True, fail_fast: bool = True):
+                 log: bool = True, fail_fast: bool = True, exclude_warnings: list = None):
         """
         Load a Python file and analyses its syntax
 
@@ -126,7 +127,7 @@ class Compiler:
         :param log: if compiler errors should be logged.
         :param fail_fast: if should stop compilation on first error found.
         """
-        self._analyser = Analyser.analyse(path, log=log, fail_fast=fail_fast,
+        self._analyser = Analyser.analyse(path, log=log, fail_fast=fail_fast, exclude_warnings=exclude_warnings,
                                           root=root_folder, env=env, compiler_entry=True)
 
     def _compile(self, optimization_level: OptimizationLevel) -> CompilerOutput:

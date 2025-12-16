@@ -1,6 +1,7 @@
 import os.path
 
 from boa3.internal import constants
+from boa3.internal.exception import CompilerWarning
 from boa3_test.tests.cli_tests.cli_test import BoaCliTest
 from boa3_test.tests.cli_tests.utils import neo3_boa_cli, get_path_from_boa3_test
 
@@ -16,6 +17,7 @@ class TestCliCompile(BoaCliTest):
                       '[--project-path PROJECT_PATH] [-e ENV] '
                       '[-o NEF_OUTPUT] [--no-failfast] '
                       '[--log-level LOG_LEVEL] '
+                      '[--exclude-warnings EXCLUDE_WARNINGS [EXCLUDE_WARNINGS ...]] '
                       'input',
                       cli_output)
 
@@ -247,3 +249,70 @@ class TestCliCompile(BoaCliTest):
 
         first_wrong_dir = 'this_path'
         self.assertTrue(f"Can't find '{first_wrong_dir}'" in logs.output[0])
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'import_test', 'ImportTyping.py'),
+                  '--exclude-warnings', 'deprecated_symbol')
+    def test_cli_exclude_warning_deprecated_symbol(self):
+        logs = self.get_cli_log()
+        self.assertFalse(any(["WARNING" in output for output in logs.output]))
+
+        self.assertCompilerLogs(CompilerWarning.DeprecatedSymbol,
+                                get_path_from_boa3_test('test_sc', 'import_test', 'ImportTyping.py'))
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'if_test', 'IfWithInnerFor.py'),
+                  '--exclude-warnings', 'name_shadowing')
+    def test_cli_exclude_warning_name_shadowing(self):
+        logs = self.get_cli_log()
+        self.assertFalse(any(["WARNING" in output for output in logs.output]))
+
+        self.assertCompilerLogs(CompilerWarning.NameShadowing,
+                                get_path_from_boa3_test('test_sc', 'if_test', 'IfWithInnerFor.py'))
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'metadata_test', 'MetadataInfoMultipleMethod.py'),
+                  '--exclude-warnings', 'redeclared_symbol')
+    def test_cli_exclude_warning_redeclared_symbol(self):
+        logs = self.get_cli_log()
+        self.assertFalse(any(["WARNING" in output for output in logs.output]))
+
+        self.assertCompilerLogs(CompilerWarning.RedeclaredSymbol,
+                                get_path_from_boa3_test('test_sc', 'metadata_test', 'MetadataInfoMultipleMethod.py'))
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'neo_type_test', 'CastTransactionGetHash.py'),
+                  '--exclude-warnings', 'type_casting')
+    def test_cli_exclude_warning_type_casting(self):
+        logs = self.get_cli_log()
+        self.assertFalse(any(["WARNING" in output for output in logs.output]))
+
+        self.assertCompilerLogs(CompilerWarning.TypeCasting,
+                                get_path_from_boa3_test('test_sc', 'neo_type_test', 'CastTransactionGetHash.py'))
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'exception_test', 'TryExceptSpecificException.py'),
+                  '--exclude-warnings', 'using_specific_exception')
+    def test_cli_exclude_warning_using_specific_exception(self):
+        logs = self.get_cli_log()
+        self.assertFalse(any(["WARNING" in output for output in logs.output]))
+
+        self.assertCompilerLogs(CompilerWarning.UsingSpecificException,
+                                get_path_from_boa3_test('test_sc', 'exception_test', 'TryExceptSpecificException.py'))
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_sc', 'bytes_test', 'BytesToInt.py'),
+                  '--exclude-warnings', 'method_warning')
+    def test_cli_exclude_warning_method_warning(self):
+        logs = self.get_cli_log()
+        self.assertFalse(any(["WARNING" in output for output in logs.output]))
+
+        self.assertCompilerLogs(CompilerWarning.MethodWarning,
+                                get_path_from_boa3_test('test_sc', 'bytes_test', 'BytesToInt.py'))
+
+    @neo3_boa_cli('compile', get_path_from_boa3_test('test_cli', 'MultipleWarnings.py'),
+                  '--exclude-warnings', 'method_warning', 'name_shadowing', 'type_casting')
+    def test_cli_exclude_multiple_warnings(self):
+        logs = self.get_cli_log()
+        self.assertFalse(any(["WARNING" in output for output in logs.output]))
+
+        self.assertCompilerLogs(CompilerWarning.MethodWarning,
+                                get_path_from_boa3_test('test_cli', 'MultipleWarnings.py'))
+        self.assertCompilerLogs(CompilerWarning.NameShadowing,
+                                get_path_from_boa3_test('test_cli', 'MultipleWarnings.py'))
+        self.assertCompilerLogs(CompilerWarning.TypeCasting,
+                                get_path_from_boa3_test('test_cli', 'MultipleWarnings.py'))
