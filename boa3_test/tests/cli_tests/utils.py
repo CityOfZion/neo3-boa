@@ -15,7 +15,7 @@ def get_path_from_boa3_test(*args: str, get_unique=False) -> str:
 
         if USE_UNIQUE_NAME:
             import os.path
-            from boa3_test.test_drive import utils
+            from boa3_test.tests import utils
 
             file_path_without_ext, ext = os.path.splitext(result)
             file_path_without_ext = utils.create_custom_id(file_path_without_ext, use_time=False)

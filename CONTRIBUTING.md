@@ -18,9 +18,8 @@ user experience, we need to use logs and inform errors with details.
 
 ### Testing against Neo VM
 We need to ensure that the code works as expected, and the only way to do that is to run our tests against the official
-Neo 3 VM. Neo organization already has a [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner)
-available to C# dApp developers. A [NeoTestRunner](boa3_test/test_drive/testrunner/neo_test_runner.py) class was
-implemented in this project to facilitate testing compiled smart-contracts with Python.
+Neo 3 VM. We are using NeoGo's Neo VM provided by [boa-test-constructor](https://github.com/CityOfZion/boa-test-constructor)
+to facilitate testing compiled smart-contracts with Python.
 
 ### Maintenance
 Create a product that is easy to maintain and upgrade. Use unit tests, typed and documented code to ensure its maintainability.
@@ -53,13 +52,10 @@ snippet of the code where the problem is happening or a example of a feature, an
 
 If you wish to contribute with the project by implementing a feature or fixing a bug, it's necessary to have a Python3
 version equal or higher than 3.13 on your machine and install the `dev` Python packages listed in the `optional-dependencies` section of the `pyproject.toml`
-file, and also have the [.NET 6.0](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) tools: [Neo-Express](https://github.com/neo-project/neo-express#neo-express-and-neo-trace) and [Neo Test Runner](https://github.com/ngdenterprise/neo-test#neo-test-runner)
-installed.
+file.
 
 ```shell
 pip install -e .[dev,test]
-dotnet tool install Neo.Express --version 3.5.20 -g
-dotnet tool install Neo.Test.Runner --version 3.5.17 -g
 ```
 
 ## Writing changes
@@ -83,7 +79,7 @@ add it in `boa3/internal`.
 ### Tests
 
 Always create unit tests and run them all to make sure everything is working.
-This project uses CircleCI with Neo Test Runner and Neo-Express to test its features and Coveralls to track the Code 
+This project uses CircleCI with [NeoGo](https://github.com/nspcc-dev/neo-go/) to test its features and Coveralls to track the Code 
 Coverage. To run all tests run the Python script at boa3_test/tests/run_unit_tests.py.
 
 ## Submitting new features or bug fixes

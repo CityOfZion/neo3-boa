@@ -2,7 +2,7 @@ import abc
 from typing import Any, Self
 
 from boa3.internal.neo3.core.types import UInt160
-from boa3_test.test_drive.model.wallet import utils
+from boa3_test.tests import utils
 
 
 class Account(abc.ABC):

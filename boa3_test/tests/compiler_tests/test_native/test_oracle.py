@@ -2,37 +2,22 @@ from dataclasses import dataclass
 from typing import Self
 
 from neo3.api import noderpc
+from neo3.api.helpers.signing import sign_with_account, sign_with_multisig_account
+from neo3.api.noderpc import Receipt
 from neo3.contracts.contract import CONTRACT_HASHES
 from neo3.core import types
+from neo3.network.payloads import verification
+from neo3.network.payloads.transaction import OracleResponse
+from neo3.vm import ScriptBuilder
 from neo3.wallet import account
 
 from boa3.internal import constants
+from boa3.internal.constants import ORACLE_SCRIPT
 from boa3.internal.exception import CompilerError
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
+from boa3.internal.neo3.contracts.native import Role
 from boa3.internal.neo3.network.payloads import OracleResponseCode
 from boa3_test.tests import boatestcase
-
-
-def _deep_scan(iterable: [dict, list], key: str, list_of_values: list):
-    """
-    Used to get a similar result to the oracle filter JsonPath deep scan
-    """
-    if isinstance(iterable, dict):
-        for key_inside in iterable:
-            value = iterable[key_inside]
-
-            if key_inside == key:
-                list_of_values.append(value)
-            elif isinstance(value, dict):
-                _deep_scan(value, key, list_of_values)
-            elif isinstance(value, list):
-                for item in value:
-                    if isinstance(item, dict):
-                        _deep_scan(item, key, list_of_values)
-    elif isinstance(iterable, list):
-        for item in iterable:
-            if isinstance(item, dict):
-                _deep_scan(item, key, list_of_values)
 
 
 @dataclass
@@ -61,24 +46,71 @@ class OracleResponseEvent(boatestcase.BoaTestEvent):
         return cls(e.contract, e.name, e.state, *e.state)
 
 
-class TestNativeContracts(boatestcase.BoaTestCase):
+class TestOracleContract(boatestcase.BoaTestCase):
     default_folder: str = 'test_sc/native_test/oracle'
     ORACLE_CONTRACT_NAME = 'OracleContract'
     ORACLE_SCRIPT_HASH = types.UInt160(constants.ORACLE_SCRIPT)
 
     owner: account.Account
+    oracle_node: account.Account
 
     @classmethod
     def setupTestCase(cls):
         cls.owner = cls.node.wallet.account_new(label='owner')
 
+        cls.oracle_node = cls.node.account_committee
         super().setupTestCase()
 
     @classmethod
     async def asyncSetupClass(cls) -> None:
         await super().asyncSetupClass()
 
-        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 100, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.owner.script_hash, 1000, 8)
+        await cls.transfer(CONTRACT_HASHES.GAS_TOKEN, cls.genesis.script_hash, cls.oracle_node.script_hash, 1000, 8)
+
+    async def send_response(self, request_id: int, data: bytes) -> Receipt:
+        call_contract = await self.compile_and_deploy('test_sc/native_test/rolemanagement', 'DesignateAsRole.py')
+
+        signer = verification.Signer(
+            self.genesis.script_hash,
+            verification.WitnessScope.GLOBAL
+        )
+
+        result, _ = await self.call('main',
+                                    [Role.ORACLE, [self.oracle_node.public_key]],
+                                    target_contract=call_contract, signers=[signer],
+                                    signing_accounts=[self.genesis],
+                                    return_type=None
+                                    )
+        self.assertIsNone(result)
+
+        oracle_response = OracleResponse(request_id, OracleResponseCode.SUCCESS, data)
+
+        script = ScriptBuilder().emit_contract_call(ORACLE_SCRIPT, "finish").to_array()
+
+        from neo3.api.helpers.txbuilder import TxBuilder
+        async with noderpc.NeoRpcClient(
+                self.node.facade.rpc_host
+        ) as client:
+            builder = TxBuilder(client, script)
+            await builder.init()
+
+            from neo3.network.payloads.verification import Signer
+            builder.add_signer(sign_with_multisig_account(self.oracle_node),
+                               Signer(self.oracle_node.script_hash, verification.WitnessScope.NONE))
+            builder.add_signer(sign_with_account(self.owner),
+                               Signer(self.owner.script_hash, verification.WitnessScope.NONE))
+            await builder.set_valid_until_block()
+            builder.tx.attributes.append(oracle_response)
+            builder.tx.system_fee = 10 ** 8
+            builder.tx.network_fee = 10 ** 8 + 1234
+
+            builder.tx.witnesses = []
+
+            tx = await builder.build_and_sign()
+            tx_id = await client.send_transaction(tx)
+
+            return await client.wait_for_transaction_receipt(tx_id, retry_delay=1)
 
     async def test_get_hash(self):
         await self.set_up_contract('GetHash.py')
@@ -109,6 +141,7 @@ class TestNativeContracts(boatestcase.BoaTestCase):
                                              )
 
         self.assertEqual(1, len(oracle_requests))
+        self.assertIsInstance(oracle_requests[0].id, int)
         self.assertEqual(contract_script, oracle_requests[0].request_contract)
         self.assertEqual(test_url, oracle_requests[0].url)
         self.assertEqual(request_filter, oracle_requests[0].filter)
@@ -135,142 +168,62 @@ class TestNativeContracts(boatestcase.BoaTestCase):
         self.assertEqual(test_url, oracle_requests[0].url)
         self.assertEqual(request_filter, oracle_requests[0].filter)
 
-    def test_oracle_response(self):
-        from boa3.internal.neo3.vm import VMState
-        from boa3_test.tests.test_drive import neoxp
-        from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
-
-        path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
+    async def test_oracle_response(self):
+        await self.set_up_contract('OracleRequestCall.py')
 
         test_url = 'https://unittest.fake.url/api/0/'
         callback = 'callback_method'
-        user_data = 'Any Data Here'
+        user_data = b'Any Data Here'
         gas_for_response = 1 * 10 ** 8
 
-        OWNER = neoxp.utils.get_account_by_name('owner')
-        genesis = neoxp.utils.get_account_by_name('genesis')
-        runner.oracle_enable(genesis)
+        result, notifications = await self.call('oracle_call',
+                                                [test_url, None, callback, user_data, gas_for_response],
+                                                return_type=bool, signing_accounts=[self.owner]
+                                                )
+        oracle_request_tx = await self.get_last_tx()
+        self.assertEqual(True, result)
 
-        runner.add_gas(OWNER.address, 1000 * 10 ** 8)
+        oracle_requests = self.filter_events(notifications,
+                                             event_name='OracleRequest',
+                                             origin=self.ORACLE_SCRIPT_HASH,
+                                             notification_type=OracleRequestEvent
+                                             )
+        self.assertEqual(1, len(oracle_requests))
+        oracle_request_id = oracle_requests[0].id
 
-        invokes.append(runner.call_contract(path, 'oracle_call', test_url, None, callback, user_data, gas_for_response))
-        expected_results.append(True)
+        result, _ = await self.call('get_storage',
+                                    [],
+                                    return_type=list
+                                    )
+        self.assertEqual(['', '', 0, ''], result)
 
-        invokes.append(runner.call_contract(path, 'get_storage'))
-        expected_results.append(['', '', 0, ''])
-
-        runner.execute(account=OWNER, add_invokes_to_batch=True)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        runner.update_contracts(export_checkpoint=True)
-
-        path_json = path.replace(path.split(constants.PATH_SEPARATOR).pop(), 'OracleResponse.json')
-        response_tx_ids = runner.oracle_response(test_url, path_json)
-
+        from boa3.internal import constants
+        path_json = constants.PATH_SEPARATOR.join([self.dirname, self.default_test_folder, "OracleResponse.json"])
         with open(path_json) as f:
-            import json
-            json_data = json.loads(f.read())
+            response_data = f.read().encode('utf-8')
 
-        storage = runner.call_contract(path, 'get_storage')
-        from boa3_test.tests.test_classes.transactionattribute.oracleresponse import OracleResponseCode
+        tx_result = await self.send_response(oracle_request_id, response_data)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
+        result, notifications = await self.call('get_storage',
+                                                [],
+                                                return_type=list)
         from boa3.internal.neo.vm.type.StackItem import StackItemType
-        self.assertEqual(test_url, storage.result[0])
-        self.assertEqual(f"{(StackItemType.ByteString + len(user_data).to_bytes(1,'little')).decode()}{user_data}",
-                         storage.result[1])
-        self.assertEqual(OracleResponseCode.Success, storage.result[2])
-        self.assertEqual(json_data, json.loads(storage.result[3]))
+        self.assertEqual(4, len(result))
+        self.assertEqual(test_url, result[0])
+        self.assertEqual((StackItemType.ByteString + len(user_data).to_bytes(1, 'little') + user_data).decode('utf-8'),
+                         result[1])
+        self.assertEqual(OracleResponseCode.SUCCESS, result[2])
+        self.assertEqual(response_data.decode('utf-8'), result[3])
 
-        self.assertEqual(1, len(response_tx_ids))
-        response_tx = runner.get_transaction(response_tx_ids[0])
-        self.assertIsNotNone(response_tx)
-        self.assertTrue(hasattr(response_tx, 'attributes'))
+        oracle_response = self.filter_events(tx_result.execution.notifications,
+                                             event_name='OracleResponse',
+                                             origin=self.ORACLE_SCRIPT_HASH,
+                                             notification_type=OracleResponseEvent
+                                             )
 
-        response_tx_attr = response_tx.attributes[0].to_json()
-        self.assertEqual('OracleResponse', response_tx_attr['type'])
-        self.assertEqual(0, response_tx_attr['id'])
-        self.assertEqual('Success', response_tx_attr['code'])
-        self.assertEqual(json_data, response_tx_attr['result'])
-
-    def test_oracle_response_filter(self):
-        from boa3.internal.neo3.vm import VMState
-        from boa3_test.tests.test_drive import neoxp
-        from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
-
-        path, _ = self.get_deploy_file_paths('OracleRequestCall.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        test_url = 'https://unittest.fake.url/api/0/'
-        callback = 'callback_method'
-        user_data = 'Any Data Here'
-        gas_for_response = 1 * 10 ** 8
-
-        OWNER = neoxp.utils.get_account_by_name('owner')
-        runner.add_gas(OWNER.address, 1000 * 10 ** 8)
-        genesis = neoxp.utils.get_account_by_name('genesis')
-        runner.oracle_enable(genesis)
-
-        invokes.append(runner.call_contract(path, 'oracle_call', test_url, "$..book[-2:]", callback, user_data, gas_for_response))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'oracle_call', test_url, "$.store.book[*].author", callback, user_data, gas_for_response))
-        expected_results.append(True)
-        invokes.append(runner.call_contract(path, 'oracle_call', test_url, "$.store.*", callback, user_data, gas_for_response))
-        expected_results.append(True)
-
-        runner.execute(account=OWNER, add_invokes_to_batch=True)
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-        runner.update_contracts(export_checkpoint=True)
-
-        path_json = path.replace(path.split(constants.PATH_SEPARATOR).pop(), 'OracleResponse.json')
-        response_tx_ids = runner.oracle_response(test_url, path_json)
-
-        with open(path_json) as f:
-            import json
-            json_data = json.loads(f.read())
-
-        storage = runner.call_contract(path, 'get_storage')
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        self.assertNotEqual(['', '', '', ''], storage)
-        self.assertEqual(3, len(response_tx_ids))
-
-        # Oracle can filter Json with JsonPath,
-        # Pythons json module doesn't use JsonPath, so it needs to be done manually
-        response_tx_attributes = [runner.get_transaction(tx_id).attributes[0].to_json() for tx_id in response_tx_ids]
-
-        books_inside_json = []
-        _deep_scan(json_data, 'book', books_inside_json)
-
-        # filter used was "$..book[-2:]"
-        last_2_books_inside_book = [book
-                                    for book_list in books_inside_json
-                                    for index, book in enumerate(book_list)
-                                    if index >= len(book_list) - 2]
-        self.assertEqual(last_2_books_inside_book, response_tx_attributes[0]['result'])
-
-        # filter used was "$.store.book[*].author"
-        authors_of_books_in_store = [book['author'] for book in json_data['store']['book']]
-        self.assertEqual(authors_of_books_in_store, response_tx_attributes[1]['result'])
-
-        # filter used was "$.store.*"
-        everything_inside_store = [json_data['store'][key] for key in json_data['store']]
-        self.assertEqual(everything_inside_store, response_tx_attributes[2]['result'])
+        self.assertEqual(1, len(oracle_response))
+        self.assertEqual(oracle_request_id, oracle_response[0].id)
+        self.assertEqual(oracle_request_tx.hash(), oracle_response[0].original_tx)
 
     async def test_oracle_request_invalid_gas(self):
         await self.set_up_contract('OracleRequestCall.py')
@@ -396,8 +349,8 @@ class TestNativeContracts(boatestcase.BoaTestCase):
 
     def test_oracle_get_price_compile(self):
         expected_output = (
-            Opcode.CALLT + b'\x00\x00'
-            + Opcode.RET
+                Opcode.CALLT + b'\x00\x00'
+                + Opcode.RET
         )
 
         output, _ = self.assertCompile('OracleGetPrice.py')

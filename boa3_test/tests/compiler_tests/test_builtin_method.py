@@ -1,11 +1,11 @@
+import json
+
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.type.type import Type
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
-from boa3.internal.neo3.vm import VMState
 from boa3_test.tests import boatestcase
-from boa3_test.tests.test_drive.testrunner.boa_test_runner import BoaTestRunner
 
 
 def minimal_signed_bytes(n: int) -> int:
@@ -795,7 +795,6 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
             self.assertEqual(value.to_bytes(1, 'little', signed=True), result)
 
         for value in range(-32768, 32768, 100):
-            print(value)
             result, _ = await self.call('len_2', [value], return_type=bytes)
             self.assertEqual(value.to_bytes(2, 'little', signed=True), result)
 
@@ -854,174 +853,92 @@ class TestBuiltinMethod(boatestcase.BoaTestCase):
 
     # region print test
 
-    def test_print_int(self):
-        path, _ = self.get_deploy_file_paths('PrintInt.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_print_int(self):
+        await self.set_up_contract('PrintInt.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(1, len(runtime_logs))
+        self.assertEqual('42', runtime_logs[0].msg)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_print_str(self):
+        await self.set_up_contract('PrintStr.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invoke_logs = runner.get_logs()
-        self.assertEqual(1, len(invoke_logs))
-        self.assertEqual('42', invoke_logs[0].message)
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(1, len(runtime_logs))
+        self.assertEqual('str', runtime_logs[0].msg)
 
-    def test_print_str(self):
-        path, _ = self.get_deploy_file_paths('PrintStr.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_print_bytes(self):
+        await self.set_up_contract('PrintBytes.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(1, len(runtime_logs))
+        self.assertEqual(b'\x01\x02\x03'.decode('utf-8'), runtime_logs[0].msg)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_print_bool(self):
+        await self.set_up_contract('PrintBool.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invoke_logs = runner.get_logs()
-        self.assertEqual(1, len(invoke_logs))
-        self.assertEqual('str', invoke_logs[0].message)
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(1, len(runtime_logs))
+        self.assertEqual('true', runtime_logs[0].msg)
 
-    def test_print_bytes(self):
-        path, _ = self.get_deploy_file_paths('PrintBytes.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_print_list(self):
+        await self.set_up_contract('PrintList.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        invoke_logs = runner.get_logs()
-        self.assertEqual(1, len(invoke_logs))
-        self.assertEqual('\x01\x02\x03', invoke_logs[0].message)
-
-    def test_print_bool(self):
-        path, _ = self.get_deploy_file_paths('PrintBool.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        invoke_logs = runner.get_logs()
-        self.assertEqual(1, len(invoke_logs))
-        self.assertEqual('true', invoke_logs[0].message)
-
-    def test_print_list(self):
-        path, _ = self.get_deploy_file_paths('PrintList.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        import json
         expected_print = json.dumps([1, 2, 3, 4], separators=(',', ':'))
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(1, len(runtime_logs))
+        self.assertEqual(expected_print, runtime_logs[0].msg)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_print_user_class(self):
+        await self.set_up_contract('PrintClass.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invoke_logs = runner.get_logs()
-        self.assertEqual(1, len(invoke_logs))
-        self.assertEqual(expected_print, invoke_logs[0].message)
-
-    def test_print_user_class(self):
-        path, _ = self.get_deploy_file_paths('PrintClass.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        import json
         expected_print = json.dumps({
             'val1': 1,
             'val2': 2
         }, separators=(',', ':'))
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(1, len(runtime_logs))
+        self.assertEqual(expected_print, runtime_logs[0].msg)
 
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
+    async def test_print_many_values(self):
+        await self.set_up_contract('PrintManyValues.py')
 
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invoke_logs = runner.get_logs()
-        self.assertEqual(1, len(invoke_logs))
-        self.assertEqual(expected_print, invoke_logs[0].message)
-
-    def test_print_many_values(self):
-        path, _ = self.get_deploy_file_paths('PrintManyValues.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
-
-        invokes = []
-        expected_results = []
-
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        invoke_logs = runner.get_logs()
-        self.assertEqual(4, len(invoke_logs))
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(4, len(runtime_logs))
         for index in range(4):
-            self.assertEqual(str(index + 1), invoke_logs[index].message)
+            self.assertEqual(str(index + 1), runtime_logs[index].msg)
 
-    def test_print_no_args(self):
-        path, _ = self.get_deploy_file_paths('PrintNoArgs.py')
-        runner = BoaTestRunner(runner_id=self.method_name())
+    async def test_print_no_args(self):
+        await self.set_up_contract('PrintNoArgs.py')
 
-        invokes = []
-        expected_results = []
+        result, _ = await self.call('Main', [], return_type=None)
+        self.assertIsNone(result)
 
-        invokes.append(runner.call_contract(path, 'Main'))
-        expected_results.append(None)
-
-        runner.execute()
-        self.assertEqual(VMState.HALT, runner.vm_state, msg=runner.error)
-
-        for x in range(len(invokes)):
-            self.assertEqual(expected_results[x], invokes[x].result)
-
-        invoke_logs = runner.get_logs()
-        self.assertEqual(0, len(invoke_logs))
+        runtime_logs = self.get_runtime_logs(self.contract_hash)
+        self.assertEqual(0, len(runtime_logs))
 
     def test_print_missing_outer_function_return(self):
         self.assertCompilerLogs(CompilerError.MissingReturnStatement, 'PrintIntMissingFunctionReturn.py')

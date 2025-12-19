@@ -32,3 +32,9 @@ class RoleManagement:
         :rtype: boa3.sc.types.ECPoint
         """
         pass
+
+    @classmethod
+    def designate_as_role(cls, role: Role, nodes: list[ECPoint]):
+        """
+        """
+        pass

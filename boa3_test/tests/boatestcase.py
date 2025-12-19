@@ -24,6 +24,7 @@ from boaconstructor import (SmartContractTestCase,
                             Nep17TransferEvent as _Nep17TransferEvent,
                             PostProcessor,
                             )
+from boaconstructor.node import RuntimeLog
 from neo3.api import noderpc
 from neo3.api.noderpc import ApplicationExecution
 from neo3.api.wrappers import GenericContract
@@ -836,7 +837,7 @@ class BoaTestCase(SmartContractTestCase):
             file_path_without_ext, _ = os.path.splitext(contract_path)
 
         if USE_UNIQUE_NAME:
-            from boa3_test.test_drive import utils
+            from boa3_test.tests import utils
             file_path_without_ext = utils.create_custom_id(file_path_without_ext, use_time=False)
 
         return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
@@ -1014,3 +1015,6 @@ class BoaTestCase(SmartContractTestCase):
 
     def get_compiler_analyser(self, compiler: Compiler) -> Analyser:
         return compiler._analyser
+
+    def get_runtime_logs(self, contract_hash: types.UInt160) -> list[RuntimeLog]:
+        return [log for log in self.node.runtime_logs if log.contract == contract_hash]
