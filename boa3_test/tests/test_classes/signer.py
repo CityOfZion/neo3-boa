@@ -35,11 +35,11 @@ class Signer:
     @classmethod
     def from_json(cls, json: dict[str, Any]) -> Self:
         account_hex = json['account']
-        account = UInt160(from_hex_str(account_hex))
+        account = UInt160.from_string(account_hex)
         scopes = WitnessScope.get_from_neo_name(json['scopes']) if 'scopes' in json else WitnessScope.CalledByEntry
 
         signer = cls(account, scopes)
-        signer._allowed_contracts = ([UInt160(from_hex_str(contract_hex)) for contract_hex in json['allowedcontracts']]
+        signer._allowed_contracts = ([UInt160.from_string(contract_hex) for contract_hex in json['allowedcontracts']]
                                      if 'allowedcontracts' in json else [])
         signer._allowed_groups = ([from_hex_str(group_hex) for group_hex in json['allowedgroups']]
                                   if 'allowedgroups' in json else [])

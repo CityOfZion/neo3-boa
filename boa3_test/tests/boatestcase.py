@@ -12,11 +12,16 @@ __all__ = [
 
 import abc
 import asyncio
+import inspect
+import json
 import logging
 import os
+import pathlib
+import re
 import threading
 from dataclasses import dataclass
 from typing import Any, Callable, Optional, Protocol, TypeVar, Type, Sequence, Self, overload
+from zipfile import ZipFile
 
 from boaconstructor import (SmartContractTestCase,
                             AbortException,
@@ -25,7 +30,7 @@ from boaconstructor import (SmartContractTestCase,
                             PostProcessor,
                             )
 from boaconstructor.node import RuntimeLog
-from neo3.api import noderpc
+from neo3.api import noderpc, StackItemType
 from neo3.api.noderpc import ApplicationExecution
 from neo3.api.wrappers import GenericContract
 from neo3.contracts import manifest
@@ -34,11 +39,17 @@ from neo3.network.payloads import block, transaction
 from neo3.network.payloads.verification import Signer
 from neo3.wallet import account
 
+from boa3.boa3 import Boa3
 from boa3.internal import env, constants
 from boa3.internal.analyser.analyser import Analyser
 from boa3.internal.compiler.compiler import Compiler
+from boa3.internal.compiler.filegenerator.filegenerator import FileGenerator
 from boa3.internal.exception.CompilerError import CompilerError
 from boa3.internal.exception.CompilerWarning import CompilerWarning
+from boa3.internal.exception.NotLoadedException import NotLoadedException
+from boa3.internal.model.method import Method
+from boa3.internal.neo.contracts.neffile import NefFile
+from boa3_test.tests import utils
 from boa3_test.tests.annotation import JsonObject
 
 # type annotations
@@ -104,7 +115,6 @@ class Nep17TransferEvent(_Nep17TransferEvent):
         try:
             return super().from_notification(n)
         except ValueError:
-            from neo3.api import StackItemType
             stack = n.state.as_list()
             source = stack[0].as_uint160() if stack[0].type != StackItemType.ANY else stack[0].as_none()
             destination = stack[1].as_uint160() if stack[1].type != StackItemType.ANY else stack[1].as_none()
@@ -118,7 +128,6 @@ class Nep11TransferEvent(Nep17TransferEvent):
 
     @classmethod
     def from_notification(cls, n: noderpc.Notification) -> Self:
-        from neo3.api import StackItemType
         stack = n.state.as_list()
         source = stack[0].as_uint160() if stack[0].type != StackItemType.ANY else stack[0].as_none()
         destination = stack[1].as_uint160() if stack[1].type != StackItemType.ANY else stack[1].as_none()
@@ -322,9 +331,6 @@ class BoaTestCase(SmartContractTestCase):
             path_to_nef: str,
             signing_account: account.Account
     ) -> types.UInt160:
-
-        import inspect
-        import pathlib
 
         frame = inspect.stack()[1]
         manifest_path = (pathlib.Path(frame.filename)
@@ -610,8 +616,6 @@ class BoaTestCase(SmartContractTestCase):
             debug_info: bool = False
     ) -> dict[str, T]:
 
-        from boa3.internal.compiler.filegenerator.filegenerator import FileGenerator
-        from boa3.internal.model.method import Method
 
         generator = FileGenerator(compiler.result, compiler._analyser, compiler._entry_smart_contract)
         symbols = {}
@@ -674,8 +678,6 @@ class BoaTestCase(SmartContractTestCase):
             return self.compile_and_save(py_abs_path)
         else:
             # filter to get only the error message, without location information
-            import re
-
             result = re.search('^\\d+:\\d+ - (?P<msg>.*?)\t\\W+\\<.*?\\>', error_msg)
             try:
                 return result.group('msg')
@@ -742,7 +744,6 @@ class BoaTestCase(SmartContractTestCase):
 
         with _LOGGING_LOCK:
             with self.assertLogs() as log:
-                from boa3.internal.exception.NotLoadedException import NotLoadedException
                 try:
                     output = self.compile(path, fail_fast=fail_fast)
                 except NotLoadedException:
@@ -827,17 +828,16 @@ class BoaTestCase(SmartContractTestCase):
 
         contract_name, dir_folder, root_path = values
 
-        from os import path
-        if not path.exists(dir_folder) and root_path is env.PROJECT_ROOT_DIRECTORY:
+        if not os.path.exists(dir_folder) and root_path is env.PROJECT_ROOT_DIRECTORY:
             path_folder = constants.PATH_SEPARATOR.join((root_path, dir_folder))
-            if not path.exists(path_folder) and not dir_folder.startswith(cls.test_root_dir):
+            if not os.path.exists(path_folder) and not dir_folder.startswith(cls.test_root_dir):
                 path_folder = constants.PATH_SEPARATOR.join((root_path, cls.test_root_dir, dir_folder))
-                if not path.exists(path_folder):
+                if not os.path.exists(path_folder):
                     path_folder = constants.PATH_SEPARATOR.join((root_path, cls.default_test_folder, dir_folder))
 
             dir_folder = path_folder
         else:
-            if path.exists(dir_folder):
+            if os.path.exists(dir_folder):
                 dir_folder = os.path.abspath(dir_folder)
             else:
                 dir_folder = constants.PATH_SEPARATOR.join((root_path, dir_folder))
@@ -866,7 +866,6 @@ class BoaTestCase(SmartContractTestCase):
             file_path_without_ext, _ = os.path.splitext(contract_path)
 
         if USE_UNIQUE_NAME:
-            from boa3_test.tests import utils
             file_path_without_ext = utils.create_custom_id(file_path_without_ext, use_time=False)
 
         return f'{file_path_without_ext}.nef', f'{file_path_without_ext}.manifest.json'
@@ -906,8 +905,6 @@ class BoaTestCase(SmartContractTestCase):
             fail_fast: bool = False,
             **kwargs
     ) -> ContractScript:
-        from boa3.boa3 import Boa3
-
         with _COMPILER_LOCK:
             result = Boa3.compile(path, root_folder=root_folder, fail_fast=fail_fast,
                                   log_level=logging.getLevelName(logging.INFO),
@@ -949,8 +946,6 @@ class BoaTestCase(SmartContractTestCase):
             nef_output = nef_output.replace('.py', '.nef')
         manifest_output = nef_output.replace('.nef', '.manifest.json')
 
-        from boa3.boa3 import Boa3
-        from boa3.internal.neo.contracts.neffile import NefFile
         with _COMPILER_LOCK:
             Boa3.compile_and_save(path, output_path=nef_output, root_folder=root_folder,
                                   env=env, debug=debug,
@@ -970,7 +965,6 @@ class BoaTestCase(SmartContractTestCase):
                 output = NefFile.deserialize(file).script
 
         with open(manifest_output) as manifest_file:
-            import json
             manifest = json.loads(manifest_file.read())
 
         if change_manifest_name and manifest_name is not None:
@@ -991,9 +985,7 @@ class BoaTestCase(SmartContractTestCase):
         if not os.path.isfile(debug_info_output):
             return None
 
-        from zipfile import ZipFile
         with ZipFile(debug_info_output, 'r') as dbgnfo:
-            import json
             debug_info = json.loads(dbgnfo.read(os.path.basename(nef_output.replace('.nef', '.debug.json'))))
         return debug_info
 
@@ -1021,7 +1013,6 @@ class BoaTestCase(SmartContractTestCase):
             if not os.path.isfile(nef_output):
                 return self.compile_and_save(path, root_folder=root_folder, get_raw_nef=not deserialize)
 
-        from boa3.internal.neo.contracts.neffile import NefFile
 
         if not os.path.isfile(nef_output):
             output = bytes()
@@ -1037,7 +1028,6 @@ class BoaTestCase(SmartContractTestCase):
             manifest = {}
         else:
             with open(manifest_output) as manifest_output:
-                import json
                 manifest = json.loads(manifest_output.read())
 
         return output, manifest

@@ -16,7 +16,6 @@ class Witness:
         return self._verification_script
 
     def to_json(self) -> dict[str, Any]:
-        import base64
         return {
             'invocation': base64.b64encode(self._invocation_script).decode(),
             'verification': base64.b64encode(self._verification_script).decode()

@@ -1,6 +1,6 @@
+import time
 from typing import Any, Self
 
-from boa3.internal.neo import from_hex_str
 from boa3.internal.neo3.core.types import UInt256
 from boa3_test.tests.test_classes.transaction import Transaction
 
@@ -12,7 +12,6 @@ class Block:
         self._hash: UInt256 | None = None
         self._transactions: list[Transaction] = []
 
-        import time
         # time() returns timestamp in nanoseconds and Neo uses timestamp in milliseconds
         self._timestamp: int = int(time.time_ns() / 1_000_000)
         self._index: int = index
@@ -80,7 +79,7 @@ class Block:
         block._transactions = [Transaction.from_json(js) for js in tx_json]
 
         if 'hash' in json and isinstance(json['hash'], str):
-            block._hash = UInt256(from_hex_str(json['hash']))
+            block._hash = UInt256.from_string(json['hash'])
         else:
             block._hash = None
 

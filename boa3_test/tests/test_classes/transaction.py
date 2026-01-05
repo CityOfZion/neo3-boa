@@ -1,6 +1,7 @@
+import base64
 from typing import Any, Self
 
-from boa3.internal.neo import from_hex_str
+from boa3.internal.neo.vm.type.String import String
 from boa3.internal.neo3.core.types import UInt256
 from boa3.internal.neo3.vm import VMState, vmstate
 from boa3_test.tests.test_classes import transactionattribute as tx_attribute
@@ -18,9 +19,6 @@ class Transaction:
         self._attributes: list[tx_attribute.TransactionAttribute] = []
         self._state: VMState = VMState.NONE
 
-    def __new__(cls, *args, **kwargs):
-        return super().__new__(cls)
-
     def add_attribute(self, tx_attr: tx_attribute.TransactionAttribute):
         if tx_attr not in self._attributes:
             self._attributes.append(tx_attr)
@@ -37,8 +35,6 @@ class Transaction:
         return self._state
 
     def to_json(self) -> dict[str, Any]:
-        import base64
-        from boa3.internal.neo.vm.type.String import String
         json = {
             'signers': [signer.to_json() for signer in self._signers],
             'witnesses': [witness.to_json() for witness in self._witnesses],
@@ -51,10 +47,8 @@ class Transaction:
 
     @classmethod
     def from_json(cls, json: dict[str, Any]) -> Self:
-        import base64
-
         if 'hash' in json and isinstance(json['hash'], str):
-            tx_hash = UInt256(from_hex_str(json['hash']))
+            tx_hash = UInt256.from_string(json['hash'])
         else:
             tx_hash = UInt256.zero()
 
@@ -84,12 +78,6 @@ class Transaction:
             tx._witnesses = [Witness.from_json(js) for js in witnesses_json]
         else:
             tx._witnesses = []
-
-        # if 'attributes' in json:
-        #     attributes_json = json['attributes']
-        #     if not isinstance(attributes_json, list):
-        #         attributes_json = [attributes_json]
-        #     tx._attributes = [tx_attribute.TransactionAttribute.from_json(js) for js in attributes_json]
 
         if 'state' in json and isinstance(json['state'], str):
             tx._state = vmstate.get_vm_state(json['state'])
