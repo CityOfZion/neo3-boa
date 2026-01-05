@@ -16,7 +16,7 @@ import logging
 import os
 import threading
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Protocol, TypeVar, Type, Sequence, Self
+from typing import Any, Callable, Optional, Protocol, TypeVar, Type, Sequence, Self, overload
 
 from boaconstructor import (SmartContractTestCase,
                             AbortException,
@@ -247,6 +247,35 @@ class BoaTestCase(SmartContractTestCase):
             signing_account = cls.genesis
 
         return await cls.deploy(nef_abs_path, signing_account)
+
+    @overload
+    @classmethod
+    async def call(
+            cls,
+            method: str,
+            args: Optional[list] = None,
+            *,
+            return_type: None,
+            signing_accounts: Optional[Sequence[account.Account]] = None,
+            signers: Optional[Sequence[Signer]] = None,
+            target_contract: Optional[types.UInt160] = None,
+    ) -> tuple[None, list[noderpc.Notification]]:
+        ...
+
+    @overload
+    @classmethod
+    async def call(
+            cls,
+            method: str,
+            args: Optional[list] = None,
+            *,
+            return_type: Type[T],
+            signing_accounts: Optional[Sequence[account.Account]] = None,
+            signers: Optional[Sequence[Signer]] = None,
+            target_contract: Optional[types.UInt160] = None,
+    ) -> tuple[T, list[noderpc.Notification]]:
+        ...
+
 
     @classmethod
     async def call(
