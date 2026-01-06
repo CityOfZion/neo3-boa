@@ -156,6 +156,7 @@ class Interop:
 
     # Role Interops
     GetDesignatedByRole = GetDesignatedByRoleMethod()
+    DesignateAsRole = DesignateAsRoleMethod()
 
     # Runtime Interops
     AddressVersion = AddressVersionProperty()

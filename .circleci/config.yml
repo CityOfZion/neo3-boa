@@ -39,31 +39,8 @@ jobs:
             python -c "import hashlib;print(hashlib.new('ripemd160'))"
 
       - run:
-          name: Install Dependencies
-          command: |
-            sudo add-apt-repository ppa:dotnet/backports -y
-            sudo apt update
-
-            sudo apt-get install -y apt-transport-https
-            wget https://packages.microsoft.com/config/debian/10/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
-            sudo dpkg -i packages-microsoft-prod.deb
-            sudo apt update
-
-            sudo apt remove dotnet* aspnetcore* netstandard*
-            sudo rm /etc/apt/sources.list.d/microsoft-prod.list
-            sudo apt update && \
-              sudo apt-get install -y dotnet-sdk-6.0
-
-            sudo apt install libsnappy-dev libc6-dev librocksdb-dev -y
-            dotnet tool install Neo.Express --version 3.5.20 -g
-            dotnet tool install Neo.Test.Runner --version 3.5.17 -g
-
-      - run:
           name: Test
           command: |
-            export DOTNET_TOOL_PATH="$HOME/.dotnet/tools"
-            export PATH="$PATH:$DOTNET_TOOL_PATH"
-            
             coverage run boa3_test/tests/run_unit_tests.py
             pip install coveralls
             coveralls --service=circleci

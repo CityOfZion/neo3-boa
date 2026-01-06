@@ -76,5 +76,6 @@ if __name__ == "main":
 
 # Testing
 
-There is more than one way to test your smart contract, e.g., deploying your contract at Neo's TestNet, but I'd argue 
-that the quickest way to test would be using the NeoTestRunner. Check this [section](../../README.md#neotestrunner) on the project README.
+There is more than one way to test your smart contract, e.g., deploying your contract at Neo's TestNet, but the quickest
+way to test would be using [boa-test-constructor](https://github.com/CityOfZion/boa-test-constructor). 
+Check the official repository to see some [examples](https://github.com/CityOfZion/boa-test-constructor/tree/master/examples).

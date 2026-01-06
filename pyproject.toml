@@ -31,7 +31,7 @@ dev = [
     'twine>=1.10.0',
 ]
 test = [
-    'boa-test-constructor>=0.5.2',
+    'boa-test-constructor>=0.6.0',
 ]
 docs = [
     'autodocsumm>=0.2.12',
@@ -54,7 +54,6 @@ exclude = ['boa3_test.tests.*_tests*']
 include = [
     'boa3', 'boa3.*',
     'boa3_test',
-    'boa3_test.test_drive', 'boa3_test.test_drive.*'
 ]
 
 [tool.setuptools.package-data]

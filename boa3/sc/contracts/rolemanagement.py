@@ -32,3 +32,16 @@ class RoleManagement:
         :rtype: boa3.sc.types.ECPoint
         """
         pass
+
+    @classmethod
+    def designate_as_role(cls, role: Role, nodes: list[ECPoint]):
+        """
+        Designate the role of a node list.
+        Can only be used by Neo's committee.
+
+        :param role: the type of the role
+        :type role: boa3.sc.type.Role
+        :param nodes: a list of public keys of the nodes
+        :type nodes: list
+        """
+        pass

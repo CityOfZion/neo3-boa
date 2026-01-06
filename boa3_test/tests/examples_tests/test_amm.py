@@ -7,8 +7,8 @@ from neo3.core import types
 from neo3.network.payloads import verification
 
 from boa3.internal import constants
-from boa3_test.test_drive.model.wallet.account import Account
 from boa3_test.tests import boatestcase
+from boa3_test.tests.test_classes.account import Account
 
 
 @dataclass

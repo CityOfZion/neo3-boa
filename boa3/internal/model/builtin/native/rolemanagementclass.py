@@ -20,7 +20,8 @@ class RoleManagementClass(INativeContractClass):
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'get_designated_by_role': Interop.GetDesignatedByRole
+                'designate_as_role': Interop.DesignateAsRole,
+                'get_designated_by_role': Interop.GetDesignatedByRole,
             }
         return super().class_methods
 
