@@ -311,3 +311,6 @@ class TestLedgerContract(boatestcase.BoaTestCase):
 
         result, _ = await self.call('get_transaction_count', [], return_type=int)
         self.assertEqual(len(self.genesis_block.transactions), result)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')

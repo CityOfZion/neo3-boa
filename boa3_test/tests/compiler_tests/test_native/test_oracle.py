@@ -385,3 +385,6 @@ class TestOracleContract(boatestcase.BoaTestCase):
         for oracle_response_code in OracleResponseCode:
             result, _ = await self.call('main', [oracle_response_code], return_type=int)
             self.assertEqual(~oracle_response_code, result)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')
