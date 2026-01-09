@@ -404,3 +404,6 @@ class TestCryptoLibClass(boatestcase.BoaTestCase):
         public_key = bytes.fromhex('03414549fd05bfb7803ae507ff86b99becd36f8d66037a7f5ba612792841d42eb9')
         result, _ = await self.call('main', [message_hash, signature], return_type=bytes)
         self.assertEqual(public_key, result)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')

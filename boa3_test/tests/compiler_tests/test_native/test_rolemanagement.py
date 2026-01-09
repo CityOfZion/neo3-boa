@@ -84,3 +84,6 @@ class TestRoleManagementClass(boatestcase.BoaTestCase):
 
         output, _ = self.assertCompile('ImportScContractsRoleManagement.py')
         self.assertEqual(expected_output, output)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')

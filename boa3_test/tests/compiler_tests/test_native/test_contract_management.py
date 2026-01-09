@@ -283,3 +283,6 @@ class TestContractManagementContract(boatestcase.BoaTestCase):
         self.assertEqual(gas_contract_id, result[0])  # contract id
         self.assertEqual(0, result[1])  # update counter
         self.assertEqual(types.UInt160(constants.GAS_SCRIPT), result[2])  # contract hash
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')

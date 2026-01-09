@@ -178,3 +178,6 @@ class TestGasClass(boatestcase.BoaTestCase):
         no_balance = types.UInt160.zero()
         result, _ = await self.call('main', [no_balance], return_type=int)
         self.assertEqual(0, result)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')

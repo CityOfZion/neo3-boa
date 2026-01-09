@@ -682,3 +682,6 @@ class TestStdlibClass(boatestcase.BoaTestCase):
         string = '😀'
         result, _ = await self.call('main', [string], return_type=int)
         self.assertEqual(len(string), result)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')

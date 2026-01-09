@@ -160,3 +160,6 @@ class TestPolicyContract(boatestcase.BoaTestCase):
 
         result, _ = await self.call('main', [], return_type=int)
         self.assertIsInstance(result, int)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')

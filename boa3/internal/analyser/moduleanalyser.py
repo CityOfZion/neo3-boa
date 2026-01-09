@@ -14,9 +14,11 @@ from boa3.internal.analyser.model.optimizer import UndefinedType
 from boa3.internal.analyser.model.symbolscope import SymbolScope
 from boa3.internal.exception import CompilerError, CompilerWarning
 from boa3.internal.model.builtin.builtin import Builtin
+from boa3.internal.model.builtin.builtinproperty import IBuiltinProperty
 from boa3.internal.model.builtin.compile_time.neometadatatype import MetadataTypeSingleton
 from boa3.internal.model.builtin.decorator import ContractDecorator
 from boa3.internal.model.builtin.decorator.builtindecorator import IBuiltinDecorator
+from boa3.internal.model.builtin.interop.contractgethashmethod import ContractGetHashMethod
 from boa3.internal.model.builtin.interop.runtime import ScriptContainerProperty
 from boa3.internal.model.builtin.interop.runtime import NotifyMethod
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
@@ -1111,6 +1113,13 @@ class ModuleAnalyser(IAstAnalyser, ast.NodeVisitor):
         return_type = var_type
         for target in targets:
             var_id = self.visit(target)
+
+            if isinstance(var_id, IBuiltinProperty) and isinstance(var_id.getter, ContractGetHashMethod):
+                self._log_error(
+                    CompilerError.NotSupportedOperation(assign.lineno, assign.col_offset,
+                                                        'Can not change contract script hash')
+                )
+
             if not isinstance(var_id, ISymbol):
                 return_type = self.assign_value(var_id, var_type,
                                                 source_node=assign,

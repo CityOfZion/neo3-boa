@@ -590,3 +590,6 @@ class TestNeoClass(boatestcase.BoaTestCase):
         register_price = await self.get_register_price()
         result, _ = await self.call('main', [], return_type=int)
         self.assertEqual(register_price, result)
+
+    def test_overwrite_hash(self):
+        self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')
