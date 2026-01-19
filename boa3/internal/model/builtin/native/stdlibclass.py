@@ -31,6 +31,8 @@ class StdLibClass(INativeContractClass):
                 'base58_encode': Interop.Base58Encode,
                 'base58_check_decode': Interop.Base58CheckDecode,
                 'base58_check_encode': Interop.Base58CheckEncode,
+                'hex_decode': stdlib.HexDecodeMethod(),
+                'hex_encode': stdlib.HexEncodeMethod(),
                 'itoa': Interop.Itoa,
                 'atoi': Interop.Atoi,
                 'memory_compare': Interop.MemoryCompare,

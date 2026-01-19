@@ -252,6 +252,36 @@ class StdLib:
         pass
 
     @classmethod
+    def hex_decode(cls, hex_string: str) -> bytes:
+        """
+        Converts a hexadecimal string representation to its bytes value.
+
+        >>> StdLib.hex_decode('00010203')
+        b'\x00\x01x\x02\x03'
+
+        :param hex_string: hexadecimal string to be converted
+        :type hex_string: str
+        :return: the bytes value represented by the hexadecimal string
+        :rtype: bytes
+        """
+        pass
+
+    @classmethod
+    def hex_encode(cls, bytes_: bytes) -> str:
+        """
+        Converts a bytes value to its hexadecimal string representation.
+
+        >>> StdLib.hex_encode(b'\x00\x01x\x02\x03')
+        '00010203'
+
+        :param bytes_: bytes value to be converted
+        :type bytes_: bytes
+        :return: the hexadecimal string representation of the bytes value
+        :rtype: str
+        """
+        pass
+
+    @classmethod
     def memory_compare(cls, mem1: bytes | str, mem2: bytes | str) -> int:
         """
         Compares a memory with another one.

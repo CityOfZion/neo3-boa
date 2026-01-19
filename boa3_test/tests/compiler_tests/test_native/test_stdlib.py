@@ -1,7 +1,9 @@
 import json
+import unittest
 
 from boa3.internal import constants
 from boa3.internal.exception import CompilerError
+from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.StackItem import StackItemType, serialize
 from boa3.internal.neo.vm.type.String import String
 from boa3_test.tests import boatestcase
@@ -685,3 +687,43 @@ class TestStdlibClass(boatestcase.BoaTestCase):
 
     def test_overwrite_hash(self):
         self.assertCompilerLogs(CompilerError.NotSupportedOperation, 'CompilerErrorOverwriteHash.py')
+
+    def test_hex_decode_compile(self):
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x00\x01'
+                + Opcode.LDARG0
+                + Opcode.CALLT + b'\x00\x00'
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('HexDecode.py')
+        self.assertEqual(expected_output, output)
+
+    @unittest.skip("Can not test without a Neo 3.9 node")
+    async def test_hex_decode(self):
+        await self.set_up_contract('HexDecode.py')
+
+        value = '00010203'
+        result, _ = await self.call('main', [value], return_type=bytes)
+        self.assertEqual(bytes.fromhex(value), result)
+
+    def test_hex_encode_compile(self):
+        expected_output = (
+                Opcode.INITSLOT
+                + b'\x00\x01'
+                + Opcode.LDARG0
+                + Opcode.CALLT + b'\x00\x00'
+                + Opcode.RET
+        )
+
+        output, _ = self.assertCompile('HexEncode.py')
+        self.assertEqual(expected_output, output)
+
+    @unittest.skip("Can not test without a Neo 3.9 node")
+    async def test_hex_encode(self):
+        await self.set_up_contract('HexEncode.py')
+
+        value = b'\x00\x01\x02\x03'
+        result, _ = await self.call('main', [value], return_type=str)
+        self.assertEqual(value.hex(), result)
