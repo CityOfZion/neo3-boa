@@ -700,7 +700,6 @@ class TestStdlibClass(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('HexDecode.py')
         self.assertEqual(expected_output, output)
 
-    @unittest.skip("Can not test without a Neo 3.9 node")
     async def test_hex_decode(self):
         await self.set_up_contract('HexDecode.py')
 
@@ -720,7 +719,6 @@ class TestStdlibClass(boatestcase.BoaTestCase):
         output, _ = self.assertCompile('HexEncode.py')
         self.assertEqual(expected_output, output)
 
-    @unittest.skip("Can not test without a Neo 3.9 node")
     async def test_hex_encode(self):
         await self.set_up_contract('HexEncode.py')
 
