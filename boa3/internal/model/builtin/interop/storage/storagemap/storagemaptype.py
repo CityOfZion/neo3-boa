@@ -58,7 +58,8 @@ class StorageMapType(ClassArrayType):
     def instance_methods(self) -> dict[str, Method]:
         # avoid recursive import
         if len(self._instance_methods) == 0:
-            from boa3.internal.model.builtin.interop.storage.storagemap.storagemapdeletemethod import StorageMapDeleteMethod
+            from boa3.internal.model.builtin.interop.storage.storagemap.storagemapdeletemethod import \
+                StorageMapDeleteMethod
             from boa3.internal.model.builtin.interop.storage.storagemap.storagemapgetmethod import StorageMapGetMethod
             from boa3.internal.model.builtin.interop.storage.storagemap.storagemapputmethod import StorageMapPutMethod
 

@@ -1,52 +1,44 @@
-import ast
 from collections.abc import Iterable, Sized
 from typing import Any
 
-from boa3.internal.model import set_internal_call
 from boa3.internal.model.builtin.interop.interopmethod import InteropMethod
+from boa3.internal.model.builtin.interop.iterator import IteratorType
 from boa3.internal.model.builtin.interop.storage import FindOptionsType
+from boa3.internal.model.builtin.interop.storage.neostorageinterop import NeoStorageInterop, StorageContextFind, \
+    StorageLocalFind
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.expression import IExpression
 from boa3.internal.model.type.itype import IType
+from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
 
 
 class StorageFindMethod(InteropMethod):
 
-    def __init__(self, find_options_type: FindOptionsType, prefix_type: IType = None):
-        from boa3.internal.model.type.type import Type
-        from boa3.internal.model.builtin.interop.storage.storagecontext.storagecontexttype import StorageContextType
+    def __init__(self, find_options_type: FindOptionsType, prefix_type: IType = None,
+                 storage_interop: NeoStorageInterop = None):
+
+        if storage_interop is None:
+            self._storage_interop = StorageContextFind()
+        else:
+            self._storage_interop = storage_interop
 
         identifier = 'find'
-        syscall = 'System.Storage.Find'
-        context_type = StorageContextType.build()
+        syscall = self._storage_interop.syscall_name()
 
         if prefix_type is None:
             prefix_type = Type.bytes
 
-        args: dict[str, Variable] = {'prefix': Variable(prefix_type),
-                                     'context': Variable(context_type),
-                                     'options': Variable(find_options_type)}
-
-        from boa3.internal.model.builtin.interop.iterator import IteratorType
         return_type = IteratorType.build(Type.dict.build([prefix_type,  # return an Iterator[prefix, bytes]
                                                           Type.bytes]))
 
-        from boa3.internal.model.builtin.interop.storage.storagegetcontextmethod import StorageGetContextMethod
-        default_id = StorageGetContextMethod(context_type).identifier
-        context_default = set_internal_call(ast.parse("{0}()".format(default_id)
-                                                      ).body[0].value)
-        options_default = set_internal_call(ast.parse("{0}.{1}".format(find_options_type.identifier,
-                                                                       find_options_type.default_value.name)
-                                                      ).body[0].value)
-
-        defaults = [context_default, options_default]
+        args, defaults = self._storage_interop.args_default(prefix_type, find_options_type)
 
         super().__init__(identifier, syscall, args, defaults=defaults, return_type=return_type)
 
     @property
     def identifier(self) -> str:
-        return '-{0}_{1}'.format(self._identifier, self.prefix_arg.type.identifier)
+        return self._storage_interop.new_identifier(self._identifier, self.prefix_arg.type.identifier)
 
     def validate_parameters(self, *params: IExpression) -> bool:
         if any(not isinstance(param, IExpression) for param in params):
@@ -69,14 +61,8 @@ class StorageFindMethod(InteropMethod):
         :return: Index order for code generation
         """
         indexes = super().generation_order
-        context_index = list(self.args).index('context')
 
-        if indexes[-1] != context_index:
-            # context must be the last generated argument
-            indexes.remove(context_index)
-            indexes.append(context_index)
-
-        return indexes
+        return self._storage_interop.change_generation_order(indexes, self.args)
 
     @property
     def prefix_arg(self) -> Variable:
@@ -94,16 +80,13 @@ class StorageFindMethod(InteropMethod):
             exp = [exp if isinstance(exp, IExpression) else Variable(exp)
                    for exp in value if isinstance(exp, (IExpression, IType))]
 
-        elif isinstance(exp, (IExpression, IType)):
-            exp = [value if isinstance(value, IExpression) else Variable(value)]
-        else:
-            return self
-
         if not self.validate_parameters(*exp):
             return self
 
         method = self
         prefix_type: IType = exp[0].type
+        if len(exp) == 1:
+            return StorageFindMethod(self.options_arg.type, prefix_type, StorageLocalFind())
         if type(method.prefix_arg.type) != type(prefix_type):
             method = StorageFindMethod(self.options_arg.type, prefix_type)
         return method
