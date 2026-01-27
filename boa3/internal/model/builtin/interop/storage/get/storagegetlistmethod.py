@@ -1,17 +1,22 @@
+from typing import Any, Sized, Iterable
+
 from boa3.internal.model.builtin.interop.storage.get.istoragegetmethod import IStorageGetMethod
+from boa3.internal.model.builtin.interop.storage.neostorageinterop import StorageLocalGet
+from boa3.internal.model.builtin.method import IBuiltinMethod
+from boa3.internal.model.expression import IExpression
+from boa3.internal.model.type.itype import IType
+from boa3.internal.model.type.type import Type
+from boa3.internal.model.variable import Variable
 
 
 class StorageGetListMethod(IStorageGetMethod):
-    def __init__(self):
-        from boa3.internal.model.type.type import Type
-
+    def __init__(self, storage_interop=None):
         identifier = 'get_list'
         value_type = Type.list
 
-        super().__init__(identifier, value_type=value_type)
+        super().__init__(identifier, value_type=value_type, storage_interop=storage_interop)
 
     def generate_default_value_opcodes(self, code_generator):
-        from boa3.internal.model.type.type import Type
         # default_value = []
         code_generator.convert_new_empty_array(0, Type.list)
 
@@ -20,3 +25,16 @@ class StorageGetListMethod(IStorageGetMethod):
 
         converter = Interop.Deserialize
         code_generator.convert_builtin_method_call(converter, is_internal=True)
+
+    def build(self, value: Any) -> IBuiltinMethod:
+        exp: list[IExpression] = []
+        if isinstance(value, Sized):
+            if not isinstance(value, Iterable):
+                return self
+            exp = [exp if isinstance(exp, IExpression) else Variable(exp)
+                   for exp in value if isinstance(exp, (IExpression, IType))]
+
+        if len(exp) == 1:
+            return StorageGetListMethod(StorageLocalGet())
+        else:
+            return self

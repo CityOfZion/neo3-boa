@@ -2,6 +2,11 @@ from boaconstructor import storage
 from neo3.api import StackItemType
 
 from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.builtin.interop.interop import Interop
+from boa3.internal.model.builtin.interop.storage import StorageGetBytesMethod, StoragePutBytesMethod, StorageFindMethod, \
+    StorageDeleteMethod
+from boa3.internal.model.builtin.interop.storage.neostorageinterop import StorageLocalGet, StorageLocalPut, \
+    StorageLocalFind, StorageLocalDelete
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.String import String
@@ -17,6 +22,9 @@ class TestStorage(boatestcase.BoaTestCase):
     storage_get_hash = Interop.StorageGet.interop_method_hash
     storage_put_hash = Interop.StoragePut.interop_method_hash
     storage_delete_hash = Interop.StorageDelete.interop_method_hash
+    storage_local_get_hash = StorageGetBytesMethod(StorageLocalGet()).interop_method_hash
+    storage_local_put_hash = StoragePutBytesMethod(StorageLocalPut()).interop_method_hash
+    storage_local_delete_hash = StorageDeleteMethod(StorageLocalDelete()).interop_method_hash
 
     def test_storage_get_bytes_key_compile(self):
         expected_output = (
@@ -25,9 +33,7 @@ class TestStorage(boatestcase.BoaTestCase):
                 + b'\x01'
                 + Opcode.LDARG0
                 + Opcode.SYSCALL
-                + self.storage_get_context_hash
-                + Opcode.SYSCALL
-                + self.storage_get_hash
+                + self.storage_local_get_hash
                 + Opcode.DUP
                 + Opcode.ISNULL
                 + Opcode.JMPIFNOT
@@ -158,9 +164,7 @@ class TestStorage(boatestcase.BoaTestCase):
                 + Opcode.PUSHINT8 + value
                 + Opcode.LDARG0
                 + Opcode.SYSCALL
-                + self.storage_get_context_hash
-                + Opcode.SYSCALL
-                + self.storage_put_hash
+                + self.storage_local_put_hash
                 + Opcode.RET
         )
 
@@ -206,9 +210,7 @@ class TestStorage(boatestcase.BoaTestCase):
                 + value
                 + Opcode.LDARG0
                 + Opcode.SYSCALL
-                + self.storage_get_context_hash
-                + Opcode.SYSCALL
-                + self.storage_put_hash
+                + self.storage_local_put_hash
                 + Opcode.RET
         )
 
@@ -261,9 +263,7 @@ class TestStorage(boatestcase.BoaTestCase):
                 + b'\x01'
                 + Opcode.LDARG0
                 + Opcode.SYSCALL
-                + self.storage_get_context_hash
-                + Opcode.SYSCALL
-                + self.storage_delete_hash
+                + self.storage_local_delete_hash
                 + Opcode.RET
         )
 
@@ -884,3 +884,182 @@ class TestStorage(boatestcase.BoaTestCase):
         for find_option in FindOptions:
             result, _ = await self.call('main', [find_option], return_type=int)
             self.assertEqual(~find_option, result)
+
+    async def test_get_local_interop_vs_context_compile(self):
+        storage_get_hash = StorageGetBytesMethod().interop_method_hash
+
+        storage_local_get_opcode = (
+                Opcode.SYSCALL
+                + self.storage_local_get_hash
+        )
+
+        storage_context_get_opcode = (
+                Opcode.SYSCALL
+                + storage_get_hash
+        )
+
+        output, _ = self.assertCompile('GetLocalInteropVsContext.py')
+        number_of_times_get_is_called = 10
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_local_get_opcode))
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_context_get_opcode))
+
+    async def test_get_local_interop_vs_context(self):
+        await self.set_up_contract('GetLocalInteropVsContext.py')
+
+        result, _ = await self.call('get_bytes_local', [b'data1'], return_type=bytes)
+        self.assertEqual(b"fizz", result)
+
+        result, _ = await self.call('get_bytes_context', [b'data1'], return_type=bytes)
+        self.assertEqual(b"fizz", result)
+
+        result, _ = await self.call('get_bytes_local', [b'data2'], return_type=bytes)
+        self.assertEqual(b"buzz", result)
+
+        result, _ = await self.call('get_bytes_context', [b'data2'], return_type=bytes)
+        self.assertEqual(b"buzz", result)
+
+    async def test_try_get_local_interop_vs_context_compile(self):
+        storage_get_hash = StorageGetBytesMethod().interop_method_hash
+        self.assertNotEqual(storage_get_hash, self.storage_local_get_hash)
+
+        storage_local_get_opcode = (
+                Opcode.SYSCALL
+                + self.storage_local_get_hash
+        )
+
+        storage_context_get_opcode = (
+                Opcode.SYSCALL
+                + storage_get_hash
+        )
+
+        output, _ = self.assertCompile('TryGetLocalInteropVsContext.py')
+        number_of_times_get_is_called = 10
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_local_get_opcode))
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_context_get_opcode))
+
+    async def test_try_get_local_interop_vs_context(self):
+        await self.set_up_contract('TryGetLocalInteropVsContext.py')
+
+        result, _ = await self.call('try_get_bytes_local', [b'data1'], return_type=tuple[bytes, bool])
+        self.assertEqual((b"fizz", True), result)
+
+        result, _ = await self.call('try_get_bytes_context', [b'data1'], return_type=tuple[bytes, bool])
+        self.assertEqual((b"fizz", True), result)
+
+        result, _ = await self.call('try_get_bytes_local', [b'data2'], return_type=tuple[bytes, bool])
+        self.assertEqual((b"buzz", True), result)
+
+        result, _ = await self.call('try_get_bytes_context', [b'data2'], return_type=tuple[bytes, bool])
+        self.assertEqual((b"buzz", True), result)
+
+    async def test_put_local_interop_vs_context_compile(self):
+        storage_put_hash = StoragePutBytesMethod().interop_method_hash
+        self.assertNotEqual(storage_put_hash, self.storage_local_put_hash)
+
+        storage_local_put_opcode = (
+                Opcode.SYSCALL
+                + self.storage_local_put_hash
+        )
+
+        storage_context_put_opcode = (
+                Opcode.SYSCALL
+                + storage_put_hash
+        )
+
+        output, _ = self.assertCompile('PutLocalInteropVsContext.py')
+        number_of_times_get_is_called = 10
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_context_put_opcode))
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_local_put_opcode))
+
+    async def test_put_local_interop_vs_context(self):
+        await self.set_up_contract('PutLocalInteropVsContext.py')
+
+        result, _ = await self.call('put_bytes_local', [b'key1', b'data1'], return_type=None,
+                                    signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result, _ = await self.call('put_bytes_context', [b'key2', b'data2'], return_type=None,
+                                    signing_accounts=[self.genesis])
+        self.assertIsNone(result)
+
+        result1, _ = await self.call('get_value', [b'key1'], return_type=bytes)
+        result2, _ = await self.call('get_value', [b'key2'], return_type=bytes)
+        self.assertEqual(b"data1", result1)
+        self.assertEqual(b"data2", result2)
+
+    async def test_find_local_interop_vs_context_compile(self):
+        storage_find_hash = StorageFindMethod(Interop.FindOptionsType).interop_method_hash
+        storage_local_find_hash = StorageFindMethod(Interop.FindOptionsType,
+                                                    storage_interop=StorageLocalFind()).interop_method_hash
+        self.assertNotEqual(storage_find_hash, storage_local_find_hash)
+
+        storage_local_find_opcode = (
+                Opcode.SYSCALL
+                + storage_local_find_hash
+        )
+
+        storage_context_find_opcode = (
+                Opcode.SYSCALL
+                + storage_find_hash
+        )
+
+        output, _ = self.assertCompile('FindLocalInteropVsContext.py')
+        number_of_times_get_is_called = 1
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_local_find_opcode))
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_context_find_opcode))
+
+    async def test_find_local_interop_vs_context(self):
+        await self.set_up_contract('FindLocalInteropVsContext.py')
+
+        expected_results = [
+            ['data1', "fizz"],
+            ['data2', "buzz"],
+            ['data3', "unit"],
+            ['data4', "test"]
+        ]
+        result_local, _ = await self.call('find_local', [b'data'], return_type=list)
+        self.assertEqual(expected_results, result_local)
+
+        result_context, _ = await self.call('find_context', [b'data'], return_type=list)
+        self.assertEqual(expected_results, result_context)
+
+        self.assertEqual(result_context, result_local)
+
+    async def test_delete_local_interop_vs_context_compile(self):
+        storage_delete_hash = StorageDeleteMethod().interop_method_hash
+        self.assertNotEqual(storage_delete_hash, self.storage_local_delete_hash)
+
+        storage_local_delete_opcode = (
+                Opcode.SYSCALL
+                + self.storage_local_delete_hash
+        )
+
+        storage_context_delete_opcode = (
+                Opcode.SYSCALL
+                + storage_delete_hash
+        )
+
+        output, _ = self.assertCompile('DeleteLocalInteropVsContext.py')
+        number_of_times_get_is_called = 1
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_local_delete_opcode))
+        self.assertEqual(number_of_times_get_is_called, output.count(storage_context_delete_opcode))
+
+    async def test_delete_local_interop_vs_context(self):
+        await self.set_up_contract('DeleteLocalInteropVsContext.py')
+
+        result1, _ = await self.call('get_value', [b'data1'], return_type=bytes)
+        result2, _ = await self.call('get_value', [b'data2'], return_type=bytes)
+        self.assertEqual(b"fizz", result1)
+        self.assertEqual(b"buzz", result2)
+
+        result_local, _ = await self.call('delete_local', [b'data1'], return_type=None,
+                                          signing_accounts=[self.genesis])
+        self.assertIsNone(result_local)
+        result1, _ = await self.call('get_value', [b'data1'], return_type=bytes)
+        self.assertEqual(b"", result1)
+
+        result_context, _ = await self.call('delete_context', [b'data2'], return_type=None,
+                                            signing_accounts=[self.genesis])
+        self.assertIsNone(result_context)
+        result1, _ = await self.call('get_value', [b'data2'], return_type=bytes)
+        self.assertEqual(b"", result1)
