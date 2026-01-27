@@ -45,7 +45,7 @@ class TestPolicyContract(boatestcase.BoaTestCase):
 
         with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [19999999], return_type=int)
-        self.assertRegex(str(context.exception), 'bigint does not fit into uint8')
+        self.assertRegex(str(context.exception), 'bigint is not in uint8 range')
 
         with self.assertRaises(boatestcase.FaultException) as context:
             await self.call('main', [20], return_type=int)
