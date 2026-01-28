@@ -24,6 +24,18 @@ class BytesType(IByteStringType):
     def default_value(self) -> Any:
         return bytes()
 
+    def _init_class_symbols(self):
+        super()._init_class_symbols()
+
+        from boa3.internal.model.builtin.builtin import Builtin
+
+        instance_methods = [Builtin.BytesFromHex,
+                            Builtin.BytesHex,
+                            ]
+
+        for instance_method in instance_methods:
+            self._instance_methods[instance_method.identifier] = instance_method.build(self)
+
     @classmethod
     def build(cls, value: Any) -> IType:
         from boa3.internal.model.type.type import Type

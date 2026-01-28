@@ -6,6 +6,8 @@ __all__ = ['AppendMethod',
            'CountSequencePrimitiveMethod',
            'CountStrMethod',
            'ExtendMethod',
+           'FromHexMethod',
+           'HexMethod',
            'IndexBytesStringMethod',
            'IndexSequenceMethod',
            'InsertMethod',
@@ -35,6 +37,8 @@ from boa3.internal.model.builtin.classmethod.countsequencegenericmethod import C
 from boa3.internal.model.builtin.classmethod.countsequenceprimitivemethod import CountSequencePrimitiveMethod
 from boa3.internal.model.builtin.classmethod.countstrmethod import CountStrMethod
 from boa3.internal.model.builtin.classmethod.extendmethod import ExtendMethod
+from boa3.internal.model.builtin.classmethod.fromhexmethod import FromHexMethod
+from boa3.internal.model.builtin.classmethod.hexmethod import HexMethod
 from boa3.internal.model.builtin.classmethod.indexbytesstringmethod import IndexBytesStringMethod
 from boa3.internal.model.builtin.classmethod.indexsequencemethod import IndexSequenceMethod
 from boa3.internal.model.builtin.classmethod.insertmethod import InsertMethod
