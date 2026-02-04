@@ -1,5 +1,6 @@
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.builtin.native.nativecontract import NativeContract
+from boa3.internal.model.operation.binaryop import BinaryOp
 from boa3.internal.model.operation.unaryop import UnaryOp
 from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
@@ -21,7 +22,6 @@ class FromHexMethod(IBuiltinMethod):
 
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
-        from boa3.internal.model.operation.binaryop import BinaryOp
 
         # go over the string and check if there are any " " characters, if there are, replace them with ""
         """

@@ -2,6 +2,7 @@ import ast
 
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.builtin.native.nativecontract import NativeContract
+from boa3.internal.model.operation.binaryop import BinaryOp
 from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -33,7 +34,6 @@ class HexMethod(IBuiltinMethod):
 
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal.model.builtin.builtin import Builtin
-        from boa3.internal.model.operation.binaryop import BinaryOp
 
         """
         str_value = bytes_value.hex()
