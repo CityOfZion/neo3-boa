@@ -1,6 +1,7 @@
 from neo3.core import types
 
 from boa3.internal.exception import CompilerError, CompilerWarning
+from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.neo.vm.opcode.Opcode import Opcode
 from boa3.internal.neo.vm.type.Integer import Integer
 from boa3.internal.neo.vm.type.StackItem import StackItemType
@@ -1290,3 +1291,105 @@ class TestBytes(boatestcase.BoaTestCase):
 
     def test_bytes_replace_too_few_arguments(self):
         self.assertCompilerLogs(CompilerError.UnfilledArgument, 'ReplaceBytesMethodTooFewArguments.py')
+
+    async def test_bytes_from_hex(self):
+        await self.set_up_contract('FromHex.py')
+
+        string = '010203abcdef'
+        result, _ = await self.call('main', [string], return_type=bytes)
+        self.assertEqual(bytes.fromhex(string), result)
+
+        string = '010203ab cd ef'
+        result, _ = await self.call('main', [string], return_type=bytes)
+        self.assertEqual(bytes.fromhex(string), result)
+
+        string = ' 010203abcdef'
+        result, _ = await self.call('main', [string], return_type=bytes)
+        self.assertEqual(bytes.fromhex(string), result)
+
+        string = '010203abcdef '
+        result, _ = await self.call('main', [string], return_type=bytes)
+        self.assertEqual(bytes.fromhex(string), result)
+
+        string = '      010203abcdef     '
+        result, _ = await self.call('main', [string], return_type=bytes)
+        self.assertEqual(bytes.fromhex(string), result)
+
+        string = '    01 02    03 ab    cd   ef     '
+        result, _ = await self.call('main', [string], return_type=bytes)
+        self.assertEqual(bytes.fromhex(string), result)
+
+        string = '    01 02    03 ab    cd   ef     '
+        result, _ = await self.call('main', [string], return_type=bytes)
+        self.assertEqual(bytes.fromhex(string), result)
+
+        with self.assertRaises(Exception) as context:
+            string = '0 10203abcdef'
+            await self.call('main', [string], return_type=bytes)
+        self.assertEqual(str(context.exception), Builtin.BytesFromHex.whitespace_error_msg)
+
+        with self.assertRaises(Exception) as context:
+            string = 'abcdefgh'
+            await self.call('main', [string], return_type=bytes)
+        self.assertRegex(str(context.exception), 'hexDecode: invalid hex string')
+
+    async def test_bytes_hex(self):
+        await self.set_up_contract('Hex.py')
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        result, _ = await self.call('main', [bytes_value], return_type=str)
+        self.assertEqual(bytes_value.hex(), result)
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        result, _ = await self.call('bytes_dot_hex', [bytes_value], return_type=str)
+        self.assertEqual(bytes.hex(bytes_value), result)
+
+        result, _ = await self.call('literal_bytes', [], return_type=str)
+        self.assertEqual(b'0123456789abcdef'.hex(), result)
+
+    async def test_bytes_hex_with_sep(self):
+        await self.set_up_contract('HexWithSep.py')
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        sep = "_"
+        result, _ = await self.call('main', [bytes_value, sep], return_type=str)
+        self.assertEqual(bytes_value.hex(sep), result)
+
+        bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+        sep = "_"
+        result, _ = await self.call('bytes_dot_hex', [bytes_value, sep], return_type=str)
+        self.assertEqual(bytes.hex(bytes_value, sep), result)
+
+        sep = "_"
+        result, _ = await self.call('literal_bytes', [sep], return_type=str)
+        self.assertEqual(b'0123456789abcdef'.hex(sep), result)
+
+        with self.assertRaises(Exception) as context:
+            sep = ""
+            await self.call('main', [bytes_value, sep], return_type=bytes)
+        self.assertEqual(str(context.exception), Builtin.BytesHex.sep_error_msg)
+
+        with self.assertRaises(Exception) as context:
+            sep = "12"
+            await self.call('main', [bytes_value, sep], return_type=bytes)
+        self.assertEqual(str(context.exception), Builtin.BytesHex.sep_error_msg)
+
+    async def test_bytes_hex_with_sep_and_bytes_per_sep(self):
+        await self.set_up_contract('HexWithSepBytesSep.py')
+
+        for bytes_per_sep in range(-10, 10):
+            bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+            sep = "_"
+            result, _ = await self.call('main', [bytes_value, sep, bytes_per_sep], return_type=str)
+            self.assertEqual(bytes_value.hex(sep, bytes_per_sep), result, "Bytes per vlaue: {0}".format(bytes_per_sep))
+
+        for bytes_per_sep in range(-10, 10):
+            bytes_value = b'abcdefghijklmnopqrstuvwxyz'
+            sep = "_"
+            result, _ = await self.call('bytes_dot_hex', [bytes_value, sep, bytes_per_sep], return_type=str)
+            self.assertEqual(bytes_value.hex(sep, bytes_per_sep), result)
+
+        for bytes_per_sep in range(-10, 10):
+            sep = "_"
+            result, _ = await self.call('literal_bytes', [sep, bytes_per_sep], return_type=str)
+            self.assertEqual(b'0123456789abcdef'.hex(sep, bytes_per_sep), result)

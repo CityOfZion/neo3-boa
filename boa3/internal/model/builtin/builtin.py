@@ -90,6 +90,8 @@ class Builtin:
     DictPop = PopDictMethod()
     DictPopDefault = PopDictDefaultMethod()
     DictValues = MapValuesMethod()
+    BytesFromHex = FromHexMethod()
+    BytesHex = HexMethod()
 
     # custom class methods
     ConvertIntToBytes = IntToBytesMethod()
@@ -153,6 +155,8 @@ class Builtin:
         StrSplitWithoutMaxsplit,
         Sum,
         Super,
+        BytesFromHex,
+        BytesHex,
     ]
 
     # boa builtin decorator

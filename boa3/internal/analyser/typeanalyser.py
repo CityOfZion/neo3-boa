@@ -1,6 +1,6 @@
 import ast
 from collections.abc import Iterable
-from typing import Any
+from typing import Any, Literal, get_origin
 
 from boa3.internal import constants
 from boa3.internal.analyser.astanalyser import IAstAnalyser
@@ -1804,7 +1804,7 @@ class TypeAnalyser(IAstAnalyser, ast.NodeVisitor):
                 ))
             return Attribute(attribute.value, None, attr_symbol, attribute)
 
-        attr_type = value.type if isinstance(value, IExpression) else value
+        attr_type = value.type if isinstance(value, IExpression) else value_type if value_type else value
         # for checking during the code generation
         if (self.is_implemented_class_type(attr_type) and
                 not (isinstance(attribute.value, ast.Name) and attribute.value.id == attr_type.identifier) and
