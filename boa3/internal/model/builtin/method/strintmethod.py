@@ -13,6 +13,6 @@ class StrIntMethod(StrMethod):
         super().__init__(args)
 
     def generate_internal_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.stdlib import ItoaMethod
+        from boa3.internal.model.builtin.native.stdlib.itoamethod import ItoaMethod
 
         code_generator.convert_builtin_method_call(ItoaMethod(internal_call_args=1), is_internal=True)

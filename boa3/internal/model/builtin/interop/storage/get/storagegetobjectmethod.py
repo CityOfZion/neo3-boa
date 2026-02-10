@@ -21,9 +21,9 @@ class StorageGetObjectMethod(IStorageGetMethod):
         code_generator.convert_new_empty_array(0, Type.list, as_struct=True)
 
     def generate_deserialize_value_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
 
-        converter = Interop.Deserialize
+        converter = NativeContract.StdLib.deserialize
         code_generator.convert_builtin_method_call(converter, is_internal=True)
 
     def build(self, value: Any) -> IBuiltinMethod:

@@ -1,6 +1,7 @@
 from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import PolicyContract
+from boa3.internal.model.builtin.native import policy_methods as pm
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
 from boa3.internal.model.method import Method
 
@@ -20,12 +21,12 @@ class PolicyClass(INativeContractClass):
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'get_fee_per_byte': Interop.GetFeePerByte,
-                'get_exec_fee_factor': Interop.GetExecFeeFactor,
-                'get_storage_price': Interop.GetStoragePrice,
-                'get_attribute_fee': Interop.GetAttributeFee,
-                'is_blocked': Interop.IsBlocked,
-                'set_attribute_fee': Interop.SetAttributeFee,
+                'get_fee_per_byte': pm.GetFeePerByteMethod(),
+                'get_exec_fee_factor': pm.GetExecFeeFactorMethod(),
+                'get_storage_price': pm.GetStoragePriceMethod(),
+                'get_attribute_fee': pm.GetAttributeFeeMethod(Interop.TransactionAttributeType),
+                'set_attribute_fee': pm.SetAttributeFeeMethod(Interop.TransactionAttributeType),
+                'is_blocked': pm.IsBlockedMethod(),
             }
         return super().class_methods
 

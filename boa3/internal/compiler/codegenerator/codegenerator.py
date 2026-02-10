@@ -20,6 +20,7 @@ from boa3.internal.model.builtin.builtin import Builtin
 from boa3.internal.model.builtin.builtincallable import IBuiltinCallable
 from boa3.internal.model.builtin.internal.innerdeploymethod import InnerDeployMethod
 from boa3.internal.model.builtin.interop.interop import Interop
+from boa3.internal.model.builtin.native.nativecontract import NativeContract
 from boa3.internal.model.builtin.method.builtinmethod import IBuiltinMethod
 from boa3.internal.model.event import Event
 from boa3.internal.model.imports.importsymbol import Import
@@ -1714,7 +1715,7 @@ class CodeGenerator:
         addresses = [arg_address] if arg_address is not None else [self.bytecode_size]
         if not is_get:
             # must serialized before storing the value
-            self.convert_builtin_method_call(Interop.Serialize, addresses)
+            self.convert_builtin_method_call(NativeContract.StdLib.serialize, addresses)
 
         self.convert_literal(storage_key)
         self.convert_builtin_method_call(Interop.StorageGetContext)
@@ -1724,7 +1725,7 @@ class CodeGenerator:
 
         if is_get:
             # once the value is retrieved, it must be deserialized
-            self.convert_builtin_method_call(Interop.Deserialize, addresses)
+            self.convert_builtin_method_call(NativeContract.StdLib.deserialize, addresses)
 
     def _get_variable_info(self, var_id: str) -> tuple[int, bool, bool]:
         """

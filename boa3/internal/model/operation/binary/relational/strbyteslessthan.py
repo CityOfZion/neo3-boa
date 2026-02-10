@@ -1,4 +1,4 @@
-from boa3.internal.model.builtin.interop.interop import Interop
+from boa3.internal.model.builtin.native.nativecontract import NativeContract
 from boa3.internal.model.operation.binary.binaryoperation import BinaryOperation
 from boa3.internal.model.operation.operator import Operator
 from boa3.internal.model.type.type import IType, Type
@@ -37,7 +37,7 @@ class StrBytesLessThan(BinaryOperation):
         from boa3.internal.model.operation.binaryop import BinaryOp
 
         # comparing strings, on the stack the first string is the right one and the second is the left one
-        Interop.MemoryCompare.generate_internal_opcodes(code_generator)
+        NativeContract.StdLib.memory_compare.generate_internal_opcodes(code_generator)
         # -1 means the left string is greater than the right string
         # 1 means the left string is less than the right string
         # 0 means the right string is equals to the left string

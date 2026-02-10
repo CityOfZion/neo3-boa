@@ -1,6 +1,7 @@
 from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import RoleManagement
+from boa3.internal.model.builtin.native import role_management_methods as rm
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
 from boa3.internal.model.method import Method
 
@@ -15,13 +16,10 @@ class RoleManagementClass(INativeContractClass):
 
     @property
     def class_methods(self) -> dict[str, Method]:
-        # avoid recursive import
-        from boa3.internal.model.builtin.interop.interop import Interop
-
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'designate_as_role': Interop.DesignateAsRole,
-                'get_designated_by_role': Interop.GetDesignatedByRole,
+                'designate_as_role': rm.DesignateAsRoleMethod(),
+                'get_designated_by_role': rm.GetDesignatedByRoleMethod(),
             }
         return super().class_methods
 

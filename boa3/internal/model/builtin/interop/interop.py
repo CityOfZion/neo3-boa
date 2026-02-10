@@ -5,15 +5,12 @@ from boa3.internal.model.builtin.interop.contract import *
 from boa3.internal.model.builtin.interop.contract.contractmanifest import *
 from boa3.internal.model.builtin.interop.crypto import *
 from boa3.internal.model.builtin.interop.iterator import *
-from boa3.internal.model.builtin.interop.json import *
 from boa3.internal.model.builtin.interop.nativecontract import *
 from boa3.internal.model.builtin.interop.oracle import *
 from boa3.internal.model.builtin.interop.policy import *
 from boa3.internal.model.builtin.interop.role import *
 from boa3.internal.model.builtin.interop.runtime import *
-from boa3.internal.model.builtin.interop.stdlib import *
 from boa3.internal.model.builtin.interop.storage import *
-from boa3.internal.model.event import Event
 from boa3.internal.model.identifiedsymbol import IdentifiedSymbol
 from boa3.internal.model.imports.package import Package
 
@@ -44,24 +41,6 @@ class Interop:
                 if method.identifier == symbol_id:
                     return method
 
-    @classmethod
-    def interop_symbols(cls, package: str = None) -> list[IdentifiedSymbol]:
-        if package in InteropPackage.__members__.values():
-            return cls._interop_symbols[package]
-
-        lst: list[IdentifiedSymbol] = []
-        for symbols in cls._interop_symbols.values():
-            lst.extend(symbols)
-        return lst
-
-    @classmethod
-    def interop_events(cls) -> list[Event]:
-        lst: list[Event] = []
-        for symbols in cls._interop_symbols.values():
-            lst.extend([event for event in symbols if isinstance(event, Event)])
-
-        return lst
-
     # region Interops
 
     # Interop Types
@@ -90,26 +69,11 @@ class Interop:
     WitnessRule = WitnessRuleType.build()
     WitnessScope = WitnessScopeType.build()
 
-    # Blockchain Interops
-    CurrentHash = CurrentHashProperty()
-    CurrentIndex = CurrentIndexProperty()
-    GetContract = GetContractMethod(ContractType)
-    GetBlock = GetBlockMethod(BlockType)
-    GetTransaction = GetTransactionMethod(TransactionType)
-    GetTransactionFromBlock = GetTransactionFromBlockMethod(TransactionType)
-    GetTransactionHeight = GetTransactionHeightMethod()
-    GetTransactionSigners = GetTransactionSignersMethod(SignerType)
-    GetTransactionVMState = GetTransactionVMStateMethod(VMStateType)
-
     # Contract Interops
     CallContract = CallMethod()
-    CreateContract = CreateMethod(ContractType)
     CreateMultisigAccount = CreateMultisigAccountMethod()
     CreateStandardAccount = CreateStandardAccountMethod()
-    DestroyContract = DestroyMethod()
     GetCallFlags = GetCallFlagsMethod(CallFlagsType)
-    GetMinimumDeploymentFee = GetMinimumDeploymentFeeMethod()
-    UpdateContract = UpdateMethod()
 
     # Native Contracts
     GasScriptHash = GasToken
@@ -121,42 +85,15 @@ class Interop:
     StdLibScriptHash = StdLibContract
 
     # Crypto Interops
-    Bls12381Add = Bls12381AddMethod()
-    Bls12381Deserialize = Bls12381DeserializeMethod()
-    Bls12381Equal = Bls12381EqualMethod()
-    Bls12381Mul = Bls12381MulMethod()
-    Bls12381Pairing = Bls12381PairingMethod()
-    Bls12381Serialize = Bls12381SerializeMethod()
     CheckMultisig = CheckMultisigMethod()
     CheckSig = CheckSigMethod()
     Hash160 = Hash160Method()
     Hash256 = Hash256Method()
-    Keccak256 = Keccak256Method()
-    Murmur32 = Murmur32Method()
-    Ripemd160 = Ripemd160Method()
-    Sha256 = Sha256Method()
-    VerifyWithECDsa = VerifyWithECDsaMethod()
 
     # Iterator Interops
     IteratorCreate = IteratorMethod(Iterator)
     IteratorNext = IteratorNextMethod()
     IteratorValue = IteratorValueMethod(Iterator)
-
-    # Json Interops
-    JsonDeserialize = JsonDeserializeMethod()
-    JsonSerialize = JsonSerializeMethod()
-
-    # Policy Interops
-    GetExecFeeFactor = GetExecFeeFactorMethod()
-    GetFeePerByte = GetFeePerByteMethod()
-    GetStoragePrice = GetStoragePriceMethod()
-    GetAttributeFee = GetAttributeFeeMethod(TransactionAttributeType)
-    IsBlocked = IsBlockedMethod()
-    SetAttributeFee = SetAttributeFeeMethod(TransactionAttributeType)
-
-    # Role Interops
-    GetDesignatedByRole = GetDesignatedByRoleMethod()
-    DesignateAsRole = DesignateAsRoleMethod()
 
     # Runtime Interops
     AddressVersion = AddressVersionProperty()
@@ -178,20 +115,6 @@ class Interop:
     Notify = NotifyMethod()
     Platform = PlatformProperty()
     ScriptContainer = ScriptContainerProperty()
-
-    # Stdlib Interops
-    Atoi = AtoiMethod()
-    Base58CheckDecode = Base58CheckDecodeMethod()
-    Base58CheckEncode = Base58CheckEncodeMethod()
-    Base58Encode = Base58EncodeMethod()
-    Base58Decode = Base58DecodeMethod()
-    Base64Encode = Base64EncodeMethod()
-    Base64Decode = Base64DecodeMethod()
-    Deserialize = DeserializeMethod()
-    Itoa = ItoaMethod()
-    MemoryCompare = MemoryCompareMethod()
-    MemorySearch = MemorySearchMethod()
-    Serialize = SerializeMethod()
 
     # Storage Interops
     StorageDelete = StorageDeleteMethod()
@@ -271,16 +194,6 @@ class Interop:
                                        TransactionType,
                                        VMStateType
                                        ],
-                                methods=[CurrentHash,
-                                         CurrentIndex,
-                                         GetBlock,
-                                         GetContract,
-                                         GetTransaction,
-                                         GetTransactionFromBlock,
-                                         GetTransactionHeight,
-                                         GetTransactionSigners,
-                                         GetTransactionVMState
-                                         ],
                                 packages=[BlockModule,
                                           SignerModule,
                                           TransactionModule,
@@ -326,13 +239,9 @@ class Interop:
                                           NeoScriptHash
                                           ],
                               methods=[CallContract,
-                                       CreateContract,
                                        CreateMultisigAccount,
                                        CreateStandardAccount,
-                                       DestroyContract,
                                        GetCallFlags,
-                                       GetMinimumDeploymentFee,
-                                       UpdateContract
                                        ],
                               packages=[CallFlagsTypeModule,
                                         ContractManifestModule,
@@ -346,20 +255,10 @@ class Interop:
                             types=[NamedCurveHashType,
                                    Bls12381Type
                                    ],
-                            methods=[Bls12381Add,
-                                     Bls12381Deserialize,
-                                     Bls12381Equal,
-                                     Bls12381Mul,
-                                     Bls12381Pairing,
-                                     Bls12381Serialize,
-                                     CheckMultisig,
+                            methods=[CheckMultisig,
                                      CheckSig,
                                      Hash160,
                                      Hash256,
-                                     Murmur32,
-                                     Ripemd160,
-                                     Sha256,
-                                     VerifyWithECDsa,
                                      ]
                             )
 
@@ -369,58 +268,17 @@ class Interop:
                               types=[Iterator],
                               )
 
-    JsonPackage = Package(deprecated=True,
-                          new_location='boa3.sc.contracts',
-                          identifier=InteropPackage.Json,
-                          methods=[JsonDeserialize,
-                                   JsonSerialize
-                                   ]
-                          )
-
     NotificationModule = Package(deprecated=True,
                                  new_location='boa3.sc.types',
                                  identifier=NotificationType.identifier.lower(),
                                  types=[NotificationType]
                                  )
 
-    OracleResponseCodeModule = Package(deprecated=True,
-                                       new_location='boa3.sc.types',
-                                       identifier=OracleResponseCode.identifier.lower(),
-                                       types=[OracleResponseCode]
-                                       )
-
-    OracleModule = Package(deprecated=True,
-                           new_location='boa3.sc.contracts',
-                           identifier=OracleType.identifier.lower(),
-                           types=[OracleType]
-                           )
-
-    OraclePackage = Package(deprecated=True,
-                            new_location='boa3.sc.contracts and boa3.sc.types',
-                            identifier=InteropPackage.Oracle,
-                            types=[OracleResponseCode,
-                                   OracleType
-                                   ],
-                            packages=[OracleModule,
-                                      OracleResponseCodeModule
-                                      ]
-                            )
-
     TriggerTypeModule = Package(deprecated=True,
                                 new_location='boa3.sc.types',
                                 identifier=TriggerType.identifier.lower(),
                                 types=[TriggerType]
                                 )
-
-    PolicyPackage = Package(deprecated=True,
-                            new_location='boa3.sc.contracts',
-                            identifier=InteropPackage.Policy,
-                            methods=[GetExecFeeFactor,
-                                     GetFeePerByte,
-                                     GetStoragePrice,
-                                     IsBlocked
-                                     ]
-                            )
 
     RoleTypeModule = Package(deprecated=True,
                              new_location='boa3.sc.types',
@@ -432,7 +290,6 @@ class Interop:
                           new_location='boa3.sc.contracts',
                           identifier=InteropPackage.Role,
                           types=[RoleType],
-                          methods=[GetDesignatedByRole],
                           packages=[RoleTypeModule]
                           )
 
@@ -473,24 +330,6 @@ class Interop:
                                 identifier=FindOptionsType.identifier.lower(),
                                 types=[FindOptionsType]
                                 )
-
-    StdlibPackage = Package(deprecated=True,
-                            new_location='boa3.sc.contracts',
-                            identifier=InteropPackage.Stdlib,
-                            methods=[Atoi,
-                                     Base58CheckDecode,
-                                     Base58CheckEncode,
-                                     Base58Encode,
-                                     Base58Decode,
-                                     Base64Encode,
-                                     Base64Decode,
-                                     Deserialize,
-                                     Itoa,
-                                     MemoryCompare,
-                                     MemorySearch,
-                                     Serialize
-                                     ]
-                            )
 
     StorageContextModule = Package(deprecated=True,
                                    new_location='boa3.sc.storage',
@@ -560,12 +399,8 @@ class Interop:
         ContractPackage,
         CryptoPackage,
         IteratorPackage,
-        JsonPackage,
-        OraclePackage,
-        PolicyPackage,
         RolePackage,
         RuntimePackage,
-        StdlibPackage,
         StoragePackage
     ]
 

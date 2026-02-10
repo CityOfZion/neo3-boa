@@ -16,13 +16,12 @@ class OracleClass(INativeContractClass):
     @property
     def class_methods(self) -> dict[str, Method]:
         # avoid recursive import
-        from boa3.internal.model.builtin.interop.oracle.oraclegetpricemethod import OracleGetPriceMethod
-        from boa3.internal.model.builtin.interop.oracle.oraclerequestmethod import OracleRequestMethod
+        from boa3.internal.model.builtin.native import oracle_methods as om
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'get_price': OracleGetPriceMethod(),
-                'request': OracleRequestMethod()
+                'get_price': om.OracleGetPriceMethod(),
+                'request': om.OracleRequestMethod()
             }
         return super().class_methods
 

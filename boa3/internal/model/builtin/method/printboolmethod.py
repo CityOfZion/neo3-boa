@@ -11,7 +11,6 @@ class PrintBoolMethod(PrintMethod):
         super().__init__(arg_value)
 
     def _generate_print_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.interop import Interop
-
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
         code_generator.insert_opcode(Opcode.NZ)
-        code_generator.convert_builtin_method_call(Interop.JsonSerialize, is_internal=True)
+        code_generator.convert_builtin_method_call(NativeContract.StdLib.json_serialize, is_internal=True)

@@ -16,6 +16,7 @@ class ToHexStrMethod(IBuiltinMethod):
         from boa3.internal import constants
         from boa3.internal.model.builtin.builtin import Builtin
         from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
         from boa3.internal.model.operation.binaryop import BinaryOp
         from boa3.internal.model.type.type import Type
         from boa3.internal.neo.vm.opcode.Opcode import Opcode
@@ -64,7 +65,7 @@ class ToHexStrMethod(IBuiltinMethod):
         code_generator.convert_get_substring(is_internal=True, fix_result_type=False)
         #       aux = itoa(arg[pos: pos + max_size], hex_base)
         code_generator.convert_cast(Type.int, is_internal=True)
-        code_generator.convert_builtin_method_call(Interop.Itoa, is_internal=True)
+        code_generator.convert_builtin_method_call(NativeContract.StdLib.itoa, is_internal=True)
 
         code_generator.duplicate_stack_top_item()
         code_generator.convert_builtin_method_call(Builtin.Len, is_internal=True)

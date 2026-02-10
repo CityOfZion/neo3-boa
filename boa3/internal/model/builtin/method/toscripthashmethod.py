@@ -44,6 +44,7 @@ class ScriptHashMethod(IBuiltinMethod):
     def generate_internal_opcodes(self, code_generator):
         from boa3.internal import constants
         from boa3.internal.model.builtin.builtin import Builtin
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
         from boa3.internal.neo.vm.type.StackItem import StackItemType
         from boa3.internal.model.builtin.interop.interop import Interop
 
@@ -62,7 +63,7 @@ class ScriptHashMethod(IBuiltinMethod):
 
         #   result = base58_decode
         code_generator.duplicate_stack_top_item()
-        code_generator.convert_builtin_method_call(Interop.Base58Decode, is_internal=True)
+        code_generator.convert_builtin_method_call(NativeContract.StdLib.base58_decode, is_internal=True)
 
         #   if len(result) < SIZE_OF_INT160 + 1
         code_generator.duplicate_stack_top_item()

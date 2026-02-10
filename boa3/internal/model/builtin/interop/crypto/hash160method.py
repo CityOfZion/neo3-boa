@@ -14,12 +14,11 @@ class Hash160Method(CryptoLibMethod):
     @property
     def pack_arguments(self) -> bool:
         if self._pack_arguments is None:
-            from boa3.internal.model.builtin.interop.interop import Interop
-            self._pack_arguments = Interop.Sha256.pack_arguments  # this is the first method called
+            from boa3.internal.model.builtin.native.nativecontract import NativeContract
+            self._pack_arguments = NativeContract.CryptoLib.sha256.pack_arguments  # this is the first method called
         return self._pack_arguments
 
     def generate_internal_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.interop import Interop
-
-        code_generator.convert_builtin_method_call(Interop.Sha256, is_internal=True)
-        code_generator.convert_builtin_method_call(Interop.Ripemd160, is_internal=True)
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
+        code_generator.convert_builtin_method_call(NativeContract.CryptoLib.sha256, is_internal=True)
+        code_generator.convert_builtin_method_call(NativeContract.CryptoLib.ripemd160, is_internal=True)

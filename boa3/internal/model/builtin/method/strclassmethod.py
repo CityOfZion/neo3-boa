@@ -36,7 +36,7 @@ class StrClassMethod(StrMethod):
         return super().build(value)
 
     def generate_internal_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
         from boa3.internal.model.type.type import Type
 
         # class to dict, then print as json
@@ -53,4 +53,4 @@ class StrClassMethod(StrMethod):
             code_generator.convert_set_item(item_address, index_inserted_internally=True)
 
         # print as json
-        code_generator.convert_builtin_method_call(Interop.JsonSerialize, is_internal=True)
+        code_generator.convert_builtin_method_call(NativeContract.StdLib.json_serialize, is_internal=True)

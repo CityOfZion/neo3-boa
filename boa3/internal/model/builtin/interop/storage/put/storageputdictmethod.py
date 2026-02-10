@@ -17,9 +17,9 @@ class StoragePutDictMethod(IStoragePutMethod):
         super().__init__(identifier, value_type=value_type, storage_interop=storage_interop)
 
     def generate_serialize_value_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
 
-        converter = Interop.Serialize
+        converter = NativeContract.StdLib.serialize
         code_generator.convert_builtin_method_call(converter, is_internal=True)
 
     def build(self, value: Any) -> IBuiltinMethod:

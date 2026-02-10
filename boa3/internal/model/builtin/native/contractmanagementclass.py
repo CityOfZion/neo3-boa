@@ -1,6 +1,7 @@
 from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import ContractManagement
+from boa3.internal.model.builtin.native import contract_management as cm
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
 from boa3.internal.model.method import Method
 
@@ -19,16 +20,14 @@ class ContractManagementClass(INativeContractClass):
         from boa3.internal.model.builtin.interop.interop import Interop
 
         if len(self._class_methods) == 0:
-            from boa3.internal.model.builtin.native.contract_management import HasMethod, GetContractByIdMethod
-
             self._class_methods = {
-                'get_minimum_deployment_fee': Interop.GetMinimumDeploymentFee,
-                'get_contract': Interop.GetContract,
-                'get_contract_by_id': GetContractByIdMethod(Interop.ContractType),
-                'has_method': HasMethod(),
-                'deploy': Interop.CreateContract,
-                'update': Interop.UpdateContract,
-                'destroy': Interop.DestroyContract
+                'get_minimum_deployment_fee': cm.GetMinimumDeploymentFeeMethod(),
+                'get_contract': cm.GetContractMethod(Interop.ContractType),
+                'get_contract_by_id': cm.GetContractByIdMethod(Interop.ContractType),
+                'has_method': cm.HasMethod(),
+                'deploy': cm.CreateMethod(Interop.ContractType),
+                'update': cm.UpdateMethod(),
+                'destroy': cm.DestroyMethod()
             }
         return super().class_methods
 
