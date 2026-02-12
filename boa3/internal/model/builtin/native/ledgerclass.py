@@ -1,6 +1,7 @@
 from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import LedgerContract
+from boa3.internal.model.builtin.native import ledger_methods as lm
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
 from boa3.internal.model.method import Method
 
@@ -20,14 +21,14 @@ class LedgerClass(INativeContractClass):
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'get_block': Interop.GetBlock,
-                'get_current_index': Interop.CurrentIndex.getter,
-                'get_current_hash': Interop.CurrentHash.getter,
-                'get_transaction': Interop.GetTransaction,
-                'get_transaction_from_block': Interop.GetTransactionFromBlock,
-                'get_transaction_height': Interop.GetTransactionHeight,
-                'get_transaction_signers': Interop.GetTransactionSigners,
-                'get_transaction_vm_state': Interop.GetTransactionVMState
+                'get_block': lm.GetBlockMethod(Interop.BlockType),
+                'get_current_index': lm.CurrentIndexProperty().getter,
+                'get_current_hash': lm.CurrentHashProperty().getter,
+                'get_transaction': lm.GetTransactionMethod(Interop.TransactionType),
+                'get_transaction_from_block': lm.GetTransactionFromBlockMethod(Interop.TransactionType),
+                'get_transaction_height': lm.GetTransactionHeightMethod(),
+                'get_transaction_signers': lm.GetTransactionSignersMethod(Interop.SignerType),
+                'get_transaction_vm_state': lm.GetTransactionVMStateMethod(Interop.VMStateType)
             }
         return super().class_methods
 

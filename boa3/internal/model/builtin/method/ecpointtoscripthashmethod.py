@@ -30,8 +30,7 @@ class ECPointToScriptHashMethod(ScriptHashMethod):
         code_generator.convert_operation(BinaryOp.Concat, is_internal=True)
 
         # to_script_hash
-        code_generator.convert_builtin_method_call(Interop.Sha256, is_internal=True)
-        code_generator.convert_builtin_method_call(Interop.Ripemd160, is_internal=True)
+        code_generator.convert_builtin_method_call(Interop.Hash160, is_internal=True)
 
         # limit result to UInt160 length
         code_generator.convert_literal(0)

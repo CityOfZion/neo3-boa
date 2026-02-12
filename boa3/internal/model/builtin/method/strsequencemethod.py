@@ -29,6 +29,6 @@ class StrSequenceMethod(StrMethod):
         return super().build(value)
 
     def generate_internal_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.interop.interop import Interop
+        from boa3.internal.model.builtin.native.nativecontract import NativeContract
 
-        code_generator.convert_builtin_method_call(Interop.JsonSerialize, is_internal=True)
+        code_generator.convert_builtin_method_call(NativeContract.StdLib.json_serialize, is_internal=True)

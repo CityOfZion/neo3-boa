@@ -1,6 +1,7 @@
 from typing import Any, Self
 
 from boa3.internal.model.builtin.interop.nativecontract import CryptoLibContract
+from boa3.internal.model.builtin.native import crypto_lib as cl
 from boa3.internal.model.builtin.native.inativecontractclass import INativeContractClass
 from boa3.internal.model.method import Method
 
@@ -15,26 +16,31 @@ class CryptoLibClass(INativeContractClass):
 
     @property
     def class_methods(self) -> dict[str, Method]:
-        # avoid recursive import
-        from boa3.internal.model.builtin.interop.interop import Interop
-        from boa3.internal.model.builtin.native.crypto_lib import RecoverSecp256K1Method
 
         if len(self._class_methods) == 0:
             self._class_methods = {
-                'recover_secp256k1': RecoverSecp256K1Method(),
-                'murmur32': Interop.Murmur32,
-                'sha256': Interop.Sha256,
-                'ripemd160': Interop.Ripemd160,
-                'keccak256': Interop.Keccak256,
-                'verify_with_ecdsa': Interop.VerifyWithECDsa,
-                'bls12_381_add': Interop.Bls12381Add,
-                'bls12_381_deserialize': Interop.Bls12381Deserialize,
-                'bls12_381_equal': Interop.Bls12381Equal,
-                'bls12_381_mul': Interop.Bls12381Mul,
-                'bls12_381_pairing': Interop.Bls12381Pairing,
-                'bls12_381_serialize': Interop.Bls12381Serialize,
+                'recover_secp256k1': cl.RecoverSecp256K1Method(),
+                'murmur32': cl.Murmur32Method(),
+                'sha256': cl.Sha256Method(),
+                'ripemd160': cl.Ripemd160Method(),
+                'keccak256': cl.Keccak256Method(),
+                'verify_with_ecdsa': cl.VerifyWithECDsaMethod(),
+                'bls12_381_add': cl.Bls12381AddMethod(),
+                'bls12_381_deserialize': cl.Bls12381DeserializeMethod(),
+                'bls12_381_equal': cl.Bls12381EqualMethod(),
+                'bls12_381_mul': cl.Bls12381MulMethod(),
+                'bls12_381_pairing': cl.Bls12381PairingMethod(),
+                'bls12_381_serialize': cl.Bls12381SerializeMethod(),
             }
         return super().class_methods
+
+    @property
+    def sha256(self):
+        return self.class_methods['sha256']
+
+    @property
+    def ripemd160(self):
+        return self.class_methods['ripemd160']
 
     @classmethod
     def build(cls, value: Any = None) -> Self:

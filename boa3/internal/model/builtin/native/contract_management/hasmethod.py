@@ -1,13 +1,12 @@
 from boa3.internal.model.builtin.interop.nativecontract import ContractManagementMethod
+from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
+from boa3.internal.model.type.type import Type
 from boa3.internal.model.variable import Variable
 
 
 class HasMethod(ContractManagementMethod):
 
     def __init__(self):
-        from boa3.internal.model.type.collection.sequence.uint160type import UInt160Type
-        from boa3.internal.model.type.type import Type
-
         identifier = 'has_method'
         syscall = 'hasMethod'
         args: dict[str, Variable] = {
