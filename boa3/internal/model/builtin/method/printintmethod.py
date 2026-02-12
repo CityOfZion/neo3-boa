@@ -1,4 +1,5 @@
 from boa3.internal.model.builtin.method.printmethod import PrintMethod
+from boa3.internal.model.builtin.native.stdlib.itoamethod import ItoaMethod
 
 
 class PrintIntMethod(PrintMethod):
@@ -10,7 +11,5 @@ class PrintIntMethod(PrintMethod):
         super().__init__(arg_value)
 
     def _generate_print_opcodes(self, code_generator):
-        from boa3.internal.model.builtin.native.stdlib.itoamethod import ItoaMethod
-
         itoa_method = ItoaMethod(internal_call_args=1)
         code_generator.convert_builtin_method_call(itoa_method, is_internal=True)
